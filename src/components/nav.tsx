@@ -9,8 +9,11 @@ const LINKS: Record<string, { href: string; label: string }[]> = {
   ],
   faculty: [
     { href: "/faculty", label: "My Subjects" },
-    { href: "/faculty/classrooms", label: "Classrooms" },
-    { href: "/faculty/approvals", label: "Approvals" },
+    { href: "/faculty/profile", label: "My Profile" },
+  ],
+  hod: [
+    { href: "/hod", label: "Department" },
+    { href: "/hod/plans", label: "Semester Plans" },
   ],
   director: [
     { href: "/director", label: "Overview" },
@@ -22,7 +25,7 @@ export default function Nav({
   role,
   name,
 }: {
-  role: "student" | "faculty" | "director";
+  role: "student" | "faculty" | "hod" | "director";
   name: string;
 }) {
   return (

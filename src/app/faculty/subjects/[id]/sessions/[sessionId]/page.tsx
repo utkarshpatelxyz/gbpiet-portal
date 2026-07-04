@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getSubjectRoster } from "@/lib/roster";
 import { formatDate } from "@/lib/utils";
 import { Chip, Empty, Th, Td } from "@/components/ui";
 import CsvButton from "@/components/csv-button";
@@ -19,7 +20,9 @@ export default async function SessionPage({
 
   const { data: session } = await supabase
     .from("attendance_sessions")
-    .select("id, session_date, status, subjects(id, name, code, faculty_id, classroom_id)")
+    .select(
+      "id, session_date, status, subjects(id, name, code, is_lab, plan_id, faculty_id, classroom_id)"
+    )
     .eq("id", sessionId)
     .maybeSingle();
   if (!session) notFound();
@@ -27,29 +30,19 @@ export default async function SessionPage({
     id: string;
     name: string;
     code: string;
+    is_lab: boolean;
+    plan_id: string | null;
     faculty_id: string;
     classroom_id: number;
   };
   if (subject.id !== id || subject.faculty_id !== user!.id) notFound();
 
-  const { data: students } = await supabase
-    .from("students")
-    .select("id, enrollment_no, roll_no, profiles(full_name)")
-    .eq("classroom_id", subject.classroom_id)
-    .eq("status", "active")
-    .order("roll_no");
+  const studentList = await getSubjectRoster(supabase, subject);
 
   const { data: records } = await supabase
     .from("attendance_records")
     .select("student_id, self_status, final_status")
     .eq("session_id", sessionId);
-
-  const studentList = (students ?? []).map((st) => ({
-    id: st.id,
-    roll_no: st.roll_no,
-    enrollment_no: st.enrollment_no,
-    full_name: (st.profiles as unknown as { full_name: string }).full_name,
-  }));
 
   return (
     <div className="space-y-6">
@@ -65,11 +58,16 @@ export default async function SessionPage({
             Attendance — {formatDate(session.session_date)}
           </h1>
           <Chip kind={session.status} label={session.status === "open" ? "Open" : "Finalized"} />
+          {subject.is_lab && (
+            <span className="rounded-full bg-sky-50 px-2.5 py-0.5 text-xs font-medium text-sky-700 ring-1 ring-inset ring-sky-600/20">
+              Lab
+            </span>
+          )}
         </div>
       </div>
 
       {studentList.length === 0 ? (
-        <Empty>No students in this classroom yet.</Empty>
+        <Empty>No students are registered for this subject yet.</Empty>
       ) : session.status === "open" ? (
         <FinalizeBoard
           sessionId={sessionId}

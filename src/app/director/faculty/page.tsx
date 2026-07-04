@@ -1,20 +1,19 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Card, Empty, Th, Td } from "@/components/ui";
 import CsvButton from "@/components/csv-button";
-import HodToggle from "./hod-toggle";
 
 export const metadata = { title: "Faculty Roster" };
 
 export default async function FacultyRoster() {
   const supabase = await createClient();
 
-  const [{ data: facultyRows }, { data: branches }, { data: subjects }] =
+  const [{ data: facultyRows }, { data: branches }, { data: subjects }, { data: hods }] =
     await Promise.all([
-      supabase
-        .from("faculty")
-        .select("id, branch_id, is_hod, profiles(full_name, email)"),
+      supabase.from("faculty").select("id, branch_id, profiles(full_name, email)"),
       supabase.from("branches").select("id, name").order("name"),
       supabase.from("subjects").select("id, faculty_id"),
+      supabase.from("hods").select("id, branch_id, profiles(full_name, email)"),
     ]);
 
   const subjectCount = new Map<string, number>();
@@ -26,12 +25,18 @@ export default async function FacultyRoster() {
     .map((f) => ({
       id: f.id,
       branch: f.branch_id ? branchName.get(f.branch_id) ?? "—" : "Unassigned",
-      is_hod: f.is_hod,
       name: (f.profiles as unknown as { full_name: string; email: string }).full_name,
       email: (f.profiles as unknown as { full_name: string; email: string }).email,
       subjects: subjectCount.get(f.id) ?? 0,
     }))
     .sort((a, b) => a.branch.localeCompare(b.branch) || a.name.localeCompare(b.name));
+
+  const hodList = (hods ?? []).map((h) => ({
+    id: h.id,
+    branch: branchName.get(h.branch_id) ?? "—",
+    name: (h.profiles as unknown as { full_name: string; email: string }).full_name,
+    email: (h.profiles as unknown as { full_name: string; email: string }).email,
+  }));
 
   return (
     <div className="space-y-6">
@@ -39,27 +44,49 @@ export default async function FacultyRoster() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Faculty Roster</h1>
           <p className="mt-1 text-sm text-slate-600">
-            All registered faculty by department. Toggle HOD designation as
-            needed.
+            All registered faculty and heads of department.
           </p>
         </div>
         {roster.length > 0 && (
           <CsvButton
             filename="faculty-roster"
-            headers={["Name", "Email", "Department", "HOD", "Subjects Taught"]}
-            rows={roster.map((f) => [
-              f.name,
-              f.email,
-              f.branch,
-              f.is_hod ? "Yes" : "No",
-              f.subjects,
-            ])}
+            headers={["Name", "Email", "Department", "Subjects Taught"]}
+            rows={roster.map((f) => [f.name, f.email, f.branch, f.subjects])}
             label="Download roster"
           />
         )}
       </div>
 
-      <Card title={`${roster.length} faculty members`}>
+      <Card title={`Heads of Department (${hodList.length})`}>
+        {hodList.length === 0 ? (
+          <Empty>No HODs have registered yet.</Empty>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-slate-200">
+                  <Th>Name</Th>
+                  <Th>Email</Th>
+                  <Th>Department</Th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {hodList.map((h) => (
+                  <tr key={h.id}>
+                    <Td>
+                      <span className="font-medium text-slate-900">{h.name}</span>
+                    </Td>
+                    <Td>{h.email}</Td>
+                    <Td>{h.branch}</Td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
+
+      <Card title={`Faculty members (${roster.length})`}>
         {roster.length === 0 ? (
           <Empty>No faculty have registered yet.</Empty>
         ) : (
@@ -71,7 +98,7 @@ export default async function FacultyRoster() {
                   <Th>Email</Th>
                   <Th>Department</Th>
                   <Th>Subjects</Th>
-                  <Th>HOD</Th>
+                  <Th>Profile</Th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -84,7 +111,12 @@ export default async function FacultyRoster() {
                     <Td>{f.branch}</Td>
                     <Td>{f.subjects}</Td>
                     <Td>
-                      <HodToggle facultyId={f.id} isHod={f.is_hod} />
+                      <Link
+                        href={`/faculty-profile/${f.id}`}
+                        className="text-sm font-semibold text-indigo-600 hover:text-indigo-700"
+                      >
+                        View →
+                      </Link>
                     </Td>
                   </tr>
                 ))}

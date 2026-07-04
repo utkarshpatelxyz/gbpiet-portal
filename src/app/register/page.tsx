@@ -6,7 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
 type Branch = { id: number; name: string; code: string };
-type Classroom = { id: number; branch_id: number; year: number; semester: number };
+type Role = "student" | "faculty" | "hod";
 
 const inputCls =
   "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200";
@@ -15,9 +15,8 @@ const labelCls = "block text-sm font-medium text-slate-700";
 export default function RegisterPage() {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
-  const [role, setRole] = useState<"student" | "faculty">("student");
+  const [role, setRole] = useState<Role>("student");
   const [branches, setBranches] = useState<Branch[]>([]);
-  const [classrooms, setClassrooms] = useState<Classroom[]>([]);
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -25,8 +24,6 @@ export default function RegisterPage() {
   const [enrollment, setEnrollment] = useState("");
   const [roll, setRoll] = useState("");
   const [branchId, setBranchId] = useState<number | "">("");
-  const [year, setYear] = useState<number | "">("");
-  const [semester, setSemester] = useState<number | "">("");
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -38,34 +35,23 @@ export default function RegisterPage() {
       .select("id, name, code")
       .order("name")
       .then(({ data }) => setBranches(data ?? []));
-    supabase
-      .from("classrooms")
-      .select("id, branch_id, year, semester")
-      .then(({ data }) => setClassrooms(data ?? []));
   }, [supabase]);
-
-  const semesterOptions =
-    year === "" ? [] : [Number(year) * 2 - 1, Number(year) * 2];
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
+      if (branchId === "") {
+        throw new Error("Please select your department / branch.");
+      }
       let metadata: Record<string, unknown> = {
         role,
         full_name: fullName.trim(),
+        branch_id: String(branchId),
       };
 
       if (role === "student") {
-        if (branchId === "" || year === "" || semester === "") {
-          throw new Error("Please select your branch, year, and semester.");
-        }
-        const classroom = classrooms.find(
-          (c) => c.branch_id === Number(branchId) && c.semester === Number(semester)
-        );
-        if (!classroom) throw new Error("No classroom found for that selection.");
-
         const { data: check, error: rpcErr } = await supabase.rpc(
           "student_identifiers_available",
           { p_enrollment: enrollment.trim(), p_roll: roll.trim() }
@@ -75,15 +61,11 @@ export default function RegisterPage() {
           throw new Error("This enrollment number is already registered.");
         if (check?.roll_taken)
           throw new Error("This roll number is already registered.");
-
         metadata = {
           ...metadata,
           enrollment_no: enrollment.trim(),
           roll_no: roll.trim(),
-          classroom_id: classroom.id,
         };
-      } else if (branchId !== "") {
-        metadata = { ...metadata, branch_id: String(branchId) };
       }
 
       const { data, error: signUpErr } = await supabase.auth.signUp({
@@ -134,24 +116,25 @@ export default function RegisterPage() {
       <div className="w-full max-w-lg rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
         <h1 className="text-2xl font-bold text-slate-900">Create your account</h1>
         <p className="mt-1 text-sm text-slate-600">
-          Join the GBPIET Portal as a student or faculty member.
+          Join the GBPIET Portal as a student, faculty member, or head of
+          department.
         </p>
 
-        <div className="mt-6 grid grid-cols-2 gap-2 rounded-lg bg-slate-100 p-1" role="tablist">
-          {(["student", "faculty"] as const).map((r) => (
+        <div className="mt-6 grid grid-cols-3 gap-2 rounded-lg bg-slate-100 p-1" role="tablist">
+          {(["student", "faculty", "hod"] as const).map((r) => (
             <button
               key={r}
               type="button"
               role="tab"
               aria-selected={role === r}
               onClick={() => setRole(r)}
-              className={`cursor-pointer rounded-md px-4 py-2 text-sm font-semibold capitalize transition-colors duration-200 ${
+              className={`cursor-pointer rounded-md px-4 py-2 text-sm font-semibold transition-colors duration-200 ${
                 role === r
                   ? "bg-white text-indigo-700 shadow-sm"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              {r}
+              {r === "hod" ? "HOD" : r.charAt(0).toUpperCase() + r.slice(1)}
             </button>
           ))}
         </div>
@@ -164,7 +147,11 @@ export default function RegisterPage() {
           </div>
           <div>
             <label htmlFor="email" className={labelCls}>
-              {role === "faculty" ? "Institute email" : "Email (personal or institute)"}
+              {role === "faculty"
+                ? "Institute email"
+                : role === "hod"
+                ? "Email (Gmail or institute)"
+                : "Email (personal or institute)"}
             </label>
             <input id="email" type="email" required value={email}
               onChange={(e) => setEmail(e.target.value)} className={inputCls} />
@@ -198,47 +185,28 @@ export default function RegisterPage() {
 
           <div>
             <label htmlFor="branch" className={labelCls}>
-              {role === "student" ? "Branch" : "Department (optional)"}
+              {role === "student" ? "Branch" : "Department"}
             </label>
-            <select id="branch" required={role === "student"} value={branchId}
+            <select id="branch" required value={branchId}
               onChange={(e) => setBranchId(e.target.value === "" ? "" : Number(e.target.value))}
               className={inputCls}>
-              <option value="">Select branch…</option>
+              <option value="">Select…</option>
               {branches.map((b) => (
                 <option key={b.id} value={b.id}>{b.name}</option>
               ))}
             </select>
+            {role === "student" && (
+              <p className="mt-1 text-xs text-slate-500">
+                Your semester placement happens when you fill the semester
+                registration form published by your HOD.
+              </p>
+            )}
+            {role === "hod" && (
+              <p className="mt-1 text-xs text-slate-500">
+                One HOD account per department.
+              </p>
+            )}
           </div>
-
-          {role === "student" && (
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="year" className={labelCls}>Year</label>
-                <select id="year" required value={year}
-                  onChange={(e) => {
-                    setYear(e.target.value === "" ? "" : Number(e.target.value));
-                    setSemester("");
-                  }}
-                  className={inputCls}>
-                  <option value="">Select…</option>
-                  {[1, 2, 3, 4].map((y) => (
-                    <option key={y} value={y}>Year {y}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label htmlFor="semester" className={labelCls}>Current semester</label>
-                <select id="semester" required value={semester}
-                  onChange={(e) => setSemester(e.target.value === "" ? "" : Number(e.target.value))}
-                  className={inputCls} disabled={year === ""}>
-                  <option value="">Select…</option>
-                  {semesterOptions.map((s) => (
-                    <option key={s} value={s}>Semester {s}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          )}
 
           {error && (
             <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>
@@ -246,7 +214,7 @@ export default function RegisterPage() {
 
           <button type="submit" disabled={loading}
             className="w-full cursor-pointer rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60">
-            {loading ? "Creating account…" : `Register as ${role}`}
+            {loading ? "Creating account…" : `Register as ${role === "hod" ? "HOD" : role}`}
           </button>
         </form>
 

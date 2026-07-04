@@ -16,12 +16,14 @@ export default function MarksForm({
   assessmentId,
   isFinal,
   maxMarks,
+  passingMarks,
   students,
   existing,
 }: {
   assessmentId: string;
   isFinal: boolean;
   maxMarks: number;
+  passingMarks: number;
   students: Student[];
   existing: Record<string, Existing>;
 }) {
@@ -29,11 +31,6 @@ export default function MarksForm({
   const [values, setValues] = useState<Record<string, string>>(() =>
     Object.fromEntries(
       students.map((s) => [s.id, existing[s.id]?.marks_obtained?.toString() ?? ""])
-    )
-  );
-  const [passed, setPassed] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(
-      students.map((s) => [s.id, existing[s.id]?.passed ?? true])
     )
   );
   const [saving, setSaving] = useState(false);
@@ -55,7 +52,6 @@ export default function MarksForm({
         assessment_id: assessmentId,
         student_id: s.id,
         marks_obtained: n,
-        passed: isFinal ? passed[s.id] : null,
       });
     }
     if (rows.length === 0) {
@@ -76,6 +72,22 @@ export default function MarksForm({
     router.refresh();
   }
 
+  const resultChip = (id: string) => {
+    const raw = values[id]?.trim();
+    if (raw === "" || raw === undefined) return <span className="text-sm text-slate-400">—</span>;
+    const n = Number(raw);
+    if (Number.isNaN(n)) return <span className="text-sm text-slate-400">—</span>;
+    return n >= passingMarks ? (
+      <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+        Passed
+      </span>
+    ) : (
+      <span className="inline-flex rounded-full bg-rose-50 px-2 py-0.5 text-xs font-medium text-rose-700 ring-1 ring-inset ring-rose-600/20">
+        Failed
+      </span>
+    );
+  };
+
   return (
     <div className="space-y-4">
       <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
@@ -85,11 +97,9 @@ export default function MarksForm({
               <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Roll</th>
               <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Student</th>
               <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Marks (out of {maxMarks})
+                Marks (out of {maxMarks}, pass ≥ {passingMarks})
               </th>
-              {isFinal && (
-                <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Result</th>
-              )}
+              <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Result</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -117,34 +127,7 @@ export default function MarksForm({
                     className="w-24 rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                   />
                 </td>
-                {isFinal && (
-                  <td className="px-4 py-2.5">
-                    <div className="flex gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => setPassed((p) => ({ ...p, [s.id]: true }))}
-                        className={`cursor-pointer rounded-md px-3 py-1 text-xs font-semibold transition-colors duration-150 ${
-                          passed[s.id]
-                            ? "bg-emerald-600 text-white"
-                            : "border border-emerald-300 bg-white text-emerald-700 hover:bg-emerald-50"
-                        }`}
-                      >
-                        Pass
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPassed((p) => ({ ...p, [s.id]: false }))}
-                        className={`cursor-pointer rounded-md px-3 py-1 text-xs font-semibold transition-colors duration-150 ${
-                          passed[s.id] === false
-                            ? "bg-rose-600 text-white"
-                            : "border border-rose-300 bg-white text-rose-700 hover:bg-rose-50"
-                        }`}
-                      >
-                        Fail
-                      </button>
-                    </div>
-                  </td>
-                )}
+                <td className="px-4 py-2.5">{resultChip(s.id)}</td>
               </tr>
             ))}
           </tbody>
@@ -159,7 +142,7 @@ export default function MarksForm({
         {savedAt && <p className="text-sm text-emerald-700">Saved at {savedAt}</p>}
         {isFinal && (
           <p className="text-sm text-slate-500">
-            Marking Fail records a backlog for that student.
+            A Failed result on the final exam records a backlog automatically.
           </p>
         )}
         <button

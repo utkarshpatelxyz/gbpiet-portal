@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getSubjectRoster } from "@/lib/roster";
 import { Empty } from "@/components/ui";
 import MarksForm from "./marks-form";
 
@@ -17,7 +18,9 @@ export default async function MarksEntryPage({
 
   const { data: assessment } = await supabase
     .from("assessments")
-    .select("id, title, type, max_marks, subjects(id, name, code, faculty_id, classroom_id)")
+    .select(
+      "id, title, type, max_marks, passing_marks, subjects(id, name, code, plan_id, faculty_id, classroom_id)"
+    )
     .eq("id", assessmentId)
     .maybeSingle();
   if (!assessment) notFound();
@@ -25,30 +28,19 @@ export default async function MarksEntryPage({
     id: string;
     name: string;
     code: string;
+    plan_id: string | null;
     faculty_id: string;
     classroom_id: number;
   };
   if (subject.id !== id || subject.faculty_id !== user!.id) notFound();
 
-  const [{ data: students }, { data: marks }] = await Promise.all([
-    supabase
-      .from("students")
-      .select("id, enrollment_no, roll_no, profiles(full_name)")
-      .eq("classroom_id", subject.classroom_id)
-      .eq("status", "active")
-      .order("roll_no"),
+  const [studentList, { data: marks }] = await Promise.all([
+    getSubjectRoster(supabase, subject),
     supabase
       .from("marks")
       .select("student_id, marks_obtained, passed")
       .eq("assessment_id", assessmentId),
   ]);
-
-  const studentList = (students ?? []).map((st) => ({
-    id: st.id,
-    roll_no: st.roll_no,
-    enrollment_no: st.enrollment_no,
-    full_name: (st.profiles as unknown as { full_name: string }).full_name,
-  }));
 
   return (
     <div className="space-y-6">
@@ -59,22 +51,22 @@ export default async function MarksEntryPage({
         >
           ← {subject.name} ({subject.code})
         </Link>
-        <h1 className="mt-2 text-2xl font-bold text-slate-900">
-          {assessment.title}
-        </h1>
+        <h1 className="mt-2 text-2xl font-bold text-slate-900">{assessment.title}</h1>
         <p className="mt-1 text-sm text-slate-600">
           {assessment.type === "final" ? "Final exam" : "Class test"} · max{" "}
-          {assessment.max_marks} marks
+          {assessment.max_marks} · passing {assessment.passing_marks}. Pass or
+          fail is computed automatically from the passing marks.
         </p>
       </div>
 
       {studentList.length === 0 ? (
-        <Empty>No students in this classroom yet.</Empty>
+        <Empty>No students are registered for this subject yet.</Empty>
       ) : (
         <MarksForm
           assessmentId={assessment.id}
           isFinal={assessment.type === "final"}
           maxMarks={Number(assessment.max_marks)}
+          passingMarks={Number(assessment.passing_marks)}
           students={studentList}
           existing={Object.fromEntries(
             (marks ?? []).map((m) => [
