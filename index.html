@@ -761,6 +761,7 @@
       /* Input row */
       .s1-input-row {
         display: flex;
+        flex-wrap: wrap;
         gap: 14px;
         padding: 16px 40px 14px;
         border-bottom: 1px solid rgba(0,0,0,0.055);
@@ -768,6 +769,7 @@
       }
       .s1-field {
         flex: 1;
+        min-width: 150px;
         display: flex;
         flex-direction: column;
         gap: 4px;
@@ -799,6 +801,45 @@
       }
       .s1-inp.s1-err { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.12); }
       .s1-err-msg { font-size: 10.5px; color: #ef4444; display: none; margin-top: 1px; }
+      textarea.s1-inp { resize: vertical; min-height: 34px; line-height: 1.4; font-family: inherit; }
+
+      /* Revision row */
+      .s1-revision-row { border-bottom: 1px solid rgba(0,0,0,0.055); }
+      .s1-revision-inline { display: flex; gap: 8px; }
+      .s1-revision-inline .s1-inp { flex: 1; }
+      .s1-rev-btn {
+        flex-shrink: 0;
+        background: rgba(20,20,35,0.88);
+        color: #fff;
+        border: none;
+        border-radius: 9px;
+        padding: 0 14px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        letter-spacing: -0.1px;
+        transition: background 0.18s;
+        white-space: nowrap;
+      }
+      .s1-rev-btn:hover { background: rgba(20,20,35,0.98); }
+      .s1-active-revision {
+        display: none;
+        align-items: center;
+        gap: 8px;
+        margin: 0 40px 14px;
+        padding: 8px 14px;
+        border-radius: 9px;
+        background: rgba(48,209,88,0.10);
+        border: 1px solid rgba(48,209,88,0.25);
+        color: rgba(20,20,35,0.72);
+        font-size: 11.5px;
+        font-weight: 500;
+      }
+      .s1-active-revision .s1-rev-dot {
+        width: 6px; height: 6px; border-radius: 50%;
+        background: #30D158; flex-shrink: 0;
+      }
 
       /* ── MIRO TREE inside card ── */
       .s1-tree-area {
@@ -1835,14 +1876,42 @@
         <div class="app-logo">Meridian</div>
     </div>
 
-    <!-- Drum type selection modal -->
+    <!-- Drum entry modal -->
     <div id="drum-modal" style="display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);">
-        <div style="background:rgba(30,30,40,0.92);border:1px solid rgba(255,255,255,0.12);border-radius:18px;padding:32px 36px;min-width:280px;display:flex;flex-direction:column;align-items:center;gap:20px;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
-            <div style="color:#fff;font-size:15px;font-weight:600;letter-spacing:-0.2px;text-align:center;">Select Drum Type</div>
-            <div style="display:flex;flex-direction:column;gap:10px;width:100%;">
-                <button id="drum-vertical-btn" style="width:100%;padding:11px 0;border:none;border-radius:11px;background:linear-gradient(145deg,#2a52be,#16222a);color:#fff;font-size:14px;font-weight:600;cursor:pointer;letter-spacing:0.1px;transition:opacity 0.15s;">Vertical Drum</button>
-                <button id="drum-horizontal-btn" style="width:100%;padding:11px 0;border:none;border-radius:11px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.75);font-size:14px;font-weight:500;cursor:pointer;border:1px solid rgba(255,255,255,0.12);transition:opacity 0.15s;">Horizontal Drum</button>
+        <div style="background:rgba(30,30,40,0.92);border:1px solid rgba(255,255,255,0.12);border-radius:18px;padding:32px 36px;min-width:300px;max-width:340px;display:flex;flex-direction:column;align-items:center;gap:20px;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+
+            <!-- Panel 1: Existing vs New -->
+            <div id="drum-modal-panel-root" style="display:flex;flex-direction:column;align-items:center;gap:20px;width:100%;">
+                <div style="color:#fff;font-size:15px;font-weight:600;letter-spacing:-0.2px;text-align:center;">Drum Review</div>
+                <div style="display:flex;flex-direction:column;gap:10px;width:100%;">
+                    <button id="drum-new-btn" style="width:100%;padding:11px 0;border:none;border-radius:11px;background:linear-gradient(145deg,#2a52be,#16222a);color:#fff;font-size:14px;font-weight:600;cursor:pointer;letter-spacing:0.1px;transition:opacity 0.15s;">Create New Drum</button>
+                    <button id="drum-existing-btn" style="width:100%;padding:11px 0;border:none;border-radius:11px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.75);font-size:14px;font-weight:500;cursor:pointer;border:1px solid rgba(255,255,255,0.12);transition:opacity 0.15s;">Existing Drum</button>
+                </div>
             </div>
+
+            <!-- Panel 2: New drum type -->
+            <div id="drum-modal-panel-new" style="display:none;flex-direction:column;align-items:center;gap:20px;width:100%;">
+                <div style="color:#fff;font-size:15px;font-weight:600;letter-spacing:-0.2px;text-align:center;">Select Drum Type</div>
+                <div style="display:flex;flex-direction:column;gap:10px;width:100%;">
+                    <button id="drum-vertical-btn" style="width:100%;padding:11px 0;border:none;border-radius:11px;background:linear-gradient(145deg,#2a52be,#16222a);color:#fff;font-size:14px;font-weight:600;cursor:pointer;letter-spacing:0.1px;transition:opacity 0.15s;">Vertical Drum</button>
+                    <button id="drum-horizontal-btn" style="width:100%;padding:11px 0;border:none;border-radius:11px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.75);font-size:14px;font-weight:500;cursor:pointer;border:1px solid rgba(255,255,255,0.12);transition:opacity 0.15s;">Horizontal Drum</button>
+                </div>
+                <button id="drum-back-from-new" style="background:none;border:none;color:rgba(255,255,255,0.45);font-size:12px;cursor:pointer;font-family:inherit;padding:2px;">&larr; Back</button>
+            </div>
+
+            <!-- Panel 3: Existing drum / Excel import -->
+            <div id="drum-modal-panel-existing" style="display:none;flex-direction:column;align-items:center;gap:16px;width:100%;">
+                <div style="color:#fff;font-size:15px;font-weight:600;letter-spacing:-0.2px;text-align:center;">Import Existing Drum</div>
+                <div style="color:rgba(255,255,255,0.55);font-size:11.5px;text-align:center;line-height:1.5;">Select a previously exported Excel review file to continue working on it.</div>
+                <label for="drum-excel-input" style="width:100%;box-sizing:border-box;padding:14px 10px;border-radius:11px;border:1px dashed rgba(255,255,255,0.25);color:rgba(255,255,255,0.75);font-size:12px;text-align:center;cursor:pointer;">
+                    <span id="drum-excel-filename">Choose Excel file (.xlsx, .xls)</span>
+                </label>
+                <input type="file" id="drum-excel-input" accept=".xlsx,.xls" style="display:none;"/>
+                <button id="drum-excel-import-btn" style="width:100%;padding:11px 0;border:none;border-radius:11px;background:linear-gradient(145deg,#2a52be,#16222a);color:#fff;font-size:14px;font-weight:600;cursor:pointer;letter-spacing:0.1px;transition:opacity 0.15s;">Import</button>
+                <div id="drum-modal-toast" style="display:none;font-size:11px;color:#ffca7a;text-align:center;"></div>
+                <button id="drum-back-from-existing" style="background:none;border:none;color:rgba(255,255,255,0.45);font-size:12px;cursor:pointer;font-family:inherit;padding:2px;">&larr; Back</button>
+            </div>
+
         </div>
     </div>
   </div>
@@ -2128,15 +2197,55 @@
               <!-- Inputs -->
               <div class="s1-input-row">
                 <div class="s1-field">
-                  <label class="s1-lbl">Vessel Name</label>
-                  <input class="s1-inp" type="text" id="s1-vessel-name" placeholder="e.g. Knockout Drum"/>
-                  <span class="s1-err-msg" id="s1-err-name">Please enter a vessel name</span>
+                  <label class="s1-lbl">Project Name</label>
+                  <input class="s1-inp" type="text" id="s1-project-name" placeholder="e.g. Grassroots Refinery Expansion"/>
+                </div>
+                <div class="s1-field">
+                  <label class="s1-lbl">Project Code</label>
+                  <input class="s1-inp" type="text" id="s1-project-code" placeholder="e.g. PRJ-4521"/>
+                </div>
+                <div class="s1-field">
+                  <label class="s1-lbl">Equipment Name</label>
+                  <input class="s1-inp" type="text" id="s1-equip-name" placeholder="e.g. Knockout Drum"/>
                 </div>
                 <div class="s1-field">
                   <label class="s1-lbl">Equipment Tag</label>
                   <input class="s1-inp" type="text" id="s1-equip-tag" placeholder="e.g. V-1001"/>
                   <span class="s1-err-msg" id="s1-err-tag">Please enter an equipment tag</span>
                 </div>
+                <div class="s1-field">
+                  <label class="s1-lbl">Vessel Name</label>
+                  <input class="s1-inp" type="text" id="s1-vessel-name" placeholder="e.g. Knockout Drum"/>
+                  <span class="s1-err-msg" id="s1-err-name">Please enter a vessel name</span>
+                </div>
+                <div class="s1-field">
+                  <label class="s1-lbl">Created By</label>
+                  <input class="s1-inp" type="text" id="s1-created-by" placeholder="e.g. J. Patel"/>
+                </div>
+              </div>
+
+              <!-- Revision -->
+              <div class="s1-input-row s1-revision-row">
+                <div class="s1-field" style="flex:1.6;">
+                  <label class="s1-lbl">Revision Name</label>
+                  <div class="s1-revision-inline">
+                    <input class="s1-inp" type="text" id="s1-revision-name" placeholder="e.g. Rev A"/>
+                    <button type="button" class="s1-rev-btn" id="s1-create-revision-btn" onclick="s1CreateRevision()">Create New Revision</button>
+                  </div>
+                  <span class="s1-err-msg" id="s1-err-revision">Please enter a revision name</span>
+                </div>
+                <div class="s1-field">
+                  <label class="s1-lbl">Date of Revision</label>
+                  <input class="s1-inp" type="date" id="s1-revision-date"/>
+                </div>
+                <div class="s1-field" style="flex:1.8;">
+                  <label class="s1-lbl">Description of Revision</label>
+                  <textarea class="s1-inp" id="s1-revision-desc" rows="1" placeholder="Summarize what changed in this revision"></textarea>
+                </div>
+              </div>
+              <div class="s1-active-revision" id="s1-active-revision">
+                <span class="s1-rev-dot"></span>
+                <span id="s1-active-revision-text"></span>
               </div>
 
               <!-- MIRO Tree area -->
@@ -2576,12 +2685,37 @@ function initHomeView() {
                             if (clickedIcon.classList.contains('icon-drum')) {
                                 const modal = document.getElementById('drum-modal');
                                 modal.style.display = 'flex';
+                                drumModalShowPanel('root');
+
+                                document.getElementById('drum-new-btn').onclick = () => {
+                                    drumModalShowPanel('new');
+                                };
+                                document.getElementById('drum-existing-btn').onclick = () => {
+                                    drumModalShowPanel('existing');
+                                };
+                                document.getElementById('drum-back-from-new').onclick = () => {
+                                    drumModalShowPanel('root');
+                                };
+                                document.getElementById('drum-back-from-existing').onclick = () => {
+                                    drumModalShowPanel('root');
+                                };
                                 document.getElementById('drum-vertical-btn').onclick = () => {
                                     modal.style.display = 'none';
                                     startGenieEffect(clickedIcon);
                                 };
                                 document.getElementById('drum-horizontal-btn').onclick = () => {
                                     modal.style.display = 'none';
+                                };
+                                document.getElementById('drum-excel-input').onchange = (e) => {
+                                    const f = e.target.files[0];
+                                    const nameEl = document.getElementById('drum-excel-filename');
+                                    if (f) nameEl.textContent = f.name;
+                                };
+                                document.getElementById('drum-excel-import-btn').onclick = () => {
+                                    const t = document.getElementById('drum-modal-toast');
+                                    t.textContent = 'Excel import — coming soon';
+                                    t.style.display = 'block';
+                                    setTimeout(() => { t.style.display = 'none'; }, 2400);
                                 };
                             } else {
                                 // Phase 3: Genie effect
@@ -2592,6 +2726,28 @@ function initHomeView() {
                 };
             });
         });
+
+        /* ============================================================
+           DRUM MODAL PANEL SWITCHING
+        ============================================================ */
+        function drumModalShowPanel(panel) {
+            const panels = {
+                root: document.getElementById('drum-modal-panel-root'),
+                new: document.getElementById('drum-modal-panel-new'),
+                existing: document.getElementById('drum-modal-panel-existing')
+            };
+            Object.keys(panels).forEach(key => {
+                panels[key].style.display = (key === panel) ? 'flex' : 'none';
+            });
+            const toast = document.getElementById('drum-modal-toast');
+            if (toast) toast.style.display = 'none';
+            if (panel !== 'existing') {
+                const fileInput = document.getElementById('drum-excel-input');
+                const fileLabel = document.getElementById('drum-excel-filename');
+                if (fileInput) fileInput.value = '';
+                if (fileLabel) fileLabel.textContent = 'Choose Excel file (.xlsx, .xls)';
+            }
+        }
 
         /* ============================================================
            ICON → URL MAPPING
@@ -2712,7 +2868,10 @@ window.addEventListener("pageshow", function (event) {
       const logoEl = appWinEl.querySelector('.app-logo');
       if (logoEl) logoEl.style.opacity = '0';
     }
-    if (modalEl) modalEl.style.display = 'none';
+    if (modalEl) {
+      modalEl.style.display = 'none';
+      drumModalShowPanel('root');
+    }
     reset();
   };
 }
@@ -3319,7 +3478,12 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
     //  STEP 1 — VESSEL BUILDER
     // ═══════════════════════════════════════════════════════
 
-    window.vesselConfig = { vesselName:'', equipmentTag:'', division:'Division 1', selections:[] };
+    window.vesselConfig = {
+      vesselName:'', equipmentTag:'', division:'Division 1', selections:[],
+      projectName:'', projectCode:'', equipmentName:'', createdBy:'',
+      revisionName:'', revisionDate:'', revisionDesc:'', revisions: []
+    };
+    let s1ActiveRevision = null;
     const s1Sel = new Set();
     let s1OpenFamily = null;
     let s1OpenL1 = null;
@@ -3850,6 +4014,41 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
       setTimeout(() => t.classList.remove('show'), 2400);
     }
 
+    // ── Revision management ──────────────────────────────────
+    function s1CreateRevision() {
+      const rEl = document.getElementById('s1-revision-name');
+      const eR  = document.getElementById('s1-err-revision');
+      if (!rEl.value.trim()) {
+        rEl.classList.add('s1-err');
+        if (eR) eR.style.display = 'block';
+        return;
+      }
+      rEl.classList.remove('s1-err');
+      if (eR) eR.style.display = 'none';
+
+      const dateEl = document.getElementById('s1-revision-date');
+      const descEl = document.getElementById('s1-revision-desc');
+      const byEl   = document.getElementById('s1-created-by');
+
+      const dateVal = dateEl.value || new Date().toISOString().slice(0, 10);
+      dateEl.value = dateVal;
+
+      const revision = {
+        name: rEl.value.trim(),
+        date: dateVal,
+        description: descEl.value.trim(),
+        createdBy: byEl.value.trim()
+      };
+
+      window.vesselConfig.revisions.push(revision);
+      s1ActiveRevision = revision;
+
+      const badge = document.getElementById('s1-active-revision');
+      const badgeText = document.getElementById('s1-active-revision-text');
+      badgeText.textContent = `Active revision: ${revision.name} — ${revision.date}${revision.createdBy ? ' · ' + revision.createdBy : ''}`;
+      badge.style.display = 'flex';
+    }
+
     // ── Proceed ──────────────────────────────────────────────
     function mrdS1Proceed() {
       const nEl = document.getElementById('s1-vessel-name');
@@ -3863,16 +4062,32 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
       else { tEl.classList.remove('s1-err'); if(eT) eT.style.display='none'; }
       if (!ok) return;
 
+      const projectNameEl = document.getElementById('s1-project-name');
+      const projectCodeEl = document.getElementById('s1-project-code');
+      const equipNameEl   = document.getElementById('s1-equip-name');
+      const createdByEl   = document.getElementById('s1-created-by');
+      const revNameEl      = document.getElementById('s1-revision-name');
+      const revDateEl      = document.getElementById('s1-revision-date');
+      const revDescEl      = document.getElementById('s1-revision-desc');
+
       window.vesselConfig = {
         vesselName: nEl.value.trim(),
         equipmentTag: tEl.value.trim(),
         division: 'Division 1',
-        selections: [...s1Sel]
+        selections: [...s1Sel],
+        projectName: projectNameEl.value.trim(),
+        projectCode: projectCodeEl.value.trim(),
+        equipmentName: equipNameEl.value.trim(),
+        createdBy: createdByEl.value.trim(),
+        revisionName: revNameEl.value.trim(),
+        revisionDate: revDateEl.value,
+        revisionDesc: revDescEl.value.trim(),
+        revisions: window.vesselConfig.revisions || []
       };
       const s2t = document.getElementById('inp-tag');
       const s2n = document.getElementById('inp-name');
       if (s2t) s2t.value = window.vesselConfig.equipmentTag;
-      if (s2n) s2n.value = window.vesselConfig.vesselName;
+      if (s2n) s2n.value = window.vesselConfig.equipmentName || window.vesselConfig.vesselName;
 
       document.getElementById('mrd-step1').style.display = 'none';
       document.getElementById('meridian-ui').style.display = '';
@@ -3894,6 +4109,33 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
         const t = document.getElementById('s1-equip-tag');
         if (n) n.value = cfg.vesselName;
         if (t) t.value = cfg.equipmentTag;
+        const projectNameEl = document.getElementById('s1-project-name');
+        const projectCodeEl = document.getElementById('s1-project-code');
+        const equipNameEl   = document.getElementById('s1-equip-name');
+        const createdByEl   = document.getElementById('s1-created-by');
+        const revNameEl      = document.getElementById('s1-revision-name');
+        const revDateEl      = document.getElementById('s1-revision-date');
+        const revDescEl      = document.getElementById('s1-revision-desc');
+        if (projectNameEl) projectNameEl.value = cfg.projectName || '';
+        if (projectCodeEl) projectCodeEl.value = cfg.projectCode || '';
+        if (equipNameEl)   equipNameEl.value   = cfg.equipmentName || '';
+        if (createdByEl)   createdByEl.value   = cfg.createdBy || '';
+        if (revNameEl)      revNameEl.value      = cfg.revisionName || '';
+        if (revDateEl)      revDateEl.value      = cfg.revisionDate || '';
+        if (revDescEl)      revDescEl.value      = cfg.revisionDesc || '';
+
+        const badge = document.getElementById('s1-active-revision');
+        const badgeText = document.getElementById('s1-active-revision-text');
+        const lastRev = (cfg.revisions || [])[cfg.revisions.length - 1];
+        if (lastRev) {
+          badgeText.textContent = `Active revision: ${lastRev.name} — ${lastRev.date}${lastRev.createdBy ? ' · ' + lastRev.createdBy : ''}`;
+          badge.style.display = 'flex';
+          s1ActiveRevision = lastRev;
+        } else {
+          badge.style.display = 'none';
+          s1ActiveRevision = null;
+        }
+
         s1Sel.clear();
         (cfg.selections||[]).forEach(id => s1Sel.add(id));
         // Components is now a standalone L1 section — no pre-seeding needed
@@ -3987,7 +4229,7 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
     // Components is now a standalone L1 section — no pre-seeding needed
     mrdBuildGrid();
   SPA_STATE.bodyBackgrounds.drum = document.body.style.backgroundImage;
-  window.mrdAnswer = mrdAnswer; window.mrdClear = mrdClear; window.mrdClose = mrdClose; window.mrdDownload = mrdDownload; window.mrdGoToStep1 = mrdGoToStep1; window.mrdOpenIcon = mrdOpenIcon; window.mrdPrev = mrdPrev; window.mrdS1Proceed = mrdS1Proceed; window.mrdScrollTabs = mrdScrollTabs; window.mrdSwitchTab = mrdSwitchTab; window.mrdTriggerExport = mrdTriggerExport; window.s1ClickFamily = s1ClickFamily; window.s1ClickL1 = s1ClickL1; window.s1ClickL2 = s1ClickL2; window.s1ClickL3 = s1ClickL3; window.s1ClickLeaf = s1ClickLeaf; window.s1ComingSoon = s1ComingSoon; window.s1SelectDiv = s1SelectDiv; window.s1ShowDivision = s1ShowDivision; window.s1WinRestore = s1WinRestore; window.s1WinToggle = s1WinToggle;
+  window.mrdAnswer = mrdAnswer; window.mrdClear = mrdClear; window.mrdClose = mrdClose; window.mrdDownload = mrdDownload; window.mrdGoToStep1 = mrdGoToStep1; window.mrdOpenIcon = mrdOpenIcon; window.mrdPrev = mrdPrev; window.mrdS1Proceed = mrdS1Proceed; window.mrdScrollTabs = mrdScrollTabs; window.mrdSwitchTab = mrdSwitchTab; window.mrdTriggerExport = mrdTriggerExport; window.s1ClickFamily = s1ClickFamily; window.s1ClickL1 = s1ClickL1; window.s1ClickL2 = s1ClickL2; window.s1ClickL3 = s1ClickL3; window.s1ClickLeaf = s1ClickLeaf; window.s1ComingSoon = s1ComingSoon; window.s1SelectDiv = s1SelectDiv; window.s1ShowDivision = s1ShowDivision; window.s1WinRestore = s1WinRestore; window.s1WinToggle = s1WinToggle; window.s1CreateRevision = s1CreateRevision;
 }
 
 initMainView();
