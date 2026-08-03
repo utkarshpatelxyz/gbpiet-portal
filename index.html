@@ -758,6 +758,38 @@
         overflow: hidden;
       }
 
+      /* Page A: details form */
+      #mrd-s1-details {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+      }
+
+      /* Page B: vessel type / category tree */
+      #mrd-s1-treepage {
+        display: none;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+      }
+      .s1-back-btn {
+        background: none;
+        border: none;
+        color: rgba(20,20,35,0.45);
+        font-size: 12.5px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        margin-right: auto;
+        padding: 6px 4px;
+        letter-spacing: -0.1px;
+        transition: color 0.15s;
+      }
+      .s1-back-btn:hover { color: rgba(20,20,35,0.75); }
+
       /* Input row */
       .s1-input-row {
         display: flex;
@@ -2194,72 +2226,82 @@
 
             <!-- Config panel -->
             <div id="mrd-s1-config">
-              <!-- Inputs -->
-              <div class="s1-input-row">
-                <div class="s1-field">
-                  <label class="s1-lbl">Project Name</label>
-                  <input class="s1-inp" type="text" id="s1-project-name" placeholder="e.g. Grassroots Refinery Expansion"/>
-                </div>
-                <div class="s1-field">
-                  <label class="s1-lbl">Project Code</label>
-                  <input class="s1-inp" type="text" id="s1-project-code" placeholder="e.g. PRJ-4521"/>
-                </div>
-                <div class="s1-field">
-                  <label class="s1-lbl">Equipment Name</label>
-                  <input class="s1-inp" type="text" id="s1-equip-name" placeholder="e.g. Knockout Drum"/>
-                </div>
-                <div class="s1-field">
-                  <label class="s1-lbl">Equipment Tag</label>
-                  <input class="s1-inp" type="text" id="s1-equip-tag" placeholder="e.g. V-1001"/>
-                  <span class="s1-err-msg" id="s1-err-tag">Please enter an equipment tag</span>
-                </div>
-                <div class="s1-field">
-                  <label class="s1-lbl">Vessel Name</label>
-                  <input class="s1-inp" type="text" id="s1-vessel-name" placeholder="e.g. Knockout Drum"/>
-                  <span class="s1-err-msg" id="s1-err-name">Please enter a vessel name</span>
-                </div>
-                <div class="s1-field">
-                  <label class="s1-lbl">Created By</label>
-                  <input class="s1-inp" type="text" id="s1-created-by" placeholder="e.g. J. Patel"/>
-                </div>
-              </div>
 
-              <!-- Revision -->
-              <div class="s1-input-row s1-revision-row">
-                <div class="s1-field" style="flex:1.6;">
-                  <label class="s1-lbl">Revision Name</label>
-                  <div class="s1-revision-inline">
-                    <input class="s1-inp" type="text" id="s1-revision-name" placeholder="e.g. Rev A"/>
-                    <button type="button" class="s1-rev-btn" id="s1-create-revision-btn" onclick="s1CreateRevision()">Create New Revision</button>
+              <!-- Page A: vessel/project/revision details -->
+              <div id="mrd-s1-details">
+                <!-- Inputs -->
+                <div class="s1-input-row">
+                  <div class="s1-field">
+                    <label class="s1-lbl">Project Name</label>
+                    <input class="s1-inp" type="text" id="s1-project-name" placeholder="e.g. Grassroots Refinery Expansion"/>
                   </div>
-                  <span class="s1-err-msg" id="s1-err-revision">Please enter a revision name</span>
+                  <div class="s1-field">
+                    <label class="s1-lbl">Project Code</label>
+                    <input class="s1-inp" type="text" id="s1-project-code" placeholder="e.g. PRJ-4521"/>
+                  </div>
+                  <div class="s1-field">
+                    <label class="s1-lbl">Equipment Name</label>
+                    <input class="s1-inp" type="text" id="s1-equip-name" placeholder="e.g. Knockout Drum"/>
+                    <span class="s1-err-msg" id="s1-err-equip-name">Please enter an equipment name</span>
+                  </div>
+                  <div class="s1-field">
+                    <label class="s1-lbl">Equipment Tag</label>
+                    <input class="s1-inp" type="text" id="s1-equip-tag" placeholder="e.g. V-1001"/>
+                    <span class="s1-err-msg" id="s1-err-tag">Please enter an equipment tag</span>
+                  </div>
+                  <div class="s1-field">
+                    <label class="s1-lbl">Created By</label>
+                    <input class="s1-inp" type="text" id="s1-created-by" placeholder="e.g. J. Patel"/>
+                  </div>
                 </div>
-                <div class="s1-field">
-                  <label class="s1-lbl">Date of Revision</label>
-                  <input class="s1-inp" type="date" id="s1-revision-date"/>
+
+                <!-- Revision -->
+                <div class="s1-input-row s1-revision-row">
+                  <div class="s1-field" style="flex:1.6;">
+                    <label class="s1-lbl">Revision Name</label>
+                    <div class="s1-revision-inline">
+                      <input class="s1-inp" type="text" id="s1-revision-name" placeholder="e.g. Rev A"/>
+                      <button type="button" class="s1-rev-btn" id="s1-create-revision-btn" onclick="s1CreateRevision()">Create New Revision</button>
+                    </div>
+                    <span class="s1-err-msg" id="s1-err-revision">Please enter a revision name</span>
+                  </div>
+                  <div class="s1-field">
+                    <label class="s1-lbl">Date of Revision</label>
+                    <input class="s1-inp" type="date" id="s1-revision-date"/>
+                  </div>
+                  <div class="s1-field" style="flex:1.8;">
+                    <label class="s1-lbl">Description of Revision</label>
+                    <textarea class="s1-inp" id="s1-revision-desc" rows="1" placeholder="Summarize what changed in this revision"></textarea>
+                  </div>
                 </div>
-                <div class="s1-field" style="flex:1.8;">
-                  <label class="s1-lbl">Description of Revision</label>
-                  <textarea class="s1-inp" id="s1-revision-desc" rows="1" placeholder="Summarize what changed in this revision"></textarea>
+                <div class="s1-active-revision" id="s1-active-revision">
+                  <span class="s1-rev-dot"></span>
+                  <span id="s1-active-revision-text"></span>
                 </div>
-              </div>
-              <div class="s1-active-revision" id="s1-active-revision">
-                <span class="s1-rev-dot"></span>
-                <span id="s1-active-revision-text"></span>
+
+                <!-- Bottom proceed bar -->
+                <div class="s1-bottom-bar">
+                  <button class="s1-proceed-btn" onclick="s1ProceedToBuild()">Proceed to Build Vessel &rarr;</button>
+                </div>
               </div>
 
-              <!-- MIRO Tree area -->
-              <div class="s1-tree-area" id="s1-tree-area">
-                <svg id="s1-svg-lines" width="2000" height="2000"></svg>
-                <div class="s1-tree-cols" id="s1-tree-cols">
-                  <!-- injected by JS -->
+              <!-- Page B: vessel type / category tree builder -->
+              <div id="mrd-s1-treepage">
+                <!-- MIRO Tree area -->
+                <div class="s1-tree-area" id="s1-tree-area">
+                  <svg id="s1-svg-lines" width="2000" height="2000"></svg>
+                  <div class="s1-tree-cols" id="s1-tree-cols">
+                    <!-- injected by JS -->
+                  </div>
+                </div>
+
+                <!-- Bottom proceed bar -->
+                <div class="s1-bottom-bar" id="s1-bottom-bar">
+                  <button class="s1-back-btn" onclick="s1BackToDetails()">&larr; Back to Details</button>
+                  <button class="s1-proceed-btn" onclick="mrdS1Proceed()">Proceed to Checklist &rarr;</button>
                 </div>
               </div>
 
-              <!-- Bottom proceed bar -->
-              <div class="s1-bottom-bar" id="s1-bottom-bar">
-                <button class="s1-proceed-btn" onclick="mrdS1Proceed()">Proceed to Checklist &rarr;</button>
-              </div>
             </div>
           </div>
 
@@ -3479,7 +3521,7 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
     // ═══════════════════════════════════════════════════════
 
     window.vesselConfig = {
-      vesselName:'', equipmentTag:'', division:'Division 1', selections:[],
+      equipmentTag:'', division:'Division 1', selections:[],
       projectName:'', projectCode:'', equipmentName:'', createdBy:'',
       revisionName:'', revisionDate:'', revisionDesc:'', revisions: []
     };
@@ -4004,7 +4046,32 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
     function s1SelectDiv(n) {
       if (n !== 1) return;
       document.getElementById('mrd-s1-config').style.display = 'flex';
+      document.getElementById('mrd-s1-details').style.display = 'flex';
+      document.getElementById('mrd-s1-treepage').style.display = 'none';
+    }
+
+    // ── Page A → Page B ──────────────────────────────────────
+    function s1ProceedToBuild() {
+      const nEl = document.getElementById('s1-equip-name');
+      const tEl = document.getElementById('s1-equip-tag');
+      const eN  = document.getElementById('s1-err-equip-name');
+      const eT  = document.getElementById('s1-err-tag');
+      let ok = true;
+      if (!nEl.value.trim()) { nEl.classList.add('s1-err'); if(eN) eN.style.display='block'; ok=false; }
+      else { nEl.classList.remove('s1-err'); if(eN) eN.style.display='none'; }
+      if (!tEl.value.trim()) { tEl.classList.add('s1-err'); if(eT) eT.style.display='block'; ok=false; }
+      else { tEl.classList.remove('s1-err'); if(eT) eT.style.display='none'; }
+      if (!ok) return;
+
+      document.getElementById('mrd-s1-details').style.display = 'none';
+      document.getElementById('mrd-s1-treepage').style.display = 'flex';
       s1Render();
+    }
+
+    // ── Page B → Page A ──────────────────────────────────────
+    function s1BackToDetails() {
+      document.getElementById('mrd-s1-treepage').style.display = 'none';
+      document.getElementById('mrd-s1-details').style.display = 'flex';
     }
 
     function s1ComingSoon(btn) {
@@ -4051,28 +4118,17 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
 
     // ── Proceed ──────────────────────────────────────────────
     function mrdS1Proceed() {
-      const nEl = document.getElementById('s1-vessel-name');
-      const tEl = document.getElementById('s1-equip-tag');
-      const eN  = document.getElementById('s1-err-name');
-      const eT  = document.getElementById('s1-err-tag');
-      let ok = true;
-      if (!nEl.value.trim()) { nEl.classList.add('s1-err'); if(eN) eN.style.display='block'; ok=false; }
-      else { nEl.classList.remove('s1-err'); if(eN) eN.style.display='none'; }
-      if (!tEl.value.trim()) { tEl.classList.add('s1-err'); if(eT) eT.style.display='block'; ok=false; }
-      else { tEl.classList.remove('s1-err'); if(eT) eT.style.display='none'; }
-      if (!ok) return;
-
+      const equipNameEl   = document.getElementById('s1-equip-name');
+      const equipTagEl    = document.getElementById('s1-equip-tag');
       const projectNameEl = document.getElementById('s1-project-name');
       const projectCodeEl = document.getElementById('s1-project-code');
-      const equipNameEl   = document.getElementById('s1-equip-name');
       const createdByEl   = document.getElementById('s1-created-by');
       const revNameEl      = document.getElementById('s1-revision-name');
       const revDateEl      = document.getElementById('s1-revision-date');
       const revDescEl      = document.getElementById('s1-revision-desc');
 
       window.vesselConfig = {
-        vesselName: nEl.value.trim(),
-        equipmentTag: tEl.value.trim(),
+        equipmentTag: equipTagEl.value.trim(),
         division: 'Division 1',
         selections: [...s1Sel],
         projectName: projectNameEl.value.trim(),
@@ -4087,7 +4143,7 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
       const s2t = document.getElementById('inp-tag');
       const s2n = document.getElementById('inp-name');
       if (s2t) s2t.value = window.vesselConfig.equipmentTag;
-      if (s2n) s2n.value = window.vesselConfig.equipmentName || window.vesselConfig.vesselName;
+      if (s2n) s2n.value = window.vesselConfig.equipmentName;
 
       document.getElementById('mrd-step1').style.display = 'none';
       document.getElementById('meridian-ui').style.display = '';
@@ -4101,13 +4157,13 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
       document.getElementById('mrd-back-to-step1').style.display = 'none';
       document.getElementById('mrd-step1').style.display = 'flex';
       const cfg = window.vesselConfig;
-      if (cfg.vesselName || cfg.equipmentTag) {
+      if (cfg.equipmentName || cfg.equipmentTag) {
         document.getElementById('mrd-s1-opening').style.display = 'none';
         document.getElementById('mrd-s1-division').style.display = 'flex';
         document.getElementById('mrd-s1-config').style.display = 'flex';
-        const n = document.getElementById('s1-vessel-name');
+        document.getElementById('mrd-s1-details').style.display = 'none';
+        document.getElementById('mrd-s1-treepage').style.display = 'flex';
         const t = document.getElementById('s1-equip-tag');
-        if (n) n.value = cfg.vesselName;
         if (t) t.value = cfg.equipmentTag;
         const projectNameEl = document.getElementById('s1-project-name');
         const projectCodeEl = document.getElementById('s1-project-code');
@@ -4229,7 +4285,7 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
     // Components is now a standalone L1 section — no pre-seeding needed
     mrdBuildGrid();
   SPA_STATE.bodyBackgrounds.drum = document.body.style.backgroundImage;
-  window.mrdAnswer = mrdAnswer; window.mrdClear = mrdClear; window.mrdClose = mrdClose; window.mrdDownload = mrdDownload; window.mrdGoToStep1 = mrdGoToStep1; window.mrdOpenIcon = mrdOpenIcon; window.mrdPrev = mrdPrev; window.mrdS1Proceed = mrdS1Proceed; window.mrdScrollTabs = mrdScrollTabs; window.mrdSwitchTab = mrdSwitchTab; window.mrdTriggerExport = mrdTriggerExport; window.s1ClickFamily = s1ClickFamily; window.s1ClickL1 = s1ClickL1; window.s1ClickL2 = s1ClickL2; window.s1ClickL3 = s1ClickL3; window.s1ClickLeaf = s1ClickLeaf; window.s1ComingSoon = s1ComingSoon; window.s1SelectDiv = s1SelectDiv; window.s1ShowDivision = s1ShowDivision; window.s1WinRestore = s1WinRestore; window.s1WinToggle = s1WinToggle; window.s1CreateRevision = s1CreateRevision;
+  window.mrdAnswer = mrdAnswer; window.mrdClear = mrdClear; window.mrdClose = mrdClose; window.mrdDownload = mrdDownload; window.mrdGoToStep1 = mrdGoToStep1; window.mrdOpenIcon = mrdOpenIcon; window.mrdPrev = mrdPrev; window.mrdS1Proceed = mrdS1Proceed; window.mrdScrollTabs = mrdScrollTabs; window.mrdSwitchTab = mrdSwitchTab; window.mrdTriggerExport = mrdTriggerExport; window.s1ClickFamily = s1ClickFamily; window.s1ClickL1 = s1ClickL1; window.s1ClickL2 = s1ClickL2; window.s1ClickL3 = s1ClickL3; window.s1ClickLeaf = s1ClickLeaf; window.s1ComingSoon = s1ComingSoon; window.s1SelectDiv = s1SelectDiv; window.s1ShowDivision = s1ShowDivision; window.s1WinRestore = s1WinRestore; window.s1WinToggle = s1WinToggle; window.s1CreateRevision = s1CreateRevision; window.s1ProceedToBuild = s1ProceedToBuild; window.s1BackToDetails = s1BackToDetails;
 }
 
 initMainView();
