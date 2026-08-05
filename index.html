@@ -1222,6 +1222,17 @@
         outline: none;
         cursor: pointer;
       }
+      .s1-ds-unitfixed {
+        flex-shrink: 0;
+        font-size: 11px;
+        font-weight: 600;
+        color: rgba(20,20,35,0.42);
+        background: rgba(0,0,0,0.045);
+        border-radius: 7px;
+        padding: 6px 9px;
+        min-width: 42px;
+        text-align: center;
+      }
       .s1-ds-checks { display: flex; flex-direction: column; gap: 4px; width: 100%; }
       .s1-ds-check {
         display: flex;
@@ -1244,6 +1255,82 @@
         font-weight: 600;
       }
       .s1-ds-check input { accent-color: #16a34a; cursor: pointer; flex-shrink: 0; }
+
+      /* ── Repeating-row tables (nozzles, operating streams) ── */
+      .s1-ds-panel-wide { min-width: 356px; max-width: 380px; }
+      .s1-ds-table { display: flex; flex-direction: column; gap: 9px; }
+      .s1-ds-empty {
+        font-size: 11.5px;
+        color: rgba(20,20,35,0.35);
+        padding: 8px 2px;
+      }
+      .s1-ds-row {
+        border: 1px solid rgba(0,0,0,0.08);
+        border-radius: 10px;
+        background: rgba(248,249,252,0.75);
+        padding: 9px 10px 10px;
+      }
+      .s1-ds-rowhead {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        color: rgba(20,20,35,0.42);
+        margin-bottom: 8px;
+      }
+      .s1-ds-rowdel {
+        border: none;
+        background: none;
+        color: rgba(20,20,35,0.30);
+        font-size: 15px;
+        line-height: 1;
+        cursor: pointer;
+        padding: 0 2px;
+        font-family: inherit;
+        transition: color 0.15s;
+      }
+      .s1-ds-rowdel:hover { color: #ff453a; }
+      .s1-ds-rowgrid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 7px 8px;
+      }
+      .s1-ds-colgroup {
+        grid-column: 1 / -1;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        color: rgba(20,20,35,0.30);
+        margin-top: 3px;
+      }
+      .s1-ds-cell { display: flex; flex-direction: column; min-width: 0; }
+      .s1-ds-cell-wide { grid-column: 1 / -1; }
+      .s1-ds-cell .s1-ds-lbl { margin-bottom: 3px; }
+      .s1-ds-unitlbl {
+        font-weight: 500;
+        text-transform: none;
+        letter-spacing: 0;
+        color: rgba(20,20,35,0.30);
+      }
+      .s1-ds-addrow {
+        margin-top: 2px;
+        background: rgba(20,20,35,0.88);
+        color: #fff;
+        border: none;
+        border-radius: 9px;
+        padding: 8px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        letter-spacing: -0.1px;
+        transition: background 0.18s;
+      }
+      .s1-ds-addrow:hover { background: rgba(20,20,35,1); }
 
       /* Section label above column */
       .s1-col-label {
@@ -3765,10 +3852,16 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
     //   depth 1 → A=group  B=label   C=value  D=unit
     //   depth 2 → A=group  B=sub     C=label  D=value  E=unit
     function s1BuildDatasheetRows() {
-      const rows = [];   // { kind:'section'|'field', cells:[...], groupSpan, subSpan, fieldId }
+      const items = [];  // section | field | tableHead | tableBody
       S1_DS_SECTIONS.forEach(sec => {
-        rows.push({ kind: 'section', cells: [sec.label.toUpperCase()] });
+        items.push({ kind: 'section', cells: [sec.banner || sec.label.toUpperCase()] });
         sec.groups.forEach(g => {
+          if (g.table) {
+            items.push({ kind: 'tableHead', table: g.table });
+            items.push({ kind: 'tableBody', table: g.table, groupId: g.id, rows: s1DsRows(g) });
+            return;
+          }
+
           const flat = g.fields.length === 1 && !g.fields[0].label;
           let groupStart = null, subStart = null, lastSub = null;
 
@@ -3776,7 +3869,9 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
             const cur = s1DsGet(f.id);
             const raw = cur.value;
             const value = Array.isArray(raw) ? raw : (raw == null ? '' : raw);
-            const unit  = cur.unit || '';
+            // A field with a single possible unit carries it implicitly
+            const fixedUnit = (f.units && f.units.length === 1) ? f.units[0] : '';
+            const unit = cur.unit || (String(value || '').trim() ? fixedUnit : '');
 
             let cells;
             if (flat) {
@@ -3790,24 +3885,34 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
               cells = [idx === 0 ? g.label : '', f.label, value, unit];
             }
 
-            const row = { kind: 'field', cells, fieldId: f.id, depth: flat ? 0 : (f.sub ? 2 : 1) };
-            rows.push(row);
+            const item = { kind: 'field', cells, fieldId: f.id, depth: flat ? 0 : (f.sub ? 2 : 1) };
+            items.push(item);
 
-            if (idx === 0) groupStart = rows.length - 1;
-            if (f.sub && f.sub !== lastSub) subStart = rows.length - 1;
-            if (f.sub) {
-              rows[subStart].subSpanEnd = rows.length - 1;
-              row.subOwner = subStart;
-            }
+            if (idx === 0) groupStart = items.length - 1;
+            if (f.sub && f.sub !== lastSub) subStart = items.length - 1;
+            if (f.sub) items[subStart].subSpan = items.length - subStart;
             lastSub = f.sub || null;
           });
 
           if (groupStart != null && g.fields.length > 1) {
-            rows[groupStart].groupSpanEnd = rows.length - 1;
+            items[groupStart].groupSpan = items.length - groupStart;
           }
         });
       });
-      return rows;
+      return items;
+    }
+
+    // Header cells for a repeating-row table. Returns one or two physical
+    // rows: two when columns are grouped (Temperature °C / Pressure bar g).
+    function s1TableHeaderRows(table) {
+      const cols = table.columns;
+      if (!table.twoRowHeader) return [cols.map(c => c.label)];
+      const top = [], bottom = [];
+      cols.forEach(c => {
+        if (c.group) { top.push(c.group); bottom.push(c.label); }
+        else         { top.push(c.label);  bottom.push(c.unitLabel || ''); }
+      });
+      return [top, bottom];
     }
 
     function mrdStyleHeaderRow(row) {
@@ -3883,42 +3988,82 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
       const ws2 = wb.addWorksheet('Vessel Structure');
       ws2.columns = [
         { width: 44.855 }, { width: 21.711 }, { width: 21.711 },
-        { width: 18 }, { width: 12 }, { width: 12 },
-        { width: 12 }, { width: 12 }, { width: 12 }
+        { width: 18 }, { width: 13 }, { width: 13 },
+        { width: 13 }, { width: 13 }, { width: 22 }, { width: 22 }
       ];
+      const NCOL = 10;
       const thin = { top:{style:'thin'}, left:{style:'thin'}, bottom:{style:'thin'}, right:{style:'thin'} };
-      structureRows.forEach((r, idx) => {
-        const excelRow = ws2.addRow(r.cells);
-        const rowNo = idx + 1;
-        if (r.kind === 'section') {
-          ws2.mergeCells(rowNo, 1, rowNo, 9);
-          const c = ws2.getCell(rowNo, 1);
+      const paintRow = (rowNo, labelCount) => {
+        for (let c = 1; c <= NCOL; c++) {
+          const cell = ws2.getCell(rowNo, c);
+          cell.border = thin;
+          if (c <= labelCount) {
+            cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb: MRD_LABEL_FILL } };
+            cell.font = { bold: true, size: 12 };
+          } else {
+            cell.font = { size: 12 };
+          }
+        }
+      };
+
+      // Walk the layout, tracking the real row number as tables expand
+      let r = 0;
+      const pendingMerges = [];
+      structureRows.forEach(item => {
+        if (item.kind === 'section') {
+          r++;
+          const excelRow = ws2.addRow(item.cells);
+          ws2.mergeCells(r, 1, r, NCOL);
+          const c = ws2.getCell(r, 1);
           c.fill = { type:'pattern', pattern:'solid', fgColor:{ argb: MRD_SECTION_FILL } };
           c.font = { bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
           c.alignment = { vertical: 'middle', horizontal: 'center' };
           c.border = thin;
           excelRow.height = 22;
-        } else {
-          // Label cells get the light-blue wash; value/unit cells stay plain
-          const labelCount = r.depth + 1;
-          for (let c = 1; c <= 9; c++) {
-            const cell = ws2.getCell(rowNo, c);
-            cell.border = thin;
-            if (c <= labelCount) {
-              cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb: MRD_LABEL_FILL } };
-              cell.font = { bold: true, size: 12 };
-            } else {
-              cell.font = { size: 12 };
+
+        } else if (item.kind === 'field') {
+          r++;
+          ws2.addRow(item.cells);
+          paintRow(r, item.depth + 1);
+          if (item.groupSpan > 1) pendingMerges.push([r, 1, r + item.groupSpan - 1, 1]);
+          if (item.subSpan   > 1) pendingMerges.push([r, 2, r + item.subSpan   - 1, 2]);
+
+        } else if (item.kind === 'tableHead') {
+          const headerRows = s1TableHeaderRows(item.table);
+          const first = r + 1;
+          headerRows.forEach(cells => { r++; ws2.addRow(cells); paintRow(r, NCOL); });
+          if (headerRows.length === 2) {
+            // Merge the grouped headers across their columns, and the
+            // ungrouped ones down through both header rows.
+            let c = 1;
+            while (c <= item.table.columns.length) {
+              const col = item.table.columns[c - 1];
+              if (col.group) {
+                let span = 1;
+                while (c + span <= item.table.columns.length &&
+                       item.table.columns[c + span - 1].group === col.group) span++;
+                pendingMerges.push([first, c, first, c + span - 1]);
+                c += span;
+              } else {
+                if (!col.unitLabel) pendingMerges.push([first, c, first + 1, c]);
+                c++;
+              }
             }
+          }
+
+        } else if (item.kind === 'tableBody') {
+          const rows = item.rows.filter(row =>
+            Object.keys(row).some(k => String(row[k] || '').trim() !== ''));
+          const total = Math.max(rows.length, item.table.minRows || 0);
+          for (let i = 0; i < total; i++) {
+            r++;
+            const row = rows[i] || {};
+            ws2.addRow(item.table.columns.map(col => row[col.key] == null ? '' : row[col.key]));
+            paintRow(r, 0);
           }
         }
       });
-      // Merge the group / sub-group label cells so they read as one block
-      structureRows.forEach((r, idx) => {
-        const rowNo = idx + 1;
-        if (r.groupSpanEnd != null && r.groupSpanEnd > idx) ws2.mergeCells(rowNo, 1, r.groupSpanEnd + 1, 1);
-        if (r.subSpanEnd   != null && r.subSpanEnd   > idx) ws2.mergeCells(rowNo, 2, r.subSpanEnd   + 1, 2);
-      });
+      pendingMerges.forEach(m => { try { ws2.mergeCells(m[0], m[1], m[2], m[3]); } catch (e) {} });
 
       const ws3 = wb.addWorksheet('Checklist');
       ws3.columns = [{ header: 'Section', width: 14.875 }, { header: 'Checkpoint', width: 82 }, { header: 'Status', width: 12.125 }];
@@ -4029,37 +4174,69 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
         }
 
         // ── Sheet 2: process datasheet ──
-        // Read it back positionally against the same definition that wrote it,
-        // so every value lands in the field it came from.
+        // Walk the same layout that wrote the sheet, tracking the real row
+        // number as we go. Tables can hold any number of rows, so they are
+        // read until the next section banner instead of by position.
         Object.keys(s1DsValues).forEach(k => delete s1DsValues[k]);
         if (ws2) {
+          const cellText = (rowNo, colNo) => {
+            const c = ws2.getRow(rowNo).getCell(colNo).value;
+            if (c == null) return '';
+            if (typeof c === 'object' && c.richText) return c.richText.map(t => t.text).join('');
+            if (typeof c === 'object' && 'result' in c) return String(c.result);
+            if (typeof c === 'object' && c.text) return String(c.text);
+            return String(c);
+          };
+          const banners = S1_DS_SECTIONS.map(s => (s.banner || s.label.toUpperCase()).trim());
           const layout = s1BuildDatasheetRows();
-          layout.forEach((r, idx) => {
-            if (r.kind !== 'field') return;
-            const row = ws2.getRow(idx + 1);
-            if (!row) return;
-            const entry = s1DsFieldMap[r.fieldId];
-            if (!entry) return;
-            const f = entry.field;
-            const cellAt = (n) => {
-              const c = row.getCell(n).value;
-              if (c == null) return '';
-              if (typeof c === 'object' && c.richText) return c.richText.map(t => t.text).join('');
-              if (typeof c === 'object' && 'result' in c) return String(c.result);
-              return String(c);
-            };
-            if (f.type === 'multiselect') {
-              const picked = [];
-              for (let c = 2; c <= 9; c++) {
-                const v = cellAt(c).trim();
-                if (v && f.options.indexOf(v) !== -1) picked.push(v);
+          let r = 0;
+
+          layout.forEach(item => {
+            if (item.kind === 'section') { r++; return; }
+
+            if (item.kind === 'field') {
+              r++;
+              const entry = s1DsFieldMap[item.fieldId];
+              if (!entry) return;
+              const f = entry.field;
+              if (f.type === 'multiselect') {
+                const picked = [];
+                for (let c = 2; c <= 10; c++) {
+                  const v = cellText(r, c).trim();
+                  if (v && f.options.indexOf(v) !== -1) picked.push(v);
+                }
+                if (picked.length) s1DsValues[f.id] = { value: picked, unit: '' };
+              } else {
+                const valueCol = item.depth + 2;
+                const value = cellText(r, valueCol).trim();
+                const unit  = (f.units && f.units.length) ? cellText(r, valueCol + 1).trim() : '';
+                if (value || unit) s1DsValues[f.id] = { value, unit };
               }
-              if (picked.length) s1DsValues[f.id] = { value: picked, unit: '' };
-            } else {
-              const valueCol = r.depth + 2;
-              const value = cellAt(valueCol).trim();
-              const unit  = (f.units && f.units.length) ? cellAt(valueCol + 1).trim() : '';
-              if (value || unit) s1DsValues[f.id] = { value, unit };
+              return;
+            }
+
+            if (item.kind === 'tableHead') {
+              r += s1TableHeaderRows(item.table).length;
+              return;
+            }
+
+            if (item.kind === 'tableBody') {
+              const cols = item.table.columns;
+              const rows = [];
+              while (r < ws2.rowCount) {
+                const first = cellText(r + 1, 1).trim();
+                if (banners.indexOf(first) !== -1) break;   // next section starts here
+                r++;
+                const row = {};
+                let any = false;
+                cols.forEach((col, ci) => {
+                  const v = cellText(r, ci + 1).trim();
+                  row[col.key] = v;
+                  if (v) any = true;
+                });
+                if (any) rows.push(row);
+              }
+              if (rows.length) s1DsValues[item.table.fieldId] = { value: rows, unit: '' };
             }
           });
         }
@@ -4164,6 +4341,34 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
     const S1_U_TEMP   = ['°C', 'K'];
     const S1_U_LEN    = ['mm', 'cm', 'm'];
     const S1_YESNO    = ['Yes', 'No'];
+
+    // Repeating-row table columns. `group` merges the header across the
+    // columns that share it (Temperature / Pressure on the process sheet).
+    const S1_PROC_COLUMNS = [
+      { key:'reference', label:'Reference' },
+      { key:'fluid',     label:'Liquid/Fluid' },
+      { key:'density',   label:'Density',   unitLabel:'kg/m³' },
+      { key:'flow',      label:'Flow Rate', unitLabel:'kg/h' },
+      { key:'tNormal',   label:'Normal',  group:'Temperature °C', type:'number' },
+      { key:'tMax',      label:'Maximum', group:'Temperature °C', type:'number' },
+      { key:'tMin',      label:'Minimum', group:'Temperature °C', type:'number' },
+      { key:'pNormal',   label:'Normal',  group:'Pressure bar g', type:'number' },
+      { key:'pMax',      label:'Maximum', group:'Pressure bar g', type:'number' },
+      { key:'pMin',      label:'Minimum', group:'Pressure bar g', type:'number' }
+    ];
+
+    const S1_NOZZLE_COLUMNS = [
+      { key:'ref',       label:'Ref' },
+      { key:'size',      label:'Size N.B' },
+      { key:'noOff',     label:'No. Off',   type:'number' },
+      { key:'rating',    label:'Rating',    type:'select', options:['150#','300#','600#','900#','1500#','2500#'] },
+      { key:'facing',    label:'Facing',    type:'select', options:['WN,RF','LWN,RF','SO,RF','SW,RF','BL,RF','WN,RTJ','LWN,RTJ','FF'] },
+      { key:'elevation', label:'Elevation' },
+      { key:'plan',      label:'Plan' },
+      { key:'standout',  label:'Standout',  type:'number' },
+      { key:'service',   label:'Service',   wide:true },
+      { key:'remarks',   label:'Remarks',   wide:true }
+    ];
 
     const S1_DS_SECTIONS = [
       {
@@ -4272,6 +4477,65 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
           ]},
           { id:'g-m-ab',    label:'Anchor Bolts', fields:[{ id:'f-m-ab', type:'text' }] }
         ]
+      },
+      {
+        id: 'DS4', label: 'Base Details',
+        icon: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="3" width="8" height="12" rx="1.2"/><line x1="12" y1="15" x2="12" y2="19"/><line x1="3" y1="19" x2="21" y2="19"/><line x1="3" y1="22" x2="21" y2="22" opacity="0.5"/></svg>`,
+        groups: [
+          { id:'g-bd-weight', label:'Weight', fields:[
+            { id:'f-bd-w-erected', label:'Erected (Fabrication)', type:'number', units:['kg'] },
+            { id:'f-bd-w-empty',   label:'Empty',                 type:'number', units:['kg'] },
+            { id:'f-bd-w-oper',    label:'Operating',             type:'number', units:['kg'] },
+            { id:'f-bd-w-shop',    label:'Shop Test',             type:'number', units:['kg'] },
+            { id:'f-bd-w-field',   label:'Field Test',            type:'number', units:['kg'] },
+            { id:'f-bd-w-lift',    label:'Lifting',               type:'number', units:['kg'] }
+          ]},
+          { id:'g-bd-other', label:'Other', fields:[
+            { id:'f-bd-support', label:'Support Method', type:'select', options:['Skirt','Saddle','Legs','Lugs / Brackets','Ring'] },
+            { id:'f-bd-baseplate', label:'Base Plate Details', type:'select', options:['Single base plate','Double base plate'] }
+          ]},
+          { id:'g-bd-load', label:'Loadings at Base', fields:[
+            { id:'f-bd-wind-shear', sub:'Wind',    label:'Shear Force', type:'number', units:['kg'] },
+            { id:'f-bd-wind-mom',   sub:'Wind',    label:'Moment',      type:'number', units:['kg m'] },
+            { id:'f-bd-seis-shear', sub:'Seismic', label:'Shear Force', type:'number', units:['kg'] },
+            { id:'f-bd-seis-mom',   sub:'Seismic', label:'Moment',      type:'number', units:['kg m'] }
+          ]},
+          { id:'g-bd-anchor', label:'Anchor Bolt Details', fields:[
+            { id:'f-bd-ab-size',  label:'Size',    type:'text' },
+            { id:'f-bd-ab-nooff', label:'No. Off', type:'text' },
+            { id:'f-bd-ab-bcd',   label:'B.C.D',   type:'text' }
+          ]}
+        ]
+      },
+      {
+        id: 'DS5', label: 'Process Operating Data', banner: 'PROCESS OPERATING DATA',
+        icon: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17c3 0 3-10 6-10s3 10 6 10 3-10 6-10"/><line x1="3" y1="21" x2="21" y2="21" opacity="0.5"/></svg>`,
+        groups: [
+          { id:'g-proc', label:'Operating Streams', fields:[], table:{
+            fieldId:'f-proc-rows', columns:S1_PROC_COLUMNS, twoRowHeader:true,
+            addLabel:'Add Stream', rowLabel:'Stream', minRows:4
+          }}
+        ]
+      },
+      {
+        id: 'DS6', label: 'Nozzle Data', banner: 'NOZZLE DATA (Note 8, 18 & 19)',
+        icon: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><line x1="12" y1="3" x2="12" y2="5" stroke-width="2.2"/><line x1="12" y1="19" x2="12" y2="21" stroke-width="2.2"/><line x1="3" y1="12" x2="5" y2="12" stroke-width="2.2"/><line x1="19" y1="12" x2="21" y2="12" stroke-width="2.2"/><circle cx="12" cy="12" r="2.5" fill="currentColor" stroke="none"/></svg>`,
+        groups: [
+          { id:'g-nozzle', label:'Nozzle Schedule', fields:[], table:{
+            fieldId:'f-nozzle-rows', columns:S1_NOZZLE_COLUMNS,
+            addLabel:'Add Nozzle', rowLabel:'Nozzle', minRows:8
+          }}
+        ]
+      },
+      {
+        id: 'DS7', label: 'Instrument Nozzle Data', banner: 'INSTRUMENT NOZZLE DATA (Note 7)',
+        icon: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><polyline points="12,7 12,12 15.5,14"/></svg>`,
+        groups: [
+          { id:'g-inst', label:'Instrument Nozzle Schedule', fields:[], table:{
+            fieldId:'f-inst-rows', columns:S1_NOZZLE_COLUMNS,
+            addLabel:'Add Instrument Nozzle', rowLabel:'Instrument Nozzle', minRows:4
+          }}
+        ]
       }
     ];
 
@@ -4281,7 +4545,8 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
     S1_DS_SECTIONS.forEach(sec => {
       sec.groups.forEach(g => {
         s1DsGroupMap[g.id] = { group: g, section: sec };
-        g.fields.forEach(f => { s1DsFieldMap[f.id] = { field: f, group: g, section: sec }; });
+        (g.fields || []).forEach(f => { s1DsFieldMap[f.id] = { field: f, group: g, section: sec }; });
+        if (g.table) s1DsFieldMap[g.table.fieldId] = { field: g.table, group: g, section: sec, isTable: true };
       });
     });
 
@@ -4291,20 +4556,90 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
     }
     function s1DsHasValue(fieldId) {
       const v = s1DsGet(fieldId).value;
-      return Array.isArray(v) ? v.length > 0 : String(v || '').trim() !== '';
+      if (!Array.isArray(v)) return String(v || '').trim() !== '';
+      // Table rows are objects; a row only counts once something is typed in it
+      return v.some(item => (item && typeof item === 'object')
+        ? Object.keys(item).some(k => String(item[k] || '').trim() !== '')
+        : String(item || '').trim() !== '');
+    }
+    // Table rows, always as an array
+    function s1DsRows(group) {
+      const v = s1DsGet(group.table.fieldId).value;
+      return Array.isArray(v) ? v : [];
+    }
+    function s1DsFilledRowCount(group) {
+      return s1DsRows(group).filter(r => Object.keys(r).some(k => String(r[k] || '').trim() !== '')).length;
     }
     function s1DsGroupFilled(group) {
+      if (group.table) return s1DsHasValue(group.table.fieldId);
       return group.fields.some(f => s1DsHasValue(f.id));
     }
     function s1DsSectionFilled(section) {
       return section.groups.some(g => s1DsGroupFilled(g));
     }
     function s1DsGroupProgress(group) {
+      if (group.table) return s1DsFilledRowCount(group);
       return group.fields.filter(f => s1DsHasValue(f.id)).length;
     }
 
     function s1EscAttr(s) {
       return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // ── Repeating-row table (nozzles, operating streams) ─────
+    // One card per row keeps the wide datasheet tables readable inside
+    // the narrow flow-chart column.
+    function s1RenderTable(g) {
+      const rows = s1DsRows(g);
+      let html = '<div class="s1-ds-table">';
+
+      if (!rows.length) {
+        html += `<div class="s1-ds-empty">No ${g.table.rowLabel.toLowerCase()}s added yet.</div>`;
+      }
+
+      rows.forEach((row, ri) => {
+        html += `<div class="s1-ds-row">
+          <div class="s1-ds-rowhead">
+            <span>${g.table.rowLabel} ${ri + 1}</span>
+            <button type="button" class="s1-ds-rowdel" title="Remove"
+              onclick="s1DsTableRemoveRow('${g.id}', ${ri})">&times;</button>
+          </div>
+          <div class="s1-ds-rowgrid">`;
+
+        let lastGroup = null;
+        g.table.columns.forEach(col => {
+          if (col.group && col.group !== lastGroup) {
+            html += `<div class="s1-ds-colgroup">${col.group}</div>`;
+          }
+          lastGroup = col.group || null;
+
+          const val = row[col.key] == null ? '' : row[col.key];
+          const lbl = col.label + (col.unitLabel ? ` <span class="s1-ds-unitlbl">${col.unitLabel}</span>` : '');
+          html += `<div class="s1-ds-cell${col.wide ? ' s1-ds-cell-wide' : ''}">
+            <label class="s1-ds-lbl">${lbl}</label>`;
+
+          if (col.type === 'select') {
+            html += `<select class="s1-ds-inp" onchange="s1DsTableSet('${g.id}', ${ri}, '${col.key}', this.value)">
+              <option value=""${!val ? ' selected' : ''}>—</option>`;
+            col.options.forEach(o => {
+              html += `<option value="${s1EscAttr(o)}"${val === o ? ' selected' : ''}>${o}</option>`;
+            });
+            html += `</select>`;
+          } else {
+            html += `<input class="s1-ds-inp" type="${col.type === 'number' ? 'number' : 'text'}"
+              value="${s1EscAttr(val)}" placeholder="—"
+              oninput="s1DsTableSet('${g.id}', ${ri}, '${col.key}', this.value)"/>`;
+          }
+          html += `</div>`;
+        });
+
+        html += `</div></div>`;
+      });
+
+      html += `<button type="button" class="s1-ds-addrow" onclick="s1DsTableAddRow('${g.id}')">
+        + ${g.table.addLabel}
+      </button></div>`;
+      return html;
     }
 
     // ── Render tree (no CSS transitions = no blink) ──────────
@@ -4351,8 +4686,10 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
             let cls = 's1-node s1-node-l2'
               + (isOpen ? ' s1-open' : '')
               + (isSel  ? ' s1-sel'  : '');
-            const count = g.fields.length > 1
-              ? `<span class="s1-ds-count">${s1DsGroupProgress(g)}/${g.fields.length}</span>` : '';
+            const n = s1DsGroupProgress(g);
+            const count = g.table
+              ? `<span class="s1-ds-count">${n} ${n === 1 ? 'row' : 'rows'}</span>`
+              : (g.fields.length > 1 ? `<span class="s1-ds-count">${n}/${g.fields.length}</span>` : '');
             html += `<div class="${cls}" data-id="${g.id}" onclick="s1ClickGroup('${g.id}')">
               <span class="s1-nlbl">${g.label}</span>
               ${count}
@@ -4368,11 +4705,15 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
         const g = s1DsGroupMap[s1OpenGroup].group;
         html += `<div class="s1-col s1-col-inputs" id="s1-col-2">
           <div class="s1-col-label">Process Input</div>
-          <div class="s1-ds-panel s1-node" data-id="${g.id}-panel">
+          <div class="s1-ds-panel s1-node${g.table ? ' s1-ds-panel-wide' : ''}" data-id="${g.id}-panel">
             <div class="s1-ds-panel-title">${g.label}</div>`;
 
+        if (g.table) {
+          html += s1RenderTable(g);
+        }
+
         let lastSub = null;
-        g.fields.forEach(f => {
+        (g.fields || []).forEach(f => {
           if (f.sub && f.sub !== lastSub) {
             html += `<div class="s1-ds-subhead">${f.sub}</div>`;
           }
@@ -4411,7 +4752,10 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
               oninput="s1DsSet('${f.id}', this.value)"/>`;
           }
 
-          if (f.units && f.units.length) {
+          if (f.units && f.units.length === 1) {
+            // Only one possible unit — show it, don't make them pick it
+            html += `<span class="s1-ds-unitfixed">${f.units[0]}</span>`;
+          } else if (f.units && f.units.length) {
             html += `<select class="s1-ds-unit" onchange="s1DsSetUnit('${f.id}', this.value)">
               <option value=""${!cur.unit ? ' selected' : ''}>unit</option>`;
             f.units.forEach(u => {
@@ -4516,6 +4860,41 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
       s1DsRefreshStates(fieldId);
     }
 
+    // ── Table row handling ───────────────────────────────────
+    function s1DsTableAddRow(groupId) {
+      const g = s1DsGroupMap[groupId] && s1DsGroupMap[groupId].group;
+      if (!g || !g.table) return;
+      const rows = s1DsRows(g).slice();
+      const blank = {};
+      g.table.columns.forEach(c => { blank[c.key] = ''; });
+      rows.push(blank);
+      s1DsValues[g.table.fieldId] = { value: rows, unit: '' };
+      mrdSetDirty(true);
+      s1Render();
+    }
+
+    function s1DsTableRemoveRow(groupId, index) {
+      const g = s1DsGroupMap[groupId] && s1DsGroupMap[groupId].group;
+      if (!g || !g.table) return;
+      const rows = s1DsRows(g).slice();
+      rows.splice(index, 1);
+      s1DsValues[g.table.fieldId] = { value: rows, unit: '' };
+      mrdSetDirty(true);
+      s1Render();
+    }
+
+    // Typing in a cell must not re-render, or the field loses focus
+    function s1DsTableSet(groupId, index, key, value) {
+      const g = s1DsGroupMap[groupId] && s1DsGroupMap[groupId].group;
+      if (!g || !g.table) return;
+      const rows = s1DsRows(g).slice();
+      if (!rows[index]) return;
+      rows[index] = Object.assign({}, rows[index], { [key]: value });
+      s1DsValues[g.table.fieldId] = { value: rows, unit: '' };
+      mrdSetDirty(true);
+      s1DsRefreshStates(g.table.fieldId);
+    }
+
     // Update the green "filled" states without re-rendering the whole tree,
     // so typing in an input never loses focus or caret position.
     function s1DsRefreshStates(fieldId) {
@@ -4529,7 +4908,12 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
       if (groupEl) {
         groupEl.classList.toggle('s1-sel', s1DsGroupFilled(entry.group));
         const countEl = groupEl.querySelector('.s1-ds-count');
-        if (countEl) countEl.textContent = `${s1DsGroupProgress(entry.group)}/${entry.group.fields.length}`;
+        if (countEl) {
+          const n = s1DsGroupProgress(entry.group);
+          countEl.textContent = entry.group.table
+            ? `${n} ${n === 1 ? 'row' : 'rows'}`
+            : `${n}/${entry.group.fields.length}`;
+        }
       }
 
       const secEl = document.querySelector(`.s1-node-family[data-id="${entry.section.id}"]`);
@@ -4845,7 +5229,7 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
     });
 
   SPA_STATE.bodyBackgrounds.drum = document.body.style.backgroundImage;
-  window.mrdAnswer = mrdAnswer; window.mrdClear = mrdClear; window.mrdClose = mrdClose; window.mrdDownload = mrdDownload; window.mrdGoToStep1 = mrdGoToStep1; window.mrdOpenIcon = mrdOpenIcon; window.mrdPrev = mrdPrev; window.mrdS1Proceed = mrdS1Proceed; window.mrdScrollTabs = mrdScrollTabs; window.mrdSwitchTab = mrdSwitchTab; window.mrdTriggerExport = mrdTriggerExport; window.s1ClickSection = s1ClickSection; window.s1ClickGroup = s1ClickGroup; window.s1DsSet = s1DsSet; window.s1DsSetUnit = s1DsSetUnit; window.s1DsToggleMulti = s1DsToggleMulti; window.s1ComingSoon = s1ComingSoon; window.s1SelectDiv = s1SelectDiv; window.s1ShowDivision = s1ShowDivision; window.s1WinRestore = s1WinRestore; window.s1WinToggle = s1WinToggle; window.s1CreateRevision = s1CreateRevision; window.s1ProceedToBuild = s1ProceedToBuild; window.s1BackToDetails = s1BackToDetails; window.mrdSaveNow = mrdSaveNow; window.mrdApplyImportedWorkbook = mrdApplyImportedWorkbook;
+  window.mrdAnswer = mrdAnswer; window.mrdClear = mrdClear; window.mrdClose = mrdClose; window.mrdDownload = mrdDownload; window.mrdGoToStep1 = mrdGoToStep1; window.mrdOpenIcon = mrdOpenIcon; window.mrdPrev = mrdPrev; window.mrdS1Proceed = mrdS1Proceed; window.mrdScrollTabs = mrdScrollTabs; window.mrdSwitchTab = mrdSwitchTab; window.mrdTriggerExport = mrdTriggerExport; window.s1ClickSection = s1ClickSection; window.s1ClickGroup = s1ClickGroup; window.s1DsSet = s1DsSet; window.s1DsSetUnit = s1DsSetUnit; window.s1DsToggleMulti = s1DsToggleMulti; window.s1DsTableAddRow = s1DsTableAddRow; window.s1DsTableRemoveRow = s1DsTableRemoveRow; window.s1DsTableSet = s1DsTableSet; window.s1ComingSoon = s1ComingSoon; window.s1SelectDiv = s1SelectDiv; window.s1ShowDivision = s1ShowDivision; window.s1WinRestore = s1WinRestore; window.s1WinToggle = s1WinToggle; window.s1CreateRevision = s1CreateRevision; window.s1ProceedToBuild = s1ProceedToBuild; window.s1BackToDetails = s1BackToDetails; window.mrdSaveNow = mrdSaveNow; window.mrdApplyImportedWorkbook = mrdApplyImportedWorkbook;
 }
 
 initMainView();
