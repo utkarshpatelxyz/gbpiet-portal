@@ -1141,6 +1141,10 @@
         display: block;
         white-space: normal;
         cursor: default;
+        /* The panel sits inside the pannable canvas, which disables
+           selection — re-enable it so fields behave like normal inputs. */
+        user-select: text;
+        -webkit-user-select: text;
         background: rgba(255,255,255,0.92);
         border: 1px solid rgba(0,0,0,0.09);
         border-radius: 13px;
@@ -1199,6 +1203,8 @@
         border-color: rgba(0,0,0,0.30);
         box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
       }
+      input.s1-ds-inp  { cursor: text; user-select: text; -webkit-user-select: text; }
+      select.s1-ds-inp { cursor: pointer; }
       .s1-ds-filled .s1-ds-inp {
         border-color: rgba(22,163,74,0.40);
         background: rgba(34,197,94,0.07);
@@ -4768,9 +4774,15 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
       // ── Drag-to-pan ──────────────────────────────────────
       let isPanning = false, startX, startY, scrollL, scrollT;
 
+      // Never pan from inside the datasheet input panel — preventDefault
+      // there would stop inputs taking focus and selects from opening.
+      const isInteractive = (target) =>
+        !!(target && target.closest && target.closest('.s1-ds-panel, input, select, textarea, label'));
+
       area.addEventListener('mousedown', e => {
         // Only pan on left-button drag, not on node clicks
         if (e.button !== 0) return;
+        if (isInteractive(e.target)) return;
         isPanning = true;
         startX  = e.clientX;
         startY  = e.clientY;
@@ -4799,6 +4811,7 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
 
       // Touch support (mobile)
       area.addEventListener('touchstart', e => {
+        if (isInteractive(e.target)) { isPanning = false; return; }
         const t = e.touches[0];
         isPanning = true;
         startX  = t.clientX;
