@@ -195,11 +195,20 @@
 
 
         :root {
-            --bg-periwinkle: #7B9FE0; --bg-royal: #4A6CF7; --bg-violet: #7C3AED;
-            --bg-magenta: #C026D3; --bg-pink: #EC4899; --bg-coral: #FF6B6B;
-            --text-dark: rgba(20, 20, 35, 0.9);
+            /* Técnicas Reunidas ambient palette — cool steel-blue / turquoise */
+            --bg-periwinkle: #8FB3C8; --bg-royal: #5B8FB0; --bg-violet: #4C7A9B;
+            --bg-magenta: #6FBECB; --bg-pink: #9CC6D6; --bg-coral: #7FA8C4;
+            --text-dark: rgba(24, 42, 60, 0.92);
             --icon-base: 96px;
             --mac-ease: cubic-bezier(0.25, 1, 0.5, 1);
+
+            /* TR brand tokens (used by the tr-theme override sheet) */
+            --tr-teal: #45C0CE;      --tr-teal-2: #34A6B6;   --tr-teal-3: #2A93A2;
+            --tr-steel: #5B7C9D;     --tr-steel-2: #4A6A88;
+            --tr-navy: #22415F;      --tr-navy-2: #16293D;
+            --tr-ink: #33434F;       --tr-bg: #EDF0F3;
+            --tr-teal-grad: linear-gradient(135deg, #4FC7D5, #2F97AA);
+            --tr-navy-grad: linear-gradient(145deg, #2E5171, #16283C);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
@@ -2020,6 +2029,217 @@
     width: 100vw;
     height: 100vh;
   }
+
+  /* ═══════════════════════════════════════════════════════════════
+     TÉCNICAS REUNIDAS THEME OVERRIDE
+     Purely visual. Matches existing selectors/IDs; changes no markup,
+     no IDs and no JavaScript. The vessel illustration SVG is left
+     untouched so it keeps its realistic steel shading.
+  ═══════════════════════════════════════════════════════════════ */
+
+  /* ---- Loader ---- */
+  #meridian-loader { background: radial-gradient(120% 120% at 50% 0%, #1B3550 0%, #10233A 55%, #0A1622 100%) !important; }
+  .loader-letter { text-shadow: 0 0 40px rgba(69,192,206,0.55) !important; }
+  .loader-progress-fill {
+    background: var(--tr-teal-grad) !important;
+    box-shadow: 0 0 8px rgba(69,192,206,0.75) !important;
+  }
+  .loader-top-line {
+    background: linear-gradient(90deg, transparent, var(--tr-steel), var(--tr-teal), var(--tr-steel), transparent) !important;
+  }
+  .loader-tagline, .loader-progress-pct { color: #A9C6D4 !important; }
+
+  /* ---- Top chrome / wordmarks ---- */
+  .top-nav-bar {
+    background: rgba(255,255,255,0.72) !important;
+    border-bottom: 1px solid rgba(34,65,95,0.10) !important;
+  }
+  .logo, .home-logo, .app-logo { color: var(--tr-navy) !important; }
+
+  /* ---- Home dock screen ---- */
+  .hero { color: var(--tr-navy) !important; }
+  .tagline, .t-fixed { color: var(--tr-steel) !important; }
+  .t-dyn { color: var(--tr-teal-3) !important; }
+  .cursor { background: var(--tr-teal) !important; }
+  .dock {
+    background: rgba(255,255,255,0.55) !important;
+    border: 1px solid rgba(34,65,95,0.10) !important;
+  }
+  .tooltip { background: var(--tr-navy) !important; }
+  .tooltip::after { border-top-color: var(--tr-navy) !important; }
+
+  /* ---- Suites (module) view ---- */
+  .section-title { color: #fff !important; }
+  .card-suite-label { color: #fff !important; }
+  .card-description { color: var(--tr-ink) !important; }
+  .nav-btn {
+    background: rgba(255,255,255,0.9) !important;
+    border: 1px solid rgba(34,65,95,0.18) !important;
+    color: var(--tr-steel) !important;
+  }
+  .nav-btn:hover { background: var(--tr-teal) !important; color: #fff !important; border-color: transparent !important; }
+  .nav-dot.active { background: var(--tr-teal) !important; }
+
+  /* ---- Step 1: ASME strip + division pills ---- */
+  .s1-heading { color: var(--tr-navy) !important; }
+  .s1-asme-label { color: var(--tr-steel) !important; }
+  .s1-div-pill.s1-active {
+    background: var(--tr-navy) !important;
+    color: #fff !important;
+    border-color: transparent !important;
+  }
+  .s1-div-pill:hover:not(.s1-cs) { background: rgba(34,65,95,0.08) !important; color: var(--tr-navy) !important; }
+
+  /* ---- Primary CTAs → TR turquoise pill ---- */
+  .s1-start-btn,
+  .s1-proceed-btn,
+  #mrd-save-btn:not(:disabled),
+  #drum-vertical-btn,
+  #drum-new-btn,
+  #drum-excel-import-btn,
+  #mrd-unsaved-save-btn,
+  #mrd-export-btn {
+    background: var(--tr-teal-grad) !important;
+    color: #fff !important;
+    border: none !important;
+    box-shadow: 0 4px 14px rgba(47,151,170,0.32) !important;
+  }
+  .s1-start-btn:hover,
+  .s1-proceed-btn:hover,
+  #mrd-save-btn:not(:disabled):hover,
+  #drum-vertical-btn:hover,
+  #drum-new-btn:hover,
+  #drum-excel-import-btn:hover,
+  #mrd-unsaved-save-btn:hover {
+    filter: brightness(1.05);
+    box-shadow: 0 6px 20px rgba(47,151,170,0.42) !important;
+    transform: translateY(-1px);
+  }
+
+  /* ---- Secondary / navy surfaces ---- */
+  .s1-rev-btn, .s1-ds-addrow, .s1-ds-panel-title { }
+  .s1-rev-btn, .s1-ds-addrow {
+    background: var(--tr-navy) !important;
+    color: #fff !important;
+  }
+  .s1-rev-btn:hover, .s1-ds-addrow:hover { background: var(--tr-navy-2) !important; }
+  .s1-back-btn { color: var(--tr-steel) !important; }
+  .s1-back-btn:hover { color: var(--tr-navy) !important; }
+  #mrd-back-to-step1:hover { color: var(--tr-navy) !important; }
+  #mrd-exit-btn:hover { background: rgba(69,192,206,0.15) !important; color: var(--tr-teal-3) !important; border-color: rgba(69,192,206,0.4) !important; }
+
+  /* ---- Step 1 tree: structural selection tint → TR teal ---- */
+  .s1-node-root { background: var(--tr-navy) !important; box-shadow: 0 3px 12px rgba(34,65,95,0.24) !important; }
+  .s1-node-root:hover { background: var(--tr-navy) !important; }
+  .s1-node-l1.s1-sel,
+  .s1-node-l2.s1-sel,
+  .s1-node-l3.s1-sel {
+    background: rgba(69,192,206,0.14) !important;
+    border-color: rgba(52,166,182,0.42) !important;
+    color: var(--tr-navy) !important;
+  }
+  .s1-node-l1.s1-sel.s1-open,
+  .s1-node-l2.s1-sel.s1-open {
+    background: rgba(69,192,206,0.22) !important;
+    border-color: rgba(52,166,182,0.5) !important;
+    color: var(--tr-navy) !important;
+  }
+  .s1-node-l1.s1-sel:hover, .s1-node-l1.s1-fixed.s1-sel:hover,
+  .s1-node-l2.s1-sel:hover, .s1-node-l3.s1-sel:hover {
+    background: rgba(69,192,206,0.24) !important;
+    border-color: rgba(52,166,182,0.55) !important;
+  }
+  .s1-node.s1-sel .s1-chk, .s1-node.s1-open .s1-chk { background: var(--tr-navy) !important; }
+  .s1-node-l2.s1-locked .s1-chk { background: var(--tr-navy) !important; }
+  .s1-node-family .s1-family-icon,
+  .s1-node-icon { color: var(--tr-steel); }
+
+  /* ---- Datasheet input panel ---- */
+  .s1-ds-panel-title { color: var(--tr-navy) !important; }
+  .s1-ds-inp:focus { border-color: var(--tr-teal-2) !important; box-shadow: 0 0 0 3px rgba(69,192,206,0.15) !important; }
+  .s1-ds-filled .s1-ds-inp { border-color: rgba(52,166,182,0.42) !important; background: rgba(69,192,206,0.07) !important; }
+  .s1-ds-filled .s1-ds-lbl { color: var(--tr-teal-3) !important; }
+  .s1-ds-count { color: var(--tr-steel) !important; }
+  .s1-node-l2.s1-sel .s1-ds-count { color: var(--tr-teal-3) !important; background: rgba(69,192,206,0.18) !important; }
+  .s1-ds-check.s1-on { background: rgba(69,192,206,0.12) !important; border-color: rgba(52,166,182,0.35) !important; color: var(--tr-navy) !important; }
+  .s1-ds-check input { accent-color: var(--tr-teal-2) !important; }
+
+  /* Active-revision badge → TR teal wash */
+  .s1-active-revision {
+    background: rgba(69,192,206,0.10) !important;
+    border: 1px solid rgba(69,192,206,0.28) !important;
+    color: var(--tr-navy) !important;
+  }
+  .s1-active-revision .s1-rev-dot { background: var(--tr-teal-2) !important; }
+
+  /* Generic focus + fields */
+  .s1-inp:focus { border-color: var(--tr-teal-2) !important; box-shadow: 0 0 0 3px rgba(69,192,206,0.14) !important; }
+
+  /* ---- Step 2 checklist ---- */
+  .mrd-tab.active { color: var(--tr-navy) !important; border-bottom-color: var(--tr-teal) !important; }
+  .mrd-progress-fill, #mrd-prog-fill { background: var(--tr-teal-grad) !important; }
+  /* Unselected action buttons → TR navy; selected keep their traffic-light
+     status colours (grey = N/A, amber = Pending, green = Reviewed). */
+  .mrd-action-btn { background: var(--tr-navy) !important; box-shadow: 0 2px 8px rgba(34,65,95,0.3) !important; }
+  .mrd-action-btn:hover { background: var(--tr-navy-2) !important; box-shadow: 0 4px 14px rgba(34,65,95,0.4) !important; }
+  .mrd-action-btn.selected-na       { background:#6b7280 !important; }
+  .mrd-action-btn.selected-pending  { background:#E8961E !important; }
+  .mrd-action-btn.selected-reviewed { background:#1F9D6B !important; }
+  .mrd-status-chip.chip-reviewed { }
+  #mrd-back-to-step1 { border-color: rgba(34,65,95,0.15) !important; color: var(--tr-navy) !important; }
+
+  /* ---- Modals: gentle fade-in entrance ---- */
+  #drum-modal, #mrd-unsaved-modal { animation: trModalFade 0.24s ease both; }
+  #drum-modal > div, #mrd-unsaved-modal > div { animation: trModalPop 0.28s var(--mac-ease) both; }
+  @keyframes trModalFade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes trModalPop  { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: none; } }
+
+  /* Smooth, consistent interaction transitions across controls */
+  .s1-inp, .s1-ds-inp, .s1-ds-unit, .mrd-input,
+  .s1-node, .s1-div-pill, .mrd-tab, .mrd-action-btn,
+  .nav-btn, .dock-item, .suite-card {
+    transition: background 0.18s ease, border-color 0.18s ease,
+                box-shadow 0.2s ease, color 0.18s ease, transform 0.16s ease;
+  }
+
+  /* ---- Drum workspace backdrop: replace stock wallpaper with a
+         cool TR steel-blue "desktop" so the white window reads on-brand.
+         Painted on the view container so it covers the body wallpaper
+         set by JS, without touching that JS. ---- */
+  [data-view="drum"] {
+    background: linear-gradient(160deg, #7B98B2 0%, #5E7C97 42%, #48627C 100%) !important;
+    background-attachment: fixed !important;
+  }
+  [data-view="drum"] .top-nav-bar {
+    background: rgba(26,44,62,0.30) !important;
+    border-bottom: 1px solid rgba(255,255,255,0.14) !important;
+  }
+  [data-view="drum"] .logo { color: #fff !important; }
+
+  /* ---- Cohesive TR ramp for the home dock icons ---- */
+  .icon-drum    { background: linear-gradient(145deg,#2E5171,#16283C) !important; }
+  .icon-column  { background: linear-gradient(145deg,#5B7C9D,#3E5A76) !important; }
+  .icon-reactor { background: linear-gradient(145deg,#4FC7D5,#2F97AA) !important; }
+  .icon-tank    { background: linear-gradient(145deg,#3E8DA6,#256C82) !important; }
+  .icon-sphere  { background: linear-gradient(145deg,#6E93B4,#496A88) !important; }
+
+  /* ---- Cohesive TR ramp for the Step-2 section icons ----
+         Kept distinct shade-by-shade so sections stay recognisable. ---- */
+  #mrd-cell-0  .mrd-icon-square { background: linear-gradient(135deg,#2E5171,#16283C) !important; }
+  #mrd-cell-1  .mrd-icon-square { background: linear-gradient(135deg,#5B7C9D,#3E5A76) !important; }
+  #mrd-cell-2  .mrd-icon-square { background: linear-gradient(135deg,#4FC7D5,#2F97AA) !important; }
+  #mrd-cell-3  .mrd-icon-square { background: linear-gradient(135deg,#3E8DA6,#256C82) !important; }
+  #mrd-cell-4  .mrd-icon-square { background: linear-gradient(135deg,#42648A,#2A4867) !important; }
+  #mrd-cell-5  .mrd-icon-square { background: linear-gradient(135deg,#6E93B4,#496A88) !important; }
+  #mrd-cell-6  .mrd-icon-square { background: linear-gradient(135deg,#2E7C8E,#1C5A6B) !important; }
+  #mrd-cell-7  .mrd-icon-square { background: linear-gradient(135deg,#54B7C6,#328FA1) !important; }
+  #mrd-cell-8  .mrd-icon-square { background: linear-gradient(135deg,#3A5A79,#22405F) !important; }
+  #mrd-cell-9  .mrd-icon-square { background: linear-gradient(135deg,#5F86A6,#3F6280) !important; }
+  #mrd-cell-10 .mrd-icon-square { background: linear-gradient(135deg,#47A9BB,#2B8497) !important; }
+  #mrd-cell-11 .mrd-icon-square { background: linear-gradient(135deg,#2E5171,#16283C) !important; }
+
+  /* Exports panel folder glyph + recents dot → TR */
+  .mrd-folder-icon, .mrd-exports-folder { background: var(--tr-teal-grad) !important; }
   </style>
   <script>
 /*! ExcelJS 19-10-2023 */
