@@ -209,6 +209,7 @@
             --tr-ink: #33434F;       --tr-bg: #EDF0F3;
             --tr-teal-grad: linear-gradient(135deg, #4FC7D5, #2F97AA);
             --tr-navy-grad: linear-gradient(145deg, #2E5171, #16283C);
+            --tr-font: 'Montserrat', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
@@ -2049,12 +2050,40 @@
   }
   .loader-tagline, .loader-progress-pct { color: #A9C6D4 !important; }
 
-  /* ---- Top chrome / wordmarks ---- */
-  .top-nav-bar {
-    background: rgba(255,255,255,0.72) !important;
-    border-bottom: 1px solid rgba(34,65,95,0.10) !important;
+  /* ---- Typography: Técnicas Reunidas geometric sans ---- */
+  body, button, input, select, textarea, div, span, label,
+  h1, h2, h3, h4, p, a, li,
+  .loader-letter, .loader-tagline, .hero, .tagline, .section-title,
+  .logo, .home-logo, .app-logo, .card-suite-label, .card-description {
+    font-family: var(--tr-font) !important;
   }
-  .logo, .home-logo, .app-logo { color: var(--tr-navy) !important; }
+
+  /* ---- Light "paper" ground with a whisper of blue (keep it white-ish) ---- */
+  body { background-color: #F5F8FB !important; }
+  .bg-overlay {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: linear-gradient(160deg, #FAFCFE 0%, #EDF3F8 55%, #E3ECF4 100%) !important;
+  }
+  [data-view="main"],
+  [data-view="drum"] {
+    background: linear-gradient(165deg, #FAFCFE 0%, #EEF3F8 55%, #E4ECF3 100%) !important;
+    background-attachment: fixed !important;
+  }
+
+  /* ---- Clean white TR top bar (like the corporate site) ---- */
+  .top-nav-bar {
+    background: rgba(255,255,255,0.94) !important;
+    border-bottom: 1px solid rgba(34,65,95,0.12) !important;
+    box-shadow: 0 1px 8px rgba(34,65,95,0.05) !important;
+    -webkit-backdrop-filter: saturate(1.4) blur(14px) !important;
+    backdrop-filter: saturate(1.4) blur(14px) !important;
+  }
+  .logo, .home-logo, .app-logo {
+    color: var(--tr-navy) !important;
+    letter-spacing: 0.02em !important;
+    font-weight: 800 !important;
+  }
 
   /* ---- Home dock screen ---- */
   .hero { color: var(--tr-navy) !important; }
@@ -2062,14 +2091,18 @@
   .t-dyn { color: var(--tr-teal-3) !important; }
   .cursor { background: var(--tr-teal) !important; }
   .dock {
-    background: rgba(255,255,255,0.55) !important;
+    background: rgba(255,255,255,0.62) !important;
     border: 1px solid rgba(34,65,95,0.10) !important;
   }
   .tooltip { background: var(--tr-navy) !important; }
   .tooltip::after { border-top-color: var(--tr-navy) !important; }
 
-  /* ---- Suites (module) view ---- */
-  .section-title { color: #fff !important; }
+  /* ---- Suites (opening) view ---- */
+  .section-title {
+    color: var(--tr-navy) !important;
+    text-shadow: none !important;
+    font-weight: 700 !important;
+  }
   .card-suite-label { color: #fff !important; }
   .card-description { color: var(--tr-ink) !important; }
   .nav-btn {
@@ -2125,8 +2158,38 @@
   .s1-rev-btn:hover, .s1-ds-addrow:hover { background: var(--tr-navy-2) !important; }
   .s1-back-btn { color: var(--tr-steel) !important; }
   .s1-back-btn:hover { color: var(--tr-navy) !important; }
-  #mrd-back-to-step1:hover { color: var(--tr-navy) !important; }
-  #mrd-exit-btn:hover { background: rgba(69,192,206,0.15) !important; color: var(--tr-teal-3) !important; border-color: rgba(69,192,206,0.4) !important; }
+
+  /* ---- Save / exit cluster — clearly visible on the white bar ---- */
+  #mrd-save-cluster { gap: 12px !important; }
+  #mrd-exit-btn {
+    background: #fff !important;
+    border: 1px solid rgba(34,65,95,0.22) !important;
+    color: var(--tr-navy) !important;
+    box-shadow: 0 1px 3px rgba(34,65,95,0.08) !important;
+  }
+  #mrd-exit-btn:hover { background: rgba(255,69,58,0.12) !important; color: #E5534B !important; border-color: rgba(229,83,75,0.45) !important; }
+  #mrd-save-btn {
+    background: var(--tr-teal-grad) !important;
+    color: #fff !important;
+    box-shadow: 0 3px 10px rgba(47,151,170,0.30) !important;
+  }
+  #mrd-save-btn:disabled {
+    background: #fff !important;
+    color: var(--tr-steel) !important;
+    border: 1px solid rgba(34,65,95,0.20) !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+  }
+  #mrd-save-status { color: var(--tr-steel) !important; font-weight: 600 !important; }
+  #mrd-save-status.dirty { color: #E8961E !important; }
+  /* "Edit Vessel" pill */
+  #mrd-back-to-step1 {
+    background: #fff !important;
+    border: 1px solid rgba(34,65,95,0.22) !important;
+    color: var(--tr-navy) !important;
+    box-shadow: 0 1px 3px rgba(34,65,95,0.08) !important;
+  }
+  #mrd-back-to-step1:hover { background: var(--tr-navy) !important; color: #fff !important; border-color: transparent !important; }
 
   /* ---- Step 1 tree: structural selection tint → TR teal ---- */
   .s1-node-root { background: var(--tr-navy) !important; box-shadow: 0 3px 12px rgba(34,65,95,0.24) !important; }
@@ -2185,8 +2248,6 @@
   .mrd-action-btn.selected-na       { background:#6b7280 !important; }
   .mrd-action-btn.selected-pending  { background:#E8961E !important; }
   .mrd-action-btn.selected-reviewed { background:#1F9D6B !important; }
-  .mrd-status-chip.chip-reviewed { }
-  #mrd-back-to-step1 { border-color: rgba(34,65,95,0.15) !important; color: var(--tr-navy) !important; }
 
   /* ---- Modals: gentle fade-in entrance ---- */
   #drum-modal, #mrd-unsaved-modal { animation: trModalFade 0.24s ease both; }
@@ -2202,44 +2263,9 @@
                 box-shadow 0.2s ease, color 0.18s ease, transform 0.16s ease;
   }
 
-  /* ---- Drum workspace backdrop: replace stock wallpaper with a
-         cool TR steel-blue "desktop" so the white window reads on-brand.
-         Painted on the view container so it covers the body wallpaper
-         set by JS, without touching that JS. ---- */
-  [data-view="drum"] {
-    background: linear-gradient(160deg, #7B98B2 0%, #5E7C97 42%, #48627C 100%) !important;
-    background-attachment: fixed !important;
-  }
-  [data-view="drum"] .top-nav-bar {
-    background: rgba(26,44,62,0.30) !important;
-    border-bottom: 1px solid rgba(255,255,255,0.14) !important;
-  }
-  [data-view="drum"] .logo { color: #fff !important; }
-
-  /* ---- Cohesive TR ramp for the home dock icons ---- */
-  .icon-drum    { background: linear-gradient(145deg,#2E5171,#16283C) !important; }
-  .icon-column  { background: linear-gradient(145deg,#5B7C9D,#3E5A76) !important; }
-  .icon-reactor { background: linear-gradient(145deg,#4FC7D5,#2F97AA) !important; }
-  .icon-tank    { background: linear-gradient(145deg,#3E8DA6,#256C82) !important; }
-  .icon-sphere  { background: linear-gradient(145deg,#6E93B4,#496A88) !important; }
-
-  /* ---- Cohesive TR ramp for the Step-2 section icons ----
-         Kept distinct shade-by-shade so sections stay recognisable. ---- */
-  #mrd-cell-0  .mrd-icon-square { background: linear-gradient(135deg,#2E5171,#16283C) !important; }
-  #mrd-cell-1  .mrd-icon-square { background: linear-gradient(135deg,#5B7C9D,#3E5A76) !important; }
-  #mrd-cell-2  .mrd-icon-square { background: linear-gradient(135deg,#4FC7D5,#2F97AA) !important; }
-  #mrd-cell-3  .mrd-icon-square { background: linear-gradient(135deg,#3E8DA6,#256C82) !important; }
-  #mrd-cell-4  .mrd-icon-square { background: linear-gradient(135deg,#42648A,#2A4867) !important; }
-  #mrd-cell-5  .mrd-icon-square { background: linear-gradient(135deg,#6E93B4,#496A88) !important; }
-  #mrd-cell-6  .mrd-icon-square { background: linear-gradient(135deg,#2E7C8E,#1C5A6B) !important; }
-  #mrd-cell-7  .mrd-icon-square { background: linear-gradient(135deg,#54B7C6,#328FA1) !important; }
-  #mrd-cell-8  .mrd-icon-square { background: linear-gradient(135deg,#3A5A79,#22405F) !important; }
-  #mrd-cell-9  .mrd-icon-square { background: linear-gradient(135deg,#5F86A6,#3F6280) !important; }
-  #mrd-cell-10 .mrd-icon-square { background: linear-gradient(135deg,#47A9BB,#2B8497) !important; }
-  #mrd-cell-11 .mrd-icon-square { background: linear-gradient(135deg,#2E5171,#16283C) !important; }
-
-  /* Exports panel folder glyph + recents dot → TR */
-  .mrd-folder-icon, .mrd-exports-folder { background: var(--tr-teal-grad) !important; }
+  /* NOTE: the home dock icons and the Step-2 section icons keep their
+     original vibrant colours — they read as lively product iconography,
+     not chrome, and are intentionally left untouched. */
   </style>
   <script>
 /*! ExcelJS 19-10-2023 */
@@ -2288,6 +2314,9 @@ https://github.com/nodeca/pako/blob/main/LICENSE
  */function n(e){return e>=65&&e<=90||95===e||e>=97&&e<=122||e>=192&&e<=214||e>=216&&e<=246||e>=248&&e<=767||e>=880&&e<=893||e>=895&&e<=8191||e>=8204&&e<=8205||e>=8304&&e<=8591||e>=11264&&e<=12271||e>=12289&&e<=55295||e>=63744&&e<=64975||e>=65008&&e<=65533||e>=65536&&e<=983039}Object.defineProperty(r,"__esModule",{value:!0}),r.NC_NAME_START_CHAR="A-Z_a-z\xc0-\xd6\xd8-\xf6\xf8-\u02ff\u0370-\u037d\u037f-\u1fff\u200c-\u200d\u2070-\u218f\u2c00-\u2fef\u3001-\ud7ff\uf900-\ufdcf\ufdf0-\ufffd\ud800\udc00-\udb7f\udfff",r.NC_NAME_CHAR="-"+r.NC_NAME_START_CHAR+".0-9\xb7\u0300-\u036f\u203f-\u2040",r.NC_NAME_START_CHAR_RE=new RegExp("^["+r.NC_NAME_START_CHAR+"]$","u"),r.NC_NAME_CHAR_RE=new RegExp("^["+r.NC_NAME_CHAR+"]$","u"),r.NC_NAME_RE=new RegExp("^["+r.NC_NAME_START_CHAR+"]["+r.NC_NAME_CHAR+"]*$","u"),r.isNCNameStartChar=n,r.isNCNameChar=function(e){return n(e)||45===e||46===e||e>=48&&e<=57||183===e||e>=768&&e<=879||e>=8255&&e<=8256}},{}]},{},[15])(15)}));
 //# sourceMappingURL=exceljs.min.js.map
   </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
   <div data-view="main" style="display:block; position:relative; width:100vw; height:100vh; isolation:isolate;">
