@@ -5522,10 +5522,15 @@ window.addEventListener('hashchange', function() {
     #mrd-app-back:hover { background: #22415F; color: #fff; border-color: transparent; }
     #mrd-app-frame { flex: 1; width: 100%; border: none; background: #fff; }
     /* TR monogram mark */
+    /* Técnicas Reunidas logo — single swappable asset.
+       Set --tr-logo (a url(...) to the official SVG/PNG) and
+       --tr-logo-display:inline-block on :root to enable it everywhere.
+       Until a real asset is provided the mark is hidden so the nav
+       shows a clean "Meridian" wordmark rather than an inexact mark. */
     .mrd-tr-logo {
-      display: inline-block; width: 30px; height: 26px; flex-shrink: 0;
-      background: no-repeat center/contain;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 100'%3E%3Cg fill='%235B7C9D'%3E%3Cpath d='M2 20 h44 v22 H24 v58 H2 Z M24 0 h22 v20 H24 Z'/%3E%3Cpath d='M62 40 h22 v40 a20 20 0 0 1-40 0 v-4 h22 v4 a4 4 0 0 0 8 0 Z'/%3E%3Cpath d='M74 20 h44 v22 H96 v40 a18 18 0 0 1-34 8 h20 a4 4 0 0 0 8-4 V42 H74 Z'/%3E%3C/g%3E%3C/svg%3E");
+      display: var(--tr-logo-display, none);
+      width: 30px; height: 26px; flex-shrink: 0;
+      background: var(--tr-logo, none) no-repeat center/contain;
     }
     /* Project landing */
     #mrd-project-landing { flex: 1; display: flex; align-items: center; justify-content: center; }
