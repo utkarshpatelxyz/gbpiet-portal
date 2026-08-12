@@ -2,7 +2,7 @@ import base64, re, io
 
 UP = '/root/.claude/uploads/706cbad2-49b2-5620-866d-c844ed50268d/'
 FILES = {
-  'ceyhan': UP + 'a679ce83-CEYHAN_PDHPP_Equipment_Explorer.html',
+  'ceyhan': UP + '5e2654dd-CEYHAN_PDHPP_Equipment_Explorer_Updated.html',
   'p6':     UP + 'f7a79a65-P6PLAN4e_dashboard.html',
   'vendor': UP + '3f80eb12-Dashboard_VENDORdocV2_2.html',
 }
