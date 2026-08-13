@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>API 650 Storage Tank — GAD Review Checklist</title>
+
+<!-- ── External libraries (CDN, no build step) ───────────────────────────── -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- Tweening library (UMD → global TWEEN) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/21.0.0/tween.umd.js"></script>
+
+<!-- Three.js is loaded as an ES module via import map (see bottom module script) -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   DESIGN TOKENS  —  Técnicas Reunidas palette, so this module can later drop
+   straight into Meridian without a restyle.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root{
+  --navy:#22415F;  --navy-d:#16293D;  --navy-l:#3A5F84;
+  --teal:#2F97AA;  --teal-l:#45C0CE;  --teal-xl:#E4F4F7;
+  --bg:#EEF3F8;    --surface:#FFFFFF; --surface-2:#F5F8FB;
+  --border:#DCE4EC;--border-2:#C6D3E0;
+  --text:#22415F;  --text-2:#5B7C9D;  --text-3:#93A7BC;
+  --ok:#2E9E6B;    --no:#D4574E;      --na:#8A9BAE;
+  --amber:#D9922E;
+  --font:'Montserrat','Segoe UI','Helvetica Neue',Arial,sans-serif;
+  --shadow-1:0 1px 3px rgba(34,65,95,.07);
+  --shadow-2:0 4px 18px rgba(34,65,95,.10);
+  --shadow-3:0 12px 40px rgba(34,65,95,.16);
+}
+
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0; font-family:var(--font); color:var(--text);
+  background:var(--bg); overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font-family:inherit;color:inherit;}
+
+/* ── App shell ──────────────────────────────────────────────────────────── */
+#app{display:flex; flex-direction:column; height:100vh;}
+
+/* ── Top bar ────────────────────────────────────────────────────────────── */
+#topbar{
+  flex:0 0 auto; display:flex; align-items:center; gap:18px;
+  padding:0 20px; height:58px; background:var(--surface);
+  border-bottom:1px solid var(--border); box-shadow:var(--shadow-1); z-index:30;
+}
+#topbar .brand{font-weight:800; font-size:15px; letter-spacing:.2px; white-space:nowrap;}
+#topbar .brand span{color:var(--teal);}
+#topbar .rule{width:1px;height:26px;background:var(--border);}
+#topbar .sub{font-size:11.5px;color:var(--text-2);font-weight:500;white-space:nowrap;}
+#topbar .spacer{flex:1;}
+
+.meta-fields{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.meta-fields label{display:flex;flex-direction:column;gap:2px;}
+.meta-fields label>span{font-size:8.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text-3);}
+.meta-fields input{
+  width:112px;padding:4px 8px;font-size:11.5px;font-weight:600;
+  border:1px solid var(--border);border-radius:5px;background:var(--surface-2);
+}
+.meta-fields input:focus{outline:none;border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(47,151,170,.13);}
+
+/* ── Split layout ───────────────────────────────────────────────────────── */
+#split{flex:1 1 auto; display:flex; min-height:0;}
+#viewport{
+  position:relative; flex:1 1 auto; min-width:0;
+  background:linear-gradient(170deg,#F7FAFC 0%,#E3ECF4 55%,#D3E0EC 100%);
+}
+#viewport canvas{display:block;width:100%;height:100%;}
+
+/* Viewport overlays */
+#vp-title{
+  position:absolute;top:16px;left:18px;pointer-events:none;
+  font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--text-3);
+}
+#vp-zone{
+  position:absolute;top:36px;left:18px;pointer-events:none;
+  font-size:20px;font-weight:800;color:var(--navy);letter-spacing:-.2px;
+  max-width:60%;line-height:1.15;
+}
+#vp-ref{position:absolute;top:62px;left:18px;pointer-events:none;font-size:11px;font-weight:600;color:var(--teal);}
+
+#vp-tools{position:absolute;top:14px;right:14px;display:flex;gap:6px;}
+.vp-btn{
+  padding:6px 11px;font-size:11px;font-weight:700;border-radius:6px;cursor:pointer;
+  background:rgba(255,255,255,.92);border:1px solid var(--border);color:var(--navy);
+  backdrop-filter:blur(6px);transition:all .16s ease;
+}
+.vp-btn:hover{border-color:var(--teal);color:var(--teal);transform:translateY(-1px);box-shadow:var(--shadow-1);}
+.vp-btn.on{background:var(--teal);border-color:var(--teal);color:#fff;}
+
+#vp-legend{
+  position:absolute;left:18px;bottom:16px;display:flex;flex-wrap:wrap;gap:5px;max-width:min(560px,72%);
+}
+.lg{
+  display:flex;align-items:center;gap:5px;padding:3px 8px;border-radius:20px;cursor:pointer;
+  background:rgba(255,255,255,.88);border:1px solid var(--border);
+  font-size:9.5px;font-weight:700;letter-spacing:.2px;transition:all .15s ease;
+}
+.lg:hover{transform:translateY(-1px);box-shadow:var(--shadow-1);border-color:var(--border-2);}
+.lg.on{background:var(--navy);border-color:var(--navy);color:#fff;}
+.lg i{width:9px;height:9px;border-radius:2.5px;display:block;flex:0 0 auto;}
+
+#vp-hint{
+  position:absolute;right:16px;bottom:16px;pointer-events:none;
+  font-size:10px;font-weight:600;color:var(--text-3);text-align:right;line-height:1.5;
+}
+
+/* Loading veil */
+#veil{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;background:var(--bg);z-index:20;transition:opacity .5s ease;
+}
+#veil.hide{opacity:0;pointer-events:none;}
+.spinner{
+  width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--teal);
+  border-radius:50%;animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+#veil p{margin:0;font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-3);}
+#veil .err{color:var(--no);letter-spacing:0;text-transform:none;font-size:12px;max-width:340px;text-align:center;line-height:1.6;}
+
+/* ── Right panel ────────────────────────────────────────────────────────── */
+#panel{
+  flex:0 0 clamp(390px,36%,560px); display:flex; flex-direction:column;
+  background:var(--surface); border-left:1px solid var(--border); min-height:0;
+}
+
+#progress-wrap{flex:0 0 auto;padding:14px 18px 12px;border-bottom:1px solid var(--border);background:var(--surface);}
+.pg-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px;}
+.pg-head h2{margin:0;font-size:12px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;color:var(--navy);}
+.pg-head .pct{font-size:19px;font-weight:800;color:var(--teal);letter-spacing:-.5px;}
+.pg-track{height:7px;border-radius:20px;background:var(--surface-2);border:1px solid var(--border);overflow:hidden;display:flex;}
+.pg-seg{height:100%;transition:width .45s cubic-bezier(.4,0,.2,1);}
+.pg-seg.ok{background:linear-gradient(90deg,#3FB57F,#2E9E6B);}
+.pg-seg.no{background:linear-gradient(90deg,#E07066,#D4574E);}
+.pg-seg.na{background:linear-gradient(90deg,#A3B2C2,#8A9BAE);}
+.pg-stats{display:flex;gap:12px;margin-top:8px;font-size:10px;font-weight:700;color:var(--text-2);flex-wrap:wrap;}
+.pg-stats i{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:4px;vertical-align:middle;}
+
+/* Filter bar */
+#filters{flex:0 0 auto;display:flex;gap:6px;padding:10px 18px;border-bottom:1px solid var(--border);background:var(--surface-2);align-items:center;}
+#search{
+  flex:1 1 auto;min-width:0;padding:6px 10px;font-size:12px;font-weight:500;
+  border:1px solid var(--border);border-radius:6px;background:#fff;
+}
+#search:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(47,151,170,.13);}
+.chip{
+  padding:5px 10px;font-size:10px;font-weight:700;border-radius:20px;cursor:pointer;white-space:nowrap;
+  background:#fff;border:1px solid var(--border);color:var(--text-2);transition:all .15s ease;
+}
+.chip:hover{border-color:var(--border-2);color:var(--navy);}
+.chip.on{background:var(--navy);border-color:var(--navy);color:#fff;}
+
+/* Accordion */
+#list{flex:1 1 auto;overflow-y:auto;overscroll-behavior:contain;padding:10px 12px 6px;min-height:0;}
+#list::-webkit-scrollbar{width:9px;}
+#list::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:20px;border:2px solid var(--surface);}
+#list::-webkit-scrollbar-track{background:transparent;}
+
+.sec{margin-bottom:7px;border:1px solid var(--border);border-radius:9px;overflow:hidden;background:var(--surface);transition:box-shadow .2s ease,border-color .2s ease;}
+.sec.active{border-color:var(--teal);box-shadow:0 0 0 3px rgba(47,151,170,.11);}
+.sec.dim{opacity:.42;}
+
+.sec-head{
+  display:flex;align-items:center;gap:9px;padding:10px 12px;cursor:pointer;
+  background:var(--surface);transition:background .16s ease;user-select:none;
+}
+.sec-head:hover{background:var(--surface-2);}
+.sec-bar{width:4px;align-self:stretch;border-radius:3px;flex:0 0 auto;}
+.sec-txt{flex:1 1 auto;min-width:0;}
+.sec-name{font-size:12.5px;font-weight:800;letter-spacing:-.1px;line-height:1.25;}
+.sec-ref{font-size:9.5px;font-weight:700;color:var(--text-3);margin-top:2px;letter-spacing:.3px;}
+.sec-kpi{display:flex;align-items:center;gap:7px;flex:0 0 auto;}
+.sec-count{font-size:10px;font-weight:800;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);padding:2px 7px;border-radius:20px;white-space:nowrap;}
+.sec-ring{width:26px;height:26px;flex:0 0 auto;transform:rotate(-90deg);}
+.sec-ring circle{fill:none;stroke-width:3.4;}
+.sec-ring .bg{stroke:var(--border);}
+.sec-ring .fg{stroke:var(--teal);stroke-linecap:round;transition:stroke-dasharray .45s ease;}
+.caret{font-size:9px;color:var(--text-3);transition:transform .22s ease;flex:0 0 auto;}
+.sec.open .caret{transform:rotate(90deg);}
+
+.sec-body{display:none;border-top:1px solid var(--border);background:var(--surface-2);}
+.sec.open .sec-body{display:block;}
+
+.grp{padding:6px 12px 2px;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);}
+
+.item{padding:9px 12px;border-bottom:1px solid var(--border);background:var(--surface-2);transition:background .15s ease;}
+.item:last-child{border-bottom:none;}
+.item:hover{background:#fff;}
+.item.answered{background:#fff;}
+.item.hidden{display:none;}
+.item-top{display:flex;align-items:flex-start;gap:8px;}
+.item-label{flex:1 1 auto;min-width:0;font-size:11.5px;font-weight:600;line-height:1.4;}
+.item-key{display:block;font-size:9px;font-weight:600;color:var(--text-3);font-family:ui-monospace,'SF Mono',Menlo,monospace;margin-top:2px;word-break:break-all;}
+.tag{display:inline-block;font-size:8px;font-weight:800;letter-spacing:.5px;padding:1px 5px;border-radius:3px;margin-left:5px;vertical-align:1px;white-space:nowrap;}
+.tag.m{background:#FDECEA;color:#C0392B;}
+.tag.t{background:var(--teal-xl);color:var(--teal);}
+
+.item-meta{font-size:9.5px;color:var(--text-3);font-weight:600;margin-top:3px;line-height:1.5;}
+.item-meta b{color:var(--text-2);font-weight:700;}
+
+.tri{display:flex;gap:3px;flex:0 0 auto;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:2px;}
+.item.answered .tri{background:var(--surface-2);}
+.tri button{
+  border:none;background:transparent;cursor:pointer;border-radius:4px;
+  padding:3px 8px;font-size:9.5px;font-weight:800;letter-spacing:.3px;color:var(--text-3);
+  transition:all .14s ease;
+}
+.tri button:hover{color:var(--navy);background:#fff;}
+.tri button.on[data-v="yes"]{background:var(--ok);color:#fff;}
+.tri button.on[data-v="no"]{background:var(--no);color:#fff;}
+.tri button.on[data-v="na"]{background:var(--na);color:#fff;}
+
+.rmk{
+  width:100%;margin-top:6px;padding:5px 8px;font-size:10.5px;font-weight:500;
+  border:1px solid var(--border);border-radius:5px;background:#fff;
+}
+.rmk::placeholder{color:var(--text-3);font-weight:500;}
+.rmk:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(47,151,170,.12);}
+
+.empty{padding:26px 16px;text-align:center;font-size:11px;font-weight:600;color:var(--text-3);}
+
+/* Footer */
+#foot{flex:0 0 auto;display:flex;gap:8px;padding:11px 18px;border-top:1px solid var(--border);background:var(--surface);}
+.btn{
+  flex:1 1 auto;padding:10px 14px;font-size:11.5px;font-weight:800;letter-spacing:.4px;
+  border-radius:7px;cursor:pointer;border:1px solid transparent;transition:all .18s ease;
+}
+.btn-primary{background:linear-gradient(135deg,var(--teal-l),var(--teal));color:#fff;box-shadow:0 3px 12px rgba(47,151,170,.3);}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(47,151,170,.38);}
+.btn-ghost{flex:0 0 auto;background:#fff;border-color:var(--border);color:var(--text-2);}
+.btn-ghost:hover{border-color:var(--no);color:var(--no);}
+
+/* ── Print report ───────────────────────────────────────────────────────── */
+#report{display:none;}
+@media screen{ #report{display:none !important;} }
+
+@media print{
+  @page{size:A4 portrait;margin:13mm 12mm;}
+  html,body{height:auto;overflow:visible;background:#fff;}
+  #app{display:none !important;}
+  #report{display:block !important;font-size:9pt;color:#000;}
+
+  .rp-head{border-bottom:2.5px solid #22415F;padding-bottom:8px;margin-bottom:12px;}
+  .rp-head h1{margin:0 0 3px;font-size:15pt;font-weight:800;color:#22415F;letter-spacing:-.2px;}
+  .rp-head .rp-sub{font-size:8pt;font-weight:600;color:#5B7C9D;}
+
+  .rp-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:5px 14px;margin-bottom:12px;}
+  .rp-meta div{font-size:8pt;border-bottom:1px solid #DCE4EC;padding-bottom:2px;}
+  .rp-meta b{display:block;font-size:6.5pt;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:#93A7BC;}
+
+  .rp-sum{border:1px solid #DCE4EC;border-radius:4px;padding:8px 10px;margin-bottom:14px;background:#F5F8FB;}
+  .rp-sum h3{margin:0 0 6px;font-size:8pt;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#22415F;}
+  .rp-sum table{width:100%;border-collapse:collapse;font-size:7.5pt;}
+  .rp-sum td{padding:1.5px 0;}
+  .rp-sum td:not(:first-child){text-align:right;width:52px;}
+  .rp-sum tr.tot{font-weight:800;border-top:1px solid #C6D3E0;}
+
+  .rp-zone{margin-bottom:12px;break-inside:auto;}
+  .rp-zone h2{
+    font-size:9pt;font-weight:800;color:#fff;background:#22415F;
+    padding:4px 8px;margin:0 0 5px;border-radius:3px;
+    break-after:avoid;page-break-after:avoid;
+  }
+  .rp-zone h2 span{float:right;font-weight:600;font-size:7.5pt;opacity:.85;}
+
+  table.rp-tbl{width:100%;border-collapse:collapse;font-size:7.5pt;}
+  table.rp-tbl th{
+    background:#EEF3F8;color:#22415F;font-size:6.5pt;font-weight:800;letter-spacing:.5px;
+    text-transform:uppercase;text-align:left;padding:3px 5px;border:1px solid #DCE4EC;
+  }
+  table.rp-tbl td{padding:3px 5px;border:1px solid #DCE4EC;vertical-align:top;}
+  table.rp-tbl tr{break-inside:avoid;page-break-inside:avoid;}
+  .c-n{width:22px;text-align:right;color:#93A7BC;}
+  .c-s{width:40px;text-align:center;font-weight:800;}
+  .c-r{width:32%;color:#5B7C9D;}
+  .s-yes{color:#2E9E6B;} .s-no{color:#D4574E;} .s-na{color:#8A9BAE;} .s-un{color:#C6D3E0;}
+  .rp-key{font-size:6.5pt;color:#93A7BC;font-family:ui-monospace,Menlo,monospace;display:block;}
+  .rp-mand{color:#C0392B;font-weight:800;}
+
+  .rp-foot{margin-top:16px;padding-top:8px;border-top:1px solid #DCE4EC;font-size:7pt;color:#93A7BC;}
+  .rp-sign{display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px;margin-top:22px;break-inside:avoid;}
+  .rp-sign div{border-top:1px solid #22415F;padding-top:3px;font-size:7pt;font-weight:700;color:#5B7C9D;}
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width:960px){
+  body{overflow:auto;}
+  #split{flex-direction:column;}
+  #viewport{flex:0 0 46vh;}
+  #panel{flex:1 1 auto;border-left:none;border-top:1px solid var(--border);}
+  #topbar{height:auto;padding:9px 14px;flex-wrap:wrap;gap:10px;}
+  .meta-fields input{width:92px;}
+}
+@media (max-width:620px){
+  #vp-legend{display:none;}
+  #vp-hint{display:none;}
+  .meta-fields{width:100%;}
+}
+</style>
+</head>
+
+<body>
+<div id="app">
+
+  <!-- ── Top bar ─────────────────────────────────────────────────────────── -->
+  <header id="topbar">
+    <div class="brand">GAD <span>Review</span></div>
+    <div class="rule"></div>
+    <div class="sub">API 650 Storage Tank<br>General Arrangement Drawing</div>
+    <div class="spacer"></div>
+    <div class="meta-fields">
+      <label><span>Project</span><input id="m-project" placeholder="—"></label>
+      <label><span>Tank Tag</span><input id="m-tag" placeholder="—"></label>
+      <label><span>Drawing No.</span><input id="m-dwg" placeholder="—"></label>
+      <label><span>Rev</span><input id="m-rev" style="width:52px" placeholder="—"></label>
+      <label><span>Reviewer</span><input id="m-rev-by" placeholder="—"></label>
+      <label><span>Date</span><input id="m-date" type="date"></label>
+    </div>
+  </header>
+
+  <!-- ── Split ───────────────────────────────────────────────────────────── -->
+  <div id="split">
+
+    <!-- 3D viewport -->
+    <section id="viewport">
+      <div id="vp-title">Physical zone</div>
+      <div id="vp-zone">Complete tank</div>
+      <div id="vp-ref">Select a zone to inspect</div>
+
+      <div id="vp-tools">
+        <button class="vp-btn" id="btn-reset" title="Frame the whole tank">Reset view</button>
+        <button class="vp-btn" id="btn-cut" title="Hide the shell to reveal internals">Cutaway</button>
+        <button class="vp-btn" id="btn-spin" title="Toggle turntable rotation">Auto-spin</button>
+      </div>
+
+      <div id="vp-legend"></div>
+      <div id="vp-hint">Click a tank part to jump to its checklist<br>Drag to orbit · scroll to zoom · right-drag to pan</div>
+
+      <div id="veil"><div class="spinner"></div><p>Building tank model</p></div>
+    </section>
+
+    <!-- Checklist panel -->
+    <aside id="panel">
+      <div id="progress-wrap">
+        <div class="pg-head">
+          <h2>Review progress</h2>
+          <div class="pct" id="pg-pct">0%</div>
+        </div>
+        <div class="pg-track">
+          <div class="pg-seg ok" id="pg-ok" style="width:0"></div>
+          <div class="pg-seg no" id="pg-no" style="width:0"></div>
+          <div class="pg-seg na" id="pg-na" style="width:0"></div>
+        </div>
+        <div class="pg-stats" id="pg-stats"></div>
+      </div>
+
+      <div id="filters">
+        <input id="search" type="search" placeholder="Search parameters…" autocomplete="off">
+        <button class="chip" id="f-mand" title="Show only mandatory parameters">Mandatory</button>
+        <button class="chip" id="f-open" title="Show only unanswered parameters">Open</button>
+      </div>
+
+      <div id="list"></div>
+
+      <div id="foot">
+        <button class="btn btn-primary" id="btn-report">Generate GAD Review Report</button>
+        <button class="btn btn-ghost" id="btn-clear" title="Clear every answer and remark">Clear</button>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- ── Printable report (built on demand) ─────────────────────────────────── -->
+<div id="report"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     DATA  —  eqp.tank sheet of Matriz_EQP_FINAL.xlsx, every sub-parameter
+     mapped onto the 8 physical zones + 4 transversal control groups defined
+     on page 1 of "pdf tank checklist.pdf".  Generated by tools/build_tank_data.py
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<script id="tank-data" type="application/json">__TANK_DATA__</script>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   PART A — CHECKLIST STATE, UI AND REPORTING  (plain ES6, no framework)
+   Runs immediately; does not depend on Three.js having loaded.
+   ═══════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  const DATA  = JSON.parse(document.getElementById('tank-data').textContent);
+  const ZONES = DATA.zones;
+  const STORE = 'gad-tank-review-v1';
+
+  /* Flat index: id → item, and id → zone id */
+  const ITEM = new Map(), ITEM_ZONE = new Map();
+  ZONES.forEach(z => z.items.forEach(it => { ITEM.set(it.id, it); ITEM_ZONE.set(it.id, z.id); }));
+  const TOTAL = ITEM.size;
+
+  /* ── Persisted state ──────────────────────────────────────────────────── */
+  const state = { answers: {}, meta: {} };
+  try {
+    const raw = localStorage.getItem(STORE);
+    if (raw) Object.assign(state, JSON.parse(raw));
+  } catch (e) { /* private mode / quota — run without persistence */ }
+
+  let saveTimer = null;
+  function save() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {}
+    }, 350);
+  }
+
+  /* ── Header metadata fields ───────────────────────────────────────────── */
+  const META = ['project', 'tag', 'dwg', 'rev', 'rev-by', 'date'];
+  META.forEach(k => {
+    const el = document.getElementById('m-' + k);
+    if (state.meta[k]) el.value = state.meta[k];
+    el.addEventListener('input', () => { state.meta[k] = el.value; save(); });
+  });
+  if (!state.meta.date) {
+    const d = new Date();
+    document.getElementById('m-date').value =
+      d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    state.meta.date = document.getElementById('m-date').value;
+  }
+
+  /* ── Filters ──────────────────────────────────────────────────────────── */
+  const filter = { q: '', mand: false, open: false };
+
+  function matches(it) {
+    if (filter.mand && !it.mand) return false;
+    if (filter.open && state.answers[it.id] && state.answers[it.id].v) return false;
+    if (filter.q) {
+      const hay = (it.label + ' ' + it.key + ' ' + it.table + ' ' + it.group).toLowerCase();
+      if (!hay.includes(filter.q)) return false;
+    }
+    return true;
+  }
+
+  /* ── Build the accordion shell (bodies render lazily on first open) ────── */
+  const listEl = document.getElementById('list');
+  const secEls = {};
+
+  ZONES.forEach(z => {
+    const sec = document.createElement('section');
+    sec.className = 'sec';
+    sec.dataset.zone = z.id;
+
+    sec.innerHTML =
+      '<div class="sec-head">' +
+        '<div class="sec-bar" style="background:' + z.color + '"></div>' +
+        '<div class="sec-txt">' +
+          '<div class="sec-name">' + esc(z.name) +
+            (z.kind === 'transversal' ? '<span class="tag t">TRANSVERSAL</span>' : '') +
+          '</div>' +
+          '<div class="sec-ref">' + esc(z.ref) + '</div>' +
+        '</div>' +
+        '<div class="sec-kpi">' +
+          '<div class="sec-count"><b class="cnt-done">0</b>/<span class="cnt-tot">' + z.items.length + '</span></div>' +
+          '<svg class="sec-ring" viewBox="0 0 26 26">' +
+            '<circle class="bg" cx="13" cy="13" r="10.5"></circle>' +
+            '<circle class="fg" cx="13" cy="13" r="10.5" stroke-dasharray="0 66" stroke="' + z.color + '"></circle>' +
+          '</svg>' +
+          '<span class="caret">▶</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="sec-body"></div>';
+
+    sec.querySelector('.sec-head').addEventListener('click', () => toggleZone(z.id));
+    listEl.appendChild(sec);
+    secEls[z.id] = sec;
+  });
+
+  /* ── Render one zone's items ──────────────────────────────────────────── */
+  function renderBody(zid) {
+    const z = ZONES.find(x => x.id === zid);
+    const body = secEls[zid].querySelector('.sec-body');
+    let html = '', lastGroup = null, shown = 0;
+
+    z.items.forEach(it => {
+      if (!matches(it)) return;
+      shown++;
+      const grp = it.table === 'eqp.tank' ? (it.group || 'Tag-level') : it.table;
+      if (grp !== lastGroup) { html += '<div class="grp">' + esc(grp) + '</div>'; lastGroup = grp; }
+
+      const a = state.answers[it.id] || {};
+      const meta = [];
+      if (it.dtype)  meta.push('<b>Type</b> ' + esc(it.dtype));
+      if (it.constr && it.constr !== '-') meta.push('<b>Range</b> ' + esc(it.constr));
+      if (it.owner && it.owner.length) meta.push('<b>Owner</b> ' + esc(it.owner.join(', ')));
+      if (it.note) meta.push('<b>Note</b> ' + esc(it.note));
+
+      html +=
+        '<div class="item' + (a.v ? ' answered' : '') + '" data-id="' + it.id + '">' +
+          '<div class="item-top">' +
+            '<div class="item-label">' + esc(it.label) +
+              (it.mand ? '<span class="tag m">MANDATORY</span>' : '') +
+              '<span class="item-key">' + esc(it.key) + '</span>' +
+            '</div>' +
+            '<div class="tri">' +
+              btn(it.id, 'yes', 'Yes', a.v) + btn(it.id, 'no', 'No', a.v) + btn(it.id, 'na', 'N/A', a.v) +
+            '</div>' +
+          '</div>' +
+          (meta.length ? '<div class="item-meta">' + meta.join(' &nbsp;·&nbsp; ') + '</div>' : '') +
+          '<input class="rmk" data-id="' + it.id + '" placeholder="Remarks…" value="' + esc(a.r || '') + '">' +
+        '</div>';
+    });
+
+    body.innerHTML = shown ? html : '<div class="empty">No parameters match the current filter.</div>';
+    body.dataset.rendered = '1';
+  }
+
+  function btn(id, v, txt, cur) {
+    return '<button data-id="' + id + '" data-v="' + v + '"' + (cur === v ? ' class="on"' : '') + '>' + txt + '</button>';
+  }
+
+  /* ── Delegated events inside the list ─────────────────────────────────── */
+  listEl.addEventListener('click', e => {
+    const b = e.target.closest('.tri button');
+    if (!b) return;
+    const id = b.dataset.id, v = b.dataset.v;
+    const a = state.answers[id] || (state.answers[id] = {});
+    a.v = (a.v === v) ? null : v;             // clicking the active choice clears it
+    if (!a.v && !a.r) delete state.answers[id];
+
+    const row = b.closest('.item');
+    row.querySelectorAll('.tri button').forEach(x => x.classList.toggle('on', x.dataset.v === a.v));
+    row.classList.toggle('answered', !!a.v);
+
+    save(); refreshProgress();
+    if (filter.open && a.v) row.classList.add('hidden');
+  });
+
+  listEl.addEventListener('input', e => {
+    if (!e.target.classList.contains('rmk')) return;
+    const id = e.target.dataset.id;
+    const a = state.answers[id] || (state.answers[id] = {});
+    a.r = e.target.value;
+    if (!a.v && !a.r) delete state.answers[id];
+    save();
+  });
+
+  /* ── Zone open / close  (bi-directional hook lives here) ───────────────── */
+  let openZone = null;
+
+  function toggleZone(zid, opts) {
+    opts = opts || {};
+    if (openZone === zid && !opts.force) { closeZone(); return; }
+    openZone = zid;
+
+    ZONES.forEach(z => {
+      const el = secEls[z.id];
+      el.classList.toggle('open', z.id === zid);
+      el.classList.toggle('active', z.id === zid);
+    });
+
+    const body = secEls[zid].querySelector('.sec-body');
+    if (body.dataset.rendered !== '1') renderBody(zid);
+
+    const z = ZONES.find(x => x.id === zid);
+    document.getElementById('vp-zone').textContent = z.name;
+    document.getElementById('vp-ref').textContent  =
+      z.ref + (z.kind === 'transversal' ? '  ·  transversal control — applies across every zone' : '');
+    syncLegend(zid);
+
+    if (!opts.silent && window.__gad3d) window.__gad3d.focusZone(zid);
+    if (opts.scroll !== false) {
+      secEls[zid].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  function closeZone() {
+    openZone = null;
+    ZONES.forEach(z => { secEls[z.id].classList.remove('open', 'active'); });
+    document.getElementById('vp-zone').textContent = 'Complete tank';
+    document.getElementById('vp-ref').textContent  = 'Select a zone to inspect';
+    syncLegend(null);
+    if (window.__gad3d) window.__gad3d.focusZone(null);
+  }
+
+  /* Exposed so the 3D layer can drive the UI (canvas → checklist) */
+  window.__gadUI = {
+    openZone: zid => toggleZone(zid, { force: true, silent: true }),
+    closeZone,
+    zones: ZONES
+  };
+
+  /* ── Legend chips (mirror of the accordion, over the canvas) ───────────── */
+  const legendEl = document.getElementById('vp-legend');
+  ZONES.filter(z => z.kind === 'zone').forEach(z => {
+    const c = document.createElement('div');
+    c.className = 'lg'; c.dataset.zone = z.id;
+    c.innerHTML = '<i style="background:' + z.color + '"></i>' + esc(z.name);
+    c.addEventListener('click', () => toggleZone(z.id, { force: openZone !== z.id }));
+    legendEl.appendChild(c);
+  });
+  function syncLegend(zid) {
+    legendEl.querySelectorAll('.lg').forEach(c => c.classList.toggle('on', c.dataset.zone === zid));
+  }
+
+  /* ── Progress ─────────────────────────────────────────────────────────── */
+  function tally() {
+    const t = { yes: 0, no: 0, na: 0, byZone: {} };
+    ZONES.forEach(z => t.byZone[z.id] = { yes: 0, no: 0, na: 0, done: 0, total: z.items.length });
+    Object.keys(state.answers).forEach(id => {
+      const v = state.answers[id].v; if (!v) return;
+      const zid = ITEM_ZONE.get(id); if (!zid) return;
+      t[v]++; t.byZone[zid][v]++; t.byZone[zid].done++;
+    });
+    t.done = t.yes + t.no + t.na;
+    return t;
+  }
+
+  function refreshProgress() {
+    const t = tally();
+    const pct = TOTAL ? Math.round(t.done / TOTAL * 100) : 0;
+    document.getElementById('pg-pct').textContent = pct + '%';
+    document.getElementById('pg-ok').style.width = (t.yes / TOTAL * 100) + '%';
+    document.getElementById('pg-no').style.width = (t.no  / TOTAL * 100) + '%';
+    document.getElementById('pg-na').style.width = (t.na  / TOTAL * 100) + '%';
+    document.getElementById('pg-stats').innerHTML =
+      '<span><i style="background:var(--ok)"></i>Yes ' + t.yes + '</span>' +
+      '<span><i style="background:var(--no)"></i>No ' + t.no + '</span>' +
+      '<span><i style="background:var(--na)"></i>N/A ' + t.na + '</span>' +
+      '<span style="color:var(--text-3)">Open ' + (TOTAL - t.done) + ' of ' + TOTAL + '</span>';
+
+    ZONES.forEach(z => {
+      const s = t.byZone[z.id], el = secEls[z.id];
+      el.querySelector('.cnt-done').textContent = s.done;
+      const frac = s.total ? s.done / s.total : 0;
+      el.querySelector('.sec-ring .fg').setAttribute('stroke-dasharray', (frac * 65.97).toFixed(2) + ' 65.97');
+    });
+  }
+
+  /* ── Filter wiring ────────────────────────────────────────────────────── */
+  let searchTimer = null;
+  document.getElementById('search').addEventListener('input', e => {
+    clearTimeout(searchTimer);
+    const v = e.target.value.trim().toLowerCase();
+    searchTimer = setTimeout(() => { filter.q = v; applyFilter(); }, 180);
+  });
+  document.getElementById('f-mand').addEventListener('click', e => {
+    filter.mand = !filter.mand; e.target.classList.toggle('on', filter.mand); applyFilter();
+  });
+  document.getElementById('f-open').addEventListener('click', e => {
+    filter.open = !filter.open; e.target.classList.toggle('on', filter.open); applyFilter();
+  });
+
+  function applyFilter() {
+    const active = filter.q || filter.mand || filter.open;
+    ZONES.forEach(z => {
+      const hits = z.items.filter(matches).length;
+      const el = secEls[z.id];
+      el.classList.toggle('dim', active && hits === 0);
+      el.querySelector('.cnt-tot').textContent = active ? hits : z.items.length;
+      // Re-render any already-rendered body so it reflects the new filter
+      const body = el.querySelector('.sec-body');
+      if (body.dataset.rendered === '1') renderBody(z.id);
+    });
+    // A text search auto-opens the best-matching zone
+    if (filter.q) {
+      let best = null, n = -1;
+      ZONES.forEach(z => { const h = z.items.filter(matches).length; if (h > n) { n = h; best = z.id; } });
+      if (best && n > 0 && openZone !== best) toggleZone(best, { force: true, scroll: false });
+    }
+  }
+
+  /* ── Clear ────────────────────────────────────────────────────────────── */
+  document.getElementById('btn-clear').addEventListener('click', () => {
+    if (!confirm('Clear every status and remark on this checklist?')) return;
+    state.answers = {}; save();
+    ZONES.forEach(z => {
+      const body = secEls[z.id].querySelector('.sec-body');
+      if (body.dataset.rendered === '1') renderBody(z.id);
+    });
+    refreshProgress();
+  });
+
+  /* ── Report generation → window.print() ───────────────────────────────── */
+  document.getElementById('btn-report').addEventListener('click', buildReport);
+
+  function buildReport() {
+    const t = tally();
+    const m = state.meta;
+    const pct = TOTAL ? Math.round(t.done / TOTAL * 100) : 0;
+    const label = { yes: 'YES', no: 'NO', na: 'N/A' };
+    const cls   = { yes: 's-yes', no: 's-no', na: 's-na' };
+
+    let h =
+      '<div class="rp-head">' +
+        '<h1>API 650 Storage Tank — GAD Review Checklist</h1>' +
+        '<div class="rp-sub">General Arrangement Drawing review record  ·  ' + esc(DATA.meta.source_pdf) + '</div>' +
+      '</div>' +
+      '<div class="rp-meta">' +
+        f('Project', m.project) + f('Tank tag', m.tag) + f('Drawing no.', m.dwg) +
+        f('Revision', m.rev) + f('Reviewed by', m['rev-by']) + f('Date', m.date) +
+      '</div>' +
+      '<div class="rp-sum"><h3>Summary — ' + pct + '% reviewed (' + t.done + ' of ' + TOTAL + ' parameters)</h3><table>' +
+        '<tr><td><b>Zone / control group</b></td><td>Yes</td><td>No</td><td>N/A</td><td>Open</td></tr>';
+
+    ZONES.forEach(z => {
+      const s = t.byZone[z.id];
+      h += '<tr><td>' + esc(z.name) + '</td><td>' + s.yes + '</td><td>' + s.no + '</td><td>' + s.na +
+           '</td><td>' + (s.total - s.done) + '</td></tr>';
+    });
+    h += '<tr class="tot"><td>Total</td><td>' + t.yes + '</td><td>' + t.no + '</td><td>' + t.na +
+         '</td><td>' + (TOTAL - t.done) + '</td></tr></table></div>';
+
+    ZONES.forEach(z => {
+      const s = t.byZone[z.id];
+      h += '<div class="rp-zone"><h2>' + esc(z.name) +
+           '<span>' + esc(z.ref) + '  ·  ' + s.done + '/' + s.total + ' reviewed</span></h2>' +
+           '<table class="rp-tbl"><thead><tr>' +
+             '<th class="c-n">#</th><th>Parameter</th><th class="c-s">Status</th><th class="c-r">Remarks</th>' +
+           '</tr></thead><tbody>';
+
+      z.items.forEach((it, i) => {
+        const a = state.answers[it.id] || {};
+        const st = a.v ? '<span class="' + cls[a.v] + '">' + label[a.v] + '</span>'
+                       : '<span class="s-un">—</span>';
+        h += '<tr>' +
+               '<td class="c-n">' + (i + 1) + '</td>' +
+               '<td>' + esc(it.label) + (it.mand ? ' <span class="rp-mand">*</span>' : '') +
+                 '<span class="rp-key">' + esc(it.key) +
+                 (it.table !== 'eqp.tank' ? '  ·  ' + esc(it.table) : '') + '</span></td>' +
+               '<td class="c-s">' + st + '</td>' +
+               '<td class="c-r">' + esc(a.r || '') + '</td>' +
+             '</tr>';
+      });
+      h += '</tbody></table></div>';
+    });
+
+    h += '<div class="rp-sign"><div>Reviewed by</div><div>Checked by</div><div>Discipline Leader</div></div>' +
+         '<div class="rp-foot">* mandatory parameter.  Source: ' + esc(DATA.meta.source_xlsx) +
+         '.  Generated ' + new Date().toLocaleString() + '.  ' +
+         'The full checklist remains the controlling document.</div>';
+
+    document.getElementById('report').innerHTML = h;
+    setTimeout(() => window.print(), 60);
+  }
+
+  function f(lbl, v) { return '<div><b>' + lbl + '</b>' + esc(v || '—') + '</div>'; }
+
+  /* ── Utility ──────────────────────────────────────────────────────────── */
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  refreshProgress();
+})();
+</script>
+
+<script type="module">
+/* ═══════════════════════════════════════════════════════════════════════════
+   PART B — PROCEDURAL 3D TANK  (Three.js, ES modules via import map)
+
+   The tank is assembled from primitive geometries grouped into exactly the
+   8 physical zones on page 1 of the checklist PDF.  Every mesh carries
+   userData.zone so a single raycast resolves canvas clicks back to a zone.
+   ═══════════════════════════════════════════════════════════════════════════ */
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const veil = document.getElementById('veil');
+const vp   = document.getElementById('viewport');
+
+try {
+
+/* ── Tank dimensions (scene units ≈ metres) ──────────────────────────────── */
+const R           = 10;      // shell radius
+const COURSES     = 5;       // number of shell courses
+const COURSE_H    = 2.6;     // height of each course
+const H           = COURSES * COURSE_H;   // shell height = 13
+const ROOF_H      = 2.4;     // cone roof rise
+const FOUND_H     = 1.2;     // foundation ringwall height
+const DECK_Y      = 6.2;     // floating roof deck elevation
+
+/* ── Zone palette — kept in sync with the checklist accordion ─────────────── */
+const ZCOL = {
+  Z1:0x2B6CB0, Z2:0x2C9AA8, Z3:0xD9922E, Z4:0x1B3A5C,
+  Z5:0x2A9D8F, Z6:0x4E8B62, Z7:0xE08A2E, Z8:0x3763A8
+};
+
+/* ── Renderer / scene / camera ───────────────────────────────────────────── */
+const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+vp.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xE9F0F6);
+scene.fog = new THREE.Fog(0xE9F0F6, 90, 230);
+
+const camera = new THREE.PerspectiveCamera(42, 1, 0.5, 600);
+camera.position.set(34, 22, 38);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.075;
+controls.minDistance = 8;
+controls.maxDistance = 150;
+controls.maxPolarAngle = Math.PI * 0.495;   // never go under the ground plane
+controls.target.set(0, H * 0.45, 0);
+
+/* ── Lighting ────────────────────────────────────────────────────────────── */
+scene.add(new THREE.HemisphereLight(0xE8F2FA, 0x9FB0C0, 1.05));
+
+const key = new THREE.DirectionalLight(0xFFFFFF, 1.5);
+key.position.set(36, 46, 26);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.camera.near = 10; key.shadow.camera.far = 140;
+key.shadow.camera.left = -34; key.shadow.camera.right = 34;
+key.shadow.camera.top = 40;   key.shadow.camera.bottom = -14;
+key.shadow.bias = -0.0012;
+scene.add(key);
+
+const fill = new THREE.DirectionalLight(0xCFE2F0, 0.5);
+fill.position.set(-30, 16, -24);
+scene.add(fill);
+
+/* Ground */
+const ground = new THREE.Mesh(
+  new THREE.CircleGeometry(72, 72),
+  new THREE.MeshStandardMaterial({ color:0xDCE6EF, roughness:0.97, metalness:0 })
+);
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = -FOUND_H - 0.02;
+ground.receiveShadow = true;
+scene.add(ground);
+
+const grid = new THREE.GridHelper(140, 56, 0xB9CBDB, 0xCBD9E5);
+grid.position.y = -FOUND_H - 0.01;
+grid.material.opacity = 0.5; grid.material.transparent = true;
+scene.add(grid);
+
+/* ── Materials — one instance per zone so highlighting is a per-zone edit ── */
+const zoneMat = {};        // zid → base material
+const allMats = [];
+function mat(zid, o) {
+  const m = new THREE.MeshStandardMaterial(Object.assign({
+    color: ZCOL[zid], roughness: 0.55, metalness: 0.35
+  }, o || {}));
+  m.userData = { base: new THREE.Color(ZCOL[zid]), zone: zid };
+  allMats.push(m);
+  return m;
+}
+['Z1','Z2','Z3','Z4','Z5','Z6','Z7','Z8'].forEach(z => { zoneMat[z] = mat(z); });
+
+/* Slight per-zone character */
+zoneMat.Z2.roughness = 0.42; zoneMat.Z2.metalness = 0.55;   // painted steel shell
+zoneMat.Z4.roughness = 0.95; zoneMat.Z4.metalness = 0.05;   // concrete foundation
+zoneMat.Z5.roughness = 0.35; zoneMat.Z5.metalness = 0.7;    // internals
+zoneMat.Z6.roughness = 0.6;  zoneMat.Z6.metalness = 0.45;   // galvanised access steel
+zoneMat.Z8.transparent = true; zoneMat.Z8.opacity = 0.30;   // coating envelope
+zoneMat.Z8.side = THREE.DoubleSide;
+
+/* ── Zone groups ─────────────────────────────────────────────────────────── */
+const tank = new THREE.Group();
+scene.add(tank);
+
+const groups = {};
+['Z1','Z2','Z3','Z4','Z5','Z6','Z7','Z8'].forEach(z => {
+  groups[z] = new THREE.Group();
+  groups[z].name = z;
+  tank.add(groups[z]);
+});
+
+/* Aim a mesh whose geometry runs along +Y so that its axis points along `dir`.
+   Using a quaternion avoids the Euler-order ambiguity that bites when you try
+   to compose rotation.z + rotation.y by hand. */
+const YAXIS = new THREE.Vector3(0, 1, 0);
+function aim(mesh, dir) {
+  mesh.quaternion.setFromUnitVectors(YAXIS, dir.clone().normalize());
+  return mesh;
+}
+const radialDir = a => new THREE.Vector3(Math.cos(a), 0, Math.sin(a));
+
+/* Helper: add a mesh to a zone group, tagged for raycasting */
+function add(zid, geo, m, x, y, z2) {
+  const mesh = new THREE.Mesh(geo, m || zoneMat[zid]);
+  if (x !== undefined) mesh.position.set(x, y, z2);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  mesh.userData.zone = zid;
+  groups[zid].add(mesh);
+  return mesh;
+}
+
+/* ═══ Z4 — ANCHORAGE & FOUNDATION ═══════════════════════════════════════════
+   Concrete ringwall + anchor chairs and bolts around the base.               */
+(function buildFoundation() {
+  const concrete = new THREE.MeshStandardMaterial({ color:0x8FA3B8, roughness:0.96, metalness:0.02 });
+  concrete.userData = { base:new THREE.Color(0x8FA3B8), zone:'Z4' };
+  allMats.push(concrete);
+
+  // Ringwall (slightly larger than the tank, sunk below grade)
+  add('Z4', new THREE.CylinderGeometry(R + 0.9, R + 1.15, FOUND_H, 72, 1, false),
+      concrete, 0, -FOUND_H / 2, 0);
+  // Chamfered top pad
+  add('Z4', new THREE.CylinderGeometry(R + 0.55, R + 0.9, 0.22, 72),
+      concrete, 0, 0.11, 0);
+
+  // Anchor chairs: gusset + top plate + bolt, on the anchor bolt circle
+  const NCHAIR = 16, BCD = R + 0.55;
+  for (let i = 0; i < NCHAIR; i++) {
+    const a = (i / NCHAIR) * Math.PI * 2;
+    const cx = Math.cos(a) * BCD, cz = Math.sin(a) * BCD;
+
+    const gus = add('Z4', new THREE.BoxGeometry(0.6, 1.5, 0.16), null, cx, 0.97, cz);
+    gus.lookAt(0, 0.97, 0);
+
+    const top = add('Z4', new THREE.BoxGeometry(0.75, 0.13, 0.55), null, cx, 1.75, cz);
+    top.lookAt(0, 1.75, 0);
+
+    add('Z4', new THREE.CylinderGeometry(0.075, 0.075, 2.4, 10), null, cx, 0.75, cz);
+  }
+})();
+
+/* ═══ Z3 — BOTTOM, ANNULAR & CLEANOUT ══════════════════════════════════════
+   Bottom plate (coned-down), annular ring, sump and a cleanout door.         */
+(function buildBottom() {
+  // Bottom plate — a very shallow cone, high point at the centre
+  add('Z3', new THREE.ConeGeometry(R - 0.55, 0.42, 72, 1, false), null, 0, 0.44, 0);
+  // Annular plate ring at the shell-to-bottom corner
+  add('Z3', new THREE.CylinderGeometry(R + 0.06, R + 0.06, 0.16, 72), null, 0, 0.3, 0);
+  add('Z3', new THREE.RingGeometry(R - 1.6, R + 0.06, 72), null, 0, 0.39, 0)
+    .rotation.x = -Math.PI / 2;
+
+  // Drip ring
+  add('Z3', new THREE.TorusGeometry(R + 0.28, 0.09, 8, 64), null, 0, 0.28, 0)
+    .rotation.x = Math.PI / 2;
+
+  // Sump (drain pit below the bottom, offset from centreline)
+  const sx = R * 0.42, sz = R * 0.22;
+  add('Z3', new THREE.CylinderGeometry(0.85, 0.85, 0.9, 24), null, sx, -0.1, sz);
+  add('Z3', new THREE.CylinderGeometry(0.95, 0.95, 0.12, 24), null, sx, 0.4, sz);
+
+  // Cleanout door (reinforced opening in the first course)
+  const a = Math.PI * 1.28;
+  const cx = Math.cos(a) * R, cz = Math.sin(a) * R;
+  const door = add('Z3', new THREE.BoxGeometry(2.4, 1.5, 0.34), null, cx, 0.95, cz);
+  door.lookAt(0, 0.95, 0);
+  const frame = add('Z3', new THREE.BoxGeometry(3.0, 2.1, 0.16), null,
+                    Math.cos(a) * (R + 0.06), 0.95, Math.sin(a) * (R + 0.06));
+  frame.lookAt(0, 0.95, 0);
+})();
+
+/* ═══ Z2 — SHELL COURSES & WIND GIRDERS ════════════════════════════════════
+   Five stacked courses (thinning upward) + intermediate and top wind girders
+   + pipe-support clips welded to the shell.                                  */
+(function buildShell() {
+  for (let i = 0; i < COURSES; i++) {
+    const y = 0.3 + i * COURSE_H + COURSE_H / 2;
+    // Courses get very slightly smaller radius going up — reads as a plate lap
+    const r = R - i * 0.012;
+    const c = add('Z2', new THREE.CylinderGeometry(r, r + 0.012, COURSE_H - 0.05, 72, 1, true),
+                  null, 0, y, 0);
+    c.material.side = THREE.DoubleSide;
+    // Horizontal seam band between courses
+    if (i < COURSES - 1) {
+      add('Z2', new THREE.TorusGeometry(r + 0.02, 0.045, 6, 72), null, 0, y + COURSE_H / 2, 0)
+        .rotation.x = Math.PI / 2;
+    }
+  }
+
+  // Intermediate wind girder (mid-height) and top wind girder / walkway ring
+  [{ y: 0.3 + COURSE_H * 3, w: 0.62 }, { y: 0.3 + H - 0.25, w: 0.95 }].forEach(g => {
+    add('Z2', new THREE.CylinderGeometry(R + g.w, R + g.w, 0.1, 72), null, 0, g.y, 0);
+    add('Z2', new THREE.TorusGeometry(R + g.w, 0.075, 8, 72), null, 0, g.y + 0.05, 0)
+      .rotation.x = Math.PI / 2;
+    // Gusset brackets under the girder
+    for (let i = 0; i < 24; i++) {
+      const a = (i / 24) * Math.PI * 2;
+      const br = add('Z2', new THREE.BoxGeometry(g.w, 0.5, 0.07), null,
+                     Math.cos(a) * (R + g.w / 2), g.y - 0.3, Math.sin(a) * (R + g.w / 2));
+      br.lookAt(0, g.y - 0.3, 0);
+      br.rotateY(Math.PI / 2);
+    }
+  });
+
+  // Pipe-support clips welded to the shell (eqp.tank_pipe_clip)
+  [[0.35, 3.2], [0.35, 6.4], [0.35, 9.6], [1.9, 4.8], [1.9, 8.0]].forEach(([a, y]) => {
+    const clip = add('Z2', new THREE.BoxGeometry(0.7, 0.55, 0.42), null,
+                     Math.cos(a) * (R + 0.2), y, Math.sin(a) * (R + 0.2));
+    clip.lookAt(0, y, 0);
+  });
+})();
+
+/* ═══ Z1 — ROOF & ROOF STRUCTURE ═══════════════════════════════════════════
+   Cone roof, compression ring, radial rafters and centre column.            */
+(function buildRoof() {
+  const roofY = 0.3 + H;
+
+  // Cone roof deck
+  const roof = add('Z1', new THREE.ConeGeometry(R + 0.18, ROOF_H, 72, 1, false),
+                   null, 0, roofY + ROOF_H / 2, 0);
+  roof.material.side = THREE.DoubleSide;
+
+  // Roof-to-shell compression ring (the frangible joint)
+  add('Z1', new THREE.TorusGeometry(R + 0.12, 0.11, 8, 72), null, 0, roofY, 0)
+    .rotation.x = Math.PI / 2;
+
+  // Centre / apex plate
+  add('Z1', new THREE.CylinderGeometry(0.7, 0.7, 0.22, 20), null, 0, roofY + ROOF_H, 0);
+
+  // Radial rafters under the deck
+  for (let i = 0; i < 16; i++) {
+    const a = (i / 16) * Math.PI * 2;
+    const len = R - 0.4;
+    const raf = add('Z1', new THREE.BoxGeometry(len, 0.3, 0.1), null,
+                    Math.cos(a) * len / 2, roofY - 0.42, Math.sin(a) * len / 2);
+    raf.rotation.y = -a;
+    raf.rotation.z = -Math.atan2(ROOF_H * 0.72, len);
+  }
+
+  // Roof support columns (roof_num_column / column_roof_apply_supported)
+  for (let i = 0; i < 6; i++) {
+    const a = (i / 6) * Math.PI * 2 + 0.3;
+    add('Z1', new THREE.CylinderGeometry(0.2, 0.2, H - 0.3, 12), null,
+        Math.cos(a) * R * 0.55, 0.3 + (H - 0.3) / 2, Math.sin(a) * R * 0.55);
+  }
+
+  // Gauge hatch
+  add('Z1', new THREE.CylinderGeometry(0.34, 0.34, 0.55, 16), null,
+      R * 0.55, roofY + ROOF_H * 0.42, R * 0.2);
+})();
+
+/* ═══ Z5 — FLOATING ROOF & INTERNALS ═══════════════════════════════════════
+   Internal floating deck with rim/pontoon, seal, support legs, rolling
+   ladder, heating coil and an agitator.                                      */
+(function buildInternals() {
+  // Deck
+  add('Z5', new THREE.CylinderGeometry(R - 0.55, R - 0.55, 0.22, 64), null, 0, DECK_Y, 0);
+  // Rim pontoon
+  add('Z5', new THREE.TorusGeometry(R - 0.62, 0.34, 10, 64), null, 0, DECK_Y + 0.12, 0)
+    .rotation.x = Math.PI / 2;
+  // Rim seal (against the shell)
+  const seal = add('Z5', new THREE.CylinderGeometry(R - 0.06, R - 0.06, 0.5, 64, 1, true),
+                   null, 0, DECK_Y + 0.35, 0);
+  seal.material = new THREE.MeshStandardMaterial({
+    color:0x1F7A70, roughness:0.9, metalness:0.05, side:THREE.DoubleSide,
+    transparent:true, opacity:0.85
+  });
+  seal.material.userData = { base:new THREE.Color(0x1F7A70), zone:'Z5' };
+  allMats.push(seal.material);
+
+  // Support legs in the operating position
+  for (let ring = 0; ring < 2; ring++) {
+    const rr = ring === 0 ? R * 0.35 : R * 0.72, n = ring === 0 ? 6 : 10;
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2;
+      add('Z5', new THREE.CylinderGeometry(0.09, 0.09, DECK_Y - 0.5, 8), null,
+          Math.cos(a) * rr, (DECK_Y - 0.5) / 2 + 0.5, Math.sin(a) * rr);
+    }
+  }
+
+  // Rolling ladder from the top of the shell down to the deck
+  const rl = add('Z5', new THREE.BoxGeometry(0.9, 0.1, 9.5), null, -R * 0.45, DECK_Y + 3.1, 0);
+  rl.rotation.x = Math.PI / 2 - 0.62;
+
+  // Heating coil — a helix of pipe just above the bottom
+  const coilPts = [];
+  for (let i = 0; i <= 260; i++) {
+    const t = i / 260, a = t * Math.PI * 9;
+    const rr = (R - 1.4) * (1 - t * 0.62);
+    coilPts.push(new THREE.Vector3(Math.cos(a) * rr, 1.05 + t * 0.5, Math.sin(a) * rr));
+  }
+  add('Z5', new THREE.TubeGeometry(new THREE.CatmullRomCurve3(coilPts), 300, 0.13, 8, false), null);
+
+  // Agitator (shaft + impeller), side-entry near the bottom
+  add('Z5', new THREE.CylinderGeometry(0.14, 0.14, R * 0.85, 12), null, 0, 2.4, 0);
+  for (let i = 0; i < 4; i++) {
+    const a = (i / 4) * Math.PI * 2;
+    add('Z5', new THREE.BoxGeometry(1.5, 0.4, 0.09), null,
+        Math.cos(a) * 0.75, 2.4, Math.sin(a) * 0.75).rotation.y = -a;
+  }
+
+  // Stilling well
+  add('Z5', new THREE.CylinderGeometry(0.26, 0.26, H - 1.2, 14), null,
+      R * 0.78, 0.6 + (H - 1.2) / 2, -R * 0.2);
+})();
+
+/* ═══ Z7 — NOZZLES, MANHOLES & VENTS ═══════════════════════════════════════
+   Shell nozzles with reinforcing pads and flanges, shell + roof manholes,
+   roof vents and a flame arrester.                                           */
+(function buildNozzles() {
+  const roofY = 0.3 + H;
+
+  // ── Shell nozzles: [azimuth, elevation, nominal radius] ──
+  const shellNz = [
+    [0.00,  1.6, 0.55], [0.55,  2.9, 0.40], [1.15,  1.4, 0.62],
+    [2.05,  4.3, 0.34], [2.70,  1.7, 0.48], [3.55,  3.6, 0.40],
+    [4.30,  1.5, 0.58], [5.10,  5.2, 0.30], [5.75,  2.4, 0.44]
+  ];
+  shellNz.forEach(([a, y, nr]) => {
+    const dir = radialDir(a);
+
+    // Reinforcing pad, flush on the shell
+    aim(add('Z7', new THREE.CylinderGeometry(nr * 1.85, nr * 1.85, 0.1, 20), null,
+            dir.x * (R + 0.04), y, dir.z * (R + 0.04)), dir);
+
+    // Neck, projecting radially outward
+    aim(add('Z7', new THREE.CylinderGeometry(nr, nr, 1.5, 20), null,
+            dir.x * (R + 0.75), y, dir.z * (R + 0.75)), dir);
+
+    // Raised-face flange at the projection limit
+    aim(add('Z7', new THREE.CylinderGeometry(nr * 1.55, nr * 1.55, 0.24, 20), null,
+            dir.x * (R + 1.5), y, dir.z * (R + 1.5)), dir);
+  });
+
+  // ── Shell manholes (two, first course) ──
+  [[0.85, 1.5], [3.95, 1.5]].forEach(([a, y]) => {
+    const dir = radialDir(a);
+    aim(add('Z7', new THREE.CylinderGeometry(1.15, 1.15, 1.1, 28), null,
+            dir.x * (R + 0.55), y, dir.z * (R + 0.55)), dir);
+    aim(add('Z7', new THREE.CylinderGeometry(1.5, 1.5, 0.28, 28), null,
+            dir.x * (R + 1.15), y, dir.z * (R + 1.15)), dir);
+    // Hinge davit
+    add('Z7', new THREE.CylinderGeometry(0.09, 0.09, 2.2, 10), null,
+        dir.x * (R + 0.5), y + 1.5, dir.z * (R + 0.5));
+  });
+
+  // ── Roof manhole ──
+  add('Z7', new THREE.CylinderGeometry(1.0, 1.0, 0.6, 24), null,
+      -R * 0.42, roofY + ROOF_H * 0.55, R * 0.3);
+  add('Z7', new THREE.CylinderGeometry(1.25, 1.25, 0.16, 24), null,
+      -R * 0.42, roofY + ROOF_H * 0.55 + 0.38, R * 0.3);
+
+  // ── Roof vents (PVRV) + flame arrester ──
+  [[0.7, 0.55], [2.6, 0.55], [4.6, 0.55]].forEach(([a, nr]) => {
+    const rr = R * 0.62;
+    const x = Math.cos(a) * rr, z = Math.sin(a) * rr;
+    const yTop = roofY + ROOF_H * (1 - rr / (R + 0.18));
+    add('Z7', new THREE.CylinderGeometry(nr, nr, 1.0, 16), null, x, yTop + 0.5, z);
+    add('Z7', new THREE.CylinderGeometry(nr * 1.5, nr * 1.5, 0.5, 16), null, x, yTop + 1.2, z);
+    add('Z7', new THREE.SphereGeometry(nr * 1.15, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2),
+        null, x, yTop + 1.45, z);
+  });
+
+  // Gooseneck emergency vent at the apex
+  const gnPts = [
+    new THREE.Vector3(1.2, 0.3 + H + ROOF_H, 0.6),
+    new THREE.Vector3(1.2, 0.3 + H + ROOF_H + 1.6, 0.6),
+    new THREE.Vector3(1.2, 0.3 + H + ROOF_H + 2.4, 1.3),
+    new THREE.Vector3(1.2, 0.3 + H + ROOF_H + 2.0, 2.2)
+  ];
+  add('Z7', new THREE.TubeGeometry(new THREE.CatmullRomCurve3(gnPts), 32, 0.28, 12, false), null);
+})();
+
+/* ═══ Z6 — STAIRS, PLATFORMS & SAFETY ══════════════════════════════════════
+   Spiral stairway with handrails, top platform, and a water-spray ring.      */
+(function buildAccess() {
+  const roofY = 0.3 + H;
+  const START = 0.6, SWEEP = Math.PI * 1.72, STEPS = 40;
+  const SR = R + 1.05;                       // stair centreline radius
+
+  // Treads
+  for (let i = 0; i <= STEPS; i++) {
+    const t = i / STEPS;
+    const a = START + t * SWEEP;
+    const y = 0.35 + t * (roofY - 0.35);
+    // lookAt puts +Z on the radius, so the box depth is the tread WIDTH
+    // (radial, ~1.15 m) and the box X is the GOING (tangential, ~0.3 m).
+    const tr = add('Z6', new THREE.BoxGeometry(0.3, 0.09, 1.15), null,
+                   Math.cos(a) * SR, y, Math.sin(a) * SR);
+    tr.lookAt(0, y, 0);
+  }
+
+  // Helper: one helical tube following the stair rise at radius rr, offset dy
+  function helix(rr, dy, tube) {
+    const pts = [];
+    for (let i = 0; i <= 90; i++) {
+      const t = i / 90, a = START + t * SWEEP;
+      pts.push(new THREE.Vector3(Math.cos(a) * rr, 0.3 + dy + t * (roofY - 0.3), Math.sin(a) * rr));
+    }
+    return add('Z6', new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 160, tube, 7, false), null);
+  }
+
+  // Stringers (both sides) and a single outboard handrail — an inboard rail
+  // would just read as visual noise against the shell.
+  helix(SR - 0.62, 0, 0.07);
+  helix(SR + 0.62, 0, 0.07);
+  helix(SR + 0.62, 1.05, 0.055);   // top rail
+  helix(SR + 0.62, 0.55, 0.04);    // mid rail
+
+  // Handrail stanchions, outboard side only
+  for (let i = 0; i <= 12; i++) {
+    const t = i / 12, a = START + t * SWEEP, y = 0.3 + t * (roofY - 0.3);
+    add('Z6', new THREE.CylinderGeometry(0.045, 0.045, 1.05, 6), null,
+        Math.cos(a) * (SR + 0.62), y + 0.52, Math.sin(a) * (SR + 0.62));
+  }
+
+  // Top platform: a partial annulus on the roof perimeter
+  const plat = add('Z6', new THREE.RingGeometry(R + 0.35, R + 1.7, 48, 1, START + SWEEP - 0.35, 2.2),
+                   null, 0, roofY + 0.12, 0);
+  plat.rotation.x = -Math.PI / 2;
+  plat.material.side = THREE.DoubleSide;
+
+  // Platform handrail
+  [R + 0.35, R + 1.7].forEach(rr => {
+    const pts = [];
+    for (let i = 0; i <= 40; i++) {
+      const a = START + SWEEP - 0.35 + (i / 40) * 2.2;
+      pts.push(new THREE.Vector3(Math.cos(a) * rr, roofY + 1.2, Math.sin(a) * rr));
+    }
+    add('Z6', new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 80, 0.05, 8, false), null);
+  });
+
+  // Roof walkway from the platform to the apex
+  const wk = add('Z6', new THREE.BoxGeometry(R, 0.09, 1.0), null,
+                 Math.cos(START + SWEEP) * R * 0.5, roofY + ROOF_H * 0.55, Math.sin(START + SWEEP) * R * 0.5);
+  wk.rotation.y = -(START + SWEEP);
+  wk.rotation.z = -Math.atan2(ROOF_H, R);
+
+  // Water-spray / foam ring main around the tank (safety-system interface)
+  add('Z6', new THREE.TorusGeometry(R + 2.6, 0.13, 8, 72), null, 0, 0.55, 0)
+    .rotation.x = Math.PI / 2;
+  for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * Math.PI * 2 + 0.2;
+    add('Z6', new THREE.CylinderGeometry(0.1, 0.1, 3.0, 8), null,
+        Math.cos(a) * (R + 2.6), 2.0, Math.sin(a) * (R + 2.6));
+  }
+
+  // Earthing lugs + cables to grade
+  for (let i = 0; i < 4; i++) {
+    const a = (i / 4) * Math.PI * 2 + 0.9;
+    add('Z6', new THREE.BoxGeometry(0.34, 0.34, 0.12), null,
+        Math.cos(a) * (R + 0.1), 1.0, Math.sin(a) * (R + 0.1)).lookAt(0, 1.0, 0);
+    add('Z6', new THREE.CylinderGeometry(0.05, 0.05, 1.1, 6), null,
+        Math.cos(a) * (R + 0.35), 0.4, Math.sin(a) * (R + 0.35));
+  }
+})();
+
+/* ═══ Z8 — MATERIALS, COATING & LOADS ══════════════════════════════════════
+   Materials/coating/loads are not a discrete part of the tank — they are the
+   envelope applied to all of it.  Represented as a translucent coating skin
+   that is hidden (and non-raycastable) until the zone is selected.           */
+(function buildCoating() {
+  const skin = add('Z8', new THREE.CylinderGeometry(R + 0.32, R + 0.32, H + 0.3, 72, 1, true),
+                   null, 0, 0.3 + (H + 0.3) / 2, 0);
+  skin.castShadow = false; skin.receiveShadow = false;
+
+  const cap = add('Z8', new THREE.ConeGeometry(R + 0.45, ROOF_H + 0.25, 72, 1, true),
+                  null, 0, 0.3 + H + (ROOF_H + 0.25) / 2, 0);
+  cap.castShadow = false; cap.receiveShadow = false;
+
+  groups.Z8.visible = false;
+})();
+
+/* ── Original material snapshot, for restoring after a highlight ─────────── */
+allMats.forEach(m => {
+  m.userData.origOpacity = m.opacity;
+  m.userData.origTransparent = m.transparent;
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CAMERA FRAMING
+   Bounding-sphere fit, so the target is correctly framed at ANY viewport
+   aspect ratio — the limiting field of view is whichever of the vertical /
+   horizontal FOV is narrower.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const _box = new THREE.Box3(), _sph = new THREE.Sphere();
+
+function fitTo(object3d, dirHint, pad) {
+  _box.makeEmpty();
+  _box.setFromObject(object3d);
+  if (_box.isEmpty()) return null;
+  _box.getBoundingSphere(_sph);
+
+  const vFov = THREE.MathUtils.degToRad(camera.fov);
+  const hFov = 2 * Math.atan(Math.tan(vFov / 2) * camera.aspect);
+  const fov  = Math.min(vFov, hFov);                 // the constraining direction
+  let dist   = (_sph.radius / Math.sin(fov / 2)) * (pad || 1.28);
+  dist = THREE.MathUtils.clamp(dist, controls.minDistance + 1, controls.maxDistance - 1);
+
+  const dir = (dirHint || new THREE.Vector3(1, 0.42, 1)).clone().normalize();
+  return { pos: _sph.center.clone().addScaledVector(dir, dist), target: _sph.center.clone() };
+}
+
+let camTween = null, tgtTween = null;
+
+function flyTo(pos, target, ms) {
+  if (camTween) camTween.stop();
+  if (tgtTween) tgtTween.stop();
+  controls.autoRotate = false;
+  document.getElementById('btn-spin').classList.remove('on');
+
+  camTween = new TWEEN.Tween(camera.position)
+    .to({ x: pos.x, y: pos.y, z: pos.z }, ms || 1000)
+    .easing(TWEEN.Easing.Cubic.InOut).start();
+
+  tgtTween = new TWEEN.Tween(controls.target)
+    .to({ x: target.x, y: target.y, z: target.z }, ms || 1000)
+    .easing(TWEEN.Easing.Cubic.InOut).start();
+}
+
+/* Preferred viewing direction per zone, so each part is framed from a
+   sensible angle rather than always the same isometric. */
+const VIEW_DIR = {
+  Z1: new THREE.Vector3( 0.9,  0.85,  0.9),   // roof — look down
+  Z2: new THREE.Vector3( 1.0,  0.18,  1.0),   // shell — near-level
+  Z3: new THREE.Vector3( 1.0,  0.34,  0.9),   // bottom — slightly above
+  Z4: new THREE.Vector3( 1.0,  0.26,  0.85),  // foundation — low
+  Z5: new THREE.Vector3( 0.95, 0.40,  1.0),   // internals — cutaway
+  Z6: new THREE.Vector3(-0.55, 0.42,  1.15),  // stairs — from the stair side
+  Z7: new THREE.Vector3( 1.15, 0.22,  0.5),   // nozzles — near-level
+  Z8: new THREE.Vector3( 1.0,  0.40,  1.0)
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   HIGHLIGHTING
+   ═══════════════════════════════════════════════════════════════════════════ */
+let activeZone = null, cutaway = false;
+
+function applyHighlight(zid) {
+  allMats.forEach(m => {
+    const mz = m.userData.zone;
+    if (!zid) {                                   // nothing selected — full colour
+      m.color.copy(m.userData.base);
+      m.emissive.setHex(0x000000);
+      m.opacity = m.userData.origOpacity;
+      m.transparent = m.userData.origTransparent;
+      m.depthWrite = true;
+    } else if (mz === zid) {                      // selected — lift and glow
+      m.color.copy(m.userData.base);
+      m.emissive.copy(m.userData.base).multiplyScalar(0.42);
+      m.opacity = (mz === 'Z8') ? 0.5 : 1;
+      m.transparent = (mz === 'Z8');
+      m.depthWrite = true;
+    } else {                                      // everything else — recede
+      m.color.copy(m.userData.base).lerp(new THREE.Color(0xB6C6D4), 0.72);
+      m.emissive.setHex(0x000000);
+      m.transparent = true;
+      m.opacity = 0.16;
+      m.depthWrite = false;
+    }
+    m.needsUpdate = true;
+  });
+
+  // The coating envelope only exists on screen while it is the active zone
+  groups.Z8.visible = (zid === 'Z8');
+  applyCutaway();
+}
+
+function applyCutaway() {
+  // Hide the outer skin so internals read clearly
+  const hide = cutaway || activeZone === 'Z5';
+  groups.Z2.children.forEach(m => { m.visible = !hide; });
+  groups.Z1.children.forEach((m, i) => { m.visible = !hide || i > 2; });
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PUBLIC API — the checklist panel drives the scene through this object
+   ═══════════════════════════════════════════════════════════════════════════ */
+const HOME_DIR = new THREE.Vector3(1, 0.30, 1);
+
+window.__gad3d = {
+  focusZone(zid) {
+    activeZone = zid;
+    // Transversal groups (T1–T4) have no geometry: frame the whole tank.
+    const g = zid && groups[zid];
+    applyHighlight(g ? zid : null);
+
+    const fit = g ? fitTo(g, VIEW_DIR[zid], 1.55) : fitTo(tank, HOME_DIR, 1.18);
+    if (fit) flyTo(fit.pos, fit.target, 1050);
+  },
+  resetView() {
+    activeZone = null;
+    applyHighlight(null);
+    const fit = fitTo(tank, HOME_DIR, 1.18);
+    if (fit) flyTo(fit.pos, fit.target, 900);
+  }
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CANVAS → CHECKLIST  (raycast picking)
+   ═══════════════════════════════════════════════════════════════════════════ */
+const ray = new THREE.Raycaster();
+const ndc = new THREE.Vector2();
+let downAt = null;
+
+/* A mesh is only pickable when it AND every ancestor are visible.  Object3D
+   .visible is a local flag, so the hidden Z8 coating envelope would otherwise
+   still swallow clicks meant for the shell behind it. */
+function pickable(o) {
+  for (let n = o; n; n = n.parent) if (!n.visible) return false;
+  return !!o.userData.zone;
+}
+
+renderer.domElement.addEventListener('pointerdown', e => { downAt = { x: e.clientX, y: e.clientY }; });
+
+renderer.domElement.addEventListener('pointerup', e => {
+  // Ignore the pointerup that ends an orbit/pan drag
+  if (!downAt || Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y) > 5) { downAt = null; return; }
+  downAt = null;
+
+  const r = renderer.domElement.getBoundingClientRect();
+  ndc.x =  ((e.clientX - r.left) / r.width)  * 2 - 1;
+  ndc.y = -((e.clientY - r.top)  / r.height) * 2 + 1;
+  ray.setFromCamera(ndc, camera);
+
+  const hits = ray.intersectObject(tank, true).filter(h => pickable(h.object));
+  if (!hits.length) return;
+
+  const zid = hits[0].object.userData.zone;
+  if (zid === activeZone) { window.__gad3d.resetView(); window.__gadUI.closeZone(); return; }
+
+  window.__gadUI.openZone(zid);     // expand the matching accordion section…
+  window.__gad3d.focusZone(zid);    // …and frame the part
+});
+
+/* Pointer cursor over pickable parts */
+let hoverRaf = 0;
+renderer.domElement.addEventListener('pointermove', e => {
+  if (hoverRaf) return;
+  hoverRaf = requestAnimationFrame(() => {
+    hoverRaf = 0;
+    const r = renderer.domElement.getBoundingClientRect();
+    ndc.x =  ((e.clientX - r.left) / r.width)  * 2 - 1;
+    ndc.y = -((e.clientY - r.top)  / r.height) * 2 + 1;
+    ray.setFromCamera(ndc, camera);
+    const hit = ray.intersectObject(tank, true).some(h => pickable(h.object));
+    renderer.domElement.style.cursor = hit ? 'pointer' : 'grab';
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   VIEWPORT TOOLS
+   ═══════════════════════════════════════════════════════════════════════════ */
+document.getElementById('btn-reset').addEventListener('click', () => {
+  window.__gad3d.resetView();
+  window.__gadUI.closeZone();
+});
+
+document.getElementById('btn-cut').addEventListener('click', e => {
+  cutaway = !cutaway;
+  e.target.classList.toggle('on', cutaway);
+  applyCutaway();
+});
+
+document.getElementById('btn-spin').addEventListener('click', e => {
+  controls.autoRotate = !controls.autoRotate;
+  controls.autoRotateSpeed = 0.75;
+  e.target.classList.toggle('on', controls.autoRotate);
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESIZE  (ResizeObserver keeps the fit correct on any screen / panel size)
+   ═══════════════════════════════════════════════════════════════════════════ */
+function resize() {
+  const w = vp.clientWidth, h = vp.clientHeight;
+  if (!w || !h) return;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h, false);
+}
+new ResizeObserver(resize).observe(vp);
+resize();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RENDER LOOP
+   ═══════════════════════════════════════════════════════════════════════════ */
+renderer.setAnimationLoop(t => {
+  TWEEN.update(t);
+  controls.update();
+  renderer.render(scene, camera);
+});
+
+/* Initial framing */
+const home = fitTo(tank, HOME_DIR, 1.18);
+if (home) {
+  camera.position.copy(home.pos);
+  controls.target.copy(home.target);
+  controls.update();
+}
+veil.classList.add('hide');
+
+} catch (err) {
+  console.error(err);
+  veil.innerHTML =
+    '<p class="err"><b>3D viewport unavailable.</b><br>' +
+    (err && err.message ? String(err.message) : 'Three.js could not be loaded.') +
+    '<br><br>The checklist on the right remains fully usable, including report generation.</p>';
+}
+</script>
+</body>
+</html>
