@@ -13,6 +13,11 @@
 <!-- Tweening library (UMD → global TWEEN) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/21.0.0/tween.umd.js"></script>
 
+<!-- Spreadsheet engine.  xlsx-js-style is the SheetJS fork that can WRITE cell
+     styles (fills / fonts / borders); the community SheetJS build silently
+     drops them, which would defeat Phase 4.  Exposes the same global `XLSX`. -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+
 <!-- Three.js is loaded as an ES module via import map (see bottom module script) -->
 <script type="importmap">
 {
@@ -25,7 +30,7 @@
 
 <style>
 /* ═══════════════════════════════════════════════════════════════════════════
-   DESIGN TOKENS  —  Técnicas Reunidas palette, so this module can later drop
+   DESIGN TOKENS — Técnicas Reunidas palette, so this module can later drop
    straight into Meridian without a restyle.
    ═══════════════════════════════════════════════════════════════════════════ */
 :root{
@@ -34,315 +39,302 @@
   --bg:#EEF3F8;    --surface:#FFFFFF; --surface-2:#F5F8FB;
   --border:#DCE4EC;--border-2:#C6D3E0;
   --text:#22415F;  --text-2:#5B7C9D;  --text-3:#93A7BC;
-  --ok:#2E9E6B;    --no:#D4574E;      --na:#8A9BAE;
+  --closed:#2E9E6B; --open:#D4574E;   --na:#8A9BAE;
   --amber:#D9922E;
   --font:'Montserrat','Segoe UI','Helvetica Neue',Arial,sans-serif;
   --shadow-1:0 1px 3px rgba(34,65,95,.07);
   --shadow-2:0 4px 18px rgba(34,65,95,.10);
-  --shadow-3:0 12px 40px rgba(34,65,95,.16);
+  --shadow-3:0 12px 40px rgba(34,65,95,.18);
 }
 
 *{box-sizing:border-box;}
 html,body{height:100%;}
 body{
   margin:0; font-family:var(--font); color:var(--text);
-  background:var(--bg); overflow:hidden;
-  -webkit-font-smoothing:antialiased;
+  background:var(--bg); overflow:hidden; -webkit-font-smoothing:antialiased;
 }
 button,input,select,textarea{font-family:inherit;color:inherit;}
 
-/* ── App shell ──────────────────────────────────────────────────────────── */
-#app{display:flex; flex-direction:column; height:100vh;}
+#app{display:flex;flex-direction:column;height:100vh;}
 
 /* ── Top bar ────────────────────────────────────────────────────────────── */
 #topbar{
-  flex:0 0 auto; display:flex; align-items:center; gap:18px;
-  padding:0 20px; height:58px; background:var(--surface);
-  border-bottom:1px solid var(--border); box-shadow:var(--shadow-1); z-index:30;
+  flex:0 0 auto;display:flex;align-items:center;gap:16px;padding:0 18px;height:58px;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  box-shadow:var(--shadow-1);z-index:30;
 }
-#topbar .brand{font-weight:800; font-size:15px; letter-spacing:.2px; white-space:nowrap;}
+#topbar .brand{font-weight:800;font-size:15px;white-space:nowrap;}
 #topbar .brand span{color:var(--teal);}
-#topbar .rule{width:1px;height:26px;background:var(--border);}
-#topbar .sub{font-size:11.5px;color:var(--text-2);font-weight:500;white-space:nowrap;}
+#topbar .rule{width:1px;height:26px;background:var(--border);flex:0 0 auto;}
+#topbar .sub{font-size:11px;color:var(--text-2);font-weight:500;white-space:nowrap;line-height:1.35;}
 #topbar .spacer{flex:1;}
 
-.meta-fields{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+/* Step indicator */
+#steps{display:flex;align-items:center;gap:0;flex:0 0 auto;}
+.stp{display:flex;align-items:center;gap:7px;padding:5px 12px;border-radius:20px;
+     font-size:10.5px;font-weight:700;color:var(--text-3);white-space:nowrap;transition:all .25s ease;}
+.stp b{display:grid;place-items:center;width:18px;height:18px;border-radius:50%;
+       background:var(--border);color:#fff;font-size:10px;font-weight:800;transition:all .25s ease;}
+.stp.on{background:var(--teal-xl);color:var(--navy);}
+.stp.on b{background:var(--teal);}
+.stp.done b{background:var(--closed);}
+.stp-arrow{color:var(--border-2);font-size:11px;margin:0 2px;}
+
+.meta-fields{display:flex;gap:7px;flex-wrap:wrap;align-items:center;}
 .meta-fields label{display:flex;flex-direction:column;gap:2px;}
-.meta-fields label>span{font-size:8.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text-3);}
-.meta-fields input{
-  width:112px;padding:4px 8px;font-size:11.5px;font-weight:600;
-  border:1px solid var(--border);border-radius:5px;background:var(--surface-2);
-}
+.meta-fields label>span{font-size:8px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text-3);}
+.meta-fields input{width:104px;padding:4px 8px;font-size:11px;font-weight:600;
+  border:1px solid var(--border);border-radius:5px;background:var(--surface-2);}
 .meta-fields input:focus{outline:none;border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(47,151,170,.13);}
 
-/* ── Split layout ───────────────────────────────────────────────────────── */
-#split{flex:1 1 auto; display:flex; min-height:0;}
-#viewport{
-  position:relative; flex:1 1 auto; min-width:0;
-  background:linear-gradient(170deg,#F7FAFC 0%,#E3ECF4 55%,#D3E0EC 100%);
-}
+/* ── Split ──────────────────────────────────────────────────────────────── */
+#split{flex:1 1 auto;display:flex;min-height:0;}
+#viewport{position:relative;flex:1 1 auto;min-width:0;
+  background:linear-gradient(170deg,#F7FAFC 0%,#E3ECF4 55%,#D3E0EC 100%);}
 #viewport canvas{display:block;width:100%;height:100%;}
 
-/* Viewport overlays */
-#vp-title{
-  position:absolute;top:16px;left:18px;pointer-events:none;
-  font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--text-3);
-}
-#vp-zone{
-  position:absolute;top:36px;left:18px;pointer-events:none;
-  font-size:20px;font-weight:800;color:var(--navy);letter-spacing:-.2px;
-  max-width:60%;line-height:1.15;
-}
+#vp-title{position:absolute;top:16px;left:18px;pointer-events:none;
+  font-size:10.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--text-3);}
+#vp-zone{position:absolute;top:35px;left:18px;pointer-events:none;font-size:20px;font-weight:800;
+  color:var(--navy);letter-spacing:-.2px;max-width:60%;line-height:1.15;}
 #vp-ref{position:absolute;top:62px;left:18px;pointer-events:none;font-size:11px;font-weight:600;color:var(--teal);}
 
-#vp-tools{position:absolute;top:14px;right:14px;display:flex;gap:6px;}
-.vp-btn{
-  padding:6px 11px;font-size:11px;font-weight:700;border-radius:6px;cursor:pointer;
-  background:rgba(255,255,255,.92);border:1px solid var(--border);color:var(--navy);
-  backdrop-filter:blur(6px);transition:all .16s ease;
+#vp-trim{
+  position:absolute;top:92px;left:18px;pointer-events:none;font-size:10px;font-weight:700;
+  color:var(--na);background:rgba(255,255,255,.8);border:1px solid var(--border);
+  padding:3px 9px;border-radius:20px;display:none;
 }
+#vp-trim.show{display:block;}
+
+#vp-tools{position:absolute;top:14px;right:14px;display:flex;gap:6px;}
+.vp-btn{padding:6px 11px;font-size:11px;font-weight:700;border-radius:6px;cursor:pointer;
+  background:rgba(255,255,255,.92);border:1px solid var(--border);color:var(--navy);
+  backdrop-filter:blur(6px);transition:all .16s ease;}
 .vp-btn:hover{border-color:var(--teal);color:var(--teal);transform:translateY(-1px);box-shadow:var(--shadow-1);}
 .vp-btn.on{background:var(--teal);border-color:var(--teal);color:#fff;}
 
-#vp-legend{
-  position:absolute;left:18px;bottom:16px;display:flex;flex-wrap:wrap;gap:5px;max-width:min(560px,72%);
-}
-.lg{
-  display:flex;align-items:center;gap:5px;padding:3px 8px;border-radius:20px;cursor:pointer;
+#vp-legend{position:absolute;left:18px;bottom:16px;display:flex;flex-wrap:wrap;gap:5px;max-width:min(560px,72%);}
+.lg{display:flex;align-items:center;gap:5px;padding:3px 8px;border-radius:20px;cursor:pointer;
   background:rgba(255,255,255,.88);border:1px solid var(--border);
-  font-size:9.5px;font-weight:700;letter-spacing:.2px;transition:all .15s ease;
-}
+  font-size:9.5px;font-weight:700;transition:all .15s ease;}
 .lg:hover{transform:translateY(-1px);box-shadow:var(--shadow-1);border-color:var(--border-2);}
 .lg.on{background:var(--navy);border-color:var(--navy);color:#fff;}
 .lg i{width:9px;height:9px;border-radius:2.5px;display:block;flex:0 0 auto;}
 
-#vp-hint{
-  position:absolute;right:16px;bottom:16px;pointer-events:none;
-  font-size:10px;font-weight:600;color:var(--text-3);text-align:right;line-height:1.5;
-}
+#vp-hint{position:absolute;right:16px;bottom:16px;pointer-events:none;font-size:10px;
+  font-weight:600;color:var(--text-3);text-align:right;line-height:1.5;}
 
-/* Loading veil */
-#veil{
-  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:14px;background:var(--bg);z-index:20;transition:opacity .5s ease;
-}
+#veil{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;background:var(--bg);z-index:20;transition:opacity .5s ease;}
 #veil.hide{opacity:0;pointer-events:none;}
-.spinner{
-  width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--teal);
-  border-radius:50%;animation:spin .8s linear infinite;
-}
+.spinner{width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--teal);
+  border-radius:50%;animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 #veil p{margin:0;font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-3);}
-#veil .err{color:var(--no);letter-spacing:0;text-transform:none;font-size:12px;max-width:340px;text-align:center;line-height:1.6;}
+#veil .err{color:var(--open);letter-spacing:0;text-transform:none;font-size:12px;max-width:340px;text-align:center;line-height:1.6;}
 
 /* ── Right panel ────────────────────────────────────────────────────────── */
-#panel{
-  flex:0 0 clamp(390px,36%,560px); display:flex; flex-direction:column;
-  background:var(--surface); border-left:1px solid var(--border); min-height:0;
-}
+#panel{position:relative;flex:0 0 clamp(400px,37%,580px);display:flex;flex-direction:column;
+  background:var(--surface);border-left:1px solid var(--border);min-height:0;}
 
-#progress-wrap{flex:0 0 auto;padding:14px 18px 12px;border-bottom:1px solid var(--border);background:var(--surface);}
+/* Step banner */
+#banner{flex:0 0 auto;padding:11px 18px;border-bottom:1px solid var(--border);
+  background:linear-gradient(135deg,#F0F8FA,#E7F3F7);}
+#banner h2{margin:0 0 3px;font-size:12px;font-weight:800;letter-spacing:.4px;color:var(--navy);}
+#banner p{margin:0;font-size:10.5px;font-weight:500;color:var(--text-2);line-height:1.5;}
+
+#progress-wrap{flex:0 0 auto;padding:12px 18px 11px;border-bottom:1px solid var(--border);}
 .pg-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px;}
-.pg-head h2{margin:0;font-size:12px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;color:var(--navy);}
+.pg-head h3{margin:0;font-size:11.5px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;color:var(--navy);}
 .pg-head .pct{font-size:19px;font-weight:800;color:var(--teal);letter-spacing:-.5px;}
 .pg-track{height:7px;border-radius:20px;background:var(--surface-2);border:1px solid var(--border);overflow:hidden;display:flex;}
 .pg-seg{height:100%;transition:width .45s cubic-bezier(.4,0,.2,1);}
-.pg-seg.ok{background:linear-gradient(90deg,#3FB57F,#2E9E6B);}
-.pg-seg.no{background:linear-gradient(90deg,#E07066,#D4574E);}
-.pg-seg.na{background:linear-gradient(90deg,#A3B2C2,#8A9BAE);}
+.pg-seg.c{background:linear-gradient(90deg,#3FB57F,#2E9E6B);}
+.pg-seg.o{background:linear-gradient(90deg,#E07066,#D4574E);}
+.pg-seg.n{background:linear-gradient(90deg,#A3B2C2,#8A9BAE);}
 .pg-stats{display:flex;gap:12px;margin-top:8px;font-size:10px;font-weight:700;color:var(--text-2);flex-wrap:wrap;}
 .pg-stats i{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:4px;vertical-align:middle;}
 
-/* Filter bar */
-#filters{flex:0 0 auto;display:flex;gap:6px;padding:10px 18px;border-bottom:1px solid var(--border);background:var(--surface-2);align-items:center;}
-#search{
-  flex:1 1 auto;min-width:0;padding:6px 10px;font-size:12px;font-weight:500;
-  border:1px solid var(--border);border-radius:6px;background:#fff;
-}
+#filters{flex:0 0 auto;display:flex;gap:6px;padding:9px 18px;border-bottom:1px solid var(--border);
+  background:var(--surface-2);align-items:center;}
+#search{flex:1 1 auto;min-width:0;padding:6px 10px;font-size:12px;font-weight:500;
+  border:1px solid var(--border);border-radius:6px;background:#fff;}
 #search:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(47,151,170,.13);}
-.chip{
-  padding:5px 10px;font-size:10px;font-weight:700;border-radius:20px;cursor:pointer;white-space:nowrap;
-  background:#fff;border:1px solid var(--border);color:var(--text-2);transition:all .15s ease;
-}
+.chip{padding:5px 10px;font-size:10px;font-weight:700;border-radius:20px;cursor:pointer;white-space:nowrap;
+  background:#fff;border:1px solid var(--border);color:var(--text-2);transition:all .15s ease;}
 .chip:hover{border-color:var(--border-2);color:var(--navy);}
 .chip.on{background:var(--navy);border-color:var(--navy);color:#fff;}
 
-/* Accordion */
 #list{flex:1 1 auto;overflow-y:auto;overscroll-behavior:contain;padding:10px 12px 6px;min-height:0;}
 #list::-webkit-scrollbar{width:9px;}
 #list::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:20px;border:2px solid var(--surface);}
-#list::-webkit-scrollbar-track{background:transparent;}
 
-.sec{margin-bottom:7px;border:1px solid var(--border);border-radius:9px;overflow:hidden;background:var(--surface);transition:box-shadow .2s ease,border-color .2s ease;}
+.sec{margin-bottom:7px;border:1px solid var(--border);border-radius:9px;overflow:hidden;
+  background:var(--surface);transition:box-shadow .2s ease,border-color .2s ease;}
 .sec.active{border-color:var(--teal);box-shadow:0 0 0 3px rgba(47,151,170,.11);}
 .sec.dim{opacity:.42;}
-
-.sec-head{
-  display:flex;align-items:center;gap:9px;padding:10px 12px;cursor:pointer;
-  background:var(--surface);transition:background .16s ease;user-select:none;
-}
+.sec-head{display:flex;align-items:center;gap:9px;padding:10px 12px;cursor:pointer;
+  background:var(--surface);transition:background .16s ease;user-select:none;}
 .sec-head:hover{background:var(--surface-2);}
 .sec-bar{width:4px;align-self:stretch;border-radius:3px;flex:0 0 auto;}
 .sec-txt{flex:1 1 auto;min-width:0;}
-.sec-name{font-size:12.5px;font-weight:800;letter-spacing:-.1px;line-height:1.25;}
-.sec-ref{font-size:9.5px;font-weight:700;color:var(--text-3);margin-top:2px;letter-spacing:.3px;}
+.sec-name{font-size:12.5px;font-weight:800;line-height:1.25;}
+.sec-ref{font-size:9.5px;font-weight:700;color:var(--text-3);margin-top:2px;}
 .sec-kpi{display:flex;align-items:center;gap:7px;flex:0 0 auto;}
-.sec-count{font-size:10px;font-weight:800;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);padding:2px 7px;border-radius:20px;white-space:nowrap;}
+.sec-count{font-size:10px;font-weight:800;color:var(--text-2);background:var(--surface-2);
+  border:1px solid var(--border);padding:2px 7px;border-radius:20px;white-space:nowrap;}
 .sec-ring{width:26px;height:26px;flex:0 0 auto;transform:rotate(-90deg);}
 .sec-ring circle{fill:none;stroke-width:3.4;}
 .sec-ring .bg{stroke:var(--border);}
-.sec-ring .fg{stroke:var(--teal);stroke-linecap:round;transition:stroke-dasharray .45s ease;}
+.sec-ring .fg{stroke-linecap:round;transition:stroke-dasharray .45s ease;}
 .caret{font-size:9px;color:var(--text-3);transition:transform .22s ease;flex:0 0 auto;}
 .sec.open .caret{transform:rotate(90deg);}
-
 .sec-body{display:none;border-top:1px solid var(--border);background:var(--surface-2);}
 .sec.open .sec-body{display:block;}
 
-.grp{padding:6px 12px 2px;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);}
+.grp{padding:6px 12px 2px;font-size:9px;font-weight:800;letter-spacing:1px;
+  text-transform:uppercase;color:var(--text-3);}
 
 .item{padding:9px 12px;border-bottom:1px solid var(--border);background:var(--surface-2);transition:background .15s ease;}
 .item:last-child{border-bottom:none;}
-.item:hover{background:#fff;}
-.item.answered{background:#fff;}
-.item.hidden{display:none;}
+.item:hover,.item.answered{background:#fff;}
+.item.is-na{opacity:.6;}
 .item-top{display:flex;align-items:flex-start;gap:8px;}
 .item-label{flex:1 1 auto;min-width:0;font-size:11.5px;font-weight:600;line-height:1.4;}
-.item-key{display:block;font-size:9px;font-weight:600;color:var(--text-3);font-family:ui-monospace,'SF Mono',Menlo,monospace;margin-top:2px;word-break:break-all;}
-.tag{display:inline-block;font-size:8px;font-weight:800;letter-spacing:.5px;padding:1px 5px;border-radius:3px;margin-left:5px;vertical-align:1px;white-space:nowrap;}
+.item-key{display:block;font-size:9px;font-weight:600;color:var(--text-3);
+  font-family:ui-monospace,'SF Mono',Menlo,monospace;margin-top:2px;word-break:break-all;}
+.tag{display:inline-block;font-size:8px;font-weight:800;letter-spacing:.5px;padding:1px 5px;
+  border-radius:3px;margin-left:5px;vertical-align:1px;white-space:nowrap;}
 .tag.m{background:#FDECEA;color:#C0392B;}
 .tag.t{background:var(--teal-xl);color:var(--teal);}
-
+.tag.f{background:#EEF3F8;color:var(--navy-l);border:1px solid var(--border-2);}
 .item-meta{font-size:9.5px;color:var(--text-3);font-weight:600;margin-top:3px;line-height:1.5;}
 .item-meta b{color:var(--text-2);font-weight:700;}
 
-.tri{display:flex;gap:3px;flex:0 0 auto;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:2px;}
-.item.answered .tri{background:var(--surface-2);}
-.tri button{
-  border:none;background:transparent;cursor:pointer;border-radius:4px;
-  padding:3px 8px;font-size:9.5px;font-weight:800;letter-spacing:.3px;color:var(--text-3);
-  transition:all .14s ease;
-}
+/* Status buttons */
+.tri{display:flex;gap:3px;flex:0 0 auto;background:var(--surface-2);border:1px solid var(--border);
+  border-radius:6px;padding:2px;}
+.tri button{border:none;background:transparent;cursor:pointer;border-radius:4px;padding:3px 8px;
+  font-size:9.5px;font-weight:800;letter-spacing:.3px;color:var(--text-3);transition:all .14s ease;}
 .tri button:hover{color:var(--navy);background:#fff;}
-.tri button.on[data-v="yes"]{background:var(--ok);color:#fff;}
-.tri button.on[data-v="no"]{background:var(--no);color:#fff;}
+.tri button.on[data-v="closed"]{background:var(--closed);color:#fff;}
+.tri button.on[data-v="open"]{background:var(--open);color:#fff;}
 .tri button.on[data-v="na"]{background:var(--na);color:#fff;}
 
-.rmk{
-  width:100%;margin-top:6px;padding:5px 8px;font-size:10.5px;font-weight:500;
-  border:1px solid var(--border);border-radius:5px;background:#fff;
-}
+/* Step-1 applicability toggle */
+.duo{display:flex;gap:3px;flex:0 0 auto;background:var(--surface-2);border:1px solid var(--border);
+  border-radius:6px;padding:2px;}
+.duo button{border:none;background:transparent;cursor:pointer;border-radius:4px;padding:3px 10px;
+  font-size:9.5px;font-weight:800;color:var(--text-3);transition:all .14s ease;}
+.duo button:hover{color:var(--navy);background:#fff;}
+.duo button.on[data-v="app"]{background:var(--teal);color:#fff;}
+.duo button.on[data-v="na"]{background:var(--na);color:#fff;}
+
+.pend{margin-top:6px;display:flex;align-items:center;gap:7px;}
+.pend label{font-size:9px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--open);white-space:nowrap;}
+.pend select{flex:1 1 auto;min-width:0;padding:5px 8px;font-size:10.5px;font-weight:700;
+  border:1px solid #EBB9B4;border-radius:5px;background:#FFF6F5;color:var(--open);cursor:pointer;}
+.pend select:focus{outline:none;border-color:var(--open);box-shadow:0 0 0 3px rgba(212,87,78,.13);}
+.pend select.unset{border-color:var(--open);background:#FFECEA;}
+
+.rmk{width:100%;margin-top:6px;padding:5px 8px;font-size:10.5px;font-weight:500;
+  border:1px solid var(--border);border-radius:5px;background:#fff;}
 .rmk::placeholder{color:var(--text-3);font-weight:500;}
 .rmk:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(47,151,170,.12);}
 
 .empty{padding:26px 16px;text-align:center;font-size:11px;font-weight:600;color:var(--text-3);}
 
 /* Footer */
-#foot{flex:0 0 auto;display:flex;gap:8px;padding:11px 18px;border-top:1px solid var(--border);background:var(--surface);}
-.btn{
-  flex:1 1 auto;padding:10px 14px;font-size:11.5px;font-weight:800;letter-spacing:.4px;
-  border-radius:7px;cursor:pointer;border:1px solid transparent;transition:all .18s ease;
-}
-.btn-primary{background:linear-gradient(135deg,var(--teal-l),var(--teal));color:#fff;box-shadow:0 3px 12px rgba(47,151,170,.3);}
+#foot{flex:0 0 auto;display:flex;gap:7px;padding:11px 18px;border-top:1px solid var(--border);background:var(--surface);}
+.btn{padding:10px 14px;font-size:11.5px;font-weight:800;letter-spacing:.4px;border-radius:7px;
+  cursor:pointer;border:1px solid transparent;transition:all .18s ease;white-space:nowrap;}
+.btn-primary{flex:1 1 auto;background:linear-gradient(135deg,var(--teal-l),var(--teal));color:#fff;
+  box-shadow:0 3px 12px rgba(47,151,170,.3);}
 .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(47,151,170,.38);}
 .btn-ghost{flex:0 0 auto;background:#fff;border-color:var(--border);color:var(--text-2);}
-.btn-ghost:hover{border-color:var(--no);color:var(--no);}
+.btn-ghost:hover{border-color:var(--teal);color:var(--teal);}
+.btn-ghost.warn:hover{border-color:var(--open);color:var(--open);}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none;}
 
-/* ── Print report ───────────────────────────────────────────────────────── */
-#report{display:none;}
-@media screen{ #report{display:none !important;} }
+/* ── "Restored N/A Items" drawer ────────────────────────────────────────── */
+#drawer{position:absolute;inset:0;z-index:15;display:none;flex-direction:column;
+  background:rgba(22,41,61,.32);backdrop-filter:blur(2px);}
+#drawer.open{display:flex;}
+#drawer .sheet{margin-top:auto;background:var(--surface);border-top:2px solid var(--teal);
+  border-radius:12px 12px 0 0;box-shadow:var(--shadow-3);display:flex;flex-direction:column;
+  max-height:78%;animation:slideup .28s cubic-bezier(.4,0,.2,1);}
+@keyframes slideup{from{transform:translateY(18px);opacity:0;}to{transform:none;opacity:1;}}
+#drawer .dhead{display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid var(--border);}
+#drawer .dhead h3{margin:0;font-size:12.5px;font-weight:800;color:var(--navy);flex:1 1 auto;}
+#drawer .dhead .n{font-size:10px;font-weight:800;background:var(--na);color:#fff;padding:2px 8px;border-radius:20px;}
+#drawer .dhead button{border:none;background:transparent;font-size:18px;line-height:1;cursor:pointer;color:var(--text-3);}
+#drawer .dhead button:hover{color:var(--open);}
+#drawer .dbody{overflow-y:auto;padding:8px 12px 14px;}
+.na-row{display:flex;align-items:flex-start;gap:9px;padding:8px 10px;border-bottom:1px solid var(--border);}
+.na-row:last-child{border-bottom:none;}
+.na-row .t{flex:1 1 auto;min-width:0;}
+.na-row .t b{display:block;font-size:11px;font-weight:700;line-height:1.35;}
+.na-row .t span{display:block;font-size:9px;font-weight:600;color:var(--text-3);margin-top:2px;}
+.na-row .z{font-size:8.5px;font-weight:800;color:var(--text-3);letter-spacing:.4px;text-transform:uppercase;margin-top:3px;}
+.na-row button{flex:0 0 auto;padding:5px 11px;font-size:9.5px;font-weight:800;border-radius:5px;
+  cursor:pointer;background:var(--teal-xl);border:1px solid var(--teal);color:var(--teal);transition:all .15s ease;}
+.na-row button:hover{background:var(--teal);color:#fff;}
+.dnote{padding:9px 12px;font-size:10px;font-weight:600;color:var(--text-2);background:var(--surface-2);
+  border-bottom:1px solid var(--border);line-height:1.5;}
 
-@media print{
-  @page{size:A4 portrait;margin:13mm 12mm;}
-  html,body{height:auto;overflow:visible;background:#fff;}
-  #app{display:none !important;}
-  #report{display:block !important;font-size:9pt;color:#000;}
+/* Toast */
+#toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(14px);
+  background:var(--navy);color:#fff;padding:11px 18px;border-radius:8px;font-size:11.5px;font-weight:700;
+  box-shadow:var(--shadow-3);opacity:0;pointer-events:none;transition:all .3s ease;z-index:200;max-width:78vw;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+#toast.err{background:var(--open);}
 
-  .rp-head{border-bottom:2.5px solid #22415F;padding-bottom:8px;margin-bottom:12px;}
-  .rp-head h1{margin:0 0 3px;font-size:15pt;font-weight:800;color:#22415F;letter-spacing:-.2px;}
-  .rp-head .rp-sub{font-size:8pt;font-weight:600;color:#5B7C9D;}
-
-  .rp-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:5px 14px;margin-bottom:12px;}
-  .rp-meta div{font-size:8pt;border-bottom:1px solid #DCE4EC;padding-bottom:2px;}
-  .rp-meta b{display:block;font-size:6.5pt;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:#93A7BC;}
-
-  .rp-sum{border:1px solid #DCE4EC;border-radius:4px;padding:8px 10px;margin-bottom:14px;background:#F5F8FB;}
-  .rp-sum h3{margin:0 0 6px;font-size:8pt;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#22415F;}
-  .rp-sum table{width:100%;border-collapse:collapse;font-size:7.5pt;}
-  .rp-sum td{padding:1.5px 0;}
-  .rp-sum td:not(:first-child){text-align:right;width:52px;}
-  .rp-sum tr.tot{font-weight:800;border-top:1px solid #C6D3E0;}
-
-  .rp-zone{margin-bottom:12px;break-inside:auto;}
-  .rp-zone h2{
-    font-size:9pt;font-weight:800;color:#fff;background:#22415F;
-    padding:4px 8px;margin:0 0 5px;border-radius:3px;
-    break-after:avoid;page-break-after:avoid;
-  }
-  .rp-zone h2 span{float:right;font-weight:600;font-size:7.5pt;opacity:.85;}
-
-  table.rp-tbl{width:100%;border-collapse:collapse;font-size:7.5pt;}
-  table.rp-tbl th{
-    background:#EEF3F8;color:#22415F;font-size:6.5pt;font-weight:800;letter-spacing:.5px;
-    text-transform:uppercase;text-align:left;padding:3px 5px;border:1px solid #DCE4EC;
-  }
-  table.rp-tbl td{padding:3px 5px;border:1px solid #DCE4EC;vertical-align:top;}
-  table.rp-tbl tr{break-inside:avoid;page-break-inside:avoid;}
-  .c-n{width:22px;text-align:right;color:#93A7BC;}
-  .c-s{width:40px;text-align:center;font-weight:800;}
-  .c-r{width:32%;color:#5B7C9D;}
-  .s-yes{color:#2E9E6B;} .s-no{color:#D4574E;} .s-na{color:#8A9BAE;} .s-un{color:#C6D3E0;}
-  .rp-key{font-size:6.5pt;color:#93A7BC;font-family:ui-monospace,Menlo,monospace;display:block;}
-  .rp-mand{color:#C0392B;font-weight:800;}
-
-  .rp-foot{margin-top:16px;padding-top:8px;border-top:1px solid #DCE4EC;font-size:7pt;color:#93A7BC;}
-  .rp-sign{display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px;margin-top:22px;break-inside:avoid;}
-  .rp-sign div{border-top:1px solid #22415F;padding-top:3px;font-size:7pt;font-weight:700;color:#5B7C9D;}
-}
+#file-input{display:none;}
 
 /* ── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width:1180px){ #topbar .sub{display:none;} .meta-fields input{width:88px;} }
 @media (max-width:960px){
   body{overflow:auto;}
   #split{flex-direction:column;}
-  #viewport{flex:0 0 46vh;}
+  #viewport{flex:0 0 44vh;}
   #panel{flex:1 1 auto;border-left:none;border-top:1px solid var(--border);}
-  #topbar{height:auto;padding:9px 14px;flex-wrap:wrap;gap:10px;}
-  .meta-fields input{width:92px;}
+  #topbar{height:auto;padding:9px 14px;flex-wrap:wrap;gap:9px;}
+  #steps{order:3;width:100%;}
 }
-@media (max-width:620px){
-  #vp-legend{display:none;}
-  #vp-hint{display:none;}
-  .meta-fields{width:100%;}
-}
+@media (max-width:620px){ #vp-legend,#vp-hint{display:none;} .meta-fields{width:100%;} }
 </style>
 </head>
 
 <body>
 <div id="app">
 
-  <!-- ── Top bar ─────────────────────────────────────────────────────────── -->
   <header id="topbar">
     <div class="brand">GAD <span>Review</span></div>
     <div class="rule"></div>
     <div class="sub">API 650 Storage Tank<br>General Arrangement Drawing</div>
+    <div class="rule"></div>
+    <div id="steps">
+      <div class="stp on" id="stp1"><b>1</b>Applicability setup</div>
+      <span class="stp-arrow">→</span>
+      <div class="stp" id="stp2"><b>2</b>Active review</div>
+    </div>
     <div class="spacer"></div>
     <div class="meta-fields">
       <label><span>Project</span><input id="m-project" placeholder="—"></label>
       <label><span>Tank Tag</span><input id="m-tag" placeholder="—"></label>
       <label><span>Drawing No.</span><input id="m-dwg" placeholder="—"></label>
-      <label><span>Rev</span><input id="m-rev" style="width:52px" placeholder="—"></label>
       <label><span>Reviewer</span><input id="m-rev-by" placeholder="—"></label>
       <label><span>Date</span><input id="m-date" type="date"></label>
     </div>
   </header>
 
-  <!-- ── Split ───────────────────────────────────────────────────────────── -->
   <div id="split">
 
-    <!-- 3D viewport -->
     <section id="viewport">
       <div id="vp-title">Physical zone</div>
       <div id="vp-zone">Complete tank</div>
       <div id="vp-ref">Select a zone to inspect</div>
+      <div id="vp-trim"></div>
 
       <div id="vp-tools">
         <button class="vp-btn" id="btn-reset" title="Frame the whole tank">Reset view</button>
@@ -352,21 +344,25 @@ button,input,select,textarea{font-family:inherit;color:inherit;}
 
       <div id="vp-legend"></div>
       <div id="vp-hint">Click a tank part to jump to its checklist<br>Drag to orbit · scroll to zoom · right-drag to pan</div>
-
       <div id="veil"><div class="spinner"></div><p>Building tank model</p></div>
     </section>
 
-    <!-- Checklist panel -->
     <aside id="panel">
+      <div id="banner">
+        <h2 id="banner-title">Step 1 — Applicability setup</h2>
+        <p id="banner-text">Mark every parameter that does not apply to this tank as <b>N/A</b>. The 3D model trims
+        itself in real time, so what you see is the equipment you are actually reviewing.</p>
+      </div>
+
       <div id="progress-wrap">
         <div class="pg-head">
-          <h2>Review progress</h2>
+          <h3 id="pg-label">Applicability</h3>
           <div class="pct" id="pg-pct">0%</div>
         </div>
         <div class="pg-track">
-          <div class="pg-seg ok" id="pg-ok" style="width:0"></div>
-          <div class="pg-seg no" id="pg-no" style="width:0"></div>
-          <div class="pg-seg na" id="pg-na" style="width:0"></div>
+          <div class="pg-seg c" id="pg-c" style="width:0"></div>
+          <div class="pg-seg o" id="pg-o" style="width:0"></div>
+          <div class="pg-seg n" id="pg-n" style="width:0"></div>
         </div>
         <div class="pg-stats" id="pg-stats"></div>
       </div>
@@ -374,81 +370,227 @@ button,input,select,textarea{font-family:inherit;color:inherit;}
       <div id="filters">
         <input id="search" type="search" placeholder="Search parameters…" autocomplete="off">
         <button class="chip" id="f-mand" title="Show only mandatory parameters">Mandatory</button>
-        <button class="chip" id="f-open" title="Show only unanswered parameters">Open</button>
+        <button class="chip" id="f-open" title="Show only parameters with no status yet">Unset</button>
+        <button class="chip" id="f-3d" title="Show only parameters that drive 3D geometry">Drives 3D</button>
       </div>
 
       <div id="list"></div>
 
-      <div id="foot">
-        <button class="btn btn-primary" id="btn-report">Generate GAD Review Report</button>
-        <button class="btn btn-ghost" id="btn-clear" title="Clear every answer and remark">Clear</button>
+      <div id="foot"></div>
+
+      <!-- Restored N/A items -->
+      <div id="drawer">
+        <div class="sheet">
+          <div class="dhead">
+            <h3>Restored N/A Items</h3>
+            <span class="n" id="na-count">0</span>
+            <button id="drawer-close" title="Close">×</button>
+          </div>
+          <div class="dnote">These parameters were excluded during applicability setup and are hidden from the
+            active review. Restore any of them if the design scope changes — the 3D geometry comes back with it.</div>
+          <div class="dbody" id="drawer-body"></div>
+        </div>
       </div>
     </aside>
   </div>
 </div>
 
-<!-- ── Printable report (built on demand) ─────────────────────────────────── -->
-<div id="report"></div>
+<input type="file" id="file-input" accept=".xlsx,.xlsm,.xls">
+<div id="toast"></div>
 
 <!-- ═══════════════════════════════════════════════════════════════════════════
-     DATA  —  eqp.tank sheet of Matriz_EQP_FINAL.xlsx, every sub-parameter
-     mapped onto the 8 physical zones + 4 transversal control groups defined
-     on page 1 of "pdf tank checklist.pdf".  Generated by tools/build_tank_data.py
+     DATA — eqp.tank sheet of Matriz_EQP_FINAL.xlsx, every sub-parameter mapped
+     onto the 8 physical zones + 4 transversal control groups from page 1 of
+     "pdf tank checklist.pdf".  Generated by tools/build_tank_data.py
      ═══════════════════════════════════════════════════════════════════════════ -->
 <script id="tank-data" type="application/json">__TANK_DATA__</script>
 
 <script>
 /* ═══════════════════════════════════════════════════════════════════════════
-   PART A — CHECKLIST STATE, UI AND REPORTING  (plain ES6, no framework)
-   Runs immediately; does not depend on Three.js having loaded.
+   PART A — STATE, WIZARD, CHECKLIST UI, EXCEL REVISION TRACKING
+   Plain ES6.  Runs immediately and does not require Three.js to have loaded.
    ═══════════════════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
 
   const DATA  = JSON.parse(document.getElementById('tank-data').textContent);
   const ZONES = DATA.zones;
-  const STORE = 'gad-tank-review-v1';
+  const STORE = 'gad-tank-review-v2';
 
-  /* Flat index: id → item, and id → zone id */
+  /* Disciplines an "Open" item can be pending from */
+  const PENDING = ['By Vendor', 'By Piping', 'By Civil', 'By Process',
+                   'By Material Handling', 'By Instrumentation'];
+
+  /* ═════════════════════════════════════════════════════════════════════════
+     FEATURE MAP — which checklist parameters switch which 3D geometry off.
+     `sel` entries are matched against the parameter KEY first, then against
+     its exact LABEL (several safety parameters carry no key in the matrix).
+     A feature is hidden as soon as ANY of its selector parameters is N/A.
+     ═════════════════════════════════════════════════════════════════════════ */
+  const FEATURES = [
+    { id:'foundation',  label:'Foundation ringwall & pad',        sel:['foundation_type'] },
+    { id:'anchorage',   label:'Anchor chairs, bolts & straps',    sel:['anch_type','anch_bolts_qty'] },
+    { id:'bottom',      label:'Bottom plate',                     sel:['bottom_type'] },
+    { id:'annular',     label:'Annular plate ring',               sel:['annular_apply'] },
+    { id:'drip_ring',   label:'Drip ring',                        sel:['drip_ring_apply'] },
+    { id:'sump',        label:'Sump & under-bottom connection',   sel:['under_bottom_nozzle_apply'] },
+    { id:'rpb',         label:'Release prevention barrier',       sel:['Release Prevention Barrier Required',
+                                                                      'Leak Detection System Required'] },
+    { id:'cathodic',    label:'Cathodic protection anodes',       sel:['capro_int_apply','under_bottom_capro'] },
+    { id:'shell',       label:'Shell courses',                    sel:['shell_moc'] },
+    { id:'wg_int',      label:'Intermediate wind girder',         sel:['wind_girder_apply'] },
+    { id:'wg_top',      label:'Top wind girder / walkway',        sel:['top_wind_girder_walkaway'] },
+    { id:'clips',       label:'Pipe support clips',               sel:['clip_type'] },
+    { id:'insulation',  label:'Insulation & jacketing',           sel:['insulation_purpose','insulation_moc_inner'] },
+    { id:'roof_fixed',  label:'Fixed roof deck & rafters',        sel:['roof_type','roof_type_category'] },
+    { id:'roof_columns',label:'Roof support columns',             sel:['column_roof_apply_supported'] },
+    { id:'roof_hatch',  label:'Gauge hatch',                      sel:['appur_apply'] },
+    { id:'float_int',   label:'Internal floating roof',           sel:['roof_float_int_type'] },
+    { id:'float_ext',   label:'External floating roof',           sel:['roof_float_ext_type'] },
+    { id:'float_seal',  label:'Rim seal & rolling ladder',        sel:['roof_float_apply'] },
+    { id:'coils',       label:'Heating / cooling coils',          sel:['coil_apply'] },
+    { id:'agitator',    label:'Agitator / mixer',                 sel:['agitat_qty'] },
+    { id:'stwell',      label:'Stilling well',                    sel:['stwell_mat_grade'] },
+    { id:'nz_shell',    label:'Shell nozzles',                    sel:['shell_nozzle_elev'] },
+    { id:'nz_roof',     label:'Roof nozzles',                     sel:['roof_nozzle_rad_location'] },
+    { id:'manway',      label:'Manways, davits & cleanout door',  sel:['appur_apply_mech'] },
+    { id:'vents',       label:'PVRV, vents & flame arrester',     sel:['vent_apply'] },
+    { id:'stairway',    label:'Spiral stairway & platforms',      sel:['appur_apply_mech'] },
+    { id:'earthing',    label:'Earthing lugs & cables',           sel:['earthlu_qty'] },
+    { id:'fire_ring',   label:'Water-spray / foam ring',          sel:['Fire Protection System Description',
+                                                                      'Spray Nozzle Quantity','Foam Chamber Quantity'] }
+  ];
+
+  /* ── Index every parameter ────────────────────────────────────────────── */
   const ITEM = new Map(), ITEM_ZONE = new Map();
-  ZONES.forEach(z => z.items.forEach(it => { ITEM.set(it.id, it); ITEM_ZONE.set(it.id, z.id); }));
+  ZONES.forEach(z => {
+    // Disambiguate labels that repeat inside a zone, so the Excel round-trip
+    // can match a row back to exactly one parameter.
+    const seen = {};
+    z.items.forEach(it => { seen[it.label] = (seen[it.label] || 0) + 1; });
+    z.items.forEach(it => {
+      it.sub = seen[it.label] > 1 ? it.label + ' [' + it.key + ']' : it.label;
+      it.zoneName = z.name;
+      ITEM.set(it.id, it);
+      ITEM_ZONE.set(it.id, z.id);
+    });
+  });
   const TOTAL = ITEM.size;
 
+  /* Resolve feature selectors → parameter ids, and tag those parameters */
+  const ITEM_FEATURES = new Map();          // item id  → [feature id]
+  const FEATURE_ITEMS = new Map();          // feature  → [item id]
+  const FEATURE_LABEL = new Map();
+  (function resolveFeatures() {
+    const byKey = new Map(), byLabel = new Map();
+    ITEM.forEach(it => {
+      if (it.key && it.key !== '(unnamed)' && !byKey.has(it.key)) byKey.set(it.key, it.id);
+      if (!byLabel.has(it.label)) byLabel.set(it.label, it.id);
+    });
+    FEATURES.forEach(f => {
+      FEATURE_LABEL.set(f.id, f.label);
+      const ids = [];
+      f.sel.forEach(s => {
+        const id = byKey.get(s) || byLabel.get(s);
+        if (id) ids.push(id);
+        else console.warn('[GAD] feature selector not found in matrix:', f.id, s);
+      });
+      FEATURE_ITEMS.set(f.id, ids);
+      ids.forEach(id => {
+        if (!ITEM_FEATURES.has(id)) ITEM_FEATURES.set(id, []);
+        ITEM_FEATURES.get(id).push(f.id);
+      });
+    });
+  })();
+
   /* ── Persisted state ──────────────────────────────────────────────────── */
-  const state = { answers: {}, meta: {} };
+  const state = { step: 1, answers: {}, meta: {}, wbB64: null, revs: [] };
   try {
     const raw = localStorage.getItem(STORE);
     if (raw) Object.assign(state, JSON.parse(raw));
-  } catch (e) { /* private mode / quota — run without persistence */ }
+  } catch (e) { /* private mode — run without persistence */ }
 
   let saveTimer = null;
   function save() {
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => {
-      try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {}
+      try { localStorage.setItem(STORE, JSON.stringify(state)); }
+      catch (e) {
+        // Most likely the stored workbook blew the quota — drop it and retry.
+        try { const c = Object.assign({}, state, { wbB64: null });
+              localStorage.setItem(STORE, JSON.stringify(c)); } catch (e2) {}
+      }
     }, 350);
   }
 
-  /* ── Header metadata fields ───────────────────────────────────────────── */
-  const META = ['project', 'tag', 'dwg', 'rev', 'rev-by', 'date'];
-  META.forEach(k => {
+  /* ── Header metadata ──────────────────────────────────────────────────── */
+  ['project', 'tag', 'dwg', 'rev-by', 'date'].forEach(k => {
     const el = document.getElementById('m-' + k);
     if (state.meta[k]) el.value = state.meta[k];
     el.addEventListener('input', () => { state.meta[k] = el.value; save(); });
   });
   if (!state.meta.date) {
     const d = new Date();
-    document.getElementById('m-date').value =
-      d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-    state.meta.date = document.getElementById('m-date').value;
+    const v = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    document.getElementById('m-date').value = v;
+    state.meta.date = v;
   }
 
-  /* ── Filters ──────────────────────────────────────────────────────────── */
-  const filter = { q: '', mand: false, open: false };
+  /* ── Helpers ──────────────────────────────────────────────────────────── */
+  const esc = s => String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+  const statusOf = id => (state.answers[id] || {}).v || null;
+  const isNA     = id => statusOf(id) === 'na';
+
+  let toastTimer = null;
+  function toast(msg, isErr) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'show' + (isErr ? ' err' : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.className = ''; }, isErr ? 6000 : 3400);
+  }
+
+  /* ── Which 3D features are currently switched off ─────────────────────── */
+  function hiddenFeatures() {
+    const out = new Set();
+    FEATURE_ITEMS.forEach((ids, fid) => {
+      if (ids.some(isNA)) out.add(fid);
+    });
+    return out;
+  }
+
+  function pushGeometry() {
+    const hidden = hiddenFeatures();
+    if (window.__gad3d) window.__gad3d.setHidden(hidden);
+    const el = document.getElementById('vp-trim');
+    if (hidden.size) {
+      const names = Array.from(hidden).map(f => FEATURE_LABEL.get(f));
+      el.textContent = 'Trimmed: ' + hidden.size + ' feature' + (hidden.size > 1 ? 's' : '') +
+                       ' removed — ' + names.slice(0, 3).join(', ') + (names.length > 3 ? '…' : '');
+      el.classList.add('show');
+    } else {
+      el.classList.remove('show');
+    }
+  }
+
+  /* ═════════════════════════════════════════════════════════════════════════
+     FILTERS
+     ═════════════════════════════════════════════════════════════════════════ */
+  const filter = { q: '', mand: false, unset: false, f3d: false };
+
+  function visibleInStep(it) {
+    // Step 2 only ever shows parameters that are still applicable.
+    return !(state.step === 2 && isNA(it.id));
+  }
 
   function matches(it) {
+    if (!visibleInStep(it)) return false;
     if (filter.mand && !it.mand) return false;
-    if (filter.open && state.answers[it.id] && state.answers[it.id].v) return false;
+    if (filter.f3d && !ITEM_FEATURES.has(it.id)) return false;
+    if (filter.unset && statusOf(it.id)) return false;
     if (filter.q) {
       const hay = (it.label + ' ' + it.key + ' ' + it.table + ' ' + it.group).toLowerCase();
       if (!hay.includes(filter.q)) return false;
@@ -456,7 +598,9 @@ button,input,select,textarea{font-family:inherit;color:inherit;}
     return true;
   }
 
-  /* ── Build the accordion shell (bodies render lazily on first open) ────── */
+  /* ═════════════════════════════════════════════════════════════════════════
+     ACCORDION
+     ═════════════════════════════════════════════════════════════════════════ */
   const listEl = document.getElementById('list');
   const secEls = {};
 
@@ -464,14 +608,12 @@ button,input,select,textarea{font-family:inherit;color:inherit;}
     const sec = document.createElement('section');
     sec.className = 'sec';
     sec.dataset.zone = z.id;
-
     sec.innerHTML =
       '<div class="sec-head">' +
         '<div class="sec-bar" style="background:' + z.color + '"></div>' +
         '<div class="sec-txt">' +
           '<div class="sec-name">' + esc(z.name) +
-            (z.kind === 'transversal' ? '<span class="tag t">TRANSVERSAL</span>' : '') +
-          '</div>' +
+            (z.kind === 'transversal' ? '<span class="tag t">TRANSVERSAL</span>' : '') + '</div>' +
           '<div class="sec-ref">' + esc(z.ref) + '</div>' +
         '</div>' +
         '<div class="sec-kpi">' +
@@ -479,18 +621,14 @@ button,input,select,textarea{font-family:inherit;color:inherit;}
           '<svg class="sec-ring" viewBox="0 0 26 26">' +
             '<circle class="bg" cx="13" cy="13" r="10.5"></circle>' +
             '<circle class="fg" cx="13" cy="13" r="10.5" stroke-dasharray="0 66" stroke="' + z.color + '"></circle>' +
-          '</svg>' +
-          '<span class="caret">▶</span>' +
+          '</svg><span class="caret">▶</span>' +
         '</div>' +
-      '</div>' +
-      '<div class="sec-body"></div>';
-
+      '</div><div class="sec-body"></div>';
     sec.querySelector('.sec-head').addEventListener('click', () => toggleZone(z.id));
     listEl.appendChild(sec);
     secEls[z.id] = sec;
   });
 
-  /* ── Render one zone's items ──────────────────────────────────────────── */
   function renderBody(zid) {
     const z = ZONES.find(x => x.id === zid);
     const body = secEls[zid].querySelector('.sec-body');
@@ -503,25 +641,27 @@ button,input,select,textarea{font-family:inherit;color:inherit;}
       if (grp !== lastGroup) { html += '<div class="grp">' + esc(grp) + '</div>'; lastGroup = grp; }
 
       const a = state.answers[it.id] || {};
+      const feats = ITEM_FEATURES.get(it.id);
+
       const meta = [];
-      if (it.dtype)  meta.push('<b>Type</b> ' + esc(it.dtype));
+      if (it.dtype) meta.push('<b>Type</b> ' + esc(it.dtype));
       if (it.constr && it.constr !== '-') meta.push('<b>Range</b> ' + esc(it.constr));
       if (it.owner && it.owner.length) meta.push('<b>Owner</b> ' + esc(it.owner.join(', ')));
-      if (it.note) meta.push('<b>Note</b> ' + esc(it.note));
+      if (feats) meta.push('<b>Controls 3D</b> ' + esc(feats.map(f => FEATURE_LABEL.get(f)).join(', ')));
 
       html +=
-        '<div class="item' + (a.v ? ' answered' : '') + '" data-id="' + it.id + '">' +
+        '<div class="item' + (a.v ? ' answered' : '') + (a.v === 'na' ? ' is-na' : '') + '" data-id="' + it.id + '">' +
           '<div class="item-top">' +
             '<div class="item-label">' + esc(it.label) +
               (it.mand ? '<span class="tag m">MANDATORY</span>' : '') +
+              (feats ? '<span class="tag f">3D</span>' : '') +
               '<span class="item-key">' + esc(it.key) + '</span>' +
             '</div>' +
-            '<div class="tri">' +
-              btn(it.id, 'yes', 'Yes', a.v) + btn(it.id, 'no', 'No', a.v) + btn(it.id, 'na', 'N/A', a.v) +
-            '</div>' +
+            (state.step === 1 ? duoHTML(it.id, a.v) : triHTML(it.id, a.v)) +
           '</div>' +
           (meta.length ? '<div class="item-meta">' + meta.join(' &nbsp;·&nbsp; ') + '</div>' : '') +
-          '<input class="rmk" data-id="' + it.id + '" placeholder="Remarks…" value="' + esc(a.r || '') + '">' +
+          (state.step === 2 && a.v === 'open' ? pendHTML(it.id, a.pend) : '') +
+          (state.step === 2 ? '<input class="rmk" data-id="' + it.id + '" placeholder="Remarks…" value="' + esc(a.r || '') + '">' : '') +
         '</div>';
     });
 
@@ -529,82 +669,138 @@ button,input,select,textarea{font-family:inherit;color:inherit;}
     body.dataset.rendered = '1';
   }
 
-  function btn(id, v, txt, cur) {
-    return '<button data-id="' + id + '" data-v="' + v + '"' + (cur === v ? ' class="on"' : '') + '>' + txt + '</button>';
+  function triHTML(id, cur) {
+    const b = (v, t) => '<button data-id="' + id + '" data-v="' + v + '"' +
+                        (cur === v ? ' class="on"' : '') + '>' + t + '</button>';
+    return '<div class="tri">' + b('closed', 'Closed') + b('open', 'Open') + b('na', 'N/A') + '</div>';
   }
 
-  /* ── Delegated events inside the list ─────────────────────────────────── */
+  function duoHTML(id, cur) {
+    const app = cur !== 'na';
+    return '<div class="duo">' +
+      '<button data-id="' + id + '" data-v="app"' + (app ? ' class="on"' : '') + '>Applicable</button>' +
+      '<button data-id="' + id + '" data-v="na"'  + (!app ? ' class="on"' : '') + '>N/A</button></div>';
+  }
+
+  function pendHTML(id, cur) {
+    return '<div class="pend"><label>Pending from</label>' +
+      '<select class="pend-sel' + (cur ? '' : ' unset') + '" data-id="' + id + '">' +
+      '<option value=""' + (cur ? '' : ' selected') + '>— select discipline —</option>' +
+      PENDING.map(p => '<option value="' + esc(p) + '"' + (cur === p ? ' selected' : '') + '>' + esc(p) + '</option>').join('') +
+      '</select></div>';
+  }
+
+  /* ── Delegated list events ────────────────────────────────────────────── */
   listEl.addEventListener('click', e => {
-    const b = e.target.closest('.tri button');
+    const b = e.target.closest('.tri button, .duo button');
     if (!b) return;
-    const id = b.dataset.id, v = b.dataset.v;
+    const id = b.dataset.id;
+    let v = b.dataset.v;
+
     const a = state.answers[id] || (state.answers[id] = {});
-    a.v = (a.v === v) ? null : v;             // clicking the active choice clears it
+    const wasNA = a.v === 'na';
+
+    if (state.step === 1) {
+      a.v = (v === 'na') ? 'na' : null;           // step 1 is applicability only
+    } else {
+      a.v = (a.v === v) ? null : v;               // clicking the active choice clears it
+      if (a.v !== 'open') delete a.pend;
+    }
     if (!a.v && !a.r) delete state.answers[id];
 
-    const row = b.closest('.item');
-    row.querySelectorAll('.tri button').forEach(x => x.classList.toggle('on', x.dataset.v === a.v));
-    row.classList.toggle('answered', !!a.v);
-
+    rerenderItem(id);
     save(); refreshProgress();
-    if (filter.open && a.v) row.classList.add('hidden');
+    if (wasNA !== (statusOf(id) === 'na')) { pushGeometry(); renderDrawer(); }
+    if (state.step === 2 && statusOf(id) === 'na') {
+      // It just left the active review — drop it from the visible list.
+      const row = listEl.querySelector('.item[data-id="' + id + '"]');
+      if (row) row.remove();
+      renderDrawer();
+    }
   });
 
   listEl.addEventListener('input', e => {
-    if (!e.target.classList.contains('rmk')) return;
+    if (e.target.classList.contains('rmk')) {
+      const id = e.target.dataset.id;
+      const a = state.answers[id] || (state.answers[id] = {});
+      a.r = e.target.value;
+      if (!a.v && !a.r) delete state.answers[id];
+      save();
+    }
+  });
+
+  listEl.addEventListener('change', e => {
+    if (!e.target.classList.contains('pend-sel')) return;
     const id = e.target.dataset.id;
     const a = state.answers[id] || (state.answers[id] = {});
-    a.r = e.target.value;
-    if (!a.v && !a.r) delete state.answers[id];
+    a.pend = e.target.value || undefined;
+    e.target.classList.toggle('unset', !a.pend);
     save();
   });
 
-  /* ── Zone open / close  (bi-directional hook lives here) ───────────────── */
+  function rerenderItem(id) {
+    const row = listEl.querySelector('.item[data-id="' + id + '"]');
+    if (!row) return;
+    const it = ITEM.get(id), a = state.answers[id] || {};
+    const top = row.querySelector('.item-top');
+
+    // Status control
+    const old = top.querySelector('.tri, .duo');
+    if (old) old.outerHTML = state.step === 1 ? duoHTML(id, a.v) : triHTML(id, a.v);
+
+    // Pending-from dropdown appears/disappears with the "Open" status
+    const pend = row.querySelector('.pend');
+    if (state.step === 2 && a.v === 'open') {
+      if (!pend) {
+        const rmk = row.querySelector('.rmk');
+        rmk.insertAdjacentHTML('beforebegin', pendHTML(id, a.pend));
+      }
+    } else if (pend) { pend.remove(); }
+
+    row.classList.toggle('answered', !!a.v);
+    row.classList.toggle('is-na', a.v === 'na');
+  }
+
+  /* ── Zone open / close ────────────────────────────────────────────────── */
   let openZone = null;
 
   function toggleZone(zid, opts) {
     opts = opts || {};
     if (openZone === zid && !opts.force) { closeZone(); return; }
     openZone = zid;
-
     ZONES.forEach(z => {
-      const el = secEls[z.id];
-      el.classList.toggle('open', z.id === zid);
-      el.classList.toggle('active', z.id === zid);
+      secEls[z.id].classList.toggle('open', z.id === zid);
+      secEls[z.id].classList.toggle('active', z.id === zid);
     });
-
     const body = secEls[zid].querySelector('.sec-body');
     if (body.dataset.rendered !== '1') renderBody(zid);
 
     const z = ZONES.find(x => x.id === zid);
     document.getElementById('vp-zone').textContent = z.name;
-    document.getElementById('vp-ref').textContent  =
+    document.getElementById('vp-ref').textContent =
       z.ref + (z.kind === 'transversal' ? '  ·  transversal control — applies across every zone' : '');
     syncLegend(zid);
 
     if (!opts.silent && window.__gad3d) window.__gad3d.focusZone(zid);
-    if (opts.scroll !== false) {
-      secEls[zid].scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    if (opts.scroll !== false) secEls[zid].scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function closeZone() {
     openZone = null;
-    ZONES.forEach(z => { secEls[z.id].classList.remove('open', 'active'); });
+    ZONES.forEach(z => secEls[z.id].classList.remove('open', 'active'));
     document.getElementById('vp-zone').textContent = 'Complete tank';
-    document.getElementById('vp-ref').textContent  = 'Select a zone to inspect';
+    document.getElementById('vp-ref').textContent = 'Select a zone to inspect';
     syncLegend(null);
     if (window.__gad3d) window.__gad3d.focusZone(null);
   }
 
-  /* Exposed so the 3D layer can drive the UI (canvas → checklist) */
   window.__gadUI = {
     openZone: zid => toggleZone(zid, { force: true, silent: true }),
     closeZone,
-    zones: ZONES
+    getHidden: hiddenFeatures
   };
 
-  /* ── Legend chips (mirror of the accordion, over the canvas) ───────────── */
+  /* ── Legend ───────────────────────────────────────────────────────────── */
   const legendEl = document.getElementById('vp-legend');
   ZONES.filter(z => z.kind === 'zone').forEach(z => {
     const c = document.createElement('div');
@@ -617,66 +813,91 @@ button,input,select,textarea{font-family:inherit;color:inherit;}
     legendEl.querySelectorAll('.lg').forEach(c => c.classList.toggle('on', c.dataset.zone === zid));
   }
 
-  /* ── Progress ─────────────────────────────────────────────────────────── */
+  /* ═════════════════════════════════════════════════════════════════════════
+     PROGRESS
+     ═════════════════════════════════════════════════════════════════════════ */
   function tally() {
-    const t = { yes: 0, no: 0, na: 0, byZone: {} };
-    ZONES.forEach(z => t.byZone[z.id] = { yes: 0, no: 0, na: 0, done: 0, total: z.items.length });
+    const t = { closed: 0, open: 0, na: 0, byZone: {} };
+    ZONES.forEach(z => t.byZone[z.id] = { closed: 0, open: 0, na: 0, total: z.items.length });
     Object.keys(state.answers).forEach(id => {
       const v = state.answers[id].v; if (!v) return;
       const zid = ITEM_ZONE.get(id); if (!zid) return;
-      t[v]++; t.byZone[zid][v]++; t.byZone[zid].done++;
+      t[v]++; t.byZone[zid][v]++;
     });
-    t.done = t.yes + t.no + t.na;
+    t.applicable = TOTAL - t.na;
     return t;
   }
 
   function refreshProgress() {
     const t = tally();
-    const pct = TOTAL ? Math.round(t.done / TOTAL * 100) : 0;
+    const step1 = state.step === 1;
+    const denom = step1 ? TOTAL : Math.max(t.applicable, 1);
+    const pct = step1 ? Math.round((t.closed + t.open + t.na) / TOTAL * 100)
+                      : Math.round(t.closed / denom * 100);
+
+    document.getElementById('pg-label').textContent = step1 ? 'Applicability' : 'Review progress';
     document.getElementById('pg-pct').textContent = pct + '%';
-    document.getElementById('pg-ok').style.width = (t.yes / TOTAL * 100) + '%';
-    document.getElementById('pg-no').style.width = (t.no  / TOTAL * 100) + '%';
-    document.getElementById('pg-na').style.width = (t.na  / TOTAL * 100) + '%';
-    document.getElementById('pg-stats').innerHTML =
-      '<span><i style="background:var(--ok)"></i>Yes ' + t.yes + '</span>' +
-      '<span><i style="background:var(--no)"></i>No ' + t.no + '</span>' +
-      '<span><i style="background:var(--na)"></i>N/A ' + t.na + '</span>' +
-      '<span style="color:var(--text-3)">Open ' + (TOTAL - t.done) + ' of ' + TOTAL + '</span>';
+    document.getElementById('pg-c').style.width = (t.closed / TOTAL * 100) + '%';
+    document.getElementById('pg-o').style.width = (t.open / TOTAL * 100) + '%';
+    document.getElementById('pg-n').style.width = (t.na / TOTAL * 100) + '%';
+
+    document.getElementById('pg-stats').innerHTML = step1
+      ? '<span><i style="background:var(--teal)"></i>Applicable ' + t.applicable + '</span>' +
+        '<span><i style="background:var(--na)"></i>N/A ' + t.na + '</span>' +
+        '<span style="color:var(--text-3)">' + TOTAL + ' parameters in the matrix</span>'
+      : '<span><i style="background:var(--closed)"></i>Closed ' + t.closed + '</span>' +
+        '<span><i style="background:var(--open)"></i>Open ' + t.open + '</span>' +
+        '<span><i style="background:var(--na)"></i>N/A ' + t.na + '</span>' +
+        '<span style="color:var(--text-3)">Unset ' + (t.applicable - t.closed - t.open) +
+        ' of ' + t.applicable + '</span>';
 
     ZONES.forEach(z => {
       const s = t.byZone[z.id], el = secEls[z.id];
-      el.querySelector('.cnt-done').textContent = s.done;
-      const frac = s.total ? s.done / s.total : 0;
+      const app = s.total - s.na;
+      const done = step1 ? (s.closed + s.open + s.na) : s.closed;
+      const tot  = step1 ? s.total : app;
+      el.querySelector('.cnt-done').textContent = done;
+      el.querySelector('.cnt-tot').textContent  = tot;
+      const frac = tot ? done / tot : 0;
       el.querySelector('.sec-ring .fg').setAttribute('stroke-dasharray', (frac * 65.97).toFixed(2) + ' 65.97');
     });
+
+    document.getElementById('na-count').textContent = t.na;
   }
 
-  /* ── Filter wiring ────────────────────────────────────────────────────── */
+  /* ═════════════════════════════════════════════════════════════════════════
+     FILTER WIRING
+     ═════════════════════════════════════════════════════════════════════════ */
   let searchTimer = null;
   document.getElementById('search').addEventListener('input', e => {
     clearTimeout(searchTimer);
     const v = e.target.value.trim().toLowerCase();
     searchTimer = setTimeout(() => { filter.q = v; applyFilter(); }, 180);
   });
-  document.getElementById('f-mand').addEventListener('click', e => {
-    filter.mand = !filter.mand; e.target.classList.toggle('on', filter.mand); applyFilter();
-  });
-  document.getElementById('f-open').addEventListener('click', e => {
-    filter.open = !filter.open; e.target.classList.toggle('on', filter.open); applyFilter();
+  [['f-mand', 'mand'], ['f-open', 'unset'], ['f-3d', 'f3d']].forEach(([id, key]) => {
+    document.getElementById(id).addEventListener('click', e => {
+      filter[key] = !filter[key];
+      e.target.classList.toggle('on', filter[key]);
+      applyFilter();
+    });
   });
 
   function applyFilter() {
-    const active = filter.q || filter.mand || filter.open;
+    const active = filter.q || filter.mand || filter.unset || filter.f3d;
     ZONES.forEach(z => {
       const hits = z.items.filter(matches).length;
       const el = secEls[z.id];
       el.classList.toggle('dim', active && hits === 0);
-      el.querySelector('.cnt-tot').textContent = active ? hits : z.items.length;
-      // Re-render any already-rendered body so it reflects the new filter
       const body = el.querySelector('.sec-body');
       if (body.dataset.rendered === '1') renderBody(z.id);
     });
-    // A text search auto-opens the best-matching zone
+    refreshProgress();
+    if (active) {
+      ZONES.forEach(z => {
+        const hits = z.items.filter(matches).length;
+        if (hits) secEls[z.id].querySelector('.cnt-tot').textContent = hits;
+      });
+    }
     if (filter.q) {
       let best = null, n = -1;
       ZONES.forEach(z => { const h = z.items.filter(matches).length; if (h > n) { n = h; best = z.id; } });
@@ -684,90 +905,437 @@ button,input,select,textarea{font-family:inherit;color:inherit;}
     }
   }
 
-  /* ── Clear ────────────────────────────────────────────────────────────── */
-  document.getElementById('btn-clear').addEventListener('click', () => {
-    if (!confirm('Clear every status and remark on this checklist?')) return;
-    state.answers = {}; save();
+  function rerenderAll() {
     ZONES.forEach(z => {
       const body = secEls[z.id].querySelector('.sec-body');
       if (body.dataset.rendered === '1') renderBody(z.id);
     });
+  }
+
+  /* ═════════════════════════════════════════════════════════════════════════
+     WIZARD
+     ═════════════════════════════════════════════════════════════════════════ */
+  function setStep(n, opts) {
+    state.step = n;
+    document.getElementById('stp1').className = 'stp' + (n === 1 ? ' on' : ' done');
+    document.getElementById('stp2').className = 'stp' + (n === 2 ? ' on' : '');
+    document.getElementById('banner-title').textContent =
+      n === 1 ? 'Step 1 — Applicability setup' : 'Step 2 — Active review';
+    document.getElementById('banner-text').innerHTML = n === 1
+      ? 'Mark every parameter that does not apply to this tank as <b>N/A</b>. The 3D model trims itself in ' +
+        'real time, so what you see is the equipment you are actually reviewing.'
+      : 'Set every applicable parameter to <b>Closed</b> or <b>Open</b>. Anything left <b>Open</b> must be ' +
+        'assigned to the discipline it is pending from. N/A parameters are hidden — reopen them from ' +
+        '<b>Restored N/A Items</b>.';
+    renderFoot();
+    rerenderAll();
     refreshProgress();
+    renderDrawer();
+    save();
+    if (!opts || !opts.quiet) {
+      toast(n === 1 ? 'Back to applicability setup' : 'Applicability locked in — reviewing applicable parameters only');
+    }
+  }
+
+  function renderFoot() {
+    const foot = document.getElementById('foot');
+    foot.innerHTML = state.step === 1
+      ? '<button class="btn btn-primary" id="btn-proceed">Proceed to Review →</button>' +
+        '<button class="btn btn-ghost" id="btn-import" title="Load a previously generated report">Import…</button>' +
+        '<button class="btn btn-ghost warn" id="btn-clear" title="Clear every status and remark">Clear</button>'
+      : '<button class="btn btn-primary" id="btn-report">Generate GAD Report</button>' +
+        '<button class="btn btn-ghost" id="btn-na" title="View and restore N/A items">N/A (<b id="foot-na">0</b>)</button>' +
+        '<button class="btn btn-ghost" id="btn-import" title="Load a previously generated report">Import…</button>' +
+        '<button class="btn btn-ghost" id="btn-back" title="Return to applicability setup">← Step 1</button>';
+
+    const on = (id, fn) => { const el = document.getElementById(id); if (el) el.addEventListener('click', fn); };
+    on('btn-proceed', () => setStep(2));
+    on('btn-back',    () => setStep(1));
+    on('btn-report',  exportWorkbook);
+    on('btn-import',  () => document.getElementById('file-input').click());
+    on('btn-na',      () => { renderDrawer(); document.getElementById('drawer').classList.add('open'); });
+    on('btn-clear',   () => {
+      if (!confirm('Clear every status, remark and pending assignment?')) return;
+      state.answers = {}; save(); rerenderAll(); refreshProgress(); pushGeometry(); renderDrawer();
+      toast('Checklist cleared');
+    });
+    const fn = document.getElementById('foot-na');
+    if (fn) fn.textContent = tally().na;
+  }
+
+  /* ── Restored N/A drawer ──────────────────────────────────────────────── */
+  document.getElementById('drawer-close').addEventListener('click',
+    () => document.getElementById('drawer').classList.remove('open'));
+  document.getElementById('drawer').addEventListener('click', e => {
+    if (e.target.id === 'drawer') e.currentTarget.classList.remove('open');
   });
 
-  /* ── Report generation → window.print() ───────────────────────────────── */
-  document.getElementById('btn-report').addEventListener('click', buildReport);
+  function renderDrawer() {
+    const body = document.getElementById('drawer-body');
+    const naIds = Object.keys(state.answers).filter(isNA);
+    document.getElementById('na-count').textContent = naIds.length;
+    const fn = document.getElementById('foot-na');
+    if (fn) fn.textContent = naIds.length;
 
-  function buildReport() {
-    const t = tally();
+    if (!naIds.length) {
+      body.innerHTML = '<div class="empty">Nothing has been marked N/A. The full tank is in scope.</div>';
+      return;
+    }
+    // Keep the drawer in matrix order rather than click order
+    const order = [];
+    ZONES.forEach(z => z.items.forEach(it => { if (isNA(it.id)) order.push(it); }));
+
+    body.innerHTML = order.map(it => {
+      const feats = ITEM_FEATURES.get(it.id);
+      return '<div class="na-row" data-id="' + it.id + '">' +
+        '<div class="t"><b>' + esc(it.label) + '</b>' +
+          '<span>' + esc(it.key) + (feats ? '  ·  removes: ' + esc(feats.map(f => FEATURE_LABEL.get(f)).join(', ')) : '') + '</span>' +
+          '<div class="z">' + esc(it.zoneName) + '</div>' +
+        '</div><button data-id="' + it.id + '">Restore</button></div>';
+    }).join('');
+  }
+
+  document.getElementById('drawer-body').addEventListener('click', e => {
+    const b = e.target.closest('button[data-id]');
+    if (!b) return;
+    const id = b.dataset.id;
+    const a = state.answers[id];
+    if (a) { a.v = null; if (!a.r) delete state.answers[id]; }
+    save(); refreshProgress(); pushGeometry(); renderDrawer(); rerenderAll();
+    toast('Restored: ' + ITEM.get(id).label);
+  });
+
+  /* ═════════════════════════════════════════════════════════════════════════
+     EXCEL — revision-tracked import / export
+     ═════════════════════════════════════════════════════════════════════════ */
+  const COLS = ['Parameter', 'Sub Parameter', 'Status', 'Pending From', 'Remark', 'Progress %'];
+
+  const HDR_FILL   = '1F497D';           // dark blue header
+  const TITLE_FILL = '16293D';
+  const C_CLOSED   = { fill: 'C6EFCE', font: '006100' };
+  const C_OPEN     = { fill: 'FFC7CE', font: '9C0006' };
+  const C_NA       = { fill: 'D9D9D9', font: '595959' };
+
+  const thin = { style: 'thin', color: { rgb: 'B7C4D2' } };
+  const BORDER = { top: thin, bottom: thin, left: thin, right: thin };
+
+  /* Rev letters: A…Z, AA, AB, … */
+  function revToNum(s) {
+    let n = 0;
+    for (const ch of s.toUpperCase()) n = n * 26 + (ch.charCodeAt(0) - 64);
+    return n;
+  }
+  function numToRev(n) {
+    let s = '';
+    while (n > 0) { const r = (n - 1) % 26; s = String.fromCharCode(65 + r) + s; n = Math.floor((n - 1) / 26); }
+    return s || 'A';
+  }
+  const ACTIVE_RE = /^Rev\s+([A-Z]+)$/i;
+  const NA_RE     = /^Rev\s+([A-Z]+)\s*-\s*NA$/i;
+
+  function revisionsIn(wb) {
+    const out = [];
+    (wb ? wb.SheetNames : []).forEach(n => {
+      const m = ACTIVE_RE.exec(n.trim());
+      if (m) out.push(m[1].toUpperCase());
+    });
+    return out.sort((a, b) => revToNum(a) - revToNum(b));
+  }
+
+  function nextRev(wb) {
+    const have = revisionsIn(wb).concat(state.revs || []);
+    if (!have.length) return 'A';
+    return numToRev(Math.max.apply(null, have.map(revToNum)) + 1);
+  }
+
+  /* ── Build one styled worksheet ───────────────────────────────────────── */
+  function buildSheet(rows, rev, naSheet) {
     const m = state.meta;
-    const pct = TOTAL ? Math.round(t.done / TOTAL * 100) : 0;
-    const label = { yes: 'YES', no: 'NO', na: 'N/A' };
-    const cls   = { yes: 's-yes', no: 's-no', na: 's-na' };
+    const title = 'API 650 STORAGE TANK — GAD REVIEW CHECKLIST' + (naSheet ? '  ·  N/A REGISTER' : '');
+    const sub = [
+      'Project: ' + (m.project || '—'),
+      'Tank: ' + (m.tag || '—'),
+      'Drawing: ' + (m.dwg || '—'),
+      'Revision: ' + rev,
+      'Reviewer: ' + (m['rev-by'] || '—'),
+      'Date: ' + (m.date || '—')
+    ].join('     |     ');
 
-    let h =
-      '<div class="rp-head">' +
-        '<h1>API 650 Storage Tank — GAD Review Checklist</h1>' +
-        '<div class="rp-sub">General Arrangement Drawing review record  ·  ' + esc(DATA.meta.source_pdf) + '</div>' +
-      '</div>' +
-      '<div class="rp-meta">' +
-        f('Project', m.project) + f('Tank tag', m.tag) + f('Drawing no.', m.dwg) +
-        f('Revision', m.rev) + f('Reviewed by', m['rev-by']) + f('Date', m.date) +
-      '</div>' +
-      '<div class="rp-sum"><h3>Summary — ' + pct + '% reviewed (' + t.done + ' of ' + TOTAL + ' parameters)</h3><table>' +
-        '<tr><td><b>Zone / control group</b></td><td>Yes</td><td>No</td><td>N/A</td><td>Open</td></tr>';
+    const aoa = [[title, '', '', '', '', ''], [sub, '', '', '', '', ''], [], COLS.slice()];
+    rows.forEach(r => aoa.push(r));
 
-    ZONES.forEach(z => {
-      const s = t.byZone[z.id];
-      h += '<tr><td>' + esc(z.name) + '</td><td>' + s.yes + '</td><td>' + s.no + '</td><td>' + s.na +
-           '</td><td>' + (s.total - s.done) + '</td></tr>';
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    const HDR = 3;                                   // 0-based row index of the header
+    const last = aoa.length - 1;
+
+    ws['!merges'] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 5 } }
+    ];
+    ws['!rows'] = [{ hpt: 26 }, { hpt: 18 }, { hpt: 7 }, { hpt: 20 }];
+
+    const cell = (r, c) => ws[XLSX.utils.encode_cell({ r: r, c: c })];
+
+    // Title + subtitle banners
+    for (let c = 0; c < 6; c++) {
+      const t = cell(0, c) || (ws[XLSX.utils.encode_cell({ r: 0, c: c })] = { t: 's', v: '' });
+      t.s = { font: { bold: true, sz: 13, color: { rgb: 'FFFFFF' } },
+              fill: { fgColor: { rgb: TITLE_FILL } },
+              alignment: { horizontal: 'left', vertical: 'center', indent: 1 } };
+      const s = cell(1, c) || (ws[XLSX.utils.encode_cell({ r: 1, c: c })] = { t: 's', v: '' });
+      s.s = { font: { bold: true, sz: 9, color: { rgb: '22415F' } },
+              fill: { fgColor: { rgb: 'DCE6F2' } },
+              alignment: { horizontal: 'left', vertical: 'center', indent: 1 } };
+    }
+
+    // Column header
+    for (let c = 0; c < 6; c++) {
+      const h = cell(HDR, c);
+      h.s = { font: { bold: true, sz: 10, color: { rgb: 'FFFFFF' } },
+              fill: { fgColor: { rgb: HDR_FILL } },
+              alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+              border: BORDER };
+    }
+
+    // Body
+    for (let r = HDR + 1; r <= last; r++) {
+      const zebra = ((r - HDR) % 2 === 0) ? 'F2F6FA' : 'FFFFFF';
+      const status = (cell(r, 2) || {}).v;
+      const isZoneRun = (cell(r, 1) || {}).v === '';   // never used, kept for clarity
+
+      for (let c = 0; c < 6; c++) {
+        const k = XLSX.utils.encode_cell({ r: r, c: c });
+        const cl = ws[k] || (ws[k] = { t: 's', v: '' });
+        cl.s = {
+          font: { sz: 9, color: { rgb: '22415F' }, bold: c === 0 },
+          fill: { fgColor: { rgb: zebra } },
+          alignment: { vertical: 'top', wrapText: c === 1 || c === 4 },
+          border: BORDER
+        };
+      }
+
+      // Status colouring
+      const sc = status === 'Closed' ? C_CLOSED : status === 'Open' ? C_OPEN : status === 'N/A' ? C_NA : null;
+      if (sc) {
+        const k = XLSX.utils.encode_cell({ r: r, c: 2 });
+        ws[k].s = { font: { bold: true, sz: 9, color: { rgb: sc.font } },
+                    fill: { fgColor: { rgb: sc.fill } },
+                    alignment: { horizontal: 'center', vertical: 'center' },
+                    border: BORDER };
+      }
+
+      // Progress % as a real number with a percent format
+      const pk = XLSX.utils.encode_cell({ r: r, c: 5 });
+      if (ws[pk] && typeof ws[pk].v === 'number') {
+        ws[pk].t = 'n'; ws[pk].z = '0%';
+        ws[pk].s = { font: { bold: true, sz: 9, color: { rgb: ws[pk].v >= 1 ? '006100' : '9C0006' } },
+                     fill: { fgColor: { rgb: zebra } },
+                     alignment: { horizontal: 'center', vertical: 'center' },
+                     numFmt: '0%', border: BORDER };
+      } else if (ws[pk]) {
+        ws[pk].s.alignment = { horizontal: 'center', vertical: 'center' };
+      }
+    }
+
+    // Auto-size columns from the longest cell in each
+    const cap = [34, 62, 12, 22, 60, 11];
+    ws['!cols'] = COLS.map((h, c) => {
+      let w = h.length;
+      for (let r = HDR + 1; r <= last; r++) {
+        const v = (cell(r, c) || {}).v;
+        if (v != null) w = Math.max(w, String(v).length);
+      }
+      return { wch: Math.min(Math.max(w + 2, 10), cap[c]) };
     });
-    h += '<tr class="tot"><td>Total</td><td>' + t.yes + '</td><td>' + t.no + '</td><td>' + t.na +
-         '</td><td>' + (TOTAL - t.done) + '</td></tr></table></div>';
 
+    if (last > HDR) {
+      ws['!autofilter'] = { ref: XLSX.utils.encode_range({ s: { r: HDR, c: 0 }, e: { r: last, c: 5 } }) };
+    }
+    return ws;
+  }
+
+  /* ── Collect rows for the two sheets ──────────────────────────────────── */
+  function collectRows() {
+    const active = [], na = [];
     ZONES.forEach(z => {
-      const s = t.byZone[z.id];
-      h += '<div class="rp-zone"><h2>' + esc(z.name) +
-           '<span>' + esc(z.ref) + '  ·  ' + s.done + '/' + s.total + ' reviewed</span></h2>' +
-           '<table class="rp-tbl"><thead><tr>' +
-             '<th class="c-n">#</th><th>Parameter</th><th class="c-s">Status</th><th class="c-r">Remarks</th>' +
-           '</tr></thead><tbody>';
-
-      z.items.forEach((it, i) => {
+      z.items.forEach(it => {
         const a = state.answers[it.id] || {};
-        const st = a.v ? '<span class="' + cls[a.v] + '">' + label[a.v] + '</span>'
-                       : '<span class="s-un">—</span>';
-        h += '<tr>' +
-               '<td class="c-n">' + (i + 1) + '</td>' +
-               '<td>' + esc(it.label) + (it.mand ? ' <span class="rp-mand">*</span>' : '') +
-                 '<span class="rp-key">' + esc(it.key) +
-                 (it.table !== 'eqp.tank' ? '  ·  ' + esc(it.table) : '') + '</span></td>' +
-               '<td class="c-s">' + st + '</td>' +
-               '<td class="c-r">' + esc(a.r || '') + '</td>' +
-             '</tr>';
+        if (a.v === 'na') {
+          na.push([z.name, it.sub, 'N/A', '', a.r || '', '']);
+        } else {
+          const st = a.v === 'closed' ? 'Closed' : a.v === 'open' ? 'Open' : '';
+          const prog = a.v === 'closed' ? 1 : a.v === 'open' ? 0 : '';
+          active.push([z.name, it.sub, st, a.v === 'open' ? (a.pend || '') : '', a.r || '', prog]);
+        }
       });
-      h += '</tbody></table></div>';
+    });
+    return { active: active, na: na };
+  }
+
+  /* ── Export ───────────────────────────────────────────────────────────── */
+  function exportWorkbook() {
+    if (typeof XLSX === 'undefined') {
+      toast('Spreadsheet library did not load — check the network and reload.', true);
+      return;
+    }
+    let wb = null;
+    if (state.wbB64) {
+      try { wb = XLSX.read(b64ToBytes(state.wbB64), { type: 'array', cellStyles: true }); }
+      catch (e) { console.warn('stored workbook unreadable, starting fresh', e); wb = null; }
+    }
+    if (!wb) wb = XLSX.utils.book_new();
+
+    const rev = nextRev(wb);
+    const { active, na } = collectRows();
+
+    XLSX.utils.book_append_sheet(wb, buildSheet(active, rev, false), 'Rev ' + rev);
+    XLSX.utils.book_append_sheet(wb, buildSheet(na, rev, true), 'Rev ' + rev + ' - NA');
+
+    // Remember the workbook so the NEXT export appends rather than restarts
+    try {
+      const out = XLSX.write(wb, { bookType: 'xlsx', type: 'array', cellStyles: true });
+      state.wbB64 = bytesToB64(new Uint8Array(out));
+      state.revs = revisionsIn(wb);
+      save();
+    } catch (e) { console.warn('could not cache workbook', e); }
+
+    const tag = (state.meta.tag || 'TANK').replace(/[^\w.-]+/g, '_');
+    XLSX.writeFile(wb, 'GAD_Review_' + tag + '_Rev' + rev + '.xlsx',
+                   { bookType: 'xlsx', cellStyles: true });
+
+    toast('Exported Rev ' + rev + ' — ' + active.length + ' active, ' + na.length + ' N/A' +
+          (revisionsIn(wb).length > 1 ? '  ·  ' + revisionsIn(wb).length + ' revisions in file' : ''));
+  }
+
+  /* ── Import ───────────────────────────────────────────────────────────── */
+  document.getElementById('file-input').addEventListener('change', e => {
+    const f = e.target.files && e.target.files[0];
+    e.target.value = '';                                  // allow re-picking the same file
+    if (!f) return;
+    if (typeof XLSX === 'undefined') {
+      toast('Spreadsheet library did not load — check the network and reload.', true);
+      return;
+    }
+    const fr = new FileReader();
+    fr.onerror = () => toast('Could not read that file.', true);
+    fr.onload = ev => {
+      try { importWorkbook(new Uint8Array(ev.target.result), f.name); }
+      catch (err) { console.error(err); toast('Import failed: ' + err.message, true); }
+    };
+    fr.readAsArrayBuffer(f);
+  });
+
+  function importWorkbook(bytes, filename) {
+    const wb = XLSX.read(bytes, { type: 'array', cellStyles: true });
+    const revs = revisionsIn(wb);
+    if (!revs.length) throw new Error('no "Rev X" sheet found in ' + filename);
+
+    const rev = revs[revs.length - 1];                    // latest revision
+    const naName = wb.SheetNames.find(n => {
+      const m = NA_RE.exec(n.trim());
+      return m && m[1].toUpperCase() === rev;
     });
 
-    h += '<div class="rp-sign"><div>Reviewed by</div><div>Checked by</div><div>Discipline Leader</div></div>' +
-         '<div class="rp-foot">* mandatory parameter.  Source: ' + esc(DATA.meta.source_xlsx) +
-         '.  Generated ' + new Date().toLocaleString() + '.  ' +
-         'The full checklist remains the controlling document.</div>';
+    // Lookup: "zone||sub parameter" → item id
+    const lut = new Map();
+    ITEM.forEach(it => lut.set(norm(it.zoneName) + '||' + norm(it.sub), it.id));
 
-    document.getElementById('report').innerHTML = h;
-    setTimeout(() => window.print(), 60);
+    const answers = {};
+    let matched = 0, missed = 0;
+
+    function ingest(sheetName, forceNA) {
+      if (!sheetName || !wb.Sheets[sheetName]) return;
+      const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, blankrows: false });
+      let head = rows.findIndex(r => r && norm(r[0]) === 'parameter' && norm(r[1]) === 'sub parameter');
+      if (head < 0) head = rows.findIndex(r => r && norm(r[0]) === 'parameter');
+      if (head < 0) return;
+
+      for (let i = head + 1; i < rows.length; i++) {
+        const r = rows[i];
+        if (!r || r[0] == null || r[1] == null) continue;
+        const id = lut.get(norm(r[0]) + '||' + norm(r[1]));
+        if (!id) { missed++; continue; }
+        matched++;
+
+        const stRaw = norm(r[2]);
+        let v = forceNA ? 'na'
+              : stRaw === 'closed' ? 'closed'
+              : stRaw === 'open'   ? 'open'
+              : stRaw === 'n/a' || stRaw === 'na' ? 'na' : null;
+
+        const a = {};
+        if (v) a.v = v;
+        if (v === 'open' && r[3]) a.pend = String(r[3]).trim();
+        if (r[4] != null && String(r[4]).trim()) a.r = String(r[4]).trim();
+        if (a.v || a.r) answers[id] = a;
+      }
+    }
+
+    ingest('Rev ' + rev, false);
+    ingest(naName, true);
+
+    if (!matched) throw new Error('none of the rows in "Rev ' + rev + '" matched this matrix');
+
+    // Recover header metadata from the subtitle banner (row 2 of the sheet),
+    // so a fresh session picks up project / tag / drawing / reviewer too.
+    (function () {
+      const ws = wb.Sheets['Rev ' + rev];
+      const sub = ws && ws.A2 && String(ws.A2.v || '');
+      if (!sub) return;
+      const grab = re => { const m = re.exec(sub); return m && m[1].trim() !== '—' ? m[1].trim() : ''; };
+      const found = {
+        project:  grab(/Project:\s*([^|]+)/i),
+        tag:      grab(/Tank:\s*([^|]+)/i),
+        dwg:      grab(/Drawing:\s*([^|]+)/i),
+        'rev-by': grab(/Reviewer:\s*([^|]+)/i)
+      };
+      Object.keys(found).forEach(k => {
+        if (!found[k]) return;
+        state.meta[k] = found[k];
+        const el = document.getElementById('m-' + k);
+        if (el) el.value = found[k];
+      });
+    })();
+
+    // Adopt the imported state
+    state.answers = answers;
+    state.revs = revs;
+    state.wbB64 = bytesToB64(bytes);                      // append to THIS workbook next time
+    setStep(2, { quiet: true });
+    pushGeometry();
+    rerenderAll();
+    refreshProgress();
+    renderDrawer();
+    save();
+
+    const naCount = Object.keys(answers).filter(id => answers[id].v === 'na').length;
+    toast('Imported ' + filename + ' — latest revision "Rev ' + rev + '", ' + matched + ' parameters restored (' +
+          naCount + ' N/A). Next export will be Rev ' + nextRev(wb) + '.' +
+          (missed ? '  ' + missed + ' row(s) did not match this matrix and were skipped.' : ''));
   }
 
-  function f(lbl, v) { return '<div><b>' + lbl + '</b>' + esc(v || '—') + '</div>'; }
+  const norm = s => String(s == null ? '' : s).replace(/\s+/g, ' ').trim().toLowerCase();
 
-  /* ── Utility ──────────────────────────────────────────────────────────── */
-  function esc(s) {
-    return String(s == null ? '' : s)
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  /* Base64 <-> bytes without blowing the argument limit on large workbooks */
+  function bytesToB64(bytes) {
+    let bin = '', CH = 0x8000;
+    for (let i = 0; i < bytes.length; i += CH) {
+      bin += String.fromCharCode.apply(null, bytes.subarray(i, i + CH));
+    }
+    return btoa(bin);
+  }
+  function b64ToBytes(b64) {
+    const bin = atob(b64), out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
   }
 
-  refreshProgress();
+  /* ═════════════════════════════════════════════════════════════════════════
+     BOOT
+     ═════════════════════════════════════════════════════════════════════════ */
+  setStep(state.step || 1, { quiet: true });
+  pushGeometry();
+  window.addEventListener('load', pushGeometry);          // in case the 3D module lands later
 })();
 </script>
 
@@ -775,9 +1343,11 @@ button,input,select,textarea{font-family:inherit;color:inherit;}
 /* ═══════════════════════════════════════════════════════════════════════════
    PART B — PROCEDURAL 3D TANK  (Three.js, ES modules via import map)
 
-   The tank is assembled from primitive geometries grouped into exactly the
-   8 physical zones on page 1 of the checklist PDF.  Every mesh carries
-   userData.zone so a single raycast resolves canvas clicks back to a zone.
+   The model is deliberately EXHAUSTIVE: it carries every feature an API 650
+   tank could have.  Each mesh is tagged with
+     · userData.zone → which checklist zone owns it (click → accordion)
+     · userData.feat → which applicability feature controls it (N/A → hidden)
+   so marking a parameter N/A trims the corresponding geometry immediately.
    ═══════════════════════════════════════════════════════════════════════════ */
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -788,22 +1358,19 @@ const vp   = document.getElementById('viewport');
 try {
 
 /* ── Tank dimensions (scene units ≈ metres) ──────────────────────────────── */
-const R           = 10;      // shell radius
-const COURSES     = 5;       // number of shell courses
-const COURSE_H    = 2.6;     // height of each course
-const H           = COURSES * COURSE_H;   // shell height = 13
-const ROOF_H      = 2.4;     // cone roof rise
-const FOUND_H     = 1.2;     // foundation ringwall height
-const DECK_Y      = 6.2;     // floating roof deck elevation
+const R = 10, COURSES = 5, COURSE_H = 2.6;
+const H = COURSES * COURSE_H;          // 13
+const ROOF_H = 2.4, FOUND_H = 1.2;
+const DECK_Y = 6.2;                    // internal floating deck
+const EXT_DECK_Y = 10.4;               // external floating deck
 
-/* ── Zone palette — kept in sync with the checklist accordion ─────────────── */
 const ZCOL = {
   Z1:0x2B6CB0, Z2:0x2C9AA8, Z3:0xD9922E, Z4:0x1B3A5C,
   Z5:0x2A9D8F, Z6:0x4E8B62, Z7:0xE08A2E, Z8:0x3763A8
 };
 
 /* ── Renderer / scene / camera ───────────────────────────────────────────── */
-const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false });
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -811,40 +1378,36 @@ vp.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xE9F0F6);
-scene.fog = new THREE.Fog(0xE9F0F6, 90, 230);
+scene.fog = new THREE.Fog(0xE9F0F6, 90, 240);
 
 const camera = new THREE.PerspectiveCamera(42, 1, 0.5, 600);
-camera.position.set(34, 22, 38);
+camera.position.set(34, 20, 38);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.075;
 controls.minDistance = 8;
-controls.maxDistance = 150;
-controls.maxPolarAngle = Math.PI * 0.495;   // never go under the ground plane
+controls.maxDistance = 160;
+controls.maxPolarAngle = Math.PI * 0.495;
 controls.target.set(0, H * 0.45, 0);
 
-/* ── Lighting ────────────────────────────────────────────────────────────── */
 scene.add(new THREE.HemisphereLight(0xE8F2FA, 0x9FB0C0, 1.05));
-
 const key = new THREE.DirectionalLight(0xFFFFFF, 1.5);
 key.position.set(36, 46, 26);
 key.castShadow = true;
 key.shadow.mapSize.set(2048, 2048);
-key.shadow.camera.near = 10; key.shadow.camera.far = 140;
-key.shadow.camera.left = -34; key.shadow.camera.right = 34;
-key.shadow.camera.top = 40;   key.shadow.camera.bottom = -14;
+key.shadow.camera.near = 10; key.shadow.camera.far = 150;
+key.shadow.camera.left = -36; key.shadow.camera.right = 36;
+key.shadow.camera.top = 42;   key.shadow.camera.bottom = -16;
 key.shadow.bias = -0.0012;
 scene.add(key);
-
 const fill = new THREE.DirectionalLight(0xCFE2F0, 0.5);
 fill.position.set(-30, 16, -24);
 scene.add(fill);
 
-/* Ground */
 const ground = new THREE.Mesh(
   new THREE.CircleGeometry(72, 72),
-  new THREE.MeshStandardMaterial({ color:0xDCE6EF, roughness:0.97, metalness:0 })
+  new THREE.MeshStandardMaterial({ color: 0xDCE6EF, roughness: 0.97 })
 );
 ground.rotation.x = -Math.PI / 2;
 ground.position.y = -FOUND_H - 0.02;
@@ -856,370 +1419,330 @@ grid.position.y = -FOUND_H - 0.01;
 grid.material.opacity = 0.5; grid.material.transparent = true;
 scene.add(grid);
 
-/* ── Materials — one instance per zone so highlighting is a per-zone edit ── */
-const zoneMat = {};        // zid → base material
-const allMats = [];
-function mat(zid, o) {
-  const m = new THREE.MeshStandardMaterial(Object.assign({
-    color: ZCOL[zid], roughness: 0.55, metalness: 0.35
-  }, o || {}));
-  m.userData = { base: new THREE.Color(ZCOL[zid]), zone: zid };
+/* ── Materials, one per zone so highlighting is a per-zone edit ───────────── */
+const zoneMat = {}, allMats = [];
+function mkMat(zid, o) {
+  const m = new THREE.MeshStandardMaterial(Object.assign(
+    { color: ZCOL[zid], roughness: 0.55, metalness: 0.35 }, o || {}));
+  m.userData = { base: new THREE.Color(o && o.color !== undefined ? o.color : ZCOL[zid]), zone: zid };
   allMats.push(m);
   return m;
 }
-['Z1','Z2','Z3','Z4','Z5','Z6','Z7','Z8'].forEach(z => { zoneMat[z] = mat(z); });
+['Z1','Z2','Z3','Z4','Z5','Z6','Z7','Z8'].forEach(z => { zoneMat[z] = mkMat(z); });
+zoneMat.Z2.roughness = 0.42; zoneMat.Z2.metalness = 0.55;
+zoneMat.Z4.roughness = 0.95; zoneMat.Z4.metalness = 0.05;
+zoneMat.Z5.roughness = 0.35; zoneMat.Z5.metalness = 0.7;
+zoneMat.Z6.roughness = 0.6;  zoneMat.Z6.metalness = 0.45;
+zoneMat.Z8.transparent = true; zoneMat.Z8.opacity = 0.30; zoneMat.Z8.side = THREE.DoubleSide;
 
-/* Slight per-zone character */
-zoneMat.Z2.roughness = 0.42; zoneMat.Z2.metalness = 0.55;   // painted steel shell
-zoneMat.Z4.roughness = 0.95; zoneMat.Z4.metalness = 0.05;   // concrete foundation
-zoneMat.Z5.roughness = 0.35; zoneMat.Z5.metalness = 0.7;    // internals
-zoneMat.Z6.roughness = 0.6;  zoneMat.Z6.metalness = 0.45;   // galvanised access steel
-zoneMat.Z8.transparent = true; zoneMat.Z8.opacity = 0.30;   // coating envelope
-zoneMat.Z8.side = THREE.DoubleSide;
+const concreteMat = mkMat('Z4', { color: 0x8FA3B8, roughness: 0.96, metalness: 0.02 });
+const sealMat = mkMat('Z5', { color: 0x1F7A70, roughness: 0.9, metalness: 0.05,
+                              side: THREE.DoubleSide, transparent: true, opacity: 0.88 });
+const jacketMat = mkMat('Z8', { color: 0xA9C4D8, roughness: 0.35, metalness: 0.6,
+                                side: THREE.DoubleSide, transparent: true, opacity: 0.34 });
+const linerMat = mkMat('Z3', { color: 0x6E5B3E, roughness: 0.98, metalness: 0.0,
+                               side: THREE.DoubleSide, transparent: true, opacity: 0.75 });
 
-/* ── Zone groups ─────────────────────────────────────────────────────────── */
+/* ── Groups + mesh registry ──────────────────────────────────────────────── */
 const tank = new THREE.Group();
 scene.add(tank);
-
 const groups = {};
 ['Z1','Z2','Z3','Z4','Z5','Z6','Z7','Z8'].forEach(z => {
-  groups[z] = new THREE.Group();
-  groups[z].name = z;
-  tank.add(groups[z]);
+  groups[z] = new THREE.Group(); groups[z].name = z; tank.add(groups[z]);
 });
 
-/* Aim a mesh whose geometry runs along +Y so that its axis points along `dir`.
-   Using a quaternion avoids the Euler-order ambiguity that bites when you try
-   to compose rotation.z + rotation.y by hand. */
+const MESHES = [];
+let CURFEAT = null;
+const feat = f => { CURFEAT = f; };      // everything added until the next call belongs to feature f
+
 const YAXIS = new THREE.Vector3(0, 1, 0);
-function aim(mesh, dir) {
-  mesh.quaternion.setFromUnitVectors(YAXIS, dir.clone().normalize());
-  return mesh;
-}
+const aim = (mesh, dir) => (mesh.quaternion.setFromUnitVectors(YAXIS, dir.clone().normalize()), mesh);
 const radialDir = a => new THREE.Vector3(Math.cos(a), 0, Math.sin(a));
 
-/* Helper: add a mesh to a zone group, tagged for raycasting */
 function add(zid, geo, m, x, y, z2) {
   const mesh = new THREE.Mesh(geo, m || zoneMat[zid]);
   if (x !== undefined) mesh.position.set(x, y, z2);
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
+  mesh.castShadow = true; mesh.receiveShadow = true;
   mesh.userData.zone = zid;
+  mesh.userData.feat = CURFEAT;
   groups[zid].add(mesh);
+  MESHES.push(mesh);
   return mesh;
 }
 
-/* ═══ Z4 — ANCHORAGE & FOUNDATION ═══════════════════════════════════════════
-   Concrete ringwall + anchor chairs and bolts around the base.               */
-(function buildFoundation() {
-  const concrete = new THREE.MeshStandardMaterial({ color:0x8FA3B8, roughness:0.96, metalness:0.02 });
-  concrete.userData = { base:new THREE.Color(0x8FA3B8), zone:'Z4' };
-  allMats.push(concrete);
+/* ═══ Z4 — ANCHORAGE & FOUNDATION ═══════════════════════════════════════════ */
+feat('foundation');
+add('Z4', new THREE.CylinderGeometry(R + 0.9, R + 1.15, FOUND_H, 72), concreteMat, 0, -FOUND_H / 2, 0);
+add('Z4', new THREE.CylinderGeometry(R + 0.55, R + 0.9, 0.22, 72), concreteMat, 0, 0.11, 0);
 
-  // Ringwall (slightly larger than the tank, sunk below grade)
-  add('Z4', new THREE.CylinderGeometry(R + 0.9, R + 1.15, FOUND_H, 72, 1, false),
-      concrete, 0, -FOUND_H / 2, 0);
-  // Chamfered top pad
-  add('Z4', new THREE.CylinderGeometry(R + 0.55, R + 0.9, 0.22, 72),
-      concrete, 0, 0.11, 0);
-
-  // Anchor chairs: gusset + top plate + bolt, on the anchor bolt circle
-  const NCHAIR = 16, BCD = R + 0.55;
-  for (let i = 0; i < NCHAIR; i++) {
-    const a = (i / NCHAIR) * Math.PI * 2;
-    const cx = Math.cos(a) * BCD, cz = Math.sin(a) * BCD;
-
-    const gus = add('Z4', new THREE.BoxGeometry(0.6, 1.5, 0.16), null, cx, 0.97, cz);
-    gus.lookAt(0, 0.97, 0);
-
-    const top = add('Z4', new THREE.BoxGeometry(0.75, 0.13, 0.55), null, cx, 1.75, cz);
-    top.lookAt(0, 1.75, 0);
-
-    add('Z4', new THREE.CylinderGeometry(0.075, 0.075, 2.4, 10), null, cx, 0.75, cz);
+feat('anchorage');
+(function () {
+  const N = 16, BCD = R + 0.55;
+  for (let i = 0; i < N; i++) {
+    const a = (i / N) * Math.PI * 2, cx = Math.cos(a) * BCD, cz = Math.sin(a) * BCD;
+    add('Z4', new THREE.BoxGeometry(0.6, 1.5, 0.16), null, cx, 0.97, cz).lookAt(0, 0.97, 0);
+    add('Z4', new THREE.BoxGeometry(0.75, 0.13, 0.55), null, cx, 1.75, cz).lookAt(0, 1.75, 0);
+    add('Z4', new THREE.CylinderGeometry(0.075, 0.075, 2.4, 10), null, cx, 0.75, cz);   // bolt
+    add('Z4', new THREE.CylinderGeometry(0.14, 0.14, 0.12, 6), null, cx, 1.9, cz);      // nut
   }
 })();
 
-/* ═══ Z3 — BOTTOM, ANNULAR & CLEANOUT ══════════════════════════════════════
-   Bottom plate (coned-down), annular ring, sump and a cleanout door.         */
-(function buildBottom() {
-  // Bottom plate — a very shallow cone, high point at the centre
-  add('Z3', new THREE.ConeGeometry(R - 0.55, 0.42, 72, 1, false), null, 0, 0.44, 0);
-  // Annular plate ring at the shell-to-bottom corner
-  add('Z3', new THREE.CylinderGeometry(R + 0.06, R + 0.06, 0.16, 72), null, 0, 0.3, 0);
-  add('Z3', new THREE.RingGeometry(R - 1.6, R + 0.06, 72), null, 0, 0.39, 0)
-    .rotation.x = -Math.PI / 2;
+/* ═══ Z3 — BOTTOM, ANNULAR & CLEANOUT ═══════════════════════════════════════ */
+feat('rpb');
+add('Z3', new THREE.CylinderGeometry(R + 0.7, R + 0.7, 0.1, 64), linerMat, 0, 0.06, 0);  // liner / RPB
 
-  // Drip ring
-  add('Z3', new THREE.TorusGeometry(R + 0.28, 0.09, 8, 64), null, 0, 0.28, 0)
-    .rotation.x = Math.PI / 2;
+feat('bottom');
+add('Z3', new THREE.ConeGeometry(R - 0.55, 0.42, 72), null, 0, 0.44, 0);
 
-  // Sump (drain pit below the bottom, offset from centreline)
+feat('annular');
+add('Z3', new THREE.CylinderGeometry(R + 0.06, R + 0.06, 0.16, 72), null, 0, 0.3, 0);
+add('Z3', new THREE.RingGeometry(R - 1.6, R + 0.06, 72), null, 0, 0.39, 0).rotation.x = -Math.PI / 2;
+
+feat('drip_ring');
+add('Z3', new THREE.TorusGeometry(R + 0.28, 0.09, 8, 64), null, 0, 0.28, 0).rotation.x = Math.PI / 2;
+
+feat('sump');
+(function () {
   const sx = R * 0.42, sz = R * 0.22;
   add('Z3', new THREE.CylinderGeometry(0.85, 0.85, 0.9, 24), null, sx, -0.1, sz);
   add('Z3', new THREE.CylinderGeometry(0.95, 0.95, 0.12, 24), null, sx, 0.4, sz);
+  add('Z3', new THREE.CylinderGeometry(0.3, 0.3, 1.4, 14), null, sx, -0.9, sz);   // draw-off
+})();
 
-  // Cleanout door (reinforced opening in the first course)
+feat('cathodic');
+for (let i = 0; i < 8; i++) {
+  const a = (i / 8) * Math.PI * 2 + 0.4;
+  add('Z3', new THREE.CylinderGeometry(0.13, 0.13, 0.9, 8), null,
+      Math.cos(a) * (R * 0.75), -0.55, Math.sin(a) * (R * 0.75));   // sacrificial anode
+}
+
+feat('manway');
+(function () {          // cleanout door in the first course
   const a = Math.PI * 1.28;
   const cx = Math.cos(a) * R, cz = Math.sin(a) * R;
-  const door = add('Z3', new THREE.BoxGeometry(2.4, 1.5, 0.34), null, cx, 0.95, cz);
-  door.lookAt(0, 0.95, 0);
-  const frame = add('Z3', new THREE.BoxGeometry(3.0, 2.1, 0.16), null,
-                    Math.cos(a) * (R + 0.06), 0.95, Math.sin(a) * (R + 0.06));
-  frame.lookAt(0, 0.95, 0);
+  add('Z3', new THREE.BoxGeometry(2.4, 1.5, 0.34), null, cx, 0.95, cz).lookAt(0, 0.95, 0);
+  add('Z3', new THREE.BoxGeometry(3.0, 2.1, 0.16), null,
+      Math.cos(a) * (R + 0.06), 0.95, Math.sin(a) * (R + 0.06)).lookAt(0, 0.95, 0);
 })();
 
-/* ═══ Z2 — SHELL COURSES & WIND GIRDERS ════════════════════════════════════
-   Five stacked courses (thinning upward) + intermediate and top wind girders
-   + pipe-support clips welded to the shell.                                  */
-(function buildShell() {
-  for (let i = 0; i < COURSES; i++) {
-    const y = 0.3 + i * COURSE_H + COURSE_H / 2;
-    // Courses get very slightly smaller radius going up — reads as a plate lap
-    const r = R - i * 0.012;
-    const c = add('Z2', new THREE.CylinderGeometry(r, r + 0.012, COURSE_H - 0.05, 72, 1, true),
-                  null, 0, y, 0);
-    c.material.side = THREE.DoubleSide;
-    // Horizontal seam band between courses
-    if (i < COURSES - 1) {
-      add('Z2', new THREE.TorusGeometry(r + 0.02, 0.045, 6, 72), null, 0, y + COURSE_H / 2, 0)
-        .rotation.x = Math.PI / 2;
-    }
-  }
-
-  // Intermediate wind girder (mid-height) and top wind girder / walkway ring
-  [{ y: 0.3 + COURSE_H * 3, w: 0.62 }, { y: 0.3 + H - 0.25, w: 0.95 }].forEach(g => {
-    add('Z2', new THREE.CylinderGeometry(R + g.w, R + g.w, 0.1, 72), null, 0, g.y, 0);
-    add('Z2', new THREE.TorusGeometry(R + g.w, 0.075, 8, 72), null, 0, g.y + 0.05, 0)
+/* ═══ Z2 — SHELL COURSES & WIND GIRDERS ═════════════════════════════════════ */
+feat('shell');
+for (let i = 0; i < COURSES; i++) {
+  const y = 0.3 + i * COURSE_H + COURSE_H / 2, r = R - i * 0.012;
+  const c = add('Z2', new THREE.CylinderGeometry(r, r + 0.012, COURSE_H - 0.05, 72, 1, true), null, 0, y, 0);
+  c.material.side = THREE.DoubleSide;
+  if (i < COURSES - 1) {
+    add('Z2', new THREE.TorusGeometry(r + 0.02, 0.045, 6, 72), null, 0, y + COURSE_H / 2, 0)
       .rotation.x = Math.PI / 2;
-    // Gusset brackets under the girder
-    for (let i = 0; i < 24; i++) {
-      const a = (i / 24) * Math.PI * 2;
-      const br = add('Z2', new THREE.BoxGeometry(g.w, 0.5, 0.07), null,
-                     Math.cos(a) * (R + g.w / 2), g.y - 0.3, Math.sin(a) * (R + g.w / 2));
-      br.lookAt(0, g.y - 0.3, 0);
-      br.rotateY(Math.PI / 2);
-    }
-  });
+  }
+}
 
-  // Pipe-support clips welded to the shell (eqp.tank_pipe_clip)
-  [[0.35, 3.2], [0.35, 6.4], [0.35, 9.6], [1.9, 4.8], [1.9, 8.0]].forEach(([a, y]) => {
-    const clip = add('Z2', new THREE.BoxGeometry(0.7, 0.55, 0.42), null,
-                     Math.cos(a) * (R + 0.2), y, Math.sin(a) * (R + 0.2));
-    clip.lookAt(0, y, 0);
-  });
+function windGirder(y, w) {
+  add('Z2', new THREE.CylinderGeometry(R + w, R + w, 0.1, 72), null, 0, y, 0);
+  add('Z2', new THREE.TorusGeometry(R + w, 0.075, 8, 72), null, 0, y + 0.05, 0).rotation.x = Math.PI / 2;
+  for (let i = 0; i < 24; i++) {
+    const a = (i / 24) * Math.PI * 2;
+    const br = add('Z2', new THREE.BoxGeometry(w, 0.5, 0.07), null,
+                   Math.cos(a) * (R + w / 2), y - 0.3, Math.sin(a) * (R + w / 2));
+    br.lookAt(0, y - 0.3, 0); br.rotateY(Math.PI / 2);
+  }
+}
+feat('wg_int'); windGirder(0.3 + COURSE_H * 3, 0.62);
+feat('wg_top'); windGirder(0.3 + H - 0.25, 0.95);
+
+feat('clips');
+[[0.35, 3.2], [0.35, 6.4], [0.35, 9.6], [1.9, 4.8], [1.9, 8.0], [4.9, 5.6]].forEach(([a, y]) => {
+  add('Z2', new THREE.BoxGeometry(0.7, 0.55, 0.42), null,
+      Math.cos(a) * (R + 0.2), y, Math.sin(a) * (R + 0.2)).lookAt(0, y, 0);
+});
+
+/* ═══ Z8 — INSULATION & COATING ENVELOPE ════════════════════════════════════ */
+feat('insulation');
+(function () {
+  const j = add('Z8', new THREE.CylinderGeometry(R + 0.62, R + 0.62, H - 0.6, 72, 1, true),
+                jacketMat, 0, 0.3 + (H - 0.6) / 2, 0);
+  j.castShadow = false;
+  for (let i = 0; i < 4; i++) {          // banding rings
+    add('Z8', new THREE.TorusGeometry(R + 0.66, 0.05, 6, 64), jacketMat,
+        0, 1.6 + i * 3.1, 0).rotation.x = Math.PI / 2;
+  }
 })();
 
-/* ═══ Z1 — ROOF & ROOF STRUCTURE ═══════════════════════════════════════════
-   Cone roof, compression ring, radial rafters and centre column.            */
-(function buildRoof() {
-  const roofY = 0.3 + H;
+feat(null);   // the coating envelope is not an applicability feature
+(function () {
+  const skin = add('Z8', new THREE.CylinderGeometry(R + 0.32, R + 0.32, H + 0.3, 72, 1, true),
+                   null, 0, 0.3 + (H + 0.3) / 2, 0);
+  const cap = add('Z8', new THREE.ConeGeometry(R + 0.45, ROOF_H + 0.25, 72, 1, true),
+                  null, 0, 0.3 + H + (ROOF_H + 0.25) / 2, 0);
+  skin.castShadow = cap.castShadow = false;
+  skin.userData.coating = cap.userData.coating = true;
+})();
 
-  // Cone roof deck
-  const roof = add('Z1', new THREE.ConeGeometry(R + 0.18, ROOF_H, 72, 1, false),
-                   null, 0, roofY + ROOF_H / 2, 0);
-  roof.material.side = THREE.DoubleSide;
+/* ═══ Z1 — ROOF & ROOF STRUCTURE ════════════════════════════════════════════ */
+const roofY = 0.3 + H;
 
-  // Roof-to-shell compression ring (the frangible joint)
-  add('Z1', new THREE.TorusGeometry(R + 0.12, 0.11, 8, 72), null, 0, roofY, 0)
-    .rotation.x = Math.PI / 2;
-
-  // Centre / apex plate
+feat('roof_fixed');
+(function () {
+  add('Z1', new THREE.ConeGeometry(R + 0.18, ROOF_H, 72), null, 0, roofY + ROOF_H / 2, 0)
+    .material.side = THREE.DoubleSide;
+  add('Z1', new THREE.TorusGeometry(R + 0.12, 0.11, 8, 72), null, 0, roofY, 0).rotation.x = Math.PI / 2;
   add('Z1', new THREE.CylinderGeometry(0.7, 0.7, 0.22, 20), null, 0, roofY + ROOF_H, 0);
-
-  // Radial rafters under the deck
-  for (let i = 0; i < 16; i++) {
-    const a = (i / 16) * Math.PI * 2;
-    const len = R - 0.4;
+  for (let i = 0; i < 16; i++) {                       // radial rafters
+    const a = (i / 16) * Math.PI * 2, len = R - 0.4;
     const raf = add('Z1', new THREE.BoxGeometry(len, 0.3, 0.1), null,
                     Math.cos(a) * len / 2, roofY - 0.42, Math.sin(a) * len / 2);
     raf.rotation.y = -a;
     raf.rotation.z = -Math.atan2(ROOF_H * 0.72, len);
   }
-
-  // Roof support columns (roof_num_column / column_roof_apply_supported)
-  for (let i = 0; i < 6; i++) {
-    const a = (i / 6) * Math.PI * 2 + 0.3;
-    add('Z1', new THREE.CylinderGeometry(0.2, 0.2, H - 0.3, 12), null,
-        Math.cos(a) * R * 0.55, 0.3 + (H - 0.3) / 2, Math.sin(a) * R * 0.55);
-  }
-
-  // Gauge hatch
-  add('Z1', new THREE.CylinderGeometry(0.34, 0.34, 0.55, 16), null,
-      R * 0.55, roofY + ROOF_H * 0.42, R * 0.2);
 })();
 
-/* ═══ Z5 — FLOATING ROOF & INTERNALS ═══════════════════════════════════════
-   Internal floating deck with rim/pontoon, seal, support legs, rolling
-   ladder, heating coil and an agitator.                                      */
-(function buildInternals() {
-  // Deck
-  add('Z5', new THREE.CylinderGeometry(R - 0.55, R - 0.55, 0.22, 64), null, 0, DECK_Y, 0);
-  // Rim pontoon
-  add('Z5', new THREE.TorusGeometry(R - 0.62, 0.34, 10, 64), null, 0, DECK_Y + 0.12, 0)
-    .rotation.x = Math.PI / 2;
-  // Rim seal (against the shell)
-  const seal = add('Z5', new THREE.CylinderGeometry(R - 0.06, R - 0.06, 0.5, 64, 1, true),
-                   null, 0, DECK_Y + 0.35, 0);
-  seal.material = new THREE.MeshStandardMaterial({
-    color:0x1F7A70, roughness:0.9, metalness:0.05, side:THREE.DoubleSide,
-    transparent:true, opacity:0.85
-  });
-  seal.material.userData = { base:new THREE.Color(0x1F7A70), zone:'Z5' };
-  allMats.push(seal.material);
+feat('roof_columns');
+for (let i = 0; i < 6; i++) {
+  const a = (i / 6) * Math.PI * 2 + 0.3;
+  add('Z1', new THREE.CylinderGeometry(0.2, 0.2, H - 0.3, 12), null,
+      Math.cos(a) * R * 0.55, 0.3 + (H - 0.3) / 2, Math.sin(a) * R * 0.55);
+}
 
-  // Support legs in the operating position
-  for (let ring = 0; ring < 2; ring++) {
+feat('roof_hatch');
+add('Z1', new THREE.CylinderGeometry(0.34, 0.34, 0.55, 16), null, R * 0.55, roofY + ROOF_H * 0.42, R * 0.2);
+add('Z1', new THREE.CylinderGeometry(0.42, 0.42, 0.1, 16), null, R * 0.55, roofY + ROOF_H * 0.42 + 0.32, R * 0.2);
+
+/* ═══ Z5 — FLOATING ROOFS & INTERNALS ═══════════════════════════════════════ */
+function floatingDeck(y, double) {
+  add('Z5', new THREE.CylinderGeometry(R - 0.55, R - 0.55, 0.22, 64), null, 0, y, 0);
+  add('Z5', new THREE.TorusGeometry(R - 0.62, 0.34, 10, 64), null, 0, y + 0.12, 0).rotation.x = Math.PI / 2;
+  if (double) {   // double-deck pontoon reads as a second plate below
+    add('Z5', new THREE.CylinderGeometry(R - 0.62, R - 0.62, 0.18, 64), null, 0, y - 0.55, 0);
+  }
+  for (let ring = 0; ring < 2; ring++) {              // support legs
     const rr = ring === 0 ? R * 0.35 : R * 0.72, n = ring === 0 ? 6 : 10;
     for (let i = 0; i < n; i++) {
       const a = (i / n) * Math.PI * 2;
-      add('Z5', new THREE.CylinderGeometry(0.09, 0.09, DECK_Y - 0.5, 8), null,
-          Math.cos(a) * rr, (DECK_Y - 0.5) / 2 + 0.5, Math.sin(a) * rr);
+      add('Z5', new THREE.CylinderGeometry(0.09, 0.09, y - 0.5, 8), null,
+          Math.cos(a) * rr, (y - 0.5) / 2 + 0.5, Math.sin(a) * rr);
     }
   }
+}
+feat('float_int'); floatingDeck(DECK_Y, false);
+feat('float_ext'); floatingDeck(EXT_DECK_Y, true);
 
-  // Rolling ladder from the top of the shell down to the deck
+feat('float_seal');
+(function () {
+  add('Z5', new THREE.CylinderGeometry(R - 0.06, R - 0.06, 0.5, 64, 1, true), sealMat, 0, DECK_Y + 0.35, 0);
   const rl = add('Z5', new THREE.BoxGeometry(0.9, 0.1, 9.5), null, -R * 0.45, DECK_Y + 3.1, 0);
   rl.rotation.x = Math.PI / 2 - 0.62;
-
-  // Heating coil — a helix of pipe just above the bottom
-  const coilPts = [];
-  for (let i = 0; i <= 260; i++) {
-    const t = i / 260, a = t * Math.PI * 9;
-    const rr = (R - 1.4) * (1 - t * 0.62);
-    coilPts.push(new THREE.Vector3(Math.cos(a) * rr, 1.05 + t * 0.5, Math.sin(a) * rr));
+  for (let i = 0; i < 12; i++) {                       // ladder rungs
+    add('Z5', new THREE.CylinderGeometry(0.05, 0.05, 0.85, 6), null,
+        -R * 0.45, DECK_Y + 0.4 + i * 0.62, -3.6 + i * 0.62).rotation.z = Math.PI / 2;
   }
-  add('Z5', new THREE.TubeGeometry(new THREE.CatmullRomCurve3(coilPts), 300, 0.13, 8, false), null);
+})();
 
-  // Agitator (shaft + impeller), side-entry near the bottom
+feat('coils');
+(function () {
+  const pts = [];
+  for (let i = 0; i <= 260; i++) {
+    const t = i / 260, a = t * Math.PI * 9, rr = (R - 1.4) * (1 - t * 0.62);
+    pts.push(new THREE.Vector3(Math.cos(a) * rr, 1.05 + t * 0.5, Math.sin(a) * rr));
+  }
+  add('Z5', new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 300, 0.13, 8, false), null);
+})();
+
+feat('agitator');
+(function () {
   add('Z5', new THREE.CylinderGeometry(0.14, 0.14, R * 0.85, 12), null, 0, 2.4, 0);
   for (let i = 0; i < 4; i++) {
     const a = (i / 4) * Math.PI * 2;
     add('Z5', new THREE.BoxGeometry(1.5, 0.4, 0.09), null,
         Math.cos(a) * 0.75, 2.4, Math.sin(a) * 0.75).rotation.y = -a;
   }
-
-  // Stilling well
-  add('Z5', new THREE.CylinderGeometry(0.26, 0.26, H - 1.2, 14), null,
-      R * 0.78, 0.6 + (H - 1.2) / 2, -R * 0.2);
 })();
 
-/* ═══ Z7 — NOZZLES, MANHOLES & VENTS ═══════════════════════════════════════
-   Shell nozzles with reinforcing pads and flanges, shell + roof manholes,
-   roof vents and a flame arrester.                                           */
-(function buildNozzles() {
-  const roofY = 0.3 + H;
+feat('stwell');
+add('Z5', new THREE.CylinderGeometry(0.26, 0.26, H - 1.2, 14), null, R * 0.78, 0.6 + (H - 1.2) / 2, -R * 0.2);
 
-  // ── Shell nozzles: [azimuth, elevation, nominal radius] ──
-  const shellNz = [
-    [0.00,  1.6, 0.55], [0.55,  2.9, 0.40], [1.15,  1.4, 0.62],
-    [2.05,  4.3, 0.34], [2.70,  1.7, 0.48], [3.55,  3.6, 0.40],
-    [4.30,  1.5, 0.58], [5.10,  5.2, 0.30], [5.75,  2.4, 0.44]
-  ];
-  shellNz.forEach(([a, y, nr]) => {
-    const dir = radialDir(a);
+/* ═══ Z7 — NOZZLES, MANWAYS & VENTS ═════════════════════════════════════════ */
+feat('nz_shell');
+[[0.00,1.6,0.55],[0.55,2.9,0.40],[1.15,1.4,0.62],[2.05,4.3,0.34],[2.70,1.7,0.48],
+ [3.55,3.6,0.40],[4.30,1.5,0.58],[5.10,5.2,0.30],[5.75,2.4,0.44]].forEach(([a, y, nr]) => {
+  const dir = radialDir(a);
+  aim(add('Z7', new THREE.CylinderGeometry(nr * 1.85, nr * 1.85, 0.1, 20), null,
+          dir.x * (R + 0.04), y, dir.z * (R + 0.04)), dir);                       // reinforcing pad
+  aim(add('Z7', new THREE.CylinderGeometry(nr, nr, 1.5, 20), null,
+          dir.x * (R + 0.75), y, dir.z * (R + 0.75)), dir);                       // neck
+  aim(add('Z7', new THREE.CylinderGeometry(nr * 1.55, nr * 1.55, 0.24, 20), null,
+          dir.x * (R + 1.5), y, dir.z * (R + 1.5)), dir);                         // flange
+});
 
-    // Reinforcing pad, flush on the shell
-    aim(add('Z7', new THREE.CylinderGeometry(nr * 1.85, nr * 1.85, 0.1, 20), null,
-            dir.x * (R + 0.04), y, dir.z * (R + 0.04)), dir);
+feat('manway');
+[[0.85, 1.5], [3.95, 1.5]].forEach(([a, y]) => {
+  const dir = radialDir(a);
+  aim(add('Z7', new THREE.CylinderGeometry(1.15, 1.15, 1.1, 28), null,
+          dir.x * (R + 0.55), y, dir.z * (R + 0.55)), dir);
+  aim(add('Z7', new THREE.CylinderGeometry(1.5, 1.5, 0.28, 28), null,
+          dir.x * (R + 1.15), y, dir.z * (R + 1.15)), dir);
+  add('Z7', new THREE.CylinderGeometry(0.09, 0.09, 2.2, 10), null,
+      dir.x * (R + 0.5), y + 1.5, dir.z * (R + 0.5));                             // davit
+});
+add('Z7', new THREE.CylinderGeometry(1.0, 1.0, 0.6, 24), null, -R * 0.42, roofY + ROOF_H * 0.55, R * 0.3);
+add('Z7', new THREE.CylinderGeometry(1.25, 1.25, 0.16, 24), null, -R * 0.42, roofY + ROOF_H * 0.55 + 0.38, R * 0.3);
 
-    // Neck, projecting radially outward
-    aim(add('Z7', new THREE.CylinderGeometry(nr, nr, 1.5, 20), null,
-            dir.x * (R + 0.75), y, dir.z * (R + 0.75)), dir);
+feat('nz_roof');
+[[1.6, 0.34], [3.3, 0.30], [5.4, 0.38]].forEach(([a, nr]) => {
+  const rr = R * 0.45, x = Math.cos(a) * rr, z = Math.sin(a) * rr;
+  const yTop = roofY + ROOF_H * (1 - rr / (R + 0.18));
+  add('Z7', new THREE.CylinderGeometry(nr, nr, 0.8, 16), null, x, yTop + 0.4, z);
+  add('Z7', new THREE.CylinderGeometry(nr * 1.5, nr * 1.5, 0.16, 16), null, x, yTop + 0.85, z);
+});
 
-    // Raised-face flange at the projection limit
-    aim(add('Z7', new THREE.CylinderGeometry(nr * 1.55, nr * 1.55, 0.24, 20), null,
-            dir.x * (R + 1.5), y, dir.z * (R + 1.5)), dir);
-  });
-
-  // ── Shell manholes (two, first course) ──
-  [[0.85, 1.5], [3.95, 1.5]].forEach(([a, y]) => {
-    const dir = radialDir(a);
-    aim(add('Z7', new THREE.CylinderGeometry(1.15, 1.15, 1.1, 28), null,
-            dir.x * (R + 0.55), y, dir.z * (R + 0.55)), dir);
-    aim(add('Z7', new THREE.CylinderGeometry(1.5, 1.5, 0.28, 28), null,
-            dir.x * (R + 1.15), y, dir.z * (R + 1.15)), dir);
-    // Hinge davit
-    add('Z7', new THREE.CylinderGeometry(0.09, 0.09, 2.2, 10), null,
-        dir.x * (R + 0.5), y + 1.5, dir.z * (R + 0.5));
-  });
-
-  // ── Roof manhole ──
-  add('Z7', new THREE.CylinderGeometry(1.0, 1.0, 0.6, 24), null,
-      -R * 0.42, roofY + ROOF_H * 0.55, R * 0.3);
-  add('Z7', new THREE.CylinderGeometry(1.25, 1.25, 0.16, 24), null,
-      -R * 0.42, roofY + ROOF_H * 0.55 + 0.38, R * 0.3);
-
-  // ── Roof vents (PVRV) + flame arrester ──
+feat('vents');
+(function () {
   [[0.7, 0.55], [2.6, 0.55], [4.6, 0.55]].forEach(([a, nr]) => {
-    const rr = R * 0.62;
-    const x = Math.cos(a) * rr, z = Math.sin(a) * rr;
+    const rr = R * 0.62, x = Math.cos(a) * rr, z = Math.sin(a) * rr;
     const yTop = roofY + ROOF_H * (1 - rr / (R + 0.18));
     add('Z7', new THREE.CylinderGeometry(nr, nr, 1.0, 16), null, x, yTop + 0.5, z);
     add('Z7', new THREE.CylinderGeometry(nr * 1.5, nr * 1.5, 0.5, 16), null, x, yTop + 1.2, z);
     add('Z7', new THREE.SphereGeometry(nr * 1.15, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2),
         null, x, yTop + 1.45, z);
   });
-
-  // Gooseneck emergency vent at the apex
-  const gnPts = [
-    new THREE.Vector3(1.2, 0.3 + H + ROOF_H, 0.6),
-    new THREE.Vector3(1.2, 0.3 + H + ROOF_H + 1.6, 0.6),
-    new THREE.Vector3(1.2, 0.3 + H + ROOF_H + 2.4, 1.3),
-    new THREE.Vector3(1.2, 0.3 + H + ROOF_H + 2.0, 2.2)
+  const g = [
+    new THREE.Vector3(1.2, roofY + ROOF_H, 0.6),
+    new THREE.Vector3(1.2, roofY + ROOF_H + 1.6, 0.6),
+    new THREE.Vector3(1.2, roofY + ROOF_H + 2.4, 1.3),
+    new THREE.Vector3(1.2, roofY + ROOF_H + 2.0, 2.2)
   ];
-  add('Z7', new THREE.TubeGeometry(new THREE.CatmullRomCurve3(gnPts), 32, 0.28, 12, false), null);
+  add('Z7', new THREE.TubeGeometry(new THREE.CatmullRomCurve3(g), 32, 0.28, 12, false), null);
 })();
 
-/* ═══ Z6 — STAIRS, PLATFORMS & SAFETY ══════════════════════════════════════
-   Spiral stairway with handrails, top platform, and a water-spray ring.      */
-(function buildAccess() {
-  const roofY = 0.3 + H;
-  const START = 0.6, SWEEP = Math.PI * 1.72, STEPS = 40;
-  const SR = R + 1.05;                       // stair centreline radius
+/* ═══ Z6 — STAIRS, PLATFORMS & SAFETY ═══════════════════════════════════════ */
+const START = 0.6, SWEEP = Math.PI * 1.72, SR = R + 1.05;
 
-  // Treads
-  for (let i = 0; i <= STEPS; i++) {
-    const t = i / STEPS;
-    const a = START + t * SWEEP;
-    const y = 0.35 + t * (roofY - 0.35);
-    // lookAt puts +Z on the radius, so the box depth is the tread WIDTH
-    // (radial, ~1.15 m) and the box X is the GOING (tangential, ~0.3 m).
-    const tr = add('Z6', new THREE.BoxGeometry(0.3, 0.09, 1.15), null,
-                   Math.cos(a) * SR, y, Math.sin(a) * SR);
-    tr.lookAt(0, y, 0);
+feat('stairway');
+(function () {
+  for (let i = 0; i <= 40; i++) {
+    const t = i / 40, a = START + t * SWEEP, y = 0.35 + t * (roofY - 0.35);
+    // lookAt puts +Z on the radius: box depth = tread WIDTH, box X = the GOING
+    add('Z6', new THREE.BoxGeometry(0.3, 0.09, 1.15), null,
+        Math.cos(a) * SR, y, Math.sin(a) * SR).lookAt(0, y, 0);
   }
-
-  // Helper: one helical tube following the stair rise at radius rr, offset dy
   function helix(rr, dy, tube) {
     const pts = [];
     for (let i = 0; i <= 90; i++) {
       const t = i / 90, a = START + t * SWEEP;
       pts.push(new THREE.Vector3(Math.cos(a) * rr, 0.3 + dy + t * (roofY - 0.3), Math.sin(a) * rr));
     }
-    return add('Z6', new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 160, tube, 7, false), null);
+    add('Z6', new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 160, tube, 7, false), null);
   }
-
-  // Stringers (both sides) and a single outboard handrail — an inboard rail
-  // would just read as visual noise against the shell.
-  helix(SR - 0.62, 0, 0.07);
-  helix(SR + 0.62, 0, 0.07);
-  helix(SR + 0.62, 1.05, 0.055);   // top rail
-  helix(SR + 0.62, 0.55, 0.04);    // mid rail
-
-  // Handrail stanchions, outboard side only
+  helix(SR - 0.62, 0, 0.07); helix(SR + 0.62, 0, 0.07);
+  helix(SR + 0.62, 1.05, 0.055); helix(SR + 0.62, 0.55, 0.04);
   for (let i = 0; i <= 12; i++) {
     const t = i / 12, a = START + t * SWEEP, y = 0.3 + t * (roofY - 0.3);
     add('Z6', new THREE.CylinderGeometry(0.045, 0.045, 1.05, 6), null,
         Math.cos(a) * (SR + 0.62), y + 0.52, Math.sin(a) * (SR + 0.62));
   }
-
-  // Top platform: a partial annulus on the roof perimeter
+  // Top platform + handrail + roof walkway
   const plat = add('Z6', new THREE.RingGeometry(R + 0.35, R + 1.7, 48, 1, START + SWEEP - 0.35, 2.2),
                    null, 0, roofY + 0.12, 0);
-  plat.rotation.x = -Math.PI / 2;
-  plat.material.side = THREE.DoubleSide;
-
-  // Platform handrail
+  plat.rotation.x = -Math.PI / 2; plat.material.side = THREE.DoubleSide;
   [R + 0.35, R + 1.7].forEach(rr => {
     const pts = [];
     for (let i = 0; i <= 40; i++) {
@@ -1228,163 +1751,138 @@ function add(zid, geo, m, x, y, z2) {
     }
     add('Z6', new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 80, 0.05, 8, false), null);
   });
-
-  // Roof walkway from the platform to the apex
   const wk = add('Z6', new THREE.BoxGeometry(R, 0.09, 1.0), null,
                  Math.cos(START + SWEEP) * R * 0.5, roofY + ROOF_H * 0.55, Math.sin(START + SWEEP) * R * 0.5);
   wk.rotation.y = -(START + SWEEP);
   wk.rotation.z = -Math.atan2(ROOF_H, R);
+})();
 
-  // Water-spray / foam ring main around the tank (safety-system interface)
-  add('Z6', new THREE.TorusGeometry(R + 2.6, 0.13, 8, 72), null, 0, 0.55, 0)
-    .rotation.x = Math.PI / 2;
+feat('fire_ring');
+(function () {
+  add('Z6', new THREE.TorusGeometry(R + 2.6, 0.13, 8, 72), null, 0, 0.55, 0).rotation.x = Math.PI / 2;
   for (let i = 0; i < 8; i++) {
     const a = (i / 8) * Math.PI * 2 + 0.2;
     add('Z6', new THREE.CylinderGeometry(0.1, 0.1, 3.0, 8), null,
         Math.cos(a) * (R + 2.6), 2.0, Math.sin(a) * (R + 2.6));
   }
-
-  // Earthing lugs + cables to grade
-  for (let i = 0; i < 4; i++) {
-    const a = (i / 4) * Math.PI * 2 + 0.9;
-    add('Z6', new THREE.BoxGeometry(0.34, 0.34, 0.12), null,
-        Math.cos(a) * (R + 0.1), 1.0, Math.sin(a) * (R + 0.1)).lookAt(0, 1.0, 0);
-    add('Z6', new THREE.CylinderGeometry(0.05, 0.05, 1.1, 6), null,
-        Math.cos(a) * (R + 0.35), 0.4, Math.sin(a) * (R + 0.35));
+  for (let i = 0; i < 3; i++) {          // foam chambers on the top course
+    const a = (i / 3) * Math.PI * 2 + 1.1;
+    aim(add('Z6', new THREE.CylinderGeometry(0.45, 0.45, 1.2, 14), null,
+            Math.cos(a) * (R + 0.7), H - 1.4, Math.sin(a) * (R + 0.7)), radialDir(a));
   }
 })();
 
-/* ═══ Z8 — MATERIALS, COATING & LOADS ══════════════════════════════════════
-   Materials/coating/loads are not a discrete part of the tank — they are the
-   envelope applied to all of it.  Represented as a translucent coating skin
-   that is hidden (and non-raycastable) until the zone is selected.           */
-(function buildCoating() {
-  const skin = add('Z8', new THREE.CylinderGeometry(R + 0.32, R + 0.32, H + 0.3, 72, 1, true),
-                   null, 0, 0.3 + (H + 0.3) / 2, 0);
-  skin.castShadow = false; skin.receiveShadow = false;
+feat('earthing');
+for (let i = 0; i < 4; i++) {
+  const a = (i / 4) * Math.PI * 2 + 0.9;
+  add('Z6', new THREE.BoxGeometry(0.34, 0.34, 0.12), null,
+      Math.cos(a) * (R + 0.1), 1.0, Math.sin(a) * (R + 0.1)).lookAt(0, 1.0, 0);
+  add('Z6', new THREE.CylinderGeometry(0.05, 0.05, 1.1, 6), null,
+      Math.cos(a) * (R + 0.35), 0.4, Math.sin(a) * (R + 0.35));
+}
+feat(null);
 
-  const cap = add('Z8', new THREE.ConeGeometry(R + 0.45, ROOF_H + 0.25, 72, 1, true),
-                  null, 0, 0.3 + H + (ROOF_H + 0.25) / 2, 0);
-  cap.castShadow = false; cap.receiveShadow = false;
-
-  groups.Z8.visible = false;
-})();
-
-/* ── Original material snapshot, for restoring after a highlight ─────────── */
-allMats.forEach(m => {
-  m.userData.origOpacity = m.opacity;
-  m.userData.origTransparent = m.transparent;
-});
+/* Snapshot original material settings for restoring after a highlight */
+allMats.forEach(m => { m.userData.origOpacity = m.opacity; m.userData.origTransparent = m.transparent; });
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   CAMERA FRAMING
-   Bounding-sphere fit, so the target is correctly framed at ANY viewport
-   aspect ratio — the limiting field of view is whichever of the vertical /
-   horizontal FOV is narrower.
+   VISIBILITY  —  feature trimming ∧ cutaway ∧ coating envelope
    ═══════════════════════════════════════════════════════════════════════════ */
-const _box = new THREE.Box3(), _sph = new THREE.Sphere();
+let hiddenFeat = new Set(), activeZone = null, cutaway = false;
 
-function fitTo(object3d, dirHint, pad) {
+function applyVisibility() {
+  const hideShell = cutaway || activeZone === 'Z5';
+  MESHES.forEach(m => {
+    let v = !(m.userData.feat && hiddenFeat.has(m.userData.feat));
+    if (v && hideShell && (m.userData.feat === 'shell' || m.userData.feat === 'insulation')) v = false;
+    if (v && hideShell && m.userData.feat === 'roof_fixed') v = false;
+    if (v && m.userData.coating) v = (activeZone === 'Z8');
+    m.visible = v;
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CAMERA FRAMING — bounding sphere over VISIBLE meshes, so the fit stays
+   correct after the model is trimmed, at any viewport aspect ratio.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const _box = new THREE.Box3(), _tmp = new THREE.Box3(), _sph = new THREE.Sphere();
+
+function visibleBounds(root) {
   _box.makeEmpty();
-  _box.setFromObject(object3d);
-  if (_box.isEmpty()) return null;
-  _box.getBoundingSphere(_sph);
+  root.traverse(o => {
+    if (!o.isMesh || !o.visible) return;
+    for (let n = o.parent; n; n = n.parent) if (!n.visible) return;
+    _tmp.setFromObject(o);
+    if (!_tmp.isEmpty()) _box.union(_tmp);
+  });
+  return _box.isEmpty() ? null : _box;
+}
 
+function fitTo(root, dirHint, pad) {
+  const box = visibleBounds(root);
+  if (!box) return null;
+  box.getBoundingSphere(_sph);
   const vFov = THREE.MathUtils.degToRad(camera.fov);
   const hFov = 2 * Math.atan(Math.tan(vFov / 2) * camera.aspect);
-  const fov  = Math.min(vFov, hFov);                 // the constraining direction
-  let dist   = (_sph.radius / Math.sin(fov / 2)) * (pad || 1.28);
+  const fov = Math.min(vFov, hFov);
+  let dist = (_sph.radius / Math.sin(fov / 2)) * (pad || 1.28);
   dist = THREE.MathUtils.clamp(dist, controls.minDistance + 1, controls.maxDistance - 1);
-
-  const dir = (dirHint || new THREE.Vector3(1, 0.42, 1)).clone().normalize();
+  const dir = (dirHint || new THREE.Vector3(1, 0.30, 1)).clone().normalize();
   return { pos: _sph.center.clone().addScaledVector(dir, dist), target: _sph.center.clone() };
 }
 
 let camTween = null, tgtTween = null;
-
 function flyTo(pos, target, ms) {
   if (camTween) camTween.stop();
   if (tgtTween) tgtTween.stop();
   controls.autoRotate = false;
   document.getElementById('btn-spin').classList.remove('on');
-
-  camTween = new TWEEN.Tween(camera.position)
-    .to({ x: pos.x, y: pos.y, z: pos.z }, ms || 1000)
+  camTween = new TWEEN.Tween(camera.position).to({ x: pos.x, y: pos.y, z: pos.z }, ms || 1000)
     .easing(TWEEN.Easing.Cubic.InOut).start();
-
-  tgtTween = new TWEEN.Tween(controls.target)
-    .to({ x: target.x, y: target.y, z: target.z }, ms || 1000)
+  tgtTween = new TWEEN.Tween(controls.target).to({ x: target.x, y: target.y, z: target.z }, ms || 1000)
     .easing(TWEEN.Easing.Cubic.InOut).start();
 }
 
-/* Preferred viewing direction per zone, so each part is framed from a
-   sensible angle rather than always the same isometric. */
 const VIEW_DIR = {
-  Z1: new THREE.Vector3( 0.9,  0.85,  0.9),   // roof — look down
-  Z2: new THREE.Vector3( 1.0,  0.18,  1.0),   // shell — near-level
-  Z3: new THREE.Vector3( 1.0,  0.34,  0.9),   // bottom — slightly above
-  Z4: new THREE.Vector3( 1.0,  0.26,  0.85),  // foundation — low
-  Z5: new THREE.Vector3( 0.95, 0.40,  1.0),   // internals — cutaway
-  Z6: new THREE.Vector3(-0.55, 0.42,  1.15),  // stairs — from the stair side
-  Z7: new THREE.Vector3( 1.15, 0.22,  0.5),   // nozzles — near-level
-  Z8: new THREE.Vector3( 1.0,  0.40,  1.0)
+  Z1: new THREE.Vector3( 0.9,  0.85, 0.9),
+  Z2: new THREE.Vector3( 1.0,  0.18, 1.0),
+  Z3: new THREE.Vector3( 1.0,  0.34, 0.9),
+  Z4: new THREE.Vector3( 1.0,  0.26, 0.85),
+  Z5: new THREE.Vector3( 0.95, 0.40, 1.0),
+  Z6: new THREE.Vector3(-0.55, 0.42, 1.15),
+  Z7: new THREE.Vector3( 1.15, 0.22, 0.5),
+  Z8: new THREE.Vector3( 1.0,  0.40, 1.0)
 };
+const HOME_DIR = new THREE.Vector3(1, 0.30, 1);
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   HIGHLIGHTING
-   ═══════════════════════════════════════════════════════════════════════════ */
-let activeZone = null, cutaway = false;
-
+/* ── Highlighting ────────────────────────────────────────────────────────── */
 function applyHighlight(zid) {
   allMats.forEach(m => {
-    const mz = m.userData.zone;
-    if (!zid) {                                   // nothing selected — full colour
-      m.color.copy(m.userData.base);
-      m.emissive.setHex(0x000000);
-      m.opacity = m.userData.origOpacity;
-      m.transparent = m.userData.origTransparent;
-      m.depthWrite = true;
-    } else if (mz === zid) {                      // selected — lift and glow
+    if (!zid) {
+      m.color.copy(m.userData.base); m.emissive.setHex(0x000000);
+      m.opacity = m.userData.origOpacity; m.transparent = m.userData.origTransparent; m.depthWrite = true;
+    } else if (m.userData.zone === zid) {
       m.color.copy(m.userData.base);
       m.emissive.copy(m.userData.base).multiplyScalar(0.42);
-      m.opacity = (mz === 'Z8') ? 0.5 : 1;
-      m.transparent = (mz === 'Z8');
-      m.depthWrite = true;
-    } else {                                      // everything else — recede
+      m.opacity = m.userData.origTransparent ? Math.max(m.userData.origOpacity, 0.5) : 1;
+      m.transparent = m.userData.origTransparent; m.depthWrite = true;
+    } else {
       m.color.copy(m.userData.base).lerp(new THREE.Color(0xB6C6D4), 0.72);
       m.emissive.setHex(0x000000);
-      m.transparent = true;
-      m.opacity = 0.16;
-      m.depthWrite = false;
+      m.transparent = true; m.opacity = 0.16; m.depthWrite = false;
     }
     m.needsUpdate = true;
   });
-
-  // The coating envelope only exists on screen while it is the active zone
-  groups.Z8.visible = (zid === 'Z8');
-  applyCutaway();
+  applyVisibility();
 }
 
-function applyCutaway() {
-  // Hide the outer skin so internals read clearly
-  const hide = cutaway || activeZone === 'Z5';
-  groups.Z2.children.forEach(m => { m.visible = !hide; });
-  groups.Z1.children.forEach((m, i) => { m.visible = !hide || i > 2; });
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   PUBLIC API — the checklist panel drives the scene through this object
-   ═══════════════════════════════════════════════════════════════════════════ */
-const HOME_DIR = new THREE.Vector3(1, 0.30, 1);
-
+/* ── Public API for the checklist panel ──────────────────────────────────── */
 window.__gad3d = {
   focusZone(zid) {
     activeZone = zid;
-    // Transversal groups (T1–T4) have no geometry: frame the whole tank.
+    applyHighlight(zid && groups[zid] ? zid : null);
     const g = zid && groups[zid];
-    applyHighlight(g ? zid : null);
-
-    const fit = g ? fitTo(g, VIEW_DIR[zid], 1.55) : fitTo(tank, HOME_DIR, 1.18);
+    const fit = (g && visibleBounds(g)) ? fitTo(g, VIEW_DIR[zid], 1.55) : fitTo(tank, HOME_DIR, 1.18);
     if (fit) flyTo(fit.pos, fit.target, 1050);
   },
   resetView() {
@@ -1392,19 +1890,17 @@ window.__gad3d = {
     applyHighlight(null);
     const fit = fitTo(tank, HOME_DIR, 1.18);
     if (fit) flyTo(fit.pos, fit.target, 900);
+  },
+  setHidden(set) {
+    hiddenFeat = set || new Set();
+    applyVisibility();
   }
 };
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   CANVAS → CHECKLIST  (raycast picking)
-   ═══════════════════════════════════════════════════════════════════════════ */
-const ray = new THREE.Raycaster();
-const ndc = new THREE.Vector2();
+/* ── Canvas → checklist picking ──────────────────────────────────────────── */
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
 let downAt = null;
 
-/* A mesh is only pickable when it AND every ancestor are visible.  Object3D
-   .visible is a local flag, so the hidden Z8 coating envelope would otherwise
-   still swallow clicks meant for the shell behind it. */
 function pickable(o) {
   for (let n = o; n; n = n.parent) if (!n.visible) return false;
   return !!o.userData.zone;
@@ -1413,63 +1909,48 @@ function pickable(o) {
 renderer.domElement.addEventListener('pointerdown', e => { downAt = { x: e.clientX, y: e.clientY }; });
 
 renderer.domElement.addEventListener('pointerup', e => {
-  // Ignore the pointerup that ends an orbit/pan drag
   if (!downAt || Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y) > 5) { downAt = null; return; }
   downAt = null;
-
   const r = renderer.domElement.getBoundingClientRect();
-  ndc.x =  ((e.clientX - r.left) / r.width)  * 2 - 1;
-  ndc.y = -((e.clientY - r.top)  / r.height) * 2 + 1;
+  ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+  ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
   ray.setFromCamera(ndc, camera);
-
   const hits = ray.intersectObject(tank, true).filter(h => pickable(h.object));
   if (!hits.length) return;
-
   const zid = hits[0].object.userData.zone;
   if (zid === activeZone) { window.__gad3d.resetView(); window.__gadUI.closeZone(); return; }
-
-  window.__gadUI.openZone(zid);     // expand the matching accordion section…
-  window.__gad3d.focusZone(zid);    // …and frame the part
+  window.__gadUI.openZone(zid);
+  window.__gad3d.focusZone(zid);
 });
 
-/* Pointer cursor over pickable parts */
 let hoverRaf = 0;
 renderer.domElement.addEventListener('pointermove', e => {
   if (hoverRaf) return;
   hoverRaf = requestAnimationFrame(() => {
     hoverRaf = 0;
     const r = renderer.domElement.getBoundingClientRect();
-    ndc.x =  ((e.clientX - r.left) / r.width)  * 2 - 1;
-    ndc.y = -((e.clientY - r.top)  / r.height) * 2 + 1;
+    ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+    ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
     ray.setFromCamera(ndc, camera);
-    const hit = ray.intersectObject(tank, true).some(h => pickable(h.object));
-    renderer.domElement.style.cursor = hit ? 'pointer' : 'grab';
+    renderer.domElement.style.cursor =
+      ray.intersectObject(tank, true).some(h => pickable(h.object)) ? 'pointer' : 'grab';
   });
 });
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   VIEWPORT TOOLS
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* ── Viewport tools ──────────────────────────────────────────────────────── */
 document.getElementById('btn-reset').addEventListener('click', () => {
-  window.__gad3d.resetView();
-  window.__gadUI.closeZone();
+  window.__gad3d.resetView(); window.__gadUI.closeZone();
 });
-
 document.getElementById('btn-cut').addEventListener('click', e => {
-  cutaway = !cutaway;
-  e.target.classList.toggle('on', cutaway);
-  applyCutaway();
+  cutaway = !cutaway; e.target.classList.toggle('on', cutaway); applyVisibility();
 });
-
 document.getElementById('btn-spin').addEventListener('click', e => {
   controls.autoRotate = !controls.autoRotate;
   controls.autoRotateSpeed = 0.75;
   e.target.classList.toggle('on', controls.autoRotate);
 });
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   RESIZE  (ResizeObserver keeps the fit correct on any screen / panel size)
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* ── Resize ──────────────────────────────────────────────────────────────── */
 function resize() {
   const w = vp.clientWidth, h = vp.clientHeight;
   if (!w || !h) return;
@@ -1480,30 +1961,25 @@ function resize() {
 new ResizeObserver(resize).observe(vp);
 resize();
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   RENDER LOOP
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* ── Render loop ─────────────────────────────────────────────────────────── */
 renderer.setAnimationLoop(t => {
   TWEEN.update(t);
   controls.update();
   renderer.render(scene, camera);
 });
 
-/* Initial framing */
+/* ── Initial state: adopt whatever the checklist already has ─────────────── */
+if (window.__gadUI && window.__gadUI.getHidden) hiddenFeat = window.__gadUI.getHidden();
+applyVisibility();
 const home = fitTo(tank, HOME_DIR, 1.18);
-if (home) {
-  camera.position.copy(home.pos);
-  controls.target.copy(home.target);
-  controls.update();
-}
+if (home) { camera.position.copy(home.pos); controls.target.copy(home.target); controls.update(); }
 veil.classList.add('hide');
 
 } catch (err) {
   console.error(err);
-  veil.innerHTML =
-    '<p class="err"><b>3D viewport unavailable.</b><br>' +
+  veil.innerHTML = '<p class="err"><b>3D viewport unavailable.</b><br>' +
     (err && err.message ? String(err.message) : 'Three.js could not be loaded.') +
-    '<br><br>The checklist on the right remains fully usable, including report generation.</p>';
+    '<br><br>The checklist, wizard and Excel export on the right remain fully usable.</p>';
 }
 </script>
 </body>
