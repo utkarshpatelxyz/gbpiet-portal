@@ -262,8 +262,14 @@ button,input,select,textarea{font-family:inherit;color:inherit;}
 #drawer.open{display:flex;}
 #drawer .sheet{margin-top:auto;background:var(--surface);border-top:2px solid var(--teal);
   border-radius:12px 12px 0 0;box-shadow:var(--shadow-3);display:flex;flex-direction:column;
-  max-height:78%;animation:slideup .28s cubic-bezier(.4,0,.2,1);}
-@keyframes slideup{from{transform:translateY(18px);opacity:0;}to{transform:none;opacity:1;}}
+  max-height:78%;}
+/* Entry animations are scoped to the OPEN state and deliberately animate
+   TRANSFORM ONLY.  Keyframing opacity here is unsafe: if the animation is
+   still pending when the frame is painted it parks on the first keyframe, and
+   an opacity:0 first keyframe leaves the panel permanently invisible.  With
+   transform alone the worst case is a few pixels of offset. */
+#drawer.open .sheet{animation:slideup .28s cubic-bezier(.4,0,.2,1);}
+@keyframes slideup{from{transform:translateY(14px);}to{transform:none;}}
 #drawer .dhead{display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid var(--border);}
 #drawer .dhead h3{margin:0;font-size:12.5px;font-weight:800;color:var(--navy);flex:1 1 auto;}
 #drawer .dhead .n{font-size:10px;font-weight:800;background:var(--na);color:#fff;padding:2px 8px;border-radius:20px;}
@@ -290,6 +296,32 @@ button,input,select,textarea{font-family:inherit;color:inherit;}
 #toast.err{background:var(--open);}
 
 #file-input{display:none;}
+
+/* ── Revision naming dialog ─────────────────────────────────────────────── */
+#rev-modal{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;
+  background:rgba(22,41,61,.42);backdrop-filter:blur(3px);padding:20px;}
+#rev-modal.open{display:flex;}
+.rm-box{background:var(--surface);border-radius:12px;box-shadow:var(--shadow-3);width:min(430px,100%);
+  padding:20px 22px 18px;border-top:3px solid var(--teal);}
+#rev-modal.open .rm-box{animation:rmin .22s cubic-bezier(.4,0,.2,1);}
+@keyframes rmin{from{transform:translateY(10px) scale(.99);}to{transform:none;}}
+.rm-box h3{margin:0 0 4px;font-size:14px;font-weight:800;color:var(--navy);}
+.rm-sub{margin:0 0 15px;font-size:10.5px;font-weight:500;color:var(--text-2);line-height:1.55;}
+.rm-f{display:block;margin-bottom:11px;}
+.rm-f>span{display:block;font-size:8.5px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;
+  color:var(--text-3);margin-bottom:4px;}
+.rm-f input{width:100%;padding:8px 11px;font-size:13px;font-weight:700;color:var(--navy);
+  border:1px solid var(--border-2);border-radius:6px;background:var(--surface-2);}
+.rm-f input:focus{outline:none;border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(47,151,170,.14);}
+#rev-err{min-height:15px;font-size:10px;font-weight:700;color:var(--open);line-height:1.4;}
+#rev-err.warn{color:var(--amber);}
+#rev-hist{font-size:10px;font-weight:600;color:var(--text-2);line-height:1.5;margin-top:2px;}
+#rev-hist b{color:var(--navy);}
+.rm-note{margin-top:11px;padding:8px 10px;background:var(--surface-2);border:1px solid var(--border);
+  border-radius:6px;font-size:9.5px;font-weight:600;color:var(--text-2);line-height:1.5;}
+.rm-note b{color:var(--navy);font-family:ui-monospace,Menlo,monospace;}
+.rm-act{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+.rm-act .btn{flex:0 0 auto;}
 
 /* ── Responsive ─────────────────────────────────────────────────────────── */
 @media (max-width:1180px){ #topbar .sub{display:none;} .meta-fields input{width:88px;} }
@@ -396,6 +428,33 @@ button,input,select,textarea{font-family:inherit;color:inherit;}
 </div>
 
 <input type="file" id="file-input" accept=".xlsx,.xlsm,.xls">
+
+<!-- Revision naming dialog, shown before every export -->
+<div id="rev-modal">
+  <div class="rm-box">
+    <h3>Name this revision</h3>
+    <p class="rm-sub">The revision label is printed in the sheet header; the sheet name becomes the Excel tab.
+      They can be the same.</p>
+
+    <label class="rm-f"><span>Revision label</span>
+      <input id="rev-name" autocomplete="off" placeholder="Rev A"></label>
+
+    <label class="rm-f"><span>Sheet name (Excel tab)</span>
+      <input id="rev-sheet" autocomplete="off" placeholder="Rev A"></label>
+
+    <div id="rev-err"></div>
+    <div id="rev-hist"></div>
+
+    <div class="rm-note">The matching N/A register is written as
+      <b>&lt;sheet name&gt; - NA</b> and hidden inside the workbook.</div>
+
+    <div class="rm-act">
+      <button class="btn btn-ghost" id="rev-cancel">Cancel</button>
+      <button class="btn btn-primary" id="rev-ok">Export</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <!-- ═══════════════════════════════════════════════════════════════════════════
@@ -503,25 +562,33 @@ button,input,select,textarea{font-family:inherit;color:inherit;}
     });
   })();
 
-  /* ── Persisted state ──────────────────────────────────────────────────── */
-  const state = { step: 1, answers: {}, meta: {}, wbB64: null, revs: [] };
-  try {
-    const raw = localStorage.getItem(STORE);
-    if (raw) Object.assign(state, JSON.parse(raw));
-  } catch (e) { /* private mode — run without persistence */ }
+  /* ── Session state ────────────────────────────────────────────────────────
+     Deliberately NOT persisted.  Every time the file is opened the reviewer
+     starts from a clean sheet and chooses explicitly: build a new review, or
+     import a previous report.  Any leftover state from older builds of this
+     tool is cleared so it cannot leak back in.
+     `history` holds one entry per revision already in the workbook, keeping
+     each revision's ROW DATA (not a parsed worksheet) — see exportWorkbook()
+     for why that matters.                                                    */
+  const state = {
+    step: 1,
+    answers: {},
+    meta: {},
+    history: [],        // [{ rev, sheet, active:[[…]], na:[[…]], subtitle }]
+    srcName: null       // filename of the imported workbook, for the toast
+  };
+  try { localStorage.removeItem(STORE); localStorage.removeItem('gad-tank-review-v1'); } catch (e) {}
 
-  let saveTimer = null;
-  function save() {
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => {
-      try { localStorage.setItem(STORE, JSON.stringify(state)); }
-      catch (e) {
-        // Most likely the stored workbook blew the quota — drop it and retry.
-        try { const c = Object.assign({}, state, { wbB64: null });
-              localStorage.setItem(STORE, JSON.stringify(c)); } catch (e2) {}
-      }
-    }, 350);
-  }
+  /* Nothing is written to disk, so guard against losing work to a stray
+     refresh or tab close. */
+  let dirty = false;
+  function save() { dirty = Object.keys(state.answers).length > 0; }
+  window.addEventListener('beforeunload', e => {
+    if (!dirty) return;
+    e.preventDefault();
+    e.returnValue = '';
+    return '';
+  });
 
   /* ── Header metadata ──────────────────────────────────────────────────── */
   ['project', 'tag', 'dwg', 'rev-by', 'date'].forEach(k => {
@@ -1019,40 +1086,51 @@ button,input,select,textarea{font-family:inherit;color:inherit;}
   const thin = { style: 'thin', color: { rgb: 'B7C4D2' } };
   const BORDER = { top: thin, bottom: thin, left: thin, right: thin };
 
-  /* Rev letters: A…Z, AA, AB, … */
-  function revToNum(s) {
-    let n = 0;
-    for (const ch of s.toUpperCase()) n = n * 26 + (ch.charCodeAt(0) - 64);
-    return n;
-  }
-  function numToRev(n) {
-    let s = '';
-    while (n > 0) { const r = (n - 1) % 26; s = String.fromCharCode(65 + r) + s; n = Math.floor((n - 1) / 26); }
-    return s || 'A';
-  }
-  const ACTIVE_RE = /^Rev\s+([A-Z]+)$/i;
-  const NA_RE     = /^Rev\s+([A-Z]+)\s*-\s*NA$/i;
+  /* An N/A register is always "<active sheet name> - NA".  Detecting the pair
+     by suffix (rather than by a "Rev <letter>" pattern) keeps import working
+     no matter what the reviewer names a revision. */
+  const NA_SUFFIX = ' - NA';
+  const isNASheet = n => /\s-\s*NA$/i.test(String(n).trim());
 
-  function revisionsIn(wb) {
-    const out = [];
-    (wb ? wb.SheetNames : []).forEach(n => {
-      const m = ACTIVE_RE.exec(n.trim());
-      if (m) out.push(m[1].toUpperCase());
-    });
-    return out.sort((a, b) => revToNum(a) - revToNum(b));
+  /* Suggest the next revision name by incrementing whatever the last one was:
+     "Rev A" → "Rev B", "Rev Z" → "Rev AA", "R1" → "R2", otherwise append. */
+  function suggestNextName() {
+    const h = state.history;
+    if (!h.length) return 'Rev A';
+    const last = h[h.length - 1].sheet;
+
+    let m = /^(.*?)([A-Za-z]+)$/.exec(last);
+    if (m && m[2].length <= 3) {
+      let n = 0;
+      for (const ch of m[2].toUpperCase()) n = n * 26 + (ch.charCodeAt(0) - 64);
+      n += 1;
+      let s = '';
+      while (n > 0) { const r = (n - 1) % 26; s = String.fromCharCode(65 + r) + s; n = Math.floor((n - 1) / 26); }
+      return m[1] + s;
+    }
+    m = /^(.*?)(\d+)$/.exec(last);
+    if (m) return m[1] + String(parseInt(m[2], 10) + 1);
+    return last + ' A';
   }
 
-  function nextRev(wb) {
-    const have = revisionsIn(wb).concat(state.revs || []);
-    if (!have.length) return 'A';
-    return numToRev(Math.max.apply(null, have.map(revToNum)) + 1);
+  /* Excel tab-name rules: 1–31 chars, none of : \ / ? * [ ] */
+  function sheetNameError(name, allowExisting) {
+    const n = String(name || '').trim();
+    if (!n) return 'Enter a sheet name.';
+    if (n.length > 31 - NA_SUFFIX.length)
+      return 'Max ' + (31 - NA_SUFFIX.length) + ' characters (the N/A sheet appends "' + NA_SUFFIX + '").';
+    if (/[:\\\/?*\[\]]/.test(n)) return 'Cannot contain : \\ / ? * [ ]';
+    if (isNASheet(n)) return 'Cannot end in "- NA" — that suffix is reserved for the N/A register.';
+    if (!allowExisting && state.history.some(h => h.sheet.toLowerCase() === n.toLowerCase()))
+      return 'A revision named "' + n + '" already exists in this workbook.';
+    return null;
   }
 
   /* ── Build one styled worksheet ───────────────────────────────────────── */
-  function buildSheet(rows, rev, naSheet) {
+  function buildSheet(rows, rev, naSheet, subtitleOverride) {
     const m = state.meta;
     const title = 'API 650 STORAGE TANK — GAD REVIEW CHECKLIST' + (naSheet ? '  ·  N/A REGISTER' : '');
-    const sub = [
+    const sub = subtitleOverride || [
       'Project: ' + (m.project || '—'),
       'Tank: ' + (m.tag || '—'),
       'Drawing: ' + (m.dwg || '—'),
@@ -1172,39 +1250,138 @@ button,input,select,textarea{font-family:inherit;color:inherit;}
     return { active: active, na: na };
   }
 
-  /* ── Export ───────────────────────────────────────────────────────────── */
+  /* ── Export ───────────────────────────────────────────────────────────────
+     Every sheet — historical revisions included — is REBUILT from stored row
+     data on each export.  This is deliberate: xlsx-js-style cannot round-trip
+     styles.  Reading a workbook back collapses each cell's `.s` to a
+     fill-only fragment, and re-writing it then emits empty cellXfs entries,
+     so any previously written revision came out plain.  Regenerating from the
+     data keeps all revisions identically formatted.
+     ------------------------------------------------------------------------ */
   function exportWorkbook() {
     if (typeof XLSX === 'undefined') {
       toast('Spreadsheet library did not load — check the network and reload.', true);
       return;
     }
-    let wb = null;
-    if (state.wbB64) {
-      try { wb = XLSX.read(b64ToBytes(state.wbB64), { type: 'array', cellStyles: true }); }
-      catch (e) { console.warn('stored workbook unreadable, starting fresh', e); wb = null; }
+    askRevision(suggestNextName(), (revName, sheetName, replacing) => {
+      const { active, na } = collectRows();
+
+      const entry = {
+        rev: revName, sheet: sheetName,
+        active: active, na: na,
+        subtitle: sheetSubtitle(revName)
+      };
+
+      // Splice this revision into the history: overwrite in place when the
+      // name is reused, otherwise append.  Sheet order then always matches
+      // revision order in the workbook.
+      const at = state.history.findIndex(h => h.sheet.toLowerCase() === sheetName.toLowerCase());
+      const list = state.history.slice();
+      if (replacing && at >= 0) list[at] = entry; else list.push(entry);
+
+      // Rebuild EVERY sheet from row data, so all revisions stay fully styled.
+      const wb = XLSX.utils.book_new();
+      list.forEach(h => {
+        XLSX.utils.book_append_sheet(wb, buildSheet(h.active, h.rev, false, h.subtitle), h.sheet);
+        XLSX.utils.book_append_sheet(wb, buildSheet(h.na, h.rev, true, h.subtitle), h.sheet + NA_SUFFIX);
+      });
+
+      // Hide every N/A register; only the revision sheets are visible on open.
+      wb.Workbook = wb.Workbook || {};
+      wb.Workbook.Sheets = wb.SheetNames.map(n => ({ name: n, Hidden: isNASheet(n) ? 1 : 0 }));
+
+      state.history = list;
+
+      const tag = (state.meta.tag || 'TANK').replace(/[^\w.-]+/g, '_');
+      const file = 'GAD_Review_' + tag + '_' + sheetName.replace(/[^\w.-]+/g, '_') + '.xlsx';
+      XLSX.writeFile(wb, file, { bookType: 'xlsx', cellStyles: true });
+
+      dirty = false;
+      toast('Exported "' + sheetName + '" — ' + active.length + ' active, ' + na.length + ' N/A' +
+            (state.history.length > 1 ? '  ·  ' + state.history.length + ' revisions in file' : '') +
+            (replacing ? '  ·  replaced the previous "' + sheetName + '"' : ''));
+    });
+  }
+
+  function sheetSubtitle(revName) {
+    const m = state.meta;
+    return [
+      'Project: ' + (m.project || '—'),
+      'Tank: ' + (m.tag || '—'),
+      'Drawing: ' + (m.dwg || '—'),
+      'Revision: ' + revName,
+      'Reviewer: ' + (m['rev-by'] || '—'),
+      'Date: ' + (m.date || '—')
+    ].join('     |     ');
+  }
+
+  /* ── Revision naming dialog ───────────────────────────────────────────── */
+  function askRevision(suggest, done) {
+    const modal = document.getElementById('rev-modal');
+    const fRev  = document.getElementById('rev-name');
+    const fSh   = document.getElementById('rev-sheet');
+    const err   = document.getElementById('rev-err');
+    const hist  = document.getElementById('rev-hist');
+    const ok    = document.getElementById('rev-ok');
+    const cancel = document.getElementById('rev-cancel');
+
+    fRev.value = suggest;
+    fSh.value  = suggest;
+    let sheetEdited = false;
+    err.textContent = '';
+
+    hist.innerHTML = state.history.length
+      ? 'Already in this workbook: ' + state.history.map(h => '<b>' + esc(h.sheet) + '</b>').join(', ') +
+        '. Reusing a name replaces that revision.'
+      : 'This will be the first revision in a new workbook.';
+
+    modal.classList.add('open');
+    setTimeout(() => { fRev.focus(); fRev.select(); }, 40);
+
+    // The sheet tab mirrors the revision name until it is edited by hand.
+    function onRev() { if (!sheetEdited) fSh.value = fRev.value; validate(); }
+    function onSheet() { sheetEdited = true; validate(); }
+
+    function validate() {
+      const n = fSh.value.trim();
+      const exists = state.history.some(h => h.sheet.toLowerCase() === n.toLowerCase());
+      const e = sheetNameError(n, true);
+      err.className = exists && !e ? 'warn' : '';
+      err.textContent = e || (exists ? 'Replaces the existing "' + n + '" revision.' : '');
+      ok.disabled = !!e;
+      return !e;
     }
-    if (!wb) wb = XLSX.utils.book_new();
 
-    const rev = nextRev(wb);
-    const { active, na } = collectRows();
+    function close() {
+      modal.classList.remove('open');
+      fRev.removeEventListener('input', onRev);
+      fSh.removeEventListener('input', onSheet);
+      ok.removeEventListener('click', accept);
+      cancel.removeEventListener('click', close);
+      modal.removeEventListener('click', backdrop);
+      document.removeEventListener('keydown', onKey);
+    }
+    function accept() {
+      if (!validate()) return;
+      const revName = fRev.value.trim() || fSh.value.trim();
+      const sheetName = fSh.value.trim();
+      const replacing = state.history.some(h => h.sheet.toLowerCase() === sheetName.toLowerCase());
+      close();
+      done(revName, sheetName, replacing);
+    }
+    function backdrop(e) { if (e.target === modal) close(); }
+    function onKey(e) {
+      if (e.key === 'Escape') close();
+      else if (e.key === 'Enter' && modal.classList.contains('open')) { e.preventDefault(); accept(); }
+    }
 
-    XLSX.utils.book_append_sheet(wb, buildSheet(active, rev, false), 'Rev ' + rev);
-    XLSX.utils.book_append_sheet(wb, buildSheet(na, rev, true), 'Rev ' + rev + ' - NA');
-
-    // Remember the workbook so the NEXT export appends rather than restarts
-    try {
-      const out = XLSX.write(wb, { bookType: 'xlsx', type: 'array', cellStyles: true });
-      state.wbB64 = bytesToB64(new Uint8Array(out));
-      state.revs = revisionsIn(wb);
-      save();
-    } catch (e) { console.warn('could not cache workbook', e); }
-
-    const tag = (state.meta.tag || 'TANK').replace(/[^\w.-]+/g, '_');
-    XLSX.writeFile(wb, 'GAD_Review_' + tag + '_Rev' + rev + '.xlsx',
-                   { bookType: 'xlsx', cellStyles: true });
-
-    toast('Exported Rev ' + rev + ' — ' + active.length + ' active, ' + na.length + ' N/A' +
-          (revisionsIn(wb).length > 1 ? '  ·  ' + revisionsIn(wb).length + ' revisions in file' : ''));
+    fRev.addEventListener('input', onRev);
+    fSh.addEventListener('input', onSheet);
+    ok.addEventListener('click', accept);
+    cancel.addEventListener('click', close);
+    modal.addEventListener('click', backdrop);
+    document.addEventListener('keydown', onKey);
+    validate();
   }
 
   /* ── Import ───────────────────────────────────────────────────────────── */
@@ -1225,16 +1402,50 @@ button,input,select,textarea{font-family:inherit;color:inherit;}
     fr.readAsArrayBuffer(f);
   });
 
+  /* Read the 6 data columns out of one sheet, tolerating the banner rows. */
+  function readSheetRows(ws) {
+    if (!ws) return null;
+    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, blankrows: false, defval: '' });
+    let head = rows.findIndex(r => r && norm(r[0]) === 'parameter' && norm(r[1]) === 'sub parameter');
+    if (head < 0) head = rows.findIndex(r => r && norm(r[0]) === 'parameter');
+    if (head < 0) return null;
+    const out = [];
+    for (let i = head + 1; i < rows.length; i++) {
+      const r = rows[i];
+      if (!r || r[0] === '' || r[1] === '') continue;
+      out.push([r[0], r[1], r[2] === undefined ? '' : r[2], r[3] === undefined ? '' : r[3],
+                r[4] === undefined ? '' : r[4], r[5] === undefined ? '' : r[5]]);
+    }
+    return out;
+  }
+
   function importWorkbook(bytes, filename) {
     const wb = XLSX.read(bytes, { type: 'array', cellStyles: true });
-    const revs = revisionsIn(wb);
-    if (!revs.length) throw new Error('no "Rev X" sheet found in ' + filename);
 
-    const rev = revs[revs.length - 1];                    // latest revision
-    const naName = wb.SheetNames.find(n => {
-      const m = NA_RE.exec(n.trim());
-      return m && m[1].toUpperCase() === rev;
+    // Any sheet that is not an "- NA" register is a revision; workbook order
+    // is revision order, so the last one is the latest.
+    const activeNames = wb.SheetNames.filter(n => !isNASheet(n) && readSheetRows(wb.Sheets[n]));
+    if (!activeNames.length)
+      throw new Error('no GAD revision sheet found in ' + filename +
+                      ' (expected a sheet with a "Parameter / Sub Parameter" header row)');
+
+    /* Capture EVERY revision's rows, so a later export can regenerate each
+       historical sheet with full formatting instead of round-tripping it. */
+    const history = activeNames.map(name => {
+      const ws = wb.Sheets[name];
+      const naWs = wb.Sheets[wb.SheetNames.find(n => norm(n) === norm(name + NA_SUFFIX))];
+      const sub = ws.A2 && ws.A2.v != null ? String(ws.A2.v) : '';
+      const revM = /Revision:\s*([^|]+)/i.exec(sub);
+      return {
+        rev: revM ? revM[1].trim() : name,
+        sheet: name,
+        active: readSheetRows(ws) || [],
+        na: readSheetRows(naWs) || [],
+        subtitle: sub || null
+      };
     });
+
+    const latest = history[history.length - 1];
 
     // Lookup: "zone||sub parameter" → item id
     const lut = new Map();
@@ -1243,46 +1454,32 @@ button,input,select,textarea{font-family:inherit;color:inherit;}
     const answers = {};
     let matched = 0, missed = 0;
 
-    function ingest(sheetName, forceNA) {
-      if (!sheetName || !wb.Sheets[sheetName]) return;
-      const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, blankrows: false });
-      let head = rows.findIndex(r => r && norm(r[0]) === 'parameter' && norm(r[1]) === 'sub parameter');
-      if (head < 0) head = rows.findIndex(r => r && norm(r[0]) === 'parameter');
-      if (head < 0) return;
-
-      for (let i = head + 1; i < rows.length; i++) {
-        const r = rows[i];
-        if (!r || r[0] == null || r[1] == null) continue;
+    function ingest(rows, forceNA) {
+      (rows || []).forEach(r => {
         const id = lut.get(norm(r[0]) + '||' + norm(r[1]));
-        if (!id) { missed++; continue; }
+        if (!id) { missed++; return; }
         matched++;
-
-        const stRaw = norm(r[2]);
-        let v = forceNA ? 'na'
-              : stRaw === 'closed' ? 'closed'
-              : stRaw === 'open'   ? 'open'
-              : stRaw === 'n/a' || stRaw === 'na' ? 'na' : null;
-
+        const st = norm(r[2]);
+        const v = forceNA ? 'na'
+                : st === 'closed' ? 'closed'
+                : st === 'open'   ? 'open'
+                : (st === 'n/a' || st === 'na') ? 'na' : null;
         const a = {};
         if (v) a.v = v;
-        if (v === 'open' && r[3]) a.pend = String(r[3]).trim();
-        if (r[4] != null && String(r[4]).trim()) a.r = String(r[4]).trim();
+        if (v === 'open' && r[3] !== '') a.pend = String(r[3]).trim();
+        if (r[4] !== '' && String(r[4]).trim()) a.r = String(r[4]).trim();
         if (a.v || a.r) answers[id] = a;
-      }
+      });
     }
+    ingest(latest.active, false);
+    ingest(latest.na, true);
 
-    ingest('Rev ' + rev, false);
-    ingest(naName, true);
+    if (!matched)
+      throw new Error('none of the rows in "' + latest.sheet + '" matched this matrix');
 
-    if (!matched) throw new Error('none of the rows in "Rev ' + rev + '" matched this matrix');
-
-    // Recover header metadata from the subtitle banner (row 2 of the sheet),
-    // so a fresh session picks up project / tag / drawing / reviewer too.
-    (function () {
-      const ws = wb.Sheets['Rev ' + rev];
-      const sub = ws && ws.A2 && String(ws.A2.v || '');
-      if (!sub) return;
-      const grab = re => { const m = re.exec(sub); return m && m[1].trim() !== '—' ? m[1].trim() : ''; };
+    // Recover header metadata from the subtitle banner of the latest revision
+    if (latest.subtitle) {
+      const grab = re => { const m = re.exec(latest.subtitle); return m && m[1].trim() !== '—' ? m[1].trim() : ''; };
       const found = {
         project:  grab(/Project:\s*([^|]+)/i),
         tag:      grab(/Tank:\s*([^|]+)/i),
@@ -1295,45 +1492,32 @@ button,input,select,textarea{font-family:inherit;color:inherit;}
         const el = document.getElementById('m-' + k);
         if (el) el.value = found[k];
       });
-    })();
+    }
 
     // Adopt the imported state
     state.answers = answers;
-    state.revs = revs;
-    state.wbB64 = bytesToB64(bytes);                      // append to THIS workbook next time
+    state.history = history;
+    state.srcName = filename;
     setStep(2, { quiet: true });
     pushGeometry();
     rerenderAll();
     refreshProgress();
     renderDrawer();
-    save();
+    dirty = false;
 
     const naCount = Object.keys(answers).filter(id => answers[id].v === 'na').length;
-    toast('Imported ' + filename + ' — latest revision "Rev ' + rev + '", ' + matched + ' parameters restored (' +
-          naCount + ' N/A). Next export will be Rev ' + nextRev(wb) + '.' +
+    toast('Imported ' + filename + ' — latest revision "' + latest.sheet + '" of ' + history.length +
+          ', ' + matched + ' parameters restored (' + naCount + ' N/A). You will be asked to name the ' +
+          'next revision on export.' +
           (missed ? '  ' + missed + ' row(s) did not match this matrix and were skipped.' : ''));
   }
 
   const norm = s => String(s == null ? '' : s).replace(/\s+/g, ' ').trim().toLowerCase();
 
-  /* Base64 <-> bytes without blowing the argument limit on large workbooks */
-  function bytesToB64(bytes) {
-    let bin = '', CH = 0x8000;
-    for (let i = 0; i < bytes.length; i += CH) {
-      bin += String.fromCharCode.apply(null, bytes.subarray(i, i + CH));
-    }
-    return btoa(bin);
-  }
-  function b64ToBytes(b64) {
-    const bin = atob(b64), out = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-    return out;
-  }
-
   /* ═════════════════════════════════════════════════════════════════════════
-     BOOT
+     BOOT — always a clean session
      ═════════════════════════════════════════════════════════════════════════ */
-  setStep(state.step || 1, { quiet: true });
+  setStep(1, { quiet: true });
   pushGeometry();
   window.addEventListener('load', pushGeometry);          // in case the 3D module lands later
 })();
