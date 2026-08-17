@@ -8,10 +8,6 @@
   <title>Meridiam</title>
   <style>
 
-    /* Default the whole app to an 80% render (what looked/fit best in testing).
-       Fixed full-screen overlays still cover the viewport under CSS zoom. */
-    html { zoom: 0.8; }
-
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
 
     body {
@@ -2093,13 +2089,6 @@
   }
   .mrd-logo-mark { width: 24px; height: 20px; flex-shrink: 0; }
 
-  /* ---- MERIDIAM brand wordmark (nav bars) ---- */
-  .mrd-brand { display: inline-flex; align-items: center; height: 26px; line-height: 0; }
-  .mrd-brand svg { height: 26px; width: auto; display: block; }
-  .mrd-brand .mrd-brand-word { fill: currentColor; }
-  .mrd-brand .mrd-brand-rule { fill: #2E5FA3; }
-  #mrd-app-topbar .mrd-brand { color: #16294A; }
-
   /* ---- Home dock screen ---- */
   .hero { color: var(--tr-navy) !important; }
   .tagline, .t-fixed { color: var(--tr-steel) !important; }
@@ -2431,7 +2420,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
   <div data-view="main" style="display:block; position:relative; width:100vw; height:100vh; isolation:isolate;">
 <div class="bg-overlay"></div>
   <div class="top-nav-bar"></div>
-  <div class="logo"><span class="mrd-brand" role="img" aria-label="MERIDIAM"></span></div>
+  <div class="logo"><span class="mrd-tr-logo mrd-logo-mark"></span>Meridiam</div>
 
   <div class="page-content">
 
@@ -2523,7 +2512,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     </div>
 
     <div class="top-nav-bar"></div>
-    <div class="home-logo"><span class="mrd-brand" role="img" aria-label="MERIDIAM"></span></div>
+    <div class="home-logo"><span class="mrd-tr-logo mrd-logo-mark"></span>Meridiam</div>
 
     <div class="content" style="display:flex; flex-direction:column; align-items:center; z-index:10;">
         <h1 class="hero">Let's review documents together, Engineer.</h1>
@@ -2565,7 +2554,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 
     <!-- Full screen app window revealed after genie -->
     <div id="app-window">
-        <div class="app-logo"><span class="mrd-brand" role="img" aria-label="MERIDIAM"></span></div>
+        <div class="app-logo"><span class="mrd-tr-logo mrd-logo-mark"></span>Meridiam</div>
     </div>
 
     <!-- Drum entry modal -->
@@ -2610,7 +2599,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 
   <div data-view="drum" style="display:none; position:relative; width:100vw; height:100vh; isolation:isolate;">
 <div class="top-nav-bar"></div>
-    <div class="logo"><span class="mrd-brand" role="img" aria-label="MERIDIAM"></span></div>
+    <div class="logo"><span class="mrd-tr-logo mrd-logo-mark"></span>Meridiam</div>
 
     <!-- Persistent Save + Exit controls -->
     <div id="mrd-save-cluster">
@@ -5559,7 +5548,8 @@ window.addEventListener('hashchange', function() {
   <div id="mrd-app-host" style="display:none;">
     <div id="mrd-app-topbar">
       <div class="mrd-app-brand">
-        <span class="mrd-brand" role="img" aria-label="MERIDIAM"></span>
+        <span class="mrd-tr-logo" aria-hidden="true"></span>
+        <span class="mrd-app-word">Meridiam</span>
         <span class="mrd-app-sep"></span>
         <span class="mrd-app-name" id="mrd-app-name"></span>
       </div>
@@ -5820,40 +5810,38 @@ window.addEventListener('hashchange', function() {
   </script>
 
   <script>
-  /* ── MERIDIAM brand wordmark, fullscreen-on-open, and scroll-to-navigate ── */
+  /* ── Full-screen on open, and scroll-to-move-modules on the suites page ── */
   (function () {
-    // 1) Inject the MERIDIAM wordmark logo into every nav brand slot.
-    var SVG =
-      '<svg viewBox="0 0 300 46" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-        '<text class="mrd-brand-word" x="150" y="33" text-anchor="middle" ' +
-          'font-family="Montserrat,\'Segoe UI\',Arial,sans-serif" font-weight="800" ' +
-          'font-size="30" letter-spacing="6">MERIDIAM</text>' +
-        '<rect class="mrd-brand-rule" x="6" y="21.8" width="288" height="2.4"/>' +
-      '</svg>';
-    function paintBrand() {
-      document.querySelectorAll('.mrd-brand').forEach(function (el) {
-        if (!el.firstChild) el.innerHTML = SVG;
-      });
-    }
-    paintBrand();
-    // Re-run once more after load in case a nav slot mounts late.
-    window.addEventListener('load', paintBrand);
-
-    // 2) Enter full-screen on the first user interaction. Browsers block
-    //    programmatic full-screen without a user gesture, so this fires on the
-    //    first click/keypress rather than on load.
-    function goFullscreen() {
+    // 1) Enter full-screen. Browsers block programmatic full-screen without a
+    //    user gesture, so we try immediately on open (works in some setups) and
+    //    otherwise fall back to the first click / key press, which is
+    //    guaranteed to succeed.
+    function requestFS() {
       var el = document.documentElement;
       var req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
-      if (req) { try { var p = req.call(el); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
-      document.removeEventListener('pointerdown', goFullscreen);
-      document.removeEventListener('keydown', goFullscreen);
+      if (!req || document.fullscreenElement) return true;
+      try {
+        var p = req.call(el);
+        if (p && p.then) { p.then(function(){}, function(){}); }
+        return true;
+      } catch (e) { return false; }
     }
-    document.addEventListener('pointerdown', goFullscreen, { once: true });
-    document.addEventListener('keydown', goFullscreen, { once: true });
+    function armFallback() {
+      function once() {
+        requestFS();
+        document.removeEventListener('pointerdown', once);
+        document.removeEventListener('keydown', once);
+      }
+      document.addEventListener('pointerdown', once, { once: true });
+      document.addEventListener('keydown', once, { once: true });
+    }
+    // Best-effort immediate attempt, then the first-gesture fallback.
+    if (document.readyState === 'complete' || document.readyState === 'interactive') requestFS();
+    else window.addEventListener('DOMContentLoaded', requestFS);
+    armFallback();
 
-    // 3) On the suites page, let the mouse wheel move through the modules and
-    //    expand them, mirroring the ← / → buttons.
+    // 2) On the suites page, the mouse wheel steps through the modules and
+    //    expands them, mirroring the ← / → buttons.
     var mainView = document.querySelector('[data-view="main"]');
     if (mainView) {
       var lock = false;
