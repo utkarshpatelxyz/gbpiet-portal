@@ -3,10 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meridian — Suites</title>
-  <title>Meridian — Engineer Review Tool</title>
-  <title>Meridian</title>
+  <title>Meridiam — Suites</title>
+  <title>Meridiam — Engineer Review Tool</title>
+  <title>Meridiam</title>
   <style>
+
+    /* Default the whole app to an 80% render (what looked/fit best in testing).
+       Fixed full-screen overlays still cover the viewport under CSS zoom. */
+    html { zoom: 0.8; }
 
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
 
@@ -2089,6 +2093,13 @@
   }
   .mrd-logo-mark { width: 24px; height: 20px; flex-shrink: 0; }
 
+  /* ---- MERIDIAM brand wordmark (nav bars) ---- */
+  .mrd-brand { display: inline-flex; align-items: center; height: 26px; line-height: 0; }
+  .mrd-brand svg { height: 26px; width: auto; display: block; }
+  .mrd-brand .mrd-brand-word { fill: currentColor; }
+  .mrd-brand .mrd-brand-rule { fill: #2E5FA3; }
+  #mrd-app-topbar .mrd-brand { color: #16294A; }
+
   /* ---- Home dock screen ---- */
   .hero { color: var(--tr-navy) !important; }
   .tagline, .t-fixed { color: var(--tr-steel) !important; }
@@ -2342,7 +2353,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
   <div id="meridian-loader">
     <div class="loader-top-line"></div>
     <div class="loader-wordmark" id="loaderWordmark"><!-- letters injected by JS --></div>
-    <div class="loader-tagline" id="loaderTagline">Engineer Review Tool</div>
+    <div class="loader-tagline" id="loaderTagline"></div>
     <div class="loader-progress-wrap" id="loaderProgressWrap">
       <div class="loader-progress-track">
         <div class="loader-progress-fill" id="loaderFill"></div>
@@ -2360,7 +2371,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     if (!loader || loader.dataset.ran) return;
     loader.dataset.ran = '1';
 
-    var WORD = 'MERIDIAN';
+    var WORD = 'MERIDIAM';
     var wordmark = document.getElementById('loaderWordmark');
     var tagline  = document.getElementById('loaderTagline');
     var progWrap = document.getElementById('loaderProgressWrap');
@@ -2420,11 +2431,11 @@ https://github.com/nodeca/pako/blob/main/LICENSE
   <div data-view="main" style="display:block; position:relative; width:100vw; height:100vh; isolation:isolate;">
 <div class="bg-overlay"></div>
   <div class="top-nav-bar"></div>
-  <div class="logo"><span class="mrd-tr-logo mrd-logo-mark"></span>Meridian</div>
+  <div class="logo"><span class="mrd-brand" role="img" aria-label="MERIDIAM"></span></div>
 
   <div class="page-content">
 
-    <div class="section-title">More features to empower your work.</div>
+    <div class="section-title">Features to empower your work.</div>
 
     <div class="cards-outer" id="cardsOuter">
       <div class="cards-track" id="cardsTrack">
@@ -2512,7 +2523,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     </div>
 
     <div class="top-nav-bar"></div>
-    <div class="home-logo"><span class="mrd-tr-logo mrd-logo-mark"></span>Meridian</div>
+    <div class="home-logo"><span class="mrd-brand" role="img" aria-label="MERIDIAM"></span></div>
 
     <div class="content" style="display:flex; flex-direction:column; align-items:center; z-index:10;">
         <h1 class="hero">Let's review documents together, Engineer.</h1>
@@ -2543,7 +2554,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
         </div>
 
         <p class="tagline">
-            <span class="t-fixed">Use Meridian </span>
+            <span class="t-fixed">Use Meridiam </span>
             <span class="t-dyn" id="dynText"></span>
             <span class="cursor"></span>
         </p>
@@ -2554,7 +2565,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 
     <!-- Full screen app window revealed after genie -->
     <div id="app-window">
-        <div class="app-logo"><span class="mrd-tr-logo mrd-logo-mark"></span>Meridian</div>
+        <div class="app-logo"><span class="mrd-brand" role="img" aria-label="MERIDIAM"></span></div>
     </div>
 
     <!-- Drum entry modal -->
@@ -2599,7 +2610,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 
   <div data-view="drum" style="display:none; position:relative; width:100vw; height:100vh; isolation:isolate;">
 <div class="top-nav-bar"></div>
-    <div class="logo"><span class="mrd-tr-logo mrd-logo-mark"></span>Meridian</div>
+    <div class="logo"><span class="mrd-brand" role="img" aria-label="MERIDIAM"></span></div>
 
     <!-- Persistent Save + Exit controls -->
     <div id="mrd-save-cluster">
@@ -3061,7 +3072,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 
   <script>
 
-const SPA_VIEW_TITLES = {'main': 'Meridian — Suites', 'home': 'Meridian — Engineer Review Tool', 'drum': 'Meridian'};
+const SPA_VIEW_TITLES = {'main': 'Meridiam — Suites', 'home': 'Meridiam — Engineer Review Tool', 'drum': 'Meridiam'};
 const SPA_VIEW_DISPLAYS = { main: 'block', home: 'flex', drum: 'block' };
 const SPA_STATE = {
   currentView: null,
@@ -4372,7 +4383,7 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
       const dt = new Date();
       const dtStr = dt.toLocaleString();
       const tagSafe = (equipmentTag || 'Unknown-Tag').replace(/[^a-zA-Z0-9_-]/g, '_');
-      const fileName = `MERIDIAN_Review_${tagSafe}_${dt.getFullYear()}${String(dt.getMonth()+1).padStart(2,'0')}${String(dt.getDate()).padStart(2,'0')}_${String(dt.getHours()).padStart(2,'0')}${String(dt.getMinutes()).padStart(2,'0')}.xlsx`;
+      const fileName = `MERIDIAM_Review_${tagSafe}_${dt.getFullYear()}${String(dt.getMonth()+1).padStart(2,'0')}${String(dt.getDate()).padStart(2,'0')}_${String(dt.getHours()).padStart(2,'0')}${String(dt.getMinutes()).padStart(2,'0')}.xlsx`;
 
       const buffer = await wb.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -4566,8 +4577,8 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
 
         mrdSetDirty(false);
       } catch (err) {
-        console.error('Meridian import failed:', err);
-        alert('This file could not be read as a Meridian export. Please choose a valid exported Excel file.');
+        console.error('Meridiam import failed:', err);
+        alert('This file could not be read as a Meridiam export. Please choose a valid exported Excel file.');
       }
     }
 
@@ -5548,8 +5559,7 @@ window.addEventListener('hashchange', function() {
   <div id="mrd-app-host" style="display:none;">
     <div id="mrd-app-topbar">
       <div class="mrd-app-brand">
-        <span class="mrd-tr-logo" aria-hidden="true"></span>
-        <span class="mrd-app-word">Meridian</span>
+        <span class="mrd-brand" role="img" aria-label="MERIDIAM"></span>
         <span class="mrd-app-sep"></span>
         <span class="mrd-app-name" id="mrd-app-name"></span>
       </div>
@@ -5568,7 +5578,7 @@ window.addEventListener('hashchange', function() {
         </button>
       </div>
     </div>
-    <iframe id="mrd-app-frame" title="Meridian embedded application" style="display:none;"></iframe>
+    <iframe id="mrd-app-frame" title="Meridiam embedded application" style="display:none;"></iframe>
   </div>
 
   <!-- ═══════════════════════════════════════════════════════════════
@@ -5584,7 +5594,7 @@ window.addEventListener('hashchange', function() {
       <div class="mms-rule"></div>
       <div class="mms-powered">
         <span class="mms-powered-by">Powered by</span>
-        <span class="mms-brand">MERIDIAN</span>
+        <span class="mms-brand">MERIDIAM</span>
       </div>
     </div>
   </div>
@@ -5806,6 +5816,56 @@ window.addEventListener('hashchange', function() {
       landing.style.display = 'none';
       if (curURL) { URL.revokeObjectURL(curURL); curURL = null; }
     };
+  })();
+  </script>
+
+  <script>
+  /* ── MERIDIAM brand wordmark, fullscreen-on-open, and scroll-to-navigate ── */
+  (function () {
+    // 1) Inject the MERIDIAM wordmark logo into every nav brand slot.
+    var SVG =
+      '<svg viewBox="0 0 300 46" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+        '<text class="mrd-brand-word" x="150" y="33" text-anchor="middle" ' +
+          'font-family="Montserrat,\'Segoe UI\',Arial,sans-serif" font-weight="800" ' +
+          'font-size="30" letter-spacing="6">MERIDIAM</text>' +
+        '<rect class="mrd-brand-rule" x="6" y="21.8" width="288" height="2.4"/>' +
+      '</svg>';
+    function paintBrand() {
+      document.querySelectorAll('.mrd-brand').forEach(function (el) {
+        if (!el.firstChild) el.innerHTML = SVG;
+      });
+    }
+    paintBrand();
+    // Re-run once more after load in case a nav slot mounts late.
+    window.addEventListener('load', paintBrand);
+
+    // 2) Enter full-screen on the first user interaction. Browsers block
+    //    programmatic full-screen without a user gesture, so this fires on the
+    //    first click/keypress rather than on load.
+    function goFullscreen() {
+      var el = document.documentElement;
+      var req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+      if (req) { try { var p = req.call(el); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
+      document.removeEventListener('pointerdown', goFullscreen);
+      document.removeEventListener('keydown', goFullscreen);
+    }
+    document.addEventListener('pointerdown', goFullscreen, { once: true });
+    document.addEventListener('keydown', goFullscreen, { once: true });
+
+    // 3) On the suites page, let the mouse wheel move through the modules and
+    //    expand them, mirroring the ← / → buttons.
+    var mainView = document.querySelector('[data-view="main"]');
+    if (mainView) {
+      var lock = false;
+      mainView.addEventListener('wheel', function (e) {
+        if (Math.abs(e.deltaY) < 6 || typeof window.navigate !== 'function') return;
+        e.preventDefault();
+        if (lock) return;
+        lock = true;
+        window.navigate(e.deltaY > 0 ? 1 : -1);
+        setTimeout(function () { lock = false; }, 520);
+      }, { passive: false });
+    }
   })();
   </script>
 </body>
