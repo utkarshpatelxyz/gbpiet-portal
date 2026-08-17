@@ -2089,6 +2089,13 @@
   }
   .mrd-logo-mark { width: 24px; height: 20px; flex-shrink: 0; }
 
+  /* ---- MERIDIAM brand lockup (nav bars) — white wordmark + blue globe on a
+          dark chip, so the supplied logo shows correctly on the light nav ---- */
+  .mrd-brand-logo { display: inline-flex; align-items: center; line-height: 0; flex-shrink: 0; }
+  .mrd-brand-logo svg { height: 38px; width: auto; display: block; }
+  #mrd-app-topbar .mrd-brand-logo svg { height: 34px; }
+  .home-logo .mrd-brand-logo svg, .app-logo .mrd-brand-logo svg { height: 38px; }
+
   /* ---- Home dock screen ---- */
   .hero { color: var(--tr-navy) !important; }
   .tagline, .t-fixed { color: var(--tr-steel) !important; }
@@ -2420,7 +2427,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
   <div data-view="main" style="display:block; position:relative; width:100vw; height:100vh; isolation:isolate;">
 <div class="bg-overlay"></div>
   <div class="top-nav-bar"></div>
-  <div class="logo"><span class="mrd-tr-logo mrd-logo-mark"></span>Meridiam</div>
+  <div class="logo"><span class="mrd-brand-logo" role="img" aria-label="MERIDIAM"></span></div>
 
   <div class="page-content">
 
@@ -2512,7 +2519,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     </div>
 
     <div class="top-nav-bar"></div>
-    <div class="home-logo"><span class="mrd-tr-logo mrd-logo-mark"></span>Meridiam</div>
+    <div class="home-logo"><span class="mrd-brand-logo" role="img" aria-label="MERIDIAM"></span></div>
 
     <div class="content" style="display:flex; flex-direction:column; align-items:center; z-index:10;">
         <h1 class="hero">Let's review documents together, Engineer.</h1>
@@ -2554,7 +2561,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 
     <!-- Full screen app window revealed after genie -->
     <div id="app-window">
-        <div class="app-logo"><span class="mrd-tr-logo mrd-logo-mark"></span>Meridiam</div>
+        <div class="app-logo"><span class="mrd-brand-logo" role="img" aria-label="MERIDIAM"></span></div>
     </div>
 
     <!-- Drum entry modal -->
@@ -2599,7 +2606,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 
   <div data-view="drum" style="display:none; position:relative; width:100vw; height:100vh; isolation:isolate;">
 <div class="top-nav-bar"></div>
-    <div class="logo"><span class="mrd-tr-logo mrd-logo-mark"></span>Meridiam</div>
+    <div class="logo"><span class="mrd-brand-logo" role="img" aria-label="MERIDIAM"></span></div>
 
     <!-- Persistent Save + Exit controls -->
     <div id="mrd-save-cluster">
@@ -5548,8 +5555,7 @@ window.addEventListener('hashchange', function() {
   <div id="mrd-app-host" style="display:none;">
     <div id="mrd-app-topbar">
       <div class="mrd-app-brand">
-        <span class="mrd-tr-logo" aria-hidden="true"></span>
-        <span class="mrd-app-word">Meridiam</span>
+        <span class="mrd-brand-logo" role="img" aria-label="MERIDIAM"></span>
         <span class="mrd-app-sep"></span>
         <span class="mrd-app-name" id="mrd-app-name"></span>
       </div>
@@ -5810,8 +5816,47 @@ window.addEventListener('hashchange', function() {
   </script>
 
   <script>
-  /* ── Full-screen on open, and scroll-to-move-modules on the suites page ── */
+  /* ── MERIDIAM brand logo, full-screen on open, scroll-to-move modules ── */
   (function () {
+    // 0) Paint the supplied MERIDIAM logo (white wordmark + blue wireframe
+    //    globe + blue equator line on a dark chip) into every nav brand slot.
+    var LOGO =
+      '<svg viewBox="0 0 344 96" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+        '<defs>' +
+          '<radialGradient id="mrdGlobeBg" cx="50%" cy="44%" r="62%">' +
+            '<stop offset="0%" stop-color="#1b2a5c"/><stop offset="62%" stop-color="#0c1230"/>' +
+            '<stop offset="100%" stop-color="#070A1C"/>' +
+          '</radialGradient>' +
+          '<filter id="mrdGlow" x="-20%" y="-40%" width="140%" height="180%">' +
+            '<feGaussianBlur stdDeviation="1.1" result="b"/>' +
+            '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>' +
+          '</filter>' +
+        '</defs>' +
+        '<rect x="0" y="0" width="344" height="96" rx="16" fill="url(#mrdGlobeBg)"/>' +
+        '<g fill="none" stroke="#5570F6" stroke-width="2" filter="url(#mrdGlow)">' +
+          '<circle cx="172" cy="48" r="35"/>' +
+          '<ellipse cx="172" cy="48" rx="25" ry="35"/>' +
+          '<ellipse cx="172" cy="48" rx="12" ry="35"/>' +
+        '</g>' +
+        '<text x="172" y="63" text-anchor="middle" filter="url(#mrdGlow)" ' +
+          'font-family="Montserrat,\'Segoe UI\',Arial,sans-serif" font-weight="700" ' +
+          'font-size="44" letter-spacing="8" fill="#FFFFFF">MERIDIAM</text>' +
+        '<rect x="14" y="46.6" width="316" height="2.6" rx="1.3" fill="#5570F6" filter="url(#mrdGlow)"/>' +
+      '</svg>';
+    var logoSeq = 0;
+    function paintLogo() {
+      document.querySelectorAll('.mrd-brand-logo').forEach(function (el) {
+        if (el.firstChild) return;
+        // Unique gradient/filter IDs per instance — identical IDs across several
+        // inline SVGs make url(#id) references resolve to the wrong one, which
+        // dropped the dark chip + white wordmark on some nav bars.
+        var uid = 'mrdlogo' + (logoSeq++);
+        el.innerHTML = LOGO.replace(/mrdGlobeBg/g, uid + 'bg').replace(/mrdGlow/g, uid + 'gl');
+      });
+    }
+    paintLogo();
+    window.addEventListener('load', paintLogo);
+
     // 1) Enter full-screen. Browsers block programmatic full-screen without a
     //    user gesture, so we try immediately on open (works in some setups) and
     //    otherwise fall back to the first click / key press, which is
