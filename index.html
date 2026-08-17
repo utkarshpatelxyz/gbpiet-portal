@@ -2334,6 +2334,89 @@ https://github.com/nodeca/pako/blob/main/LICENSE
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       MERIDIAN STARTUP LOADER — global logo presentation, plays once
+       when the file is opened, then fades to reveal the app.
+  ═══════════════════════════════════════════════════════════════════ -->
+  <div id="meridian-loader">
+    <div class="loader-top-line"></div>
+    <div class="loader-wordmark" id="loaderWordmark"><!-- letters injected by JS --></div>
+    <div class="loader-tagline" id="loaderTagline">Engineer Review Tool</div>
+    <div class="loader-progress-wrap" id="loaderProgressWrap">
+      <div class="loader-progress-track">
+        <div class="loader-progress-fill" id="loaderFill"></div>
+      </div>
+      <div class="loader-progress-pct" id="loaderPct">0%</div>
+    </div>
+  </div>
+  <script>
+  /* Meridian startup logo animation — runs immediately, before the rest of
+     the document parses, so the branded screen covers the app from the very
+     first paint. Same animation the engineering-review view used before; it
+     is now the app-wide opening presentation. */
+  (function () {
+    var loader = document.getElementById('meridian-loader');
+    if (!loader || loader.dataset.ran) return;
+    loader.dataset.ran = '1';
+
+    var WORD = 'MERIDIAN';
+    var wordmark = document.getElementById('loaderWordmark');
+    var tagline  = document.getElementById('loaderTagline');
+    var progWrap = document.getElementById('loaderProgressWrap');
+    var fill     = document.getElementById('loaderFill');
+    var pct      = document.getElementById('loaderPct');
+
+    WORD.split('').forEach(function (ch, i) {
+      var span = document.createElement('span');
+      span.className = 'loader-letter';
+      span.textContent = ch;
+      span.id = 'll-' + i;
+      wordmark.appendChild(span);
+    });
+
+    WORD.split('').forEach(function (_, i) {
+      var el = document.getElementById('ll-' + i);
+      setTimeout(function () {
+        el.style.transition = 'opacity 0.55s cubic-bezier(0.22,1,0.36,1), transform 0.55s cubic-bezier(0.22,1,0.36,1)';
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+      }, 300 + i * 90);
+    });
+
+    var taglineDelay = 300 + WORD.length * 90 + 200;
+    setTimeout(function () {
+      tagline.style.transition = 'opacity 0.7s ease';
+      tagline.style.opacity = '1';
+    }, taglineDelay);
+
+    setTimeout(function () {
+      progWrap.style.transition = 'opacity 0.5s ease';
+      progWrap.style.opacity = '1';
+      var interval = 30, steps = 1400 / interval, step = 0;
+      var ticker = setInterval(function () {
+        step++;
+        var t = step / steps;
+        var eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        var value = Math.round(eased * 100);
+        fill.style.width = value + '%';
+        pct.textContent = value + '%';
+        if (step >= steps) {
+          clearInterval(ticker);
+          fill.style.width = '100%';
+          pct.textContent = '100%';
+          setTimeout(function () {
+            loader.classList.add('loader-exit');
+            loader.addEventListener('animationend', function () {
+              loader.style.display = 'none';
+            }, { once: true });
+          }, 280);
+        }
+      }, interval);
+    }, taglineDelay + 200);
+  })();
+  </script>
+
   <div data-view="main" style="display:block; position:relative; width:100vw; height:100vh; isolation:isolate;">
 <div class="bg-overlay"></div>
   <div class="top-nav-bar"></div>
@@ -2420,21 +2503,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 <!-- ============================================================
          MERIDIAN LOADING SCREEN
     ============================================================ -->
-    <div id="meridian-loader">
-        <div class="loader-top-line"></div>
-
-        <div class="loader-wordmark" id="loaderWordmark">
-            <!-- Letters injected by JS -->
-        </div>
-        <div class="loader-tagline" id="loaderTagline">Engineer Review Tool</div>
-
-        <div class="loader-progress-wrap" id="loaderProgressWrap">
-            <div class="loader-progress-track">
-                <div class="loader-progress-fill" id="loaderFill"></div>
-            </div>
-            <div class="loader-progress-pct" id="loaderPct">0%</div>
-        </div>
-    </div>
+    <!-- Meridian loading screen moved to top level so it plays at global
+         startup (see just after <body>), not only on the home view. -->
 
     <div class="bg-layer">
         <div class="blob b1"></div><div class="blob b2"></div>
@@ -3189,6 +3259,7 @@ document.body.style.backgroundImage = 'url("data:image/png;base64,/9j/4AAQSkZJRg
   if (mainHomeLink) {
     mainHomeLink.addEventListener('click', function(event) {
       event.preventDefault();
+      if (window.showModuleSplash) window.showModuleSplash('Engineering Review Tool');
       showView('home');
     });
   }
@@ -3207,6 +3278,10 @@ function initHomeView() {
            MERIDIAN LOADING SCREEN
         ============================================================ */
         (function() {
+            // The Meridian loader now runs once at global startup (see the
+            // script just after <body>). Skip it here so the engineering
+            // review view uses its own module splash instead.
+            return;
             const WORD = "MERIDIAN";
             const wordmark = document.getElementById('loaderWordmark');
             const tagline  = document.getElementById('loaderTagline');
