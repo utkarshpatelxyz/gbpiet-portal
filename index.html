@@ -2095,6 +2095,14 @@
   .mrd-brand-logo svg { height: 38px; width: auto; display: block; }
   #mrd-app-topbar .mrd-brand-logo svg { height: 34px; }
   .home-logo .mrd-brand-logo svg, .app-logo .mrd-brand-logo svg { height: 38px; }
+  /* Vertically centre the brand chip inside the 52px top nav (it was pinned at
+     top:14px, sized for the old 20px text, so the taller chip sat low). */
+  .logo, .home-logo, #app-window .app-logo {
+    top: 0 !important;
+    height: 52px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+  }
 
   /* ---- Home dock screen ---- */
   .hero { color: var(--tr-navy) !important; }
