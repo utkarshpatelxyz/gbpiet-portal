@@ -5496,6 +5496,91 @@ window.addEventListener('hashchange', function() {
     <iframe id="mrd-app-frame" title="Meridian embedded application" style="display:none;"></iframe>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════════════
+       PER-MODULE LAUNCH SPLASH — "[Module name]" + Powered by MERIDIAN.
+       Shown briefly whenever a module opens; the module content loads
+       underneath so the splash also masks its start-up time.
+  ═══════════════════════════════════════════════════════════════════ -->
+  <div id="mrd-module-splash" aria-hidden="true">
+    <div class="mms-topline"></div>
+    <div class="mms-inner">
+      <div class="mms-eyebrow">Module</div>
+      <div class="mms-name" id="mms-name"></div>
+      <div class="mms-rule"></div>
+      <div class="mms-powered">
+        <span class="mms-powered-by">Powered by</span>
+        <span class="mms-brand">MERIDIAN</span>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    #mrd-module-splash {
+      position: fixed; inset: 0; z-index: 13000;
+      display: flex; align-items: center; justify-content: center;
+      background: radial-gradient(120% 120% at 50% 0%, #1B3550 0%, #10233A 55%, #0A1622 100%);
+      opacity: 0; visibility: hidden; pointer-events: none; overflow: hidden;
+      font-family: var(--tr-font, 'Montserrat','Segoe UI',sans-serif);
+    }
+    #mrd-module-splash.open    { opacity: 1; visibility: visible; pointer-events: auto;
+                                 transition: opacity 0.34s ease; }
+    #mrd-module-splash.closing { opacity: 0; pointer-events: none;
+                                 transition: opacity 0.46s cubic-bezier(0.4,0,0.2,1); }
+    #mrd-module-splash::before {
+      content: ''; position: absolute; width: 760px; height: 760px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(69,192,206,0.16) 0%, transparent 68%);
+      animation: mmsGlow 3s ease-in-out infinite;
+    }
+    @keyframes mmsGlow { 0%,100% { transform: scale(1); opacity: 0.7; }
+                         50%      { transform: scale(1.14); opacity: 1; } }
+    #mrd-module-splash .mms-topline {
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, #2F97AA, #45C0CE, transparent);
+    }
+    .mms-inner { position: relative; z-index: 2; text-align: center; padding: 0 30px; max-width: 900px; }
+    .mms-eyebrow {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.42em; text-transform: uppercase;
+      color: #5E9DB0; opacity: 0; transform: translateY(10px);
+    }
+    .mms-name {
+      margin-top: 16px; font-size: clamp(28px, 5.4vw, 62px); font-weight: 800;
+      letter-spacing: -0.01em; color: #fff; line-height: 1.12;
+      opacity: 0; transform: translateY(22px); text-shadow: 0 0 44px rgba(69,192,206,0.4);
+    }
+    .mms-rule {
+      height: 2px; width: 0; margin: 26px auto 0; border-radius: 2px;
+      background: linear-gradient(90deg, #2F97AA, #45C0CE);
+      box-shadow: 0 0 14px rgba(69,192,206,0.7);
+    }
+    .mms-powered {
+      margin-top: 24px; opacity: 0; transform: translateY(10px);
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .mms-powered-by {
+      font-size: 12px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase;
+      color: rgba(255,255,255,0.42);
+    }
+    .mms-brand {
+      font-size: 16px; font-weight: 800; letter-spacing: 0.28em;
+      background: linear-gradient(90deg, #45C0CE, #2F97AA);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    /* Animations run only while the splash is open, so each launch replays them. */
+    #mrd-module-splash.open .mms-eyebrow { animation: mmsFadeUp 0.55s ease forwards 0.18s; }
+    #mrd-module-splash.open .mms-name    { animation: mmsFadeUp 0.7s cubic-bezier(0.22,1,0.36,1) forwards 0.32s; }
+    #mrd-module-splash.open .mms-rule    { animation: mmsRule 0.6s cubic-bezier(0.22,1,0.36,1) forwards 0.62s; }
+    #mrd-module-splash.open .mms-powered { animation: mmsFadeUp 0.6s ease forwards 0.82s; }
+    @keyframes mmsFadeUp { to { opacity: 1; transform: translateY(0); } }
+    @keyframes mmsRule   { to { width: min(360px, 60%); } }
+    @media (prefers-reduced-motion: reduce) {
+      #mrd-module-splash::before { animation: none; }
+      #mrd-module-splash.open .mms-eyebrow,
+      #mrd-module-splash.open .mms-name,
+      #mrd-module-splash.open .mms-powered { animation-duration: 0.01s; animation-delay: 0s; }
+      #mrd-module-splash.open .mms-rule { animation-duration: 0.01s; animation-delay: 0s; }
+    }
+  </style>
+
   <style>
     #mrd-app-host {
       position: fixed; inset: 0; z-index: 12000;
@@ -5569,6 +5654,27 @@ window.addEventListener('hashchange', function() {
     var nameEl = document.getElementById('mrd-app-name');
     var curURL = null;
 
+    /* ── Per-module launch splash ─────────────────────────────────────── */
+    var splash     = document.getElementById('mrd-module-splash');
+    var splashName = document.getElementById('mms-name');
+    var splashT1 = null, splashT2 = null;
+
+    window.showModuleSplash = function (name) {
+      if (!splash) return;
+      splashName.textContent = name || '';
+      clearTimeout(splashT1); clearTimeout(splashT2);
+      // Restart the CSS reveal animations from the top on every launch.
+      splash.classList.remove('open', 'closing');
+      void splash.offsetWidth;              // force reflow
+      splash.classList.add('open');
+      splashT1 = setTimeout(function () {
+        splash.classList.add('closing');
+        splashT2 = setTimeout(function () {
+          splash.classList.remove('open', 'closing');
+        }, 480);
+      }, 1650);
+    };
+
     function b64ToBlobURL(b64) {
       var bin = atob(b64);
       var len = bin.length;
@@ -5583,6 +5689,7 @@ window.addEventListener('hashchange', function() {
         landing.style.display = 'flex';
         frame.style.display = 'none';
         host.style.display = 'flex';
+        showModuleSplash('Project Details');
       } else if (key === 'p6') {
         openEmbeddedApp('p6', 'P6-PLAN4e');
       } else if (key === 'vendor') {
@@ -5594,6 +5701,7 @@ window.addEventListener('hashchange', function() {
       var apps = window.__MRD_APPS__ || {};
       var b64 = apps[appKey];
       nameEl.textContent = title || '';
+      showModuleSplash(title || '');
       landing.style.display = 'none';
       if (!b64) {
         // Payload not embedded — show a graceful message rather than a blank frame.
