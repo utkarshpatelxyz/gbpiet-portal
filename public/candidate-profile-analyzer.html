@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MERIDIAN · Candidate Profile Analyzer — TR India Static Equipment (Dept 133)</title>
+<title>Candidate Profile Analyzer — TR India Static Equipment (Dept 133)</title>
 <style>
 :root{
   --bg:#0b1220; --bg2:#0f1a2e; --panel:#111d33; --panel2:#152340; --line:#22355c;
@@ -11,13 +11,22 @@
   --acc:#26d0c2; --acc2:#3b82f6; --acc-d:#0e7d76;
   --good:#2ecc9b; --warn:#f4b740; --bad:#ff5d6c; --info:#5aa9ff;
   --shadow:0 10px 30px rgba(0,0,0,.35);
+  --glow1:#16233f; --glow2:#122a3a; --headbg1:rgba(11,18,32,.94); --headbg2:rgba(11,18,32,.72);
   --r:14px;
+}
+:root[data-theme="light"]{
+  --bg:#eef2f8; --bg2:#ffffff; --panel:#ffffff; --panel2:#f4f7fb; --line:#d3dcea;
+  --ink:#132036; --ink2:#4c5c78; --ink3:#8494ad;
+  --acc:#0e9c92; --acc2:#2563eb; --acc-d:#0b7c74;
+  --good:#129c72; --warn:#c98a10; --bad:#d93a4a; --info:#2b7fd6;
+  --shadow:0 10px 24px rgba(30,50,90,.12);
+  --glow1:#dbe6f5; --glow2:#dcefeb; --headbg1:rgba(255,255,255,.92); --headbg2:rgba(255,255,255,.7);
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{
-  background:radial-gradient(1200px 600px at 80% -10%,#16233f 0%,transparent 60%),
-             radial-gradient(1000px 500px at -10% 10%,#122a3a 0%,transparent 55%),
+  background:radial-gradient(1200px 600px at 80% -10%,var(--glow1) 0%,transparent 60%),
+             radial-gradient(1000px 500px at -10% 10%,var(--glow2) 0%,transparent 55%),
              var(--bg);
   color:var(--ink); font:14px/1.5 "Segoe UI",Roboto,-apple-system,Helvetica,Arial,sans-serif;
   min-height:100vh;
@@ -27,9 +36,13 @@ a{color:var(--acc)}
 /* Header */
 header.top{
   position:sticky;top:0;z-index:40;backdrop-filter:blur(9px);
-  background:linear-gradient(180deg,rgba(11,18,32,.94),rgba(11,18,32,.72));
+  background:linear-gradient(180deg,var(--headbg1),var(--headbg2));
   border-bottom:1px solid var(--line);
 }
+.themebtn{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--ink2);
+  border:1px solid var(--line);background:var(--panel);padding:6px 12px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.themebtn:hover{border-color:var(--acc-d);color:var(--ink)}
+.themebtn .ti{font-size:14px}
 .top-inner{max-width:1280px;margin:0 auto;padding:12px 22px;display:flex;align-items:center;gap:16px}
 .logo{display:flex;align-items:center;gap:12px;min-width:0}
 .mark{width:40px;height:40px;border-radius:11px;flex:none;position:relative;
@@ -185,11 +198,12 @@ details.raw summary{cursor:pointer;color:var(--ink2);font-size:12.5px;padding:6p
     <div class="logo">
       <div class="mark"></div>
       <div class="brand">
-        <h1>MERIDIAN <span style="color:var(--ink3);font-weight:400">/</span> Candidate Profile Analyzer</h1>
-        <div class="sub">TR INDIA · Static Equipment — Department 133 · Talent Intelligence Module</div>
+        <h1>Candidate Profile Analyzer</h1>
+        <div class="sub">TR INDIA · Static Equipment — Department 133 · Talent Intelligence</div>
       </div>
     </div>
     <div class="top-spacer"></div>
+    <button class="themebtn" id="themeToggle" title="Switch light / dark theme"><span class="ti">🌙</span><span id="themeLabel">Dark</span></button>
     <div class="pill">Processing is <b>100% local</b> · nothing leaves this browser</div>
   </div>
 </header>
@@ -296,7 +310,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 </script>
 <script>
 /* ============================================================
-   MERIDIAN · Candidate Profile Analyzer
+   Candidate Profile Analyzer
    Framework data transcribed from the 5 confidential source docs
    ============================================================ */
 const LEVELS = [
@@ -419,6 +433,25 @@ let CV_FILES=[];      // {name, text}
 let ANALYSIS=null;    // current analysis result
 const $=s=>document.querySelector(s);
 const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+
+/* ---------- theme (dark / light) ---------- */
+(function(){
+  let saved="dark";
+  try{saved=localStorage.getItem("cpa-theme")||"dark";}catch(e){}
+  applyTheme(saved);
+  const btn=$("#themeToggle");
+  if(btn)btn.addEventListener("click",()=>{
+    const next=document.documentElement.getAttribute("data-theme")==="light"?"dark":"light";
+    applyTheme(next);
+    try{localStorage.setItem("cpa-theme",next);}catch(e){}
+  });
+  function applyTheme(t){
+    document.documentElement.setAttribute("data-theme",t);
+    const lbl=$("#themeLabel"),ic=document.querySelector("#themeToggle .ti");
+    if(lbl)lbl.textContent=t==="light"?"Light":"Dark";
+    if(ic)ic.textContent=t==="light"?"☀️":"🌙";
+  }
+})();
 
 /* ---------- populate applied-role dropdown ---------- */
 (function(){
@@ -936,10 +969,10 @@ function renderRadar(a){
   const pt=(v,k)=>{const ang=-Math.PI/2+k*2*Math.PI/groups.length;const r=v/max*R;return [cx+r*Math.cos(ang),cy+r*Math.sin(ang)];};
   const poly=arr=>arr.map((v,k)=>pt(v,k).join(",")).join(" ");
   let grid="";
-  for(let ring=1;ring<=4;ring++){grid+=`<polygon points="${groups.map((_,k)=>pt(ring,k).join(",")).join(" ")}" fill="none" stroke="#22355c" stroke-width="1"/>`;}
-  groups.forEach((_,k)=>{const[e,f]=pt(4,k);grid+=`<line x1="${cx}" y1="${cy}" x2="${e}" y2="${f}" stroke="#22355c" stroke-width="1"/>`;});
+  for(let ring=1;ring<=4;ring++){grid+=`<polygon points="${groups.map((_,k)=>pt(ring,k).join(",")).join(" ")}" fill="none" stroke="var(--line)" stroke-width="1"/>`;}
+  groups.forEach((_,k)=>{const[e,f]=pt(4,k);grid+=`<line x1="${cx}" y1="${cy}" x2="${e}" y2="${f}" stroke="var(--line)" stroke-width="1"/>`;});
   let labels="";
-  groups.forEach((g,k)=>{const[e,f]=pt(4.7,k);labels+=`<text x="${e}" y="${f}" fill="#9fb2d4" font-size="10.5" text-anchor="middle" dominant-baseline="middle">${gl[g]}</text>`;});
+  groups.forEach((g,k)=>{const[e,f]=pt(4.7,k);labels+=`<text x="${e}" y="${f}" fill="var(--ink2)" font-size="10.5" text-anchor="middle" dominant-baseline="middle">${gl[g]}</text>`;});
   const svg=`<svg viewBox="0 0 ${size} ${size}" width="100%" style="max-width:300px">
     ${grid}${labels}
     <polygon points="${poly(ref)}" fill="rgba(244,183,64,.14)" stroke="var(--warn)" stroke-width="1.5" stroke-dasharray="4 3"/>
@@ -1095,7 +1128,7 @@ function exportAnalysis(a){
   const L=a.applied.i;
   const rows=[];
   rows.push(["CANDIDATE SCREENING ANALYSIS"]);
-  rows.push(["Generated by MERIDIAN · Candidate Profile Analyzer","",new Date().toLocaleString()]);
+  rows.push(["Generated by the Candidate Profile Analyzer","",new Date().toLocaleString()]);
   rows.push([]);
   rows.push(["Candidate",a.name]);
   rows.push(["Email",a.email]);rows.push(["Phone",a.phone]);
