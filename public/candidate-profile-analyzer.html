@@ -583,34 +583,76 @@ const NOW=new Date(2026,7,18); // per session context 2026-08-18
 function ym(month,year){return year*12+(month||0);}
 function fmtYM(v){const y=Math.floor(v/12),m=v%12;const mn=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];return mn[m]+" "+y;}
 
-function parseDates(text){
-  // find date ranges like "Jan 2015 - Mar 2019", "2015 – Present", "05/2015 to 07/2019"
-  const t=text.replace(/[–—]/g,"-");
-  const ranges=[];
-  const mrx="(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\\.?";
-  const pat=new RegExp(
-    "(?:("+mrx+")\\.?\\s*)?((?:19|20)\\d{2})\\s*(?:-|to|until|–)\\s*(?:(present|current|now|till\\s*date|to\\s*date|ongoing)|(?:("+mrx+")\\.?\\s*)?((?:19|20)\\d{2}))",
-    "gi");
+const _monNum=s=>{if(!s)return 0;const k=s.toLowerCase().replace(/[^a-z]/g,"");return (MONTHS[k] ?? MONTHS[k.slice(0,4)] ?? MONTHS[k.slice(0,3)] ?? 0);};
+// collapse spaces that PDF extraction inserts inside numbers ("202 6" -> "2026", "0 6" -> "06")
+function normNums(l){return l.replace(/(\d)\s+(?=\d)/g,"$1");}
+
+// parse every date range on a single line
+function parseDatesLine(line){
+  const t=normNums(line).replace(/[–—]/g,"-");
+  const out=[];
+  const mon="(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\\.?";
+  const pt="(?:(\\d{1,2})[\\s./]+("+mon+")[\\s./]*|("+mon+")[\\s./]*)?((?:19|20)\\d{2})";
+  const sep="\\s*(?:-|to|till|until|through)\\s*";
+  const rx=new RegExp(pt+sep+"(?:(present|current|now|till\\s*date|to\\s*date|ongoing|till\\s*now)|"+pt+")","gi");
   let m;
-  while((m=pat.exec(t))){
-    const monNum=s=>{if(!s)return 0;const k=s.toLowerCase().replace(/[^a-z]/g,"");return (MONTHS[k] ?? MONTHS[k.slice(0,4)] ?? MONTHS[k.slice(0,3)] ?? 0);};
-    const sMon=m[1]?monNum(m[1]):0;
-    const sY=+m[2];
-    let eV;
-    if(m[3]){eV=ym(NOW.getMonth(),NOW.getFullYear());}
-    else{const eMon=m[4]?monNum(m[4]):11;eV=ym(eMon,+m[5]);}
-    let sV=ym(isNaN(sMon)?0:sMon,sY);
-    if(eV<sV){const x=sV;sV=eV;eV=x;}
-    if(sY>=1970 && sY<=NOW.getFullYear()+1) ranges.push({s:sV,e:eV,raw:m[0].trim()});
+  while((m=rx.exec(t))){
+    const mon1=m[2]||m[3], y1=+m[4];
+    const pres=m[5], mon2=m[7]||m[8], y2=+m[9];
+    let sV=ym(_monNum(mon1),y1);
+    let eV=pres?ym(NOW.getMonth(),NOW.getFullYear()):ym(mon2?_monNum(mon2):11,y2);
+    if(!pres && eV<sV){const x=sV;sV=eV;eV=x;}
+    if(y1>=1970 && y1<=NOW.getFullYear()+1) out.push({s:sV,e:eV,raw:m[0].trim()});
   }
-  // also numeric mm/yyyy - mm/yyyy
-  const pat2=/(\d{1,2})\/((?:19|20)\d{2})\s*(?:-|to|–)\s*(?:(present|current|now)|(\d{1,2})\/((?:19|20)\d{2}))/gi;
-  while((m=pat2.exec(t))){
+  // numeric mm/yyyy - mm/yyyy
+  const rx2=/(\d{1,2})\/((?:19|20)\d{2})\s*(?:-|to)\s*(?:(present|current|now)|(\d{1,2})\/((?:19|20)\d{2}))/gi;
+  while((m=rx2.exec(t))){
     const sV=ym((+m[1]||1)-1,+m[2]);
     const eV=m[3]?ym(NOW.getMonth(),NOW.getFullYear()):ym((+m[4]||12)-1,+m[5]);
-    ranges.push({s:Math.min(sV,eV),e:Math.max(sV,eV),raw:m[0].trim()});
+    out.push({s:Math.min(sV,eV),e:Math.max(sV,eV),raw:m[0].trim()});
   }
-  return ranges;
+  return out;
+}
+
+// classify a CV line as a section heading (or null)
+const HEAD=[
+  {t:"EXP", re:/^(work\s+experience|professional\s+experience|experience|employment(\s+history)?|work\s+history|career(\s+history)?|professional\s+background)\b.{0,22}:?\s*$/i},
+  {t:"EDU", re:/^(education(al)?(\s+qualifications?)?|academic\s+qualifications?|qualifications?|academics?|scholastics?)\b.{0,22}:?\s*$/i},
+  {t:"INT", re:/^(internships?(\s+and\s+other\s+projects?)?|trainings?|apprenticeships?|other\s+projects?)\b.{0,30}:?\s*$/i},
+  {t:"PROJ",re:/^(academic\s+projects?|projects?(\s+involved)?|personal\s+projects?|key\s+projects?|mini\s+projects?)\b.{0,28}:?\s*$/i},
+  {t:"OTHER",re:/^(summary|profile\s+summary|professional\s+summary|career\s+objective|objective|profile|skills?\s+summary|skill\s+summary|technical\s+skills?|skills?|core\s+competenc\w*|strengths?|certifications?|courses?|achievements?|accomplishments?|awards?|honou?rs?|extra[\s-]?curricular\w*|activities|hobbies|interests|languages?|personal\s+(details|information|profile)|contact|declaration|references?|publications?|patents?)\b.{0,22}:?\s*$/i},
+];
+function headingType(line){
+  const l=line.trim().replace(/^[•\-•*.\s]+/,"");
+  if(l.length>42 || l.split(/\s+/).length>5) return null; // headings are short
+  for(const h of HEAD){ if(h.re.test(l)) return h.t; }
+  return null;
+}
+const EDU_CTX=/(universit|b\.?\s?tech|b\.?\s?e\b|m\.?\s?tech|m\.?\s?e\b|bachelor|master|diploma|\bschool\b|c\.?b\.?s\.?e|\bboard\b|semester|c\.?g\.?p\.?a|\bg\.?p\.?a\b|percentage|\bhonou?rs\b|graduation|matriculation|intermediate|10th|12th|secondary|senior\s+school|degree)/i;
+const NONWORK_CTX=/(\bintern\b|internship|simulation|thesis|dissertation|academic\s+project|coursework|certification|workshop|\bcourse\b|training\s+program|bootcamp)/i;
+
+// section-aware extraction: returns tagged ranges + which count as professional work
+function extractDates(text){
+  const lines=text.split("\n");
+  let section="HEADER";
+  let sawExp=false;
+  const all=[];
+  for(const raw of lines){
+    const h=headingType(raw);
+    if(h){section=h; if(h==="EXP")sawExp=true; continue;}
+    const rs=parseDatesLine(raw);
+    if(!rs.length)continue;
+    const ctxEdu=EDU_CTX.test(raw), ctxNon=NONWORK_CTX.test(raw);
+    rs.forEach(r=>{
+      let kind;
+      if(section==="EDU"||ctxEdu) kind="education";
+      else if(section==="INT"||section==="PROJ"||ctxNon) kind="other";
+      else if(section==="EXP") kind="work";
+      else kind="unclassified"; // date outside any recognised section
+      all.push({...r,kind,section});
+    });
+  }
+  return {all,sawExp};
 }
 
 function mergeIntervals(rs){
@@ -785,9 +827,20 @@ function detectFlags(a){
   // OCR notice
   if(a.ocr)push("med","Read via OCR — verify the text",
     "This CV had no digital text layer (scanned or image/screenshot), so it was read with optical character recognition. OCR can mis‑read characters, dates and names — confirm the extracted text (expandable below) and all scores before relying on them.");
+  // experience computed from Experience section only
+  if(a.eduRanges.length){
+    push("low","Education excluded from experience",
+      `${a.eduRanges.length} education/academic date range${a.eduRanges.length>1?"s were":" was"} detected and kept out of the experience total (see the timeline). Professional experience is counted from the work history only.`);
+  }
+  if(a.internMonths>=1){
+    push("low","Internships / academic work counted separately",
+      `~${(a.internMonths/12).toFixed(1)} yr of internship / academic‑project time was found and excluded from core professional experience. Decide during screening whether it should count for this role.`);
+  }
+  if(a.expInferred)push("med","Experience section not clearly labelled",
+    "No explicit ‘Experience’ heading was found, so the years shown are inferred from non‑education dates and may be less precise. Verify the work history manually.");
   // thin CV
   if(a.ranges.length===0)push("med","No datable work history found",
-    "Could not extract dated employment periods — the PDF may be image‑based/scanned or use an unusual format. Timeline checks are limited; verify manually.");
+    "Could not extract dated employment periods from an Experience section — the PDF may be scanned/unusually formatted, or roles may lack dates. Timeline checks are limited; verify manually.");
   if(a.wordCount<180)push("low","Sparse CV content",`Only ~${a.wordCount} words extracted. Extraction may be incomplete.`);
   if(!F.length)push("ok","No red flags detected","Timeline is consistent and the profile aligns with the target level. Proceed with a standard technical interview.");
   return F;
@@ -795,10 +848,19 @@ function detectFlags(a){
 
 function analyze(file){
   const text=file.text;
-  const ranges=parseDates(text);
+  const det=extractDates(text);
+  let workRanges=det.all.filter(r=>r.kind==="work");
+  const eduRanges=det.all.filter(r=>r.kind==="education");
+  const otherRanges=det.all.filter(r=>r.kind==="other");           // internships / academic projects
+  const unclass=det.all.filter(r=>r.kind==="unclassified");
+  // fallback: if no Experience section was found, count non-education dates (best effort)
+  let expInferred=false;
+  if(!workRanges.length && unclass.length){workRanges=unclass.slice();expInferred=true;}
+  const ranges=workRanges;                                          // "experience" = work only
   const merged=mergeIntervals(ranges);
   let coveredMonths=merged.reduce((a,r)=>a+(r.e-r.s),0);
   let years=coveredMonths/12;
+  const internMonths=mergeIntervals(otherRanges).reduce((a,r)=>a+(r.e-r.s),0);
   // explicit "N years experience"
   let claimedYears=0;
   const cm=text.match(/(\d{1,2}(?:\.\d)?)\s*\+?\s*(?:years?|yrs?)\b[^.]{0,30}(?:experience|exp\b)/i)
@@ -815,7 +877,8 @@ function analyze(file){
   const email=(text.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/)||[])[0]||"";
   const phone=(text.match(/(\+?\d[\d\s().-]{7,}\d)/)||[])[0]||"";
   const a={file:file.name,name,email,phone,text,ocr:!!file.ocr,wordCount:text.split(/\s+/).length,
-    ranges,merged,years,claimedYears,sA,sB,sC,fit,best:fit.best,applied,track,
+    ranges,merged,years,claimedYears,eduRanges,otherRanges,internMonths,expInferred,sawExp:det.sawExp,
+    sA,sB,sC,fit,best:fit.best,applied,track,
     firstStart:merged.length?merged[0].s:null,lastEnd:merged.length?merged[merged.length-1].e:null};
   a.flags=detectFlags(a);
   // verdict
@@ -856,8 +919,10 @@ function render(a){
   cards.appendChild(kpi("Candidate",esc(a.name),(a.email?esc(a.email):"")+(a.phone?" · "+esc(a.phone):"")||"—","var(--acc2)"));
   cards.appendChild(kpi("Applied for",`${a.applied.code} · ${a.applied.short}`,esc(trackTitle(a,a.applied.i)),"var(--info)","sm"));
   cards.appendChild(kpi("Best‑fit designation",`${LEVELS[a.best].code} · ${LEVELS[a.best].short}`,esc(trackTitle(a,a.best)),"var(--acc)","sm"));
-  const yc=kpi("Experience (from timeline)",a.years.toFixed(1)+" yrs",
-      a.claimedYears?("CV states ~"+a.claimedYears+" yrs"):(a.ranges.length?`${a.ranges.length} roles dated`:"not datable"),"var(--warn)");
+  const yfoot=(a.ranges.length?`${a.ranges.length} role${a.ranges.length>1?"s":""} · work only`:"no work dates")
+      + (a.eduRanges.length?" · education excluded":"")
+      + (a.claimedYears?` · CV states ~${a.claimedYears}`:"");
+  const yc=kpi("Professional experience",a.years.toFixed(1)+" yrs",yfoot,"var(--warn)");
   cards.appendChild(yc);
   d.appendChild(cards);
 
@@ -952,44 +1017,38 @@ function esc(s){return (s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;"
 
 function renderTimeline(a){
   const wrap=el("div","tl");
-  if(!a.merged.length){wrap.innerHTML=`<div class="mini">No dated periods extracted from this CV, so a timeline could not be drawn. Verify employment history manually.</div>`;return wrap;}
-  const min=a.merged[0].s, max=Math.max(a.lastEnd,ym(NOW.getMonth(),NOW.getFullYear()));
+  const workR=a.ranges.slice().sort((x,y)=>x.s-y.s);
+  const eduR=a.eduRanges.slice().sort((x,y)=>x.s-y.s);
+  const othR=a.otherRanges.slice().sort((x,y)=>x.s-y.s);
+  const allR=workR.concat(eduR,othR);
+  if(!allR.length){wrap.innerHTML=`<div class="mini">No dated periods extracted from this CV, so a timeline could not be drawn. Verify employment history manually.</div>`;return wrap;}
+  const now=ym(NOW.getMonth(),NOW.getFullYear());
+  const min=Math.min.apply(null,allR.map(r=>r.s));
+  const max=Math.max.apply(null,allR.map(r=>r.e).concat([now]));
   const span=Math.max(1,max-min);
-  // continuous coverage row with gaps highlighted
-  const covRow=el("div","row");
-  covRow.innerHTML=`<div class="who"><b>Coverage</b>Merged history</div>`;
-  const track=el("div","track");
-  a.merged.forEach(m=>{
-    const seg=el("div","seg");
-    seg.style.left=((m.s-min)/span*100)+"%";
-    seg.style.width=Math.max(1.5,((m.e-m.s)/span*100))+"%";
-    seg.title=fmtYM(m.s)+" – "+fmtYM(m.e);
-    track.appendChild(seg);
-  });
-  for(let i=1;i<a.merged.length;i++){
-    const g0=a.merged[i-1].e,g1=a.merged[i].s;
-    if(g1-g0>=6){
-      const gp=el("div","gap");
-      gp.style.left=((g0-min)/span*100)+"%";
-      gp.style.width=((g1-g0)/span*100)+"%";
-      gp.title="Gap: "+fmtYM(g0)+" – "+fmtYM(g1);
-      track.appendChild(gp);
-    }
+  const pos=v=>((v-min)/span*100);
+  wrap.innerHTML=`<div class="legend" style="margin-bottom:8px"><span><i style="background:linear-gradient(90deg,var(--acc2),var(--acc))"></i>Work (counted)</span><span><i style="background:rgba(244,183,64,.5)"></i>Education (excluded)</span><span><i style="background:rgba(120,140,170,.55)"></i>Internship / academic (excluded)</span></div>`;
+  // coverage row (work merged) with gaps
+  if(a.merged.length){
+    const covRow=el("div","row");
+    covRow.innerHTML=`<div class="who"><b>Work coverage</b>${a.years.toFixed(1)} yrs</div>`;
+    const track=el("div","track");
+    a.merged.forEach(m=>{const seg=el("div","seg");seg.style.left=pos(m.s)+"%";seg.style.width=Math.max(1.5,pos(m.e)-pos(m.s))+"%";seg.title=fmtYM(m.s)+" – "+fmtYM(m.e);track.appendChild(seg);});
+    for(let i=1;i<a.merged.length;i++){const g0=a.merged[i-1].e,g1=a.merged[i].s;if(g1-g0>=6){const gp=el("div","gap");gp.style.left=pos(g0)+"%";gp.style.width=(pos(g1)-pos(g0))+"%";gp.title="Gap: "+fmtYM(g0)+" – "+fmtYM(g1);track.appendChild(gp);}}
+    covRow.appendChild(track);wrap.appendChild(covRow);
   }
-  covRow.appendChild(track);wrap.appendChild(covRow);
-  // individual raw ranges (top 8)
-  a.ranges.slice().sort((x,y)=>x.s-y.s).slice(0,8).forEach(r=>{
+  const addRow=(r,label,bg)=>{
     const row=el("div","row");
-    row.innerHTML=`<div class="who"><b>${esc(r.raw)}</b>${fmtYM(r.s)} – ${r.e>=ym(NOW.getMonth(),NOW.getFullYear())-1?"Present":fmtYM(r.e)}</div>`;
-    const tr=el("div","track");
-    const seg=el("div","seg");
-    seg.style.left=((r.s-min)/span*100)+"%";
-    seg.style.width=Math.max(1.5,((r.e-r.s)/span*100))+"%";
+    row.innerHTML=`<div class="who"><b>${esc(label)}</b>${fmtYM(r.s)} – ${r.e>=now-1?"Present":fmtYM(r.e)}</div>`;
+    const tr=el("div","track");const seg=el("div","seg");
+    seg.style.left=pos(r.s)+"%";seg.style.width=Math.max(1.5,pos(r.e)-pos(r.s))+"%";seg.style.background=bg;
     tr.appendChild(seg);row.appendChild(tr);wrap.appendChild(row);
-  });
+  };
+  workR.slice(0,6).forEach(r=>addRow(r,r.raw,"linear-gradient(90deg,var(--acc2),var(--acc))"));
+  eduR.slice(0,4).forEach(r=>addRow(r,"🎓 "+r.raw,"rgba(244,183,64,.5)"));
+  othR.slice(0,4).forEach(r=>addRow(r,"• "+r.raw,"rgba(120,140,170,.55)"));
   // axis
-  const axis=el("div","axis");
-  const marks=el("div","marks");
+  const axis=el("div","axis");const marks=el("div","marks");
   const y0=Math.floor(min/12),y1=Math.ceil(max/12);
   let ticks="";const step=Math.max(1,Math.round((y1-y0)/6));
   for(let y=y0;y<=y1;y+=step)ticks+=`<span>${y}</span>`;
@@ -1224,7 +1283,9 @@ function exportAnalysis(a){
   rows.push(["Position applied",`${a.applied.code} · ${trackTitle(a,a.applied.i)} (${a.track==="des"?"Designer":"Engineer"} track)`]);
   rows.push(["Best-fit designation",`${LEVELS[a.best].code} · ${trackTitle(a,a.best)}`]);
   rows.push(["Verdict",a.verdict.t]);
-  rows.push(["Experience from timeline (yrs)",a.years.toFixed(1)]);
+  rows.push(["Professional experience — work only (yrs)",a.years.toFixed(1)]);
+  rows.push(["Internship / academic time excluded (yrs)",a.internMonths?(a.internMonths/12).toFixed(1):"—"]);
+  rows.push(["Education periods (excluded from experience)",a.eduRanges.length||"—"]);
   rows.push(["Experience claimed in CV (yrs)",a.claimedYears||"—"]);
   rows.push(["Skill-evidence level",LEVELS[a.fit.skillLevel].code+" "+LEVELS[a.fit.skillLevel].short]);
   rows.push(["Experience level",LEVELS[a.fit.yearsLevel].code+" "+LEVELS[a.fit.yearsLevel].short]);
@@ -1235,8 +1296,9 @@ function exportAnalysis(a){
   a.flags.forEach(f=>rows.push([{high:"HIGH",med:"MEDIUM",low:"NOTE",ok:"OK"}[f.sev],f.ft,f.fb]));
   rows.push([]);
   rows.push(["CAREER TIMELINE (extracted date ranges)"]);
-  rows.push(["Raw text","From","To","Duration (yrs)"]);
-  a.ranges.slice().sort((x,y)=>x.s-y.s).forEach(r=>rows.push([r.raw,fmtYM(r.s),fmtYM(r.e),((r.e-r.s)/12).toFixed(1)]));
+  rows.push(["Category","Raw text","From","To","Duration (yrs)"]);
+  const tlAll=a.ranges.map(r=>["Work",r]).concat(a.otherRanges.map(r=>["Internship/Academic",r]),a.eduRanges.map(r=>["Education",r]));
+  tlAll.sort((x,y)=>x[1].s-y[1].s).forEach(([cat,r])=>rows.push([cat,r.raw,fmtYM(r.s),fmtYM(r.e),((r.e-r.s)/12).toFixed(1)]));
   rows.push([]);
   rows.push(["DESIGNATION FIT BY LEVEL"]);
   rows.push(["Level","Designation","Exp band","Skill fit %","Overall match %"]);
