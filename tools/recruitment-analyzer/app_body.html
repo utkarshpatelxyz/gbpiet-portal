@@ -1,0 +1,102 @@
+<!-- [UI] ===================================================================
+     TOP BAR + PRIVACY STRIP. The privacy strip is always visible so anyone
+     using or watching a demo can see the data-handling promise at a glance.
+     ======================================================================= -->
+<div class="appbar">
+  <div class="logo"><span class="mk"></span> Recruitment Analyzer</div>
+  <span class="env">Configurable · No stored data</span>
+  <span class="sp"></span>
+  <button class="barbtn" id="themeToggle"><span class="ti">☀️</span><span id="themeLabel">Light</span></button>
+  <button class="barbtn danger" id="resetBtn" title="Clear the framework and all resumes from memory">↺ Reset session</button>
+</div>
+<div class="privacy">
+  <span class="dot"></span>
+  <span><b>In-memory only.</b> Your framework and every resume are processed in this browser and erased when you refresh or close the tab. Nothing is uploaded.</span>
+</div>
+
+<div class="wrap">
+  <!-- [UI] progress stepper -->
+  <div class="stepline" id="stepline">
+    <div class="step active" data-step="1"><span class="n">1</span> Load framework</div>
+    <span class="arw">→</span>
+    <div class="step" data-step="2"><span class="n">2</span> Add resumes</div>
+    <span class="arw">→</span>
+    <div class="step" data-step="3"><span class="n">3</span> Review analysis</div>
+  </div>
+
+  <!-- [UI] ============ SCREEN 1 — LOAD CONFIGURATION ==================== -->
+  <div id="screen-config">
+    <div class="two">
+      <div class="card">
+        <div class="card-h"><h3>Step 1 · Load your hiring framework</h3><span class="tag">Required</span></div>
+        <div class="card-b">
+          <p class="muted small" style="margin-top:0">
+            The tool ships with <b>no framework of its own</b>. Upload the configuration workbook
+            for the department you are screening for. It defines the levels, skills, scoring and
+            interview questions used for every resume in this session.</p>
+          <div class="dz" id="cfgDrop">
+            <div class="ic">📋</div>
+            <h4>Drop the configuration workbook</h4>
+            <p>or click to browse · .xlsx from the template</p>
+          </div>
+          <input type="file" id="cfgFile" accept=".xlsx,.xls" hidden>
+          <div class="status" id="cfgStatus"></div>
+          <div id="cfgSummary" class="hide"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>Don't have a workbook yet?</h3><span class="tag">Template</span></div>
+        <div class="card-b">
+          <p class="muted small" style="margin-top:0">
+            Download the blank template, fill in your framework on its sheets, and upload it here.
+            The template carries a neutral sample so you can see the exact format expected. Your
+            real framework never lives inside this tool.</p>
+          <button class="btn sec" id="tmplBtn">⬇ Download configuration template (.xlsx)</button>
+          <div class="foot" style="margin-top:18px;border-top:0;padding-top:0">
+            <b>How the split works.</b> This page is the <b>Tool</b>: engine + interface, no data.
+            The workbook is the <b>Confidential Data</b>. Keeping them apart means the tool can be
+            demonstrated to anyone, and your framework stays a file you control.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- [UI] ============ SCREEN 2 — ADD RESUMES ========================== -->
+  <div id="screen-resume" class="hide">
+    <div class="two">
+      <div class="card">
+        <div class="card-h"><h3>Step 2 · Add resumes</h3><span class="tag" id="cfgChipHolder"></span></div>
+        <div class="card-b">
+          <div class="dz" id="cvDrop">
+            <div class="ic">📄</div>
+            <h4>Drop resume PDFs</h4>
+            <p>or click to browse · scanned PDFs are read with on-device OCR</p>
+          </div>
+          <input type="file" id="cvFile" accept="application/pdf" multiple hidden>
+          <div id="cvFiles" class="roster"></div>
+          <div class="bar" id="cvBar"><i></i></div>
+          <div class="status" id="cvStatus"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>Target position</h3><span class="tag">Per batch</span></div>
+        <div class="card-b">
+          <div class="field">
+            <label>Applying for</label>
+            <select id="appliedRole"></select>
+          </div>
+          <div class="field">
+            <label>Candidate name override <span class="muted">(optional, single resume)</span></label>
+            <input type="text" id="nameOverride" placeholder="Auto-detect from resume">
+          </div>
+          <button class="btn lg" id="analyzeBtn" disabled style="width:100%;margin-top:4px">Analyze resumes</button>
+          <button class="btn sec sm" id="backToCfg" style="width:100%;margin-top:8px">← Change framework</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- [UI] ============ SCREEN 3 — DASHBOARD ============================ -->
+  <div id="screen-dash" class="hide"></div>
+</div>
