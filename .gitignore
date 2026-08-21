@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# analyzer build inputs (vendored libs / large binaries)
+tools/candidate-analyzer/lib/
+tools/candidate-analyzer/assets/
+tools/candidate-analyzer/*.xlsx

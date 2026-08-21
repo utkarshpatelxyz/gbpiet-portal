@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Candidate Profile Analyzer — TR India Static Equipment (Dept 133)</title>
+<style>
+:root{
+  --bg:#0b1220; --bg2:#0f1a2e; --panel:#111d33; --panel2:#152340; --line:#22355c;
+  --ink:#e8eefc; --ink2:#9fb2d4; --ink3:#6f83a8;
+  --acc:#26d0c2; --acc2:#3b82f6; --acc-d:#0e7d76;
+  --good:#2ecc9b; --warn:#f4b740; --bad:#ff5d6c; --info:#5aa9ff;
+  --shadow:0 10px 30px rgba(0,0,0,.35);
+  --glow1:#16233f; --glow2:#122a3a; --headbg1:rgba(11,18,32,.94); --headbg2:rgba(11,18,32,.72);
+  --r:14px;
+}
+:root[data-theme="light"]{
+  --bg:#eef2f8; --bg2:#ffffff; --panel:#ffffff; --panel2:#f4f7fb; --line:#d3dcea;
+  --ink:#132036; --ink2:#4c5c78; --ink3:#8494ad;
+  --acc:#0e9c92; --acc2:#2563eb; --acc-d:#0b7c74;
+  --good:#129c72; --warn:#c98a10; --bad:#d93a4a; --info:#2b7fd6;
+  --shadow:0 10px 24px rgba(30,50,90,.12);
+  --glow1:#dbe6f5; --glow2:#dcefeb; --headbg1:rgba(255,255,255,.92); --headbg2:rgba(255,255,255,.7);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:radial-gradient(1200px 600px at 80% -10%,var(--glow1) 0%,transparent 60%),
+             radial-gradient(1000px 500px at -10% 10%,var(--glow2) 0%,transparent 55%),
+             var(--bg);
+  color:var(--ink); font:14px/1.5 "Segoe UI",Roboto,-apple-system,Helvetica,Arial,sans-serif;
+  min-height:100vh;
+}
+a{color:var(--acc)}
+.wrap{max-width:1280px;margin:0 auto;padding:0 22px 80px}
+/* Header */
+header.top{
+  position:sticky;top:0;z-index:40;backdrop-filter:blur(9px);
+  background:linear-gradient(180deg,var(--headbg1),var(--headbg2));
+  border-bottom:1px solid var(--line);
+}
+.themebtn{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--ink2);
+  border:1px solid var(--line);background:var(--panel);padding:6px 12px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.themebtn:hover{border-color:var(--acc-d);color:var(--ink)}
+.themebtn .ti{font-size:14px}
+.top-inner{max-width:1280px;margin:0 auto;padding:12px 22px;display:flex;align-items:center;gap:16px}
+.logo{display:flex;align-items:center;gap:12px;min-width:0}
+.mark{width:40px;height:40px;border-radius:11px;flex:none;position:relative;
+  background:conic-gradient(from 210deg,var(--acc),var(--acc2),#7c5cff,var(--acc));
+  box-shadow:0 0 0 1px rgba(255,255,255,.08) inset, 0 6px 18px rgba(38,208,194,.25)}
+.mark::after{content:"";position:absolute;inset:7px;border-radius:7px;background:var(--bg2);}
+.mark::before{content:"";position:absolute;inset:0;border-radius:11px;
+  background:radial-gradient(circle at 50% 45%,var(--acc) 0 3px,transparent 4px),
+             linear-gradient(90deg,transparent 46%,var(--acc) 46% 54%,transparent 54%),
+             linear-gradient(0deg,transparent 46%,var(--acc2) 46% 54%,transparent 54%);
+  opacity:.9;z-index:2;mask:radial-gradient(circle at 50% 50%,#000 55%,transparent 56%)}
+.brand h1{font-size:15px;margin:0;letter-spacing:.3px;font-weight:700}
+.brand .sub{font-size:11.5px;color:var(--ink2);letter-spacing:.4px}
+.top-spacer{flex:1}
+.pill{font-size:11px;color:var(--ink2);border:1px solid var(--line);padding:5px 11px;border-radius:999px;background:var(--panel);white-space:nowrap}
+.pill b{color:var(--acc)}
+/* Hero / uploader */
+.hero{padding:34px 0 8px}
+.hero h2{font-size:26px;margin:0 0 6px;font-weight:750;letter-spacing:.2px}
+.hero p{color:var(--ink2);margin:0 0 22px;max-width:820px}
+.grid-upload{display:grid;grid-template-columns:1.55fr 1fr;gap:20px}
+@media(max-width:900px){.grid-upload{grid-template-columns:1fr}}
+.drop{
+  border:2px dashed var(--line);border-radius:var(--r);background:linear-gradient(180deg,var(--panel),var(--bg2));
+  padding:40px 24px;text-align:center;transition:.18s;cursor:pointer;position:relative;min-height:280px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.drop:hover{border-color:var(--acc-d);background:linear-gradient(180deg,var(--panel2),var(--bg2))}
+.drop.drag{border-color:var(--acc);background:linear-gradient(180deg,#123a3e,var(--bg2));box-shadow:0 0 0 4px rgba(38,208,194,.12) inset}
+.drop .ic{width:62px;height:62px;border-radius:16px;background:var(--panel2);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:28px}
+.drop h3{margin:0;font-size:17px}
+.drop small{color:var(--ink3)}
+.btn{appearance:none;border:1px solid var(--acc-d);background:linear-gradient(180deg,var(--acc),var(--acc-d));
+  color:#04231f;font-weight:700;padding:10px 18px;border-radius:10px;cursor:pointer;font-size:13.5px;letter-spacing:.2px}
+.btn:hover{filter:brightness(1.06)}
+.btn:disabled{opacity:.5;cursor:not-allowed;filter:none}
+.btn.ghost{background:var(--panel);color:var(--ink);border-color:var(--line);font-weight:600}
+.btn.ghost:hover{border-color:var(--acc-d)}
+.btn.wide{width:100%;justify-content:center;display:flex;padding:13px}
+.panel{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.panel h4{margin:0 0 14px;font-size:13px;letter-spacing:.6px;text-transform:uppercase;color:var(--ink2)}
+.field{margin-bottom:15px}
+.field label{display:block;font-size:12px;color:var(--ink2);margin-bottom:6px;font-weight:600}
+.field select,.field input{width:100%;background:var(--bg2);color:var(--ink);border:1px solid var(--line);
+  border-radius:9px;padding:10px 11px;font-size:13.5px;font-family:inherit}
+.field select:focus,.field input:focus{outline:none;border-color:var(--acc)}
+.hint{font-size:11px;color:var(--ink3);margin-top:5px}
+.files{margin-top:8px;display:flex;flex-direction:column;gap:8px}
+.filechip{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:8px 11px;font-size:12.5px}
+.filechip .x{margin-left:auto;cursor:pointer;color:var(--ink3);font-weight:700}
+.filechip .x:hover{color:var(--bad)}
+.status{margin-top:14px;font-size:12.5px;color:var(--ink2);min-height:18px}
+.status.err{color:var(--bad)}
+.bar{height:6px;border-radius:4px;background:var(--panel2);overflow:hidden;margin-top:10px;display:none}
+.bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--acc),var(--acc2));transition:width .25s}
+/* Dashboard */
+#dash{display:none;margin-top:14px}
+.crumbs{display:flex;align-items:center;gap:10px;color:var(--ink3);font-size:12px;margin:18px 0 10px}
+.crumbs a{cursor:pointer}
+.section-title{display:flex;align-items:center;gap:10px;margin:26px 0 14px}
+.section-title h3{font-size:16px;margin:0;letter-spacing:.3px}
+.section-title .tag{font-size:10.5px;color:var(--ink3);border:1px solid var(--line);border-radius:6px;padding:2px 8px;text-transform:uppercase;letter-spacing:.5px}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:1000px){.cards{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.cards{grid-template-columns:1fr}}
+.kpi{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:var(--r);padding:16px 17px;position:relative;overflow:hidden}
+.kpi .lab{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3)}
+.kpi .val{font-size:24px;font-weight:750;margin-top:6px;line-height:1.15}
+.kpi .val.sm{font-size:17px}
+.kpi .foot{font-size:11.5px;color:var(--ink2);margin-top:6px}
+.kpi .edge{position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--acc)}
+.badge{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid}
+.badge.good{color:var(--good);border-color:rgba(46,204,155,.4);background:rgba(46,204,155,.08)}
+.badge.warn{color:var(--warn);border-color:rgba(244,183,64,.4);background:rgba(244,183,64,.08)}
+.badge.bad{color:var(--bad);border-color:rgba(255,93,108,.4);background:rgba(255,93,108,.08)}
+.badge.info{color:var(--info);border-color:rgba(90,169,255,.4);background:rgba(90,169,255,.08)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:900px){.two{grid-template-columns:1fr}}
+.three{display:grid;grid-template-columns:1.3fr 1fr;gap:16px}
+@media(max-width:900px){.three{grid-template-columns:1fr}}
+.flag{display:flex;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:11px;background:var(--panel2);margin-bottom:10px}
+.flag .dot{width:10px;height:10px;border-radius:50%;margin-top:5px;flex:none}
+.flag.high .dot{background:var(--bad);box-shadow:0 0 0 4px rgba(255,93,108,.14)}
+.flag.med .dot{background:var(--warn);box-shadow:0 0 0 4px rgba(244,183,64,.14)}
+.flag.low .dot{background:var(--info);box-shadow:0 0 0 4px rgba(90,169,255,.14)}
+.flag.ok .dot{background:var(--good);box-shadow:0 0 0 4px rgba(46,204,155,.14)}
+.flag .ft{font-weight:700;font-size:13px;margin-bottom:2px}
+.flag .fb{font-size:12.5px;color:var(--ink2)}
+.flag .sev{margin-left:auto;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);align-self:flex-start}
+/* timeline */
+.tl{position:relative;padding:6px 0}
+.tl .row{display:grid;grid-template-columns:190px 1fr;gap:12px;align-items:center;margin-bottom:9px}
+.tl .who{font-size:12px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tl .who b{color:var(--ink);display:block;font-size:12.5px}
+.tl .track{position:relative;height:26px;background:var(--panel2);border-radius:7px;border:1px solid var(--line)}
+.tl .seg{position:absolute;top:3px;bottom:3px;border-radius:5px;background:linear-gradient(90deg,var(--acc2),var(--acc));box-shadow:0 2px 8px rgba(38,208,194,.25)}
+.tl .gap{position:absolute;top:3px;bottom:3px;border-radius:5px;background:repeating-linear-gradient(45deg,rgba(255,93,108,.22),rgba(255,93,108,.22) 6px,transparent 6px,transparent 12px);border:1px dashed rgba(255,93,108,.5)}
+.tl .axis{display:grid;grid-template-columns:190px 1fr;gap:12px;margin-top:4px}
+.tl .axis .marks{display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink3)}
+/* skill bars */
+.skilltable{width:100%;border-collapse:collapse;font-size:12.5px}
+.skilltable th{ text-align:left;color:var(--ink3);font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;padding:6px 8px;border-bottom:1px solid var(--line)}
+.skilltable td{padding:7px 8px;border-bottom:1px solid rgba(34,53,92,.5);vertical-align:middle}
+.skilltable tr:hover td{background:rgba(21,35,64,.5)}
+.grp{font-size:10px;color:var(--ink3);border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+.meter{position:relative;height:20px;background:var(--panel2);border-radius:6px;border:1px solid var(--line);min-width:150px}
+.meter .cand{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:linear-gradient(90deg,var(--acc-d),var(--acc))}
+.meter .ref{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--warn);box-shadow:0 0 0 1px rgba(0,0,0,.4)}
+.meter .ref::after{content:"";position:absolute;top:-4px;left:-3px;border:4px solid transparent;border-top-color:var(--warn)}
+.gapcell{font-weight:700}
+.gp{color:var(--good)} .gn{color:var(--bad)} .gz{color:var(--ink2)}
+.legend{display:flex;gap:18px;font-size:11.5px;color:var(--ink2);margin:2px 0 12px;flex-wrap:wrap}
+.legend i{display:inline-block;width:12px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+/* radar */
+.radar-wrap{display:flex;align-items:center;justify-content:center;padding:6px}
+/* competencies */
+.comp{display:flex;flex-direction:column;gap:10px}
+.comp .c{border:1px solid var(--line);border-radius:11px;padding:12px 14px;background:var(--panel2)}
+.comp .c .cn{font-weight:700;font-size:13px;display:flex;justify-content:space-between;gap:10px}
+.comp .c .cd{font-size:12px;color:var(--ink2);margin-top:5px}
+.comp .lvlpill{font-size:11px;color:var(--acc);border:1px solid var(--acc-d);border-radius:999px;padding:2px 9px;background:rgba(38,208,194,.08);white-space:nowrap}
+/* questions */
+.qblock{border:1px solid var(--line);border-radius:11px;background:var(--panel2);margin-bottom:10px;overflow:hidden}
+.qhead{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;user-select:none}
+.qhead:hover{background:rgba(21,35,64,.6)}
+.qhead .qn{font-weight:700;font-size:13px}
+.qhead .prio{margin-left:auto;font-size:10px;text-transform:uppercase;letter-spacing:.5px}
+.qbody{padding:0 14px 12px 40px;display:none}
+.qbody.open{display:block}
+.qbody li{font-size:12.5px;color:var(--ink2);margin:5px 0}
+.chev{transition:.15s;color:var(--ink3)}
+.qhead.open .chev{transform:rotate(90deg);color:var(--acc)}
+/* export bar */
+.exportbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:var(--r);padding:16px 18px}
+.exportbar .lbl{font-size:12.5px;color:var(--ink2)}
+.footnote{color:var(--ink3);font-size:11.5px;margin-top:24px;line-height:1.6;border-top:1px solid var(--line);padding-top:16px}
+.cvtext{white-space:pre-wrap;font:12px/1.55 ui-monospace,Menlo,Consolas,monospace;color:var(--ink2);background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:14px;max-height:340px;overflow:auto}
+details.raw{margin-top:18px}
+details.raw summary{cursor:pointer;color:var(--ink2);font-size:12.5px;padding:6px 0}
+.mini{font-size:11px;color:var(--ink3)}
+/* experience audit */
+.auditsums{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.auditsums span{font-size:11.5px;color:var(--ink2);background:var(--panel2);border:1px solid var(--line);
+  border-radius:999px;padding:5px 12px}
+.auditsums b{color:var(--ink);font-weight:700}
+table.audittable{width:100%;border-collapse:collapse;font-size:12.5px}
+table.audittable th{text-align:left;font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;
+  color:var(--ink3);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.audittable td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.audittable tr.off td{opacity:.4;text-decoration:line-through}
+table.audittable tr.off td:first-child{text-decoration:none;opacity:1}
+table.audittable select{background:var(--bg2);color:var(--ink);border:1px solid var(--line);
+  border-radius:7px;padding:3px 6px;font-size:12px;font-family:inherit}
+table.audittable input[type=checkbox]{accent-color:var(--acc);width:15px;height:15px;cursor:pointer}
+td.srcline{color:var(--ink3);max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.auditov{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px;
+  border-top:1px dashed var(--line);padding-top:14px}
+.auditov label{font-size:12px;color:var(--ink2);font-weight:600}
+.auditov input{width:110px;background:var(--bg2);color:var(--ink);border:1px solid var(--line);
+  border-radius:8px;padding:7px 9px;font-size:13px;font-family:inherit}
+.btn.sm{padding:7px 13px;font-size:12.5px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.tab{font-size:12px;padding:7px 13px;border:1px solid var(--line);border-radius:999px;background:var(--panel);cursor:pointer;color:var(--ink2)}
+.tab.active{background:var(--panel2);color:var(--acc);border-color:var(--acc-d)}
+.evi{font-size:11px;color:var(--ink3);font-style:italic}
+.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.2);border-top-color:var(--acc);border-radius:50%;display:inline-block;animation:sp .7s linear infinite;vertical-align:-3px;margin-right:7px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.confbadge{font-size:10px;padding:1px 7px;border-radius:5px;border:1px solid var(--line);color:var(--ink3)}
+.ocropt{display:flex;align-items:flex-start;gap:9px;font-size:12.5px;color:var(--ink2);margin:2px 0 15px;cursor:pointer;user-select:none}
+.ocropt input{margin-top:2px;accent-color:var(--acc);width:15px;height:15px;flex:none}
+.ocrtag{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--warn);border:1px solid rgba(244,183,64,.4);background:rgba(244,183,64,.09);border-radius:6px;padding:2px 8px;text-transform:uppercase;letter-spacing:.4px}
+
+/* ============ MOTION & POLISH ============ */
+*{transition-property:none}
+.kpi,.panel,.btn,.tab,.qblock,.filechip,.themebtn,.flag,.comp .c,.badge{transition:transform .28s cubic-bezier(.22,1,.36,1),box-shadow .28s ease,border-color .2s ease,background .2s ease}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+/* animated ambient background */
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(600px 400px at 15% 20%,rgba(38,208,194,.10),transparent 60%),
+             radial-gradient(700px 500px at 85% 15%,rgba(59,130,246,.10),transparent 60%),
+             radial-gradient(600px 500px at 70% 90%,rgba(124,92,255,.08),transparent 60%);
+  animation:bgFloat 22s ease-in-out infinite alternate}
+@keyframes bgFloat{0%{transform:translate3d(0,0,0) scale(1)}100%{transform:translate3d(0,-18px,0) scale(1.05)}}
+/* header accent line + logo */
+header.top{position:sticky}
+header.top::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;
+  background:linear-gradient(90deg,transparent,var(--acc),var(--acc2),#7c5cff,transparent);
+  background-size:200% 100%;animation:sheen 6s linear infinite;opacity:.7}
+@keyframes sheen{to{background-position:200% 0}}
+.mark{animation:markIn .9s cubic-bezier(.22,1,.36,1) both}
+@keyframes markIn{from{opacity:0;transform:rotate(-90deg) scale(.5)}to{opacity:1;transform:none}}
+.mark:hover{transform:rotate(8deg) scale(1.06);transition:transform .4s cubic-bezier(.22,1,.36,1)}
+/* entrance reveal for dashboard blocks */
+.reveal{opacity:0;transform:translateY(18px)}
+.reveal.in{opacity:1;transform:none;transition:opacity .55s ease,transform .6s cubic-bezier(.22,1,.36,1)}
+@media print{.reveal{opacity:1!important;transform:none!important}.meter .cand{width:var(--pw,auto)}}
+/* cards & panels lift */
+.kpi:hover,.panel:hover{transform:translateY(-3px);box-shadow:var(--shadow),0 0 0 1px rgba(38,208,194,.18)}
+.kpi{position:relative}
+.kpi::after{content:"";position:absolute;inset:0;border-radius:var(--r);pointer-events:none;
+  background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.06) 45%,transparent 60%);
+  background-size:250% 100%;background-position:200% 0;opacity:0;transition:opacity .3s}
+.kpi:hover::after{opacity:1;animation:shine 1.1s ease}
+@keyframes shine{to{background-position:-50% 0}}
+/* buttons: sheen + press */
+.btn{position:relative;overflow:hidden}
+.btn::before{content:"";position:absolute;top:0;left:-120%;width:60%;height:100%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-18deg)}
+.btn:hover::before{animation:btnSheen .7s ease}
+@keyframes btnSheen{to{left:140%}}
+.btn:active{transform:translateY(1px) scale(.99)}
+.btn.wide:hover{box-shadow:0 8px 24px rgba(38,208,194,.32)}
+.themebtn:hover{transform:translateY(-1px)}
+/* meters/bars grow */
+.meter .cand{transition:width .95s cubic-bezier(.22,1,.36,1)}
+.meter .ref{transition:left .6s ease .3s}
+.flag{transition:transform .25s ease,box-shadow .25s ease}
+.flag:hover{transform:translateX(3px)}
+.qblock:hover{border-color:var(--acc-d)}
+.qbody{transition:none}
+/* radar draw-in */
+.radar-wrap svg{transform-origin:50% 50%;animation:radarIn .85s .15s both cubic-bezier(.22,1,.36,1)}
+@keyframes radarIn{from{opacity:0;transform:scale(.55)}to{opacity:1;transform:none}}
+.radar-wrap svg polygon{transition:none}
+/* verdict badge shimmer */
+.badge{position:relative;overflow:hidden}
+.badge.big::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 40%,rgba(255,255,255,.25) 50%,transparent 60%);
+  background-size:250% 100%;animation:badgeShine 3.5s ease-in-out infinite}
+@keyframes badgeShine{0%,100%{background-position:200% 0}50%{background-position:-60% 0}}
+/* drop zone flair */
+.drop .ic{animation:floaty 3.6s ease-in-out infinite}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.drop::before{content:"";position:absolute;inset:-1px;border-radius:var(--r);padding:1px;pointer-events:none;
+  background:linear-gradient(120deg,transparent,rgba(38,208,194,.35),rgba(59,130,246,.35),transparent);
+  background-size:200% 100%;-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity .3s}
+.drop:hover::before,.drop.drag::before{opacity:1;animation:sheen 3s linear infinite}
+.drop.drag .ic{animation:pop .4s ease}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.18)}100%{transform:scale(1)}}
+.filechip{animation:fadeUp .4s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.section-title h3{position:relative;display:inline-block}
+.hero h2{animation:fadeUp .6s ease both}
+.hero p{animation:fadeUp .6s .08s ease both}
+.grid-upload>*{animation:fadeUp .6s .16s ease both}
+/* progress bar shimmer */
+.bar>i{background-image:linear-gradient(90deg,var(--acc),var(--acc2),var(--acc));background-size:200% 100%;animation:barflow 1.4s linear infinite}
+@keyframes barflow{to{background-position:200% 0}}
+.meter{overflow:hidden}
+.meter .cand::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);background-size:200% 100%;animation:barflow 2.2s linear infinite;opacity:.5}
+.crumbs a:hover{color:var(--acc)}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div class="logo">
+      <div class="mark"></div>
+      <div class="brand">
+        <h1>Candidate Profile Analyzer</h1>
+        <div class="sub">TR INDIA · Static Equipment — Department 133 · Talent Intelligence</div>
+      </div>
+    </div>
+    <div class="top-spacer"></div>
+    <button class="themebtn" id="themeToggle" title="Switch light / dark theme"><span class="ti">🌙</span><span id="themeLabel">Dark</span></button>
+    <div class="pill">Processing is <b>100% local</b> · nothing leaves this browser</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- UPLOAD VIEW -->
+  <section id="upload">
+    <div class="hero">
+      <h2>Analyze a candidate CV against the TR India designation framework</h2>
+      <p>Drop a resume (PDF) below. The tool extracts the text locally, checks the career timeline for gaps, overlaps and over‑qualification, builds the candidate's technical profile across the 20 Static‑Equipment skills, and maps it to the best‑fitting TR India designation — then compares that against the role you are hiring for and generates the interview evaluation kit.</p>
+    </div>
+    <div class="grid-upload">
+      <div class="drop" id="drop">
+        <input type="file" id="file" accept="application/pdf,.pdf" multiple hidden>
+        <div class="ic">📄</div>
+        <h3>Drag &amp; drop the candidate's CV here</h3>
+        <small>or click to browse · PDF only · scanned / image PDFs are read automatically via OCR · drop several to compare</small>
+        <div class="files" id="files"></div>
+      </div>
+      <div class="panel">
+        <h4>Interview parameters</h4>
+        <div class="field">
+          <label>Position applied for <span style="color:var(--acc)">— the control variable</span></label>
+          <select id="appliedRole"></select>
+          <div class="hint">The candidate's best‑fit designation is compared against this target level.</div>
+        </div>
+        <div class="field">
+          <label>Candidate name <span class="mini">(optional — auto‑detected)</span></label>
+          <input type="text" id="nameOverride" placeholder="Auto‑detect from CV">
+        </div>
+        <div class="field">
+          <label>Interviewer <span class="mini">(optional, for the report)</span></label>
+          <input type="text" id="interviewer" placeholder="Your name">
+        </div>
+        <label class="ocropt"><input type="checkbox" id="forceOcr"> <span>Force OCR <span class="mini">(read scanned / image PDFs as text — slower)</span></span></label>
+        <button class="btn wide" id="analyzeBtn" disabled>Analyze profile</button>
+        <div class="bar" id="bar"><i></i></div>
+        <div class="status" id="status">Awaiting a CV…</div>
+      </div>
+    </div>
+    <div class="footnote">
+      <b>How the mapping works.</b> Reference proficiencies come from the Department 133 <i>Master Skills Expectations</i> (PCI 0–4 technical · JCS 1–7 behavioral · qualitative role competencies) across the seven career levels L1 Trainee → L7 Leader. Career levels and their experience bands come from the <i>TR India Designations Framework</i> and the <i>Expert Itinerary Category Manual</i>. Skill evidence is inferred from CV keywords and seniority signals — always confirm during the interview using the generated question bank. All five source documents are treated as confidential and never transmitted.
+    </div>
+  </section>
+
+  <!-- DASHBOARD VIEW -->
+  <section id="dash"></section>
+</div>
+
+<!--INJECT_PDFJS-->
+<!--INJECT_XLSX-->
+<!--INJECT_TESSERACT-->
+<!--INJECT_EXCELJS-->
+<script>
+/* ---- OCR assets (embedded, offline) ---- */
+const OCR_CORE_B64="__CORE_B64__";
+const OCR_WORKER_B64="__TWORKER_B64__";
+const OCR_ENG_B64="__ENG_B64__";
+/* ---- 133 Interview Evaluation Kit template (original .xlsx, base64) ---- */
+const KIT_TEMPLATE_B64="__TEMPLATE_B64__";
+</script>
+<script>
+/* ============================================================
+   Candidate Profile Analyzer
+   Framework data transcribed from the 5 confidential source docs
+   ============================================================ */
+const LEVELS = [
+  {i:0,code:"L1",short:"Trainee", yMin:0, yMax:1,  eng:"Trainee Static Equipment Engineer", des:"Trainee Static Equipment Designer", generic:"Recent Graduate / Intern"},
+  {i:1,code:"L2",short:"Junior",  yMin:1, yMax:4,  eng:"Jr Static Equipment Engineer",      des:"Jr Static Equipment Designer",      generic:"Junior Specialist"},
+  {i:2,code:"L3",short:"Eng I",   yMin:3, yMax:9,  eng:"Static Equipment Engineer I",        des:"Static Equipment Designer I",        generic:"Specialist"},
+  {i:3,code:"L4",short:"Eng II",  yMin:7, yMax:11, eng:"Static Equipment Engineer II",       des:"Static Equipment Designer II",       generic:"Advanced Specialist"},
+  {i:4,code:"L5",short:"SR I",    yMin:10,yMax:14, eng:"Sr Static Equipment Engineer I",     des:"Sr Static Equipment Designer I",     generic:"Senior Specialist"},
+  {i:5,code:"L6",short:"SR II",   yMin:13,yMax:17, eng:"Sr Static Equipment Engineer II",    des:"Sr Static Equipment Designer II",    generic:"Senior Specialist"},
+  {i:6,code:"L7",short:"Leader",  yMin:15,yMax:99, eng:"Static Equipment Engineer Leader",   des:"Static Equipment Designer Leader",   generic:"Principal / Leader"},
+];
+// Section A — 20 technical skills, reference PCI (0-4) per level L1..L7
+const SKILLS = [
+  {n:"Drums & Separators",   g:"G1", ref:[0,1,2,3,3,3,4]},
+  {n:"Reactors & Columns",   g:"G1", ref:[0,0,1,2,3,3,4]},
+  {n:"Internals",            g:"G1", ref:[0,0,1,2,2,3,3]},
+  {n:"Tanks",                g:"G1", ref:[0,0,0,1,2,2,3]},
+  {n:"Spheres & Bullets",    g:"G1", ref:[0,0,0,1,2,2,3]},
+  {n:"Heat Exchangers",      g:"G1", ref:[0,0,1,2,3,3,4]},
+  {n:"Calculations",         g:"G2", ref:[0,1,2,3,3,3,4]},
+  {n:"Seismic & Wind Loads", g:"G2", ref:[0,0,1,2,3,3,4]},
+  {n:"Nozzle Loads",         g:"G2", ref:[0,1,2,3,3,3,4]},
+  {n:"Anchoring & Supports", g:"G2", ref:[0,0,1,2,3,3,3]},
+  {n:"Lifting & Transport",  g:"G2", ref:[0,0,1,2,2,3,3]},
+  {n:"ASME Sec VIII Div 1",  g:"G3", ref:[0,1,2,3,3,3,4]},
+  {n:"ASME Sec VIII Div 2",  g:"G3", ref:[0,0,1,2,2,3,3]},
+  {n:"PV Elite / Compress",  g:"G3", ref:[0,1,2,3,3,4,4]},
+  {n:"Ametank",              g:"G3", ref:[0,0,0,1,1,2,2]},
+  {n:"CAD / Microstation",   g:"G3", ref:[0,0,0,1,1,1,2]},
+  {n:"Proposals / Conceptual",g:"G4",ref:[0,0,0,1,2,2,3]},
+  {n:"FEED",                 g:"G4", ref:[0,0,1,2,2,3,3]},
+  {n:"EPC",                  g:"G4", ref:[0,1,2,3,3,3,4]},
+  {n:"Oil&Gas / Petrochemical",g:"G4",ref:[0,0,1,2,3,3,4]},
+];
+// keyword evidence for each of the 20 skills (word-boundary, lowercased)
+const SKILL_KW = [
+  ["drum","separator","knock out","knock-out","ko drum","k.o. drum","flash drum","surge drum","slug catcher","accumulator"],
+  ["reactor","column","distillation","tower","fractionator","stripper","absorber","packed column","tray column"],
+  ["internal","tray","demister","mist eliminator","distributor","vortex breaker","baffle","weir","downcomer"],
+  ["storage tank","api 650","api-650","api 620","api-620","atmospheric tank","floating roof","cone roof","dome roof"," tank "],
+  ["sphere","bullet","spherical","lpg","mounded","pressurized storage","horton"],
+  ["heat exchanger","shell and tube","shell & tube","tema","exchanger","reboiler","kettle","air cooler","air-cooler","condenser","u-tube"],
+  ["calculation","stress analysis","sizing","thickness calc","design calculation","mechanical design","hand calc","wall thickness"],
+  ["seismic","wind load","earthquake","asce 7","asce-7","is 1893","dynamic analysis","response spectrum"],
+  ["nozzle load","nozzle loads","wrc 107","wrc 297","wrc-107","wrc297","local stress","fea nozzle","pad reinforcement"],
+  ["skirt","saddle","support design","anchor bolt","lug support","leg support","base ring","support ring","vessel support"],
+  ["lifting","lifting lug","rigging","heavy lift","transport analysis","trunnion","tailing","lift plan"],
+  ["asme viii div 1","div 1","div.1","division 1","section viii div 1","u-stamp","u stamp","asme sec viii"],
+  ["div 2","div.2","division 2","design by analysis","design-by-analysis","dba","elastic-plastic","asme viii div 2"],
+  ["pv elite","pvelite","pv-elite","compress","codeware","nozzlepro","nozzle pro"],
+  ["ametank","tank software"],
+  ["autocad","microstation","auto cad"," cad ","3d model","pdms","sp3d","smartplant","navisworks","drafting"],
+  ["proposal","conceptual","bid","tender","estimation","feasibility","fel","pre-feed","budgetary"],
+  ["feed","front end engineering","front-end engineering","basic engineering","basic design package"],
+  ["epc","detailed engineering","vddr","vendor document","construction support","as-built","tbe","technical bid"],
+  ["oil and gas","oil & gas","petrochemical","refinery","refining","lng","offshore","onshore","upstream","downstream","chemical plant","fertilizer","hydrocarbon"],
+];
+const STRONG = ["expert","lead","led","independently","autonom","specialist","senior","in charge","responsible for","mastery","authored","approved","supervis","review of","checked","hod","head of"];
+const BEHAV = ["Technical Mastery","Standards & Procedures","Tools & Software","External Engagement","Leadership & Development","Decision & Coordination"];
+const COMP = [
+  {n:"Autonomy & Decision-Making", d:["None","Limited","Medium","High","Full","Full+Supervises","Strategic decisions"]},
+  {n:"Quality Management",         d:["Follows proc.","Applies basic","Reports deviat.","Defines stds","Manages QA","Leads QA reviews","Defines QA strategy"]},
+  {n:"Client/Vendor Interaction",  d:["None","None","Supports docs","Vendor visits","Client meetings","KOM/HAZOP lead","Full client mgmt"]},
+  {n:"Mentoring & Teaching",       d:["Receives trng","Learning","Self-developing","Takes ownership","Provides trng","Supervises eng.","Mentors leaders"]},
+  {n:"Multidisciplinary Coord.",   d:["None","Within team","Regular contact","Frequent coord.","Interdept.","Ensures integr.","Full coordination"]},
+];
+// Interview question bank (Section A/B/C) transcribed from the kit
+const QBANK_A=[
+ ["Tell me about the types of drums or separators you have designed or reviewed.","Walk me through your approach when starting a new drum design from a process datasheet.","Describe a situation where a drum design required special considerations."],
+ ["What is your experience with reactor or column design?","How do you handle the interaction between internals and shell design in a column?","Tell me about the most complex column you have worked on."],
+ ["What types of vessel internals have you worked with?","How do you approach vendor internals packages review?","Describe a case where internals affected the overall equipment design."],
+ ["What experience do you have with storage tank design — API 650, API 620?","Walk me through the main steps of designing an atmospheric storage tank.","Have you dealt with floating roof or special tank configurations?"],
+ ["Tell me about any experience you have with spheres or bullet tanks.","What makes sphere design different from standard pressure vessel design?","Have you worked with LPG or pressurized gas storage projects?"],
+ ["What types of heat exchangers have you designed or reviewed?","How do you coordinate between thermal and mechanical design?","Tell me about your experience applying TEMA standards."],
+ ["Walk me through the typical calculations you prepare for static equipment.","How do you check and validate your own calculation results?","Tell me about the most challenging calculation package you have prepared."],
+ ["How do you approach seismic and wind analysis for tall or heavy vessels?","Which codes do you use for seismic design, and how do you select parameters?","Describe a project where environmental loads significantly impacted the design."],
+ ["How do you evaluate nozzle loads on pressure vessels?","What tools or methods do you use for local stress assessment at nozzles?","Tell me about a case where nozzle loads required a design change."],
+ ["What is your experience designing vessel supports — skirts, saddles, legs?","Walk me through your approach to anchor bolt design.","Describe a project where the support design was particularly challenging."],
+ ["How do you approach lifting lug design and transport analysis?","What safety factors and standards do you apply for lifting?","Have you been involved in planning or supporting heavy lift operations?"],
+ ["Which parts of ASME VIII Div 1 do you use most frequently?","Walk me through how you determine minimum wall thickness for a pressure vessel.","How do you handle special conditions like cyclic or lethal service?"],
+ ["Have you applied ASME VIII Div 2? When would you choose it over Div 1?","Tell me about your experience with the Design-by-Analysis approach.","What advantages and limitations have you found with Div 2?"],
+ ["Which pressure vessel software do you use? Tell me about your proficiency.","How do you verify that software results are correct?","Describe a complex model you have built in PV Elite, Compress, or similar."],
+ ["Have you used Ametank or other tank design software? For what type of tanks?","What level of proficiency would you say you have with tank design tools?","How do you handle seismic or wind analysis within the software?"],
+ ["What CAD tools do you use in your engineering work?","Do you create or review detailed fabrication drawings?","How does CAD support your engineering workflow day to day?"],
+ ["Have you participated in proposal or conceptual phases? What was your contribution?","How do you size equipment when project information is still limited?","Tell me about a proposal where your input was important."],
+ ["Describe your FEED project experience — what deliverables do you produce?","How do you handle design decisions when the project basis is still evolving?","What coordination challenges have you faced in FEED projects?"],
+ ["Walk me through your experience in EPC projects.","How do you manage vendor document reviews (VDDR, TBA)?","How do you handle deliverable deadlines and quality in EPC execution?"],
+ ["What industry sectors have you worked in?","How do requirements differ between sectors for static equipment?","Tell me about the project that best represents your industry experience."],
+];
+const QBANK_B=[
+ ["How do you keep your technical knowledge up to date?","Describe a situation where your technical expertise solved a critical problem.","Where do you see your biggest room for technical growth?"],
+ ["How do you ensure your work complies with codes and standards?","Have you ever found a deviation from standards? How did you handle it?","Tell me how you apply company procedures alongside international codes."],
+ ["Which engineering tools are you most proficient with?","How do you approach learning a new tool required for your work?","Tell me how software tools improve your productivity."],
+ ["Describe your experience interacting with clients or vendors.","Have you participated in technical meetings with external parties?","How do you manage technical disagreements with vendors or clients?"],
+ ["Have you mentored or trained junior colleagues? How?","How do you take ownership of your own professional development?","Tell me about a time you led a technical effort or team initiative."],
+ ["Describe a time you made an important technical decision on your own.","How do you coordinate your work with other disciplines?","Tell me about a situation where coordination was critical to the result."],
+];
+const QBANK_C=[
+ ["How much supervision do you typically need in your current role?","Tell me about a decision you made without consulting your supervisor.","What types of engineering decisions are you comfortable making on your own?"],
+ ["How do you ensure quality in your deliverables before submitting them?","Have you been involved in quality audits or non-conformance resolution?","Tell me about your experience with QA/QC in engineering projects."],
+ ["Describe your level of interaction with clients and vendors.","Have you led or participated in KOMs, HAZOPs, or technical clarification meetings?","How do you handle a vendor deliverable that does not meet specifications?"],
+ ["Have you trained or guided colleagues? What was your approach?","How do you share knowledge within your team?","Describe your own learning path — how have you grown in your career?"],
+ ["How often do you coordinate with other engineering disciplines?","Tell me about a situation where multidisciplinary coordination was essential?","How do you resolve conflicting requirements from different disciplines?"],
+];
+const PCI_DESC=["0 None","1 Basic","2 Working","3 Proficient","4 Expert"];
+const GUIDE_ROWS=[
+ ["Interviewer Guide — Department 133 Static Equipment",""],
+ ["PURPOSE","Evaluate candidates for Static Equipment engineering positions in a structured, consistent way, based on the MASTER SKILLS EXPECTATIONS framework. Understand real experience through conversation."],
+ ["BEFORE","Fill candidate name, date, target level (L1-L5+). Review the Question Bank for relevant skill areas. Reference scores for the target level appear in the Scorecard."],
+ ["DURING","Ask open-ended questions; let the candidate explain. Use the Question Bank as a guide, not a script. Score each topic in the Scorecard."],
+ ["SECTION A — PCI 0-4","0=No knowledge · 1=Basic awareness · 2=Working knowledge (with guidance) · 3=Proficient (independent) · 4=Expert (defines standards, mentors)."],
+ ["SECTION B — JCS 1-7","1-2=Entry · 3-4=Developing · 5-6=Experienced · 7=Expert/Leader."],
+ ["SECTION C — Qualitative","Pick the descriptor per level that best matches the candidate."],
+ ["AFTER","Review the GAP column. Green=meets/exceeds, Red=below target. Add overall comments and recommendation. Share with the hiring team."],
+ ["KEY PRINCIPLES","Ask simple questions, let the candidate talk. Listen for specifics: projects, equipment, codes, problems solved. A good candidate explains how & why. Trust your engineering judgment."],
+];
+
+/* ---------- state ---------- */
+let CV_FILES=[];      // {name, text}
+let ANALYSIS=null;    // current analysis result
+const $=s=>document.querySelector(s);
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+
+/* ---------- theme (dark / light) ---------- */
+(function(){
+  let saved="dark";
+  try{saved=localStorage.getItem("cpa-theme")||"dark";}catch(e){}
+  applyTheme(saved);
+  const btn=$("#themeToggle");
+  if(btn)btn.addEventListener("click",()=>{
+    const next=document.documentElement.getAttribute("data-theme")==="light"?"dark":"light";
+    applyTheme(next);
+    try{localStorage.setItem("cpa-theme",next);}catch(e){}
+  });
+  function applyTheme(t){
+    document.documentElement.setAttribute("data-theme",t);
+    const lbl=$("#themeLabel"),ic=document.querySelector("#themeToggle .ti");
+    if(lbl)lbl.textContent=t==="light"?"Light":"Dark";
+    if(ic)ic.textContent=t==="light"?"☀️":"🌙";
+  }
+})();
+
+/* ---------- populate applied-role dropdown ---------- */
+(function(){
+  const sel=$("#appliedRole");
+  const mk=(label,track,li)=>{const o=document.createElement("option");o.value=track+":"+li;o.textContent=label;sel.appendChild(o);};
+  const gE=document.createElement("optgroup");gE.label="Engineer track";
+  const gD=document.createElement("optgroup");gD.label="Designer track";
+  sel.appendChild(gE);sel.appendChild(gD);
+  LEVELS.forEach(L=>{const o=document.createElement("option");o.value="eng:"+L.i;o.textContent=`${L.code} · ${L.eng}  (${bandTxt(L)})`;gE.appendChild(o);});
+  LEVELS.forEach(L=>{const o=document.createElement("option");o.value="des:"+L.i;o.textContent=`${L.code} · ${L.des}  (${bandTxt(L)})`;gD.appendChild(o);});
+  sel.value="eng:2"; // default Engineer I
+})();
+function bandTxt(L){return L.yMax>=99?`>${L.yMin} yrs`:(L.yMin===0?`<${L.yMax} yr`:`${L.yMin}-${L.yMax} yrs`);}
+
+/* ============================================================
+   PDF text extraction (pdf.js) + OCR fallback (Tesseract.js)
+   Everything runs locally in this browser — no uploads.
+   ============================================================ */
+function b64ToBytes(b){const s=atob(b),n=s.length,a=new Uint8Array(n);for(let i=0;i<n;i++)a[i]=s.charCodeAt(i);return a;}
+
+// extract the PDF's embedded text layer (fast path)
+async function extractTextLayer(pdf){
+  let out="";
+  for(let p=1;p<=pdf.numPages;p++){
+    const page=await pdf.getPage(p);
+    const tc=await page.getTextContent();
+    let lines={},order=[];
+    tc.items.forEach(it=>{
+      const y=Math.round(it.transform[5]);
+      if(!(y in lines)){lines[y]=[];order.push(y);}
+      lines[y].push(it.str);
+    });
+    order.sort((a,b)=>b-a);
+    out+=order.map(y=>lines[y].join(" ").replace(/\s+/g," ").trim()).filter(Boolean).join("\n")+"\n";
+  }
+  return out.trim();
+}
+
+// ---- OCR (Tesseract.js), engine + English model embedded ----
+let OCR_WORKER=null, OCR_WURL=null;
+function ocrWorkerUrl(){
+  if(OCR_WURL)return OCR_WURL;
+  // A single self-contained Web Worker script, assembled from:
+  //  (1) a shim that serves the embedded eng.traineddata over fetch (offline),
+  //  (2) the Tesseract core (single-file wasm.js) — defining self.TesseractCore
+  //      up front so the worker never importScripts/fetches it,
+  //  (3) the tesseract.js worker script.
+  const shim="(function(){var B=\""+OCR_ENG_B64+"\";var s=atob(B),n=s.length,E=new Uint8Array(n);for(var i=0;i<n;i++)E[i]=s.charCodeAt(i);"
+    +"var _f=self.fetch?self.fetch.bind(self):null;"
+    +"self.fetch=function(u,o){try{if(String(u).indexOf('traineddata')>=0)return Promise.resolve(new Response(E,{status:200,headers:{'Content-Type':'application/octet-stream'}}));}catch(e){}"
+    +"return _f?_f(u,o):Promise.reject(new Error('offline:'+u));};})();\n";
+  const coreText=new TextDecoder("utf-8").decode(b64ToBytes(OCR_CORE_B64));
+  const workerText=new TextDecoder("utf-8").decode(b64ToBytes(OCR_WORKER_B64));
+  OCR_WURL=URL.createObjectURL(new Blob([shim+coreText+"\n"+workerText],{type:"application/javascript"}));
+  return OCR_WURL;
+}
+async function getOcrWorker(onProg){
+  if(OCR_WORKER)return OCR_WORKER;
+  if(typeof Tesseract==="undefined")throw new Error("OCR engine not available");
+  const workerUrl=ocrWorkerUrl();
+  OCR_WORKER=await Tesseract.createWorker("eng",1,{ // OEM 1 = LSTM only
+    workerPath:workerUrl, langPath:"https://tessdata.local",
+    workerBlobURL:false,
+    logger:m=>{ if(onProg && m.status) onProg(m); }
+  });
+  return OCR_WORKER;
+}
+// render each page to a canvas and OCR it
+async function ocrPdf(pdf,onProg){
+  const worker=await getOcrWorker(onProg);
+  let out="";
+  for(let p=1;p<=pdf.numPages;p++){
+    if(onProg)onProg({status:"rendering",page:p,pages:pdf.numPages,progress:0});
+    const page=await pdf.getPage(p);
+    let scale=2.0;
+    const base=page.getViewport({scale:1});
+    if(base.width*scale>2400)scale=2400/base.width; // cap for speed/memory
+    const vp=page.getViewport({scale});
+    const canvas=document.createElement("canvas");
+    canvas.width=Math.ceil(vp.width);canvas.height=Math.ceil(vp.height);
+    await page.render({canvasContext:canvas.getContext("2d"),viewport:vp}).promise;
+    const {data}=await worker.recognize(canvas,{},{text:true});
+    out+=(data.text||"").replace(/[ \t]+\n/g,"\n")+"\n";
+    canvas.width=canvas.height=0;
+  }
+  return out.trim();
+}
+
+// full extraction: text layer first, OCR fallback (or forced)
+async function extractPdf(file,onProg,forceOcr){
+  const buf=await file.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+  let text="",ocr=false;
+  if(!forceOcr){
+    text=await extractTextLayer(pdf);
+  }
+  const enough=text.replace(/\s/g,"").length>=120;
+  if(forceOcr || !enough){
+    if(onProg)onProg({status:"ocr-start"});
+    const ot=await ocrPdf(pdf,onProg);
+    // keep whichever is richer
+    if(ot.replace(/\s/g,"").length > text.replace(/\s/g,"").length){text=ot;ocr=true;}
+  }
+  return {text,ocr,pages:pdf.numPages};
+}
+
+/* ============================================================
+   CV PARSING & ANALYSIS
+   ============================================================ */
+<!--INJECT_ENGINE-->
+
+// address / location words that must never be mistaken for a name
+const ADDR_RE=/\b(apartment|apartments|apt|flat|plot|street|road|nagar|extension|extn|colony|layout|sector|block|phase|lane|avenue|cross|floor|near|opposite|opp|box|pincode|\bpin\b|district|dist|taluk|tehsil|village|town|city|state|country|building|residency|enclave|society|chowk|marg|puram|pakkam|halli|wadi|gali|bhavan|towers?|complex|no\.)\b/i;
+const NAME_LABEL_RE=/\b(?:mail\s*id|e-?mail|mobile|phone|contact|tel|ph\b|mob\b|whatsapp|linkedin)\b/i;
+function titleName(s){
+  s=(s||"").replace(/[_]+/g," ").replace(/([A-Za-z])\.([A-Za-z])/g,"$1. $2").replace(/\s+/g," ").trim();
+  return s.split(/\s+/).map(w=>{
+    const bare=w.replace(/[^A-Za-z]/g,"");
+    if(bare.length<=2) return w.toUpperCase();                 // initials: "N.", "PK"
+    return bare.charAt(0).toUpperCase()+bare.slice(1).toLowerCase();
+  }).join(" ").trim();
+}
+function looksLikeName(s){
+  const t=s.replace(/[,.]+$/,"").trim();
+  if(!t||t.length>45)return false;
+  if(ADDR_RE.test(t))return false;
+  if(/\d/.test(t))return false;                                // names have no digits
+  if(/@|http|www|resume|curriculum|vitae|objective|summary|profile|linkedin/i.test(t))return false;
+  const words=t.split(/\s+/);
+  if(words.length<1||words.length>5)return false;
+  const letters=t.replace(/[^A-Za-z]/g,"");
+  if(letters.length<3)return false;
+  if(!/^[A-Za-z][A-Za-z.'\- ]*$/.test(t))return false;
+  return true;
+}
+// phone: prefer a labelled mobile/phone, else a 10-13 digit run (avoids PIN codes / plot nos)
+function extractPhone(text){
+  const norm=text.replace(/[()]/g,"");
+  const lab=norm.match(/(?:mobile|phone|contact|tel|cell|mob|whatsapp)\s*(?:no\.?|number|#)?\s*[:\-]?\s*((?:\+?\d[\d\s.-]{8,}\d))/i);
+  if(lab){const d=lab[1].replace(/[^\d+]/g,"");if(d.replace(/\D/g,"").length>=10)return lab[1].trim().replace(/\s{2,}/g," ");}
+  // any run of 10-13 digits, optionally +cc, with separators
+  const all=norm.match(/\+?\d[\d\s.-]{8,}\d/g)||[];
+  for(const c of all){const digits=c.replace(/\D/g,"");if(digits.length>=10 && digits.length<=13)return c.trim().replace(/\s{2,}/g," ");}
+  return "";
+}
+function guessName(text,override){
+  if(override && override.trim())return titleName(override.trim());
+  const rawLines=text.split("\n").map(l=>l.trim()).filter(Boolean);
+  const lines=rawLines.slice(0,20);
+  const email=(text.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/)||[])[0]||"";
+  // email local-part tokens (drop digits/initials), longest = the family/given name
+  let emTokens=[];
+  if(email){emTokens=email.split("@")[0].toLowerCase().split(/[^a-z]+/).filter(t=>t.length>=3);}
+  const mainTok=emTokens.slice().sort((a,b)=>b.length-a.length)[0]||"";
+  // 1) STRONGEST: a header line that contains the email's name token
+  if(mainTok){
+    for(const l of lines){
+      if(l.toLowerCase().replace(/[^a-z]/g,"").includes(mainTok)){
+        // strip contact labels and everything after them / after the email
+        let nm=l.split(NAME_LABEL_RE)[0].split(/[:|]/)[0].split(/\s{2,}/)[0]
+               .replace(/@.*$/,"").replace(/^\s*(name|resume of|cv of|mr\.?|ms\.?|mrs\.?|dr\.?)\s*[:\-]?\s*/i,"")
+               .replace(/[,.]+$/,"").trim();
+        if(nm && nm.toLowerCase().replace(/[^a-z]/g,"").includes(mainTok) && looksLikeName(nm)) return titleName(nm);
+        // name may sit right AFTER the label instead
+        let after=l.split(NAME_LABEL_RE).slice(1).join(" ").replace(/[:|].*/,"").trim();
+        if(after && after.toLowerCase().replace(/[^a-z]/g,"").includes(mainTok) && looksLikeName(after)) return titleName(after);
+      }
+    }
+  }
+  // 2) an explicit "Name:" field
+  for(const l of lines){
+    const m=l.match(/^\s*name\s*[:\-]\s*(.+)$/i);
+    if(m && looksLikeName(m[1])) return titleName(m[1]);
+  }
+  // 3) first plausible non-address name line near the top
+  for(const l of lines.slice(0,10)){
+    const cleaned=l.split(NAME_LABEL_RE)[0].replace(/[,.]+$/,"").trim();
+    if(looksLikeName(cleaned) && /^[A-Z]/.test(cleaned)) return titleName(cleaned);
+  }
+  // 4) fall back to the email tokens
+  if(emTokens.length) return titleName(emTokens.join(" "));
+  return titleName(rawLines[0]||"Candidate");
+}
+
+function scoreSkills(text){
+  const t=" "+text.toLowerCase().replace(/\s+/g," ")+" ";
+  const strongHits=STRONG.reduce((a,k)=>a+(t.includes(k)?1:0),0);
+  const seniorBoost=strongHits>=3;
+  return SKILLS.map((sk,idx)=>{
+    const kws=SKILL_KW[idx];
+    let hits=0;const found=[];
+    kws.forEach(k=>{
+      const kk=k.toLowerCase();
+      if(t.includes(" "+kk) || t.includes(kk+" ") || t.includes(kk)){
+        // count occurrences (capped)
+        let c=0,p=0;while((p=t.indexOf(kk,p))>=0){c++;p+=kk.length;if(c>5)break;}
+        hits+=c;found.push(k.trim());
+      }
+    });
+    let sc;
+    if(hits===0)sc=0;
+    else if(hits===1)sc=2;
+    else if(hits<=3)sc=3;
+    else sc=4;
+    if(sc===0 && found.length)sc=1;
+    if(seniorBoost && sc>0 && sc<4)sc=Math.min(4,sc+1);
+    if(!seniorBoost && sc===4 && hits<5)sc=3;
+    return {score:sc,hits,evidence:[...new Set(found)].slice(0,6)};
+  });
+}
+
+function estimateBehavioral(sA,years,text){
+  const t=text.toLowerCase();
+  const avgTech=sA.reduce((a,s)=>a+s.score,0)/sA.length;
+  const g=(idxs)=>idxs.reduce((a,i)=>a+sA[i].score,0)/idxs.length;
+  const has=(...ks)=>ks.some(k=>t.includes(k));
+  const clamp=v=>Math.max(1,Math.min(7,Math.round(v)));
+  const yLvl=years>=15?7:years>=13?6:years>=10?5:years>=7?4:years>=3?3:years>=1?2:1;
+  const b=[];
+  b[0]=clamp(1+avgTech*1.4);                                             // Technical Mastery
+  b[1]=clamp(1+g([11,12])*1.3 + (has("procedure","standard","code","asme","specification")?1:0)); // Standards
+  b[2]=clamp(1+g([13,14,15])*1.5);                                       // Tools & Software
+  b[3]=clamp((has("client","vendor","site visit","kom","hazop","meeting","supplier")?3:1)+(yLvl>=5?2:yLvl>=3?1:0)); // External
+  b[4]=clamp((has("lead","mentor","manage","supervis","train","team of","head")?3:1)+(yLvl>=6?3:yLvl>=4?2:yLvl>=3?1:0)); // Leadership
+  b[5]=clamp((has("coordinat","independ","decision","multidiscip","interface")?3:2)+(yLvl>=5?2:yLvl>=3?1:0)); // Decision
+  return b.map((v,i)=>({dim:BEHAV[i],score:v}));
+}
+
+function estimateCompetencies(sA,sB,years,text){
+  const t=text.toLowerCase();
+  const clamp=v=>Math.max(0,Math.min(6,v));
+  const yLvl=years>=15?6:years>=13?5:years>=10?4:years>=7?3:years>=3?2:years>=1?1:0;
+  const has=(...ks)=>ks.some(k=>t.includes(k));
+  const lv=[];
+  lv[0]=clamp(yLvl + (has("independent","autonom","lead")?1:0) - (has("under supervision","assisted","trainee")?1:0)); // autonomy
+  lv[1]=clamp(yLvl - 1 + (has("qa","qc","quality","audit","review","checked")?2:0)); // quality
+  lv[2]=clamp((has("client")?4:has("vendor","supplier","site visit")?3:has("document review")?2:0) + (yLvl>=4?1:0)); // client/vendor
+  lv[3]=clamp((has("mentor","train","supervis","guided")?4:has("self","develop")?2:0) + (yLvl>=5?2:0)); // mentoring
+  lv[4]=clamp((has("multidiscip","coordinat","interface","interdisciplin")?3:has("team")?1:0) + (yLvl>=4?2:0)); // multidisc
+  return COMP.map((c,i)=>({name:c.name,level:lv[i],desc:c.d[lv[i]]}));
+}
+
+function bestFit(sA,years){
+  // skill fit ratio per level
+  const perLevel=LEVELS.map(L=>{
+    let meet=0,deficit=0,surplus=0;
+    SKILLS.forEach((sk,i)=>{
+      const ref=sk.ref[L.i],cand=sA[i].score;
+      if(cand>=ref)meet++; else deficit+=(ref-cand);
+      if(cand>ref)surplus+=(cand-ref);
+    });
+    const ratio=meet/SKILLS.length;
+    // years fit
+    let yFit;
+    if(years>=L.yMin && years<=L.yMax)yFit=1;
+    else if(years<L.yMin)yFit=Math.max(0,1-(L.yMin-years)/4);
+    else yFit=Math.max(0,1-(years-L.yMax)/6);
+    const combined=0.62*ratio+0.38*yFit;
+    return {L,ratio,deficit,surplus,yFit,combined};
+  });
+  // best skill-only level = highest with ratio>=0.7 else max ratio
+  let skillLevel=0,br=-1;
+  perLevel.forEach(p=>{if(p.ratio>=0.7)skillLevel=Math.max(skillLevel,p.L.i);if(p.ratio>br){br=p.ratio;}});
+  if(br<0.7){let mx=-1;perLevel.forEach(p=>{if(p.ratio>mx){mx=p.ratio;skillLevel=p.L.i;}});}
+  // years level = highest whose min<=years
+  let yearsLevel=0;LEVELS.forEach(L=>{if(years>=L.yMin)yearsLevel=L.i;});
+  // overall best = argmax combined
+  let best=perLevel[0];perLevel.forEach(p=>{if(p.combined>best.combined)best=p;});
+  let bi=best.L.i, clamped=null;
+  /* The framework defines each level by a minimum number of years, so tenure
+     sets the band and the skill evidence positions the candidate inside it.
+     Without this, a keyword-thin CV from a 28-year veteran lands on "Trainee",
+     which the career manual does not permit. Skills may still pull the level
+     down by up to two steps (thin evidence for the seniority claimed) or push
+     it one step above what tenure alone implies. */
+  if(years>=1){
+    const lo=Math.max(0,yearsLevel-2), hi=Math.min(LEVELS.length-1,yearsLevel+1);
+    const bounded=Math.max(lo,Math.min(hi,bi));
+    if(bounded!==bi){clamped={from:bi,to:bounded};bi=bounded;}
+  }
+  return {perLevel,skillLevel,yearsLevel,best:bi,bestObj:perLevel[bi],clamped};
+}
+
+function detectFlags(a){
+  const F=[];
+  const push=(sev,ft,fb)=>F.push({sev,ft,fb});
+  const merged=a.merged, years=a.years;
+  // employment gaps
+  if(merged.length>1){
+    for(let i=1;i<merged.length;i++){
+      const gap=merged[i].s-merged[i-1].e;
+      if(gap>=6){
+        push(gap>=18?"high":"med","Employment gap detected",
+          `~${(gap/12).toFixed(1)} year gap between ${fmtYM(merged[i-1].e)} and ${fmtYM(merged[i].s)}. Confirm what the candidate did during this period.`);
+      }
+    }
+  }
+  // overlaps (raw ranges overlapping significantly)
+  const raw=a.ranges.slice().sort((x,y)=>x.s-y.s);
+  for(let i=1;i<raw.length;i++){
+    const ov=Math.min(raw[i-1].e,raw[i].e)-raw[i].s;
+    // a shared handover year between two year-only ranges is a rounding artefact
+    const floor=(raw[i-1].approx||raw[i].approx)?13:6;
+    if(ov>=floor && !(raw[i].s<=raw[i-1].s && raw[i].e>=raw[i-1].e)){
+      push("low","Overlapping engagements",
+        `Two roles overlap by ~${(ov/12).toFixed(1)} yr ("${raw[i-1].raw}" & "${raw[i].raw}"). May be concurrent/part‑time — verify.`);
+      break;
+    }
+  }
+  // claimed vs computed experience
+  const R=a.rec||{};
+  const claimSatisfied=a.claimIsMinimum && R.union>=a.claimedYears-0.5;   // "22+ yrs" is a floor
+  if(a.claimedYears && !claimSatisfied && Math.abs(a.claimedYears-R.union)>=2.5){
+    push(R.confidence==="high"?"med":"low","Experience claim vs. dated timeline",
+      `The CV states ~${a.claimedYears} yrs; the dated roles cover ~${(R.union||0).toFixed(1)} yrs across a ${(R.span||0).toFixed(1)} yr span. `+
+      `Reported figure: ${years.toFixed(1)} yrs — ${R.basis}. Confirm the actual total with the candidate.`);
+  }
+  if(R.confidence==="low"||R.confidence==="none"){
+    push("high","Experience total is not reliable",
+      `${R.basis}. Check the Experience audit below and set the correct total before using this report.`);
+  }
+  if(R.confidence==="manual"){
+    push("ok","Experience total set manually",`Using ${years.toFixed(1)} yrs as entered by the reviewer.`);
+  }
+  if(a.undatedEmployers>0){
+    push("low","Employers without readable dates",
+      `${a.undatedEmployers} employer${a.undatedEmployers>1?"s appear":" appears"} on the CV with no date range the parser could read. Their tenure is not in the dated timeline — see the Experience audit.`);
+  }
+  // job hopping
+  const shortRoles=a.ranges.filter(r=>(r.e-r.s)<18).length;
+  if(shortRoles>=3){
+    push("low","Frequent role changes",`${shortRoles} engagements shorter than 18 months. Explore reasons for the moves.`);
+  }
+  // over / under qualification vs applied
+  const diff=a.best-a.applied.i;
+  if(diff>=2)push("high","Signs of over‑qualification",
+    `Best‑fit level is ${LEVELS[a.best].code} (${LEVELS[a.best].short}) — ${diff} levels above the ${a.applied.code} role applied for. Assess retention risk, salary expectations and motivation.`);
+  else if(diff===1)push("low","Slightly above the target level",
+    `Profile leans toward ${LEVELS[a.best].code}. Candidate may expect more scope than the ${a.applied.code} role offers.`);
+  if(diff<=-2)push("high","Below the target level",
+    `Best‑fit is ${LEVELS[a.best].code}, ${Math.abs(diff)} levels under the ${a.applied.code} role. Evidence for the applied level is thin — probe the weak skill areas.`);
+  else if(diff===-1)push("med","Marginally below target",
+    `Profile maps to ${LEVELS[a.best].code}, one level below the ${a.applied.code} target. Confirm depth in the gap areas below.`);
+  // years below applied band
+  if(years<a.applied.yMin-0.5)push("med","Experience below the role's band",
+    `~${years.toFixed(1)} yrs vs the ${a.applied.code} band of ${bandTxt(a.applied)}.`);
+  // skills-vs-years divergence
+  if(Math.abs(a.fit.skillLevel-a.fit.yearsLevel)>=2){
+    const dir=a.fit.skillLevel>a.fit.yearsLevel?"technical evidence outpaces the years of experience":"years of experience outpace the demonstrated technical depth";
+    push("low","Profile imbalance",`The ${dir}. Skill evidence ≈ ${LEVELS[a.fit.skillLevel].code}, experience ≈ ${LEVELS[a.fit.yearsLevel].code}.`);
+  }
+  // OCR notice
+  if(a.ocr)push("med","Read via OCR — verify the text",
+    "This CV had no digital text layer (scanned or image/screenshot), so it was read with optical character recognition. OCR can mis‑read characters, dates and names — confirm the extracted text (expandable below) and all scores before relying on them.");
+  // experience computed from Experience section only
+  if(a.eduRanges.length){
+    push("low","Education excluded from experience",
+      `${a.eduRanges.length} education/academic date range${a.eduRanges.length>1?"s were":" was"} detected and kept out of the experience total (see the timeline). Professional experience is counted from the work history only.`);
+  }
+  if(a.internMonths>=1){
+    push("low","Internships / academic work counted separately",
+      `~${(a.internMonths/12).toFixed(1)} yr of internship / academic‑project time was found and excluded from core professional experience. Decide during screening whether it should count for this role.`);
+  }
+  if(a.expInferred)push("med","Experience section not clearly labelled",
+    "No explicit ‘Experience’ heading was found, so the years shown are inferred from non‑education dates and may be less precise. Verify the work history manually.");
+  // thin CV
+  if(a.ranges.length===0)push("med","No datable work history found",
+    "Could not extract dated employment periods from an Experience section — the PDF may be scanned/unusually formatted, or roles may lack dates. Timeline checks are limited; verify manually.");
+  if(a.wordCount<180)push("low","Sparse CV content",`Only ~${a.wordCount} words extracted. Extraction may be incomplete.`);
+  if(!F.length)push("ok","No red flags detected","Timeline is consistent and the profile aligns with the target level. Proceed with a standard technical interview.");
+  return F;
+}
+
+function analyze(file){
+  const text=file.text;
+  const det=extractDates(text);
+  const [track,li]=$("#appliedRole").value.split(":");
+  const a={file:file.name,text,ocr:!!file.ocr,wordCount:text.split(/\s+/).length,
+    allRanges:det.all.map((r,i)=>({...r,id:i,excluded:false})),
+    sawExp:det.sawExp,undatedEmployers:det.undatedEmployers,
+    claimedYears:claimedExperience(text),
+    claimIsMinimum:!!claimedExperience.lastWasMinimum,
+    override:"",
+    name:guessName(text,$("#nameOverride").value),
+    email:(text.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/)||[])[0]||"",
+    phone:extractPhone(text),
+    sA:scoreSkills(text),                       // skill scores do not depend on years
+    applied:LEVELS[+li],track};
+  recompute(a);
+  return a;
+}
+
+/* Everything downstream of the experience number, re-runnable so the reviewer
+   can correct a range or override the total and see the whole report update. */
+function recompute(a){
+  const kind=k=>a.allRanges.filter(r=>r.kind===k&&!r.excluded);
+  a.ranges=kind("work");
+  a.eduRanges=kind("education");
+  a.otherRanges=kind("other");
+  a.merged=mergeIntervals(a.ranges);
+  a.internMonths=mergeIntervals(a.otherRanges).reduce((s,r)=>s+(r.e-r.s),0);
+  a.expInferred=(!a.sawExp&&a.ranges.length>0);
+  a.rec=reconcileExperience(a.merged,a.claimedYears,a.override,a.undatedEmployers,a.claimIsMinimum);
+  a.years=a.rec.years;
+  a.firstStart=a.merged.length?a.merged[0].s:null;
+  a.lastEnd=a.merged.length?a.merged[a.merged.length-1].e:null;
+  a.sB=estimateBehavioral(a.sA,a.years,a.text);
+  a.sC=estimateCompetencies(a.sA,a.sB,a.years,a.text);
+  a.fit=bestFit(a.sA,a.years);
+  a.best=a.fit.best;
+  a.flags=detectFlags(a);
+  const d=a.best-a.applied.i;
+  a.verdict=d>=2?{cls:"bad",t:"Over‑qualified for the role"}:
+            d===1?{cls:"warn",t:"Slightly above target"}:
+            d===0?{cls:"good",t:"Well matched to the role"}:
+            d===-1?{cls:"warn",t:"Slightly below target"}:
+            {cls:"bad",t:"Below the target level"};
+  a.focus=SKILLS.map((sk,i)=>({i,name:sk.n,g:sk.g,gap:sk.ref[a.applied.i]-a.sA[i].score,ref:sk.ref[a.applied.i],cand:a.sA[i].score}))
+    .filter(x=>x.gap>0).sort((x,y)=>y.gap-x.gap);
+  return a;
+}
+
+/* ============================================================
+   RENDER DASHBOARD
+   ============================================================ */
+function trackTitle(a,li){return a.track==="des"?LEVELS[li].des:LEVELS[li].eng;}
+
+/* Experience audit — shows every date range the parser found, what it was
+   counted as, and the line it came from. Anything wrong can be reclassified
+   or dropped, and the total can be overridden outright; the whole report
+   recomputes. An automated reading you cannot inspect is not trustworthy. */
+function renderExpAudit(a){
+  const wrap=el("div","panel expaudit");wrap.style.marginTop="16px";
+  const R=a.rec;
+  const KIND=[["work","Work"],["education","Education"],["other","Internship / academic"]];
+  const conf={high:["good","High"],medium:["warn","Check"],low:["bad","Low"],none:["bad","None"],manual:["good","Manual"]}[R.confidence]||["warn","—"];
+  wrap.innerHTML=
+    `<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px">
+       <h4 style="margin:0">Experience audit</h4>
+       <span class="badge ${conf[0]}">${conf[1]} confidence</span>
+       <span style="font-size:12px;color:var(--ink2)">${esc(R.basis)}</span>
+     </div>
+     <div class="auditsums">
+       <span>Union of dated roles <b>${R.union.toFixed(1)}</b> yrs</span>
+       <span>First → last dated role <b>${R.span.toFixed(1)}</b> yrs</span>
+       <span>Stated in CV <b>${R.claim?R.claim+" yrs":"—"}</b></span>
+       <span>Reported <b style="color:var(--acc)">${a.years.toFixed(1)}</b> yrs</span>
+     </div>`;
+  if(!a.allRanges.length){
+    wrap.appendChild(el("div","mini","No date ranges could be read from this CV. Enter the correct total below."));
+  }else{
+    const tbl=el("table","audittable");
+    tbl.innerHTML="<tr><th>Count</th><th>Period</th><th>Length</th><th>Counted as</th><th>Source line</th></tr>";
+    a.allRanges.forEach(r=>{
+      const tr=el("tr");
+      if(r.excluded)tr.className="off";
+      const cb=el("input");cb.type="checkbox";cb.checked=!r.excluded;
+      cb.onchange=()=>{r.excluded=!cb.checked;recompute(a);render(a);};
+      const td0=el("td");td0.appendChild(cb);
+      const sel=el("select");
+      KIND.forEach(([v,lbl])=>{const o=el("option",null,lbl);o.value=v;if(r.kind===v)o.selected=true;sel.appendChild(o);});
+      sel.onchange=()=>{r.kind=sel.value;recompute(a);render(a);};
+      const td3=el("td");td3.appendChild(sel);
+      const td1=el("td",null,fmtYM(r.s)+" → "+(r.open?"present":fmtYM(r.e)));
+      const td2=el("td",null,((r.e-r.s)/12).toFixed(1)+" yrs");
+      const td4=el("td","srcline",r.src||r.raw||"");
+      td4.title=r.src||r.raw||"";
+      [td0,td1,td2,td3,td4].forEach(td=>tr.appendChild(td));
+      tbl.appendChild(tr);
+    });
+    wrap.appendChild(tbl);
+  }
+  const ov=el("div","auditov");
+  ov.innerHTML=`<label for="yrsOverride">Override the total</label>`;
+  const inp=el("input");inp.type="number";inp.step="0.5";inp.min="0";inp.max="55";inp.id="yrsOverride";
+  inp.placeholder=a.years.toFixed(1);inp.value=a.override||"";
+  const apply=el("button","btn sm","Apply");
+  const clear=el("button","btn ghost sm","Reset to auto");
+  apply.onclick=()=>{a.override=inp.value;recompute(a);render(a);};
+  clear.onclick=()=>{a.override="";recompute(a);render(a);};
+  inp.onkeydown=e=>{if(e.key==="Enter")apply.onclick();};
+  ov.appendChild(inp);ov.appendChild(apply);ov.appendChild(clear);
+  ov.appendChild(el("span","mini","Whatever is shown here is what goes into the Excel kit and every score below."));
+  wrap.appendChild(ov);
+  return wrap;
+}
+
+function render(a){
+  ANALYSIS=a;
+  const d=$("#dash");d.innerHTML="";
+  $("#upload").style.display="none";d.style.display="block";
+  window.scrollTo(0,0);
+
+  // breadcrumb / actions
+  const cr=el("div","crumbs");
+  cr.innerHTML=`<a id="back">← New analysis</a> <span>/</span> <span>${esc(a.name)}</span> <span>/</span> <span>${esc(a.file)}</span>`;
+  d.appendChild(cr);
+
+  // header
+  const st=el("div","section-title");
+  st.innerHTML=`<h3>Candidate Snapshot</h3><span class="tag">Auto‑generated</span>`;
+  d.appendChild(st);
+
+  const cards=el("div","cards");
+  cards.appendChild(kpi("Candidate",esc(a.name),(a.email?esc(a.email):"")+(a.phone?" · "+esc(a.phone):"")||"—","var(--acc2)"));
+  cards.appendChild(kpi("Applied for",`${a.applied.code} · ${a.applied.short}`,esc(trackTitle(a,a.applied.i)),"var(--info)","sm"));
+  cards.appendChild(kpi("Best‑fit designation",`${LEVELS[a.best].code} · ${LEVELS[a.best].short}`,esc(trackTitle(a,a.best)),"var(--acc)","sm"));
+  const CONF={high:"verified against dated roles",medium:"needs a quick check",low:"unreliable — please confirm",none:"no dates found",manual:"set manually"};
+  const yfoot=(a.ranges.length?`${a.ranges.length} dated role${a.ranges.length>1?"s":""}`:"no dated roles")
+      + (a.eduRanges.length?" · education excluded":"")
+      + (a.claimedYears?` · CV states ~${a.claimedYears}`:"")
+      + ` · ${CONF[a.rec.confidence]||""}`;
+  const yc=kpi("Professional experience",a.years.toFixed(1)+" yrs",yfoot,
+      a.rec.confidence==="high"||a.rec.confidence==="manual"?"var(--good)":a.rec.confidence==="medium"?"var(--warn)":"var(--bad)");
+  cards.appendChild(yc);
+  d.appendChild(cards);
+
+  // experience audit — every detected range, correctable
+  d.appendChild(renderExpAudit(a));
+
+  // verdict banner
+  const vb=el("div","panel");vb.style.marginTop="16px";
+  const fitPct=Math.round(a.fit.bestObj.combined*100);
+  vb.innerHTML=`<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+     <span class="badge big ${a.verdict.cls}" style="font-size:13px;padding:7px 14px">${a.verdict.t}</span>
+     <div style="font-size:13px;color:var(--ink2)">Comparing the best‑fit profile against the <b style="color:var(--ink)">${a.applied.code} · ${esc(trackTitle(a,a.applied.i))}</b> role you selected.</div>
+     <div style="margin-left:auto;font-size:12px;color:var(--ink3)">Skill‑evidence level ≈ <b style="color:var(--ink2)">${LEVELS[a.fit.skillLevel].code}</b> · Experience level ≈ <b style="color:var(--ink2)">${LEVELS[a.fit.yearsLevel].code}</b> · Match ${fitPct}%</div>
+   </div>`;
+  d.appendChild(vb);
+
+  // Flags + Timeline
+  const s2=el("div","section-title");s2.innerHTML=`<h3>Timeline &amp; Consistency Checks</h3><span class="tag">Screening</span>`;d.appendChild(s2);
+  const two=el("div","three");
+  const flagsP=el("div","panel");
+  flagsP.appendChild(el("h4",null,"Findings & inconsistencies"));
+  a.flags.forEach(f=>{
+    const sevlabel={high:"High",med:"Medium",low:"Note",ok:"OK"}[f.sev];
+    const row=el("div","flag "+f.sev);
+    row.innerHTML=`<span class="dot"></span><div><div class="ft">${esc(f.ft)}</div><div class="fb">${esc(f.fb)}</div></div><span class="sev">${sevlabel}</span>`;
+    flagsP.appendChild(row);
+  });
+  two.appendChild(flagsP);
+  const tlP=el("div","panel");
+  tlP.appendChild(el("h4",null,"Career timeline"));
+  tlP.appendChild(renderTimeline(a));
+  two.appendChild(tlP);
+  d.appendChild(two);
+
+  // Best-fit mapping detail
+  const s3=el("div","section-title");s3.innerHTML=`<h3>Designation Mapping</h3><span class="tag">TR India framework</span>`;d.appendChild(s3);
+  d.appendChild(renderLevelMap(a));
+
+  // Technical skills
+  const s4=el("div","section-title");s4.innerHTML=`<h3>Technical Profile — Section A (PCI 0–4)</h3><span class="tag">20 skills</span>`;d.appendChild(s4);
+  const skTwo=el("div","three");
+  const barsP=el("div","panel");
+  barsP.appendChild(el("h4",null,"Estimated proficiency vs. reference"));
+  barsP.innerHTML+=`<div class="legend"><span><i style="background:linear-gradient(90deg,var(--acc-d),var(--acc))"></i>Candidate (estimated)</span><span><i style="background:var(--warn)"></i>Reference — ${a.applied.code} target</span></div>`;
+  barsP.appendChild(renderSkillTable(a));
+  skTwo.appendChild(barsP);
+  const radP=el("div","panel");
+  radP.appendChild(el("h4",null,"Skill‑group radar"));
+  radP.appendChild(renderRadar(a));
+  radP.appendChild(el("div","mini","Averaged by group G1 Equipment · G2 Analysis · G3 Codes & Tools · G4 Project types. Teal = candidate, amber = "+a.applied.code+" reference."));
+  skTwo.appendChild(radP);
+  d.appendChild(skTwo);
+
+  // Behavioral + competencies
+  const s5=el("div","section-title");s5.innerHTML=`<h3>Behavioral &amp; Role Competencies — Sections B &amp; C</h3><span class="tag">JCS 1–7 · qualitative</span>`;d.appendChild(s5);
+  const bc=el("div","two");
+  const bP=el("div","panel");bP.appendChild(el("h4",null,"Behavioral dimensions (JCS 1–7)"));bP.appendChild(renderBehav(a));bc.appendChild(bP);
+  const cP=el("div","panel");cP.appendChild(el("h4",null,"Role competencies"));cP.appendChild(renderComp(a));bc.appendChild(cP);
+  d.appendChild(bc);
+
+  // Interview focus / questions
+  const s6=el("div","section-title");s6.innerHTML=`<h3>Recommended Interview Focus</h3><span class="tag">from the question bank</span>`;d.appendChild(s6);
+  d.appendChild(renderFocus(a));
+
+  // Export
+  const s7=el("div","section-title");s7.innerHTML=`<h3>Reports</h3><span class="tag">before · during · after</span>`;d.appendChild(s7);
+  const exp=el("div","exportbar");
+  exp.innerHTML=`<span class="lbl">Generate the interview evaluation kit for this candidate:</span>`;
+  const b1=el("button","btn","⬇  Interview Evaluation Kit (Excel)");b1.onclick=()=>exportKit(a);
+  const b2=el("button","btn ghost","⬇  Screening Analysis (Excel)");b2.onclick=()=>exportAnalysis(a);
+  const b3=el("button","btn ghost","🖨  Print / Save dashboard as PDF");b3.onclick=()=>window.print();
+  exp.appendChild(b1);exp.appendChild(b2);exp.appendChild(b3);
+  d.appendChild(exp);
+
+  // raw text
+  const raw=el("details","raw");
+  raw.innerHTML=`<summary>View extracted CV text (for verification)${a.ocr?' <span class="ocrtag" style="margin-left:6px">OCR</span>':''}</summary>`;
+  const pre=el("div","cvtext");pre.textContent=a.text;raw.appendChild(pre);
+  d.appendChild(raw);
+
+  const fn=el("div","footnote",
+    "Scores are automated estimates inferred from CV keywords and seniority signals — they are a screening aid, not a decision. Confirm every score during the interview using the question bank and the Master Skills reference. Source documents remain confidential and are processed only in this browser.");
+  d.appendChild(fn);
+
+  $("#back").onclick=()=>{d.style.display="none";$("#upload").style.display="block";window.scrollTo(0,0);};
+  animateDashboard(d);
+}
+
+/* ---- dashboard entrance & value animations ---- */
+function animateDashboard(root){
+  const reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(reduce)return;
+  // reveal top-level blocks with stagger
+  const blocks=[...root.children].filter(c=>!c.classList.contains("crumbs"));
+  const io=new IntersectionObserver((ents)=>{
+    ents.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target);
+      animateMeters(e.target); countUps(e.target);
+    }});
+  },{threshold:.08,rootMargin:"0px 0px -40px 0px"});
+  blocks.forEach((b,i)=>{ b.classList.add("reveal"); b.style.transitionDelay=Math.min(i*45,260)+"ms"; io.observe(b); });
+  // ensure above-the-fold ones fire even without scroll
+  requestAnimationFrame(()=>blocks.slice(0,4).forEach(b=>{b.classList.add("in");animateMeters(b);countUps(b);}));
+  // safety: reveal everything after a moment in case the observer never fires (e.g. before printing)
+  setTimeout(()=>blocks.forEach(b=>{if(!b.classList.contains("in")){b.classList.add("in");animateMeters(b);countUps(b);}}),2500);
+}
+function animateMeters(scope){
+  scope.querySelectorAll(".meter .cand").forEach(el=>{
+    if(el.dataset.anim)return; el.dataset.anim="1";
+    const w=el.style.width||"0%"; el.style.width="0%"; void el.offsetWidth;
+    requestAnimationFrame(()=>{ el.style.width=w; });
+  });
+}
+function countUps(scope){
+  scope.querySelectorAll(".kpi .val, .verdictpct").forEach(el=>{
+    if(el.dataset.cu)return;
+    const m=String(el.textContent).match(/^(\D*)(\d+(?:\.\d+)?)(.*)$/);
+    if(!m || m[1].trim()!=="")return;   // only count-up values that start with a number (e.g. "1.6 yrs")
+    el.dataset.cu="1";
+    const pre=m[1],end=parseFloat(m[2]),dec=(m[2].split(".")[1]||"").length,post=m[3];
+    const t0=performance.now(),dur=850;
+    const step=(t)=>{ const p=Math.min(1,(t-t0)/dur); const e=1-Math.pow(1-p,3);
+      el.textContent=pre+(end*e).toFixed(dec)+post; if(p<1)requestAnimationFrame(step); };
+    el.textContent=pre+(0).toFixed(dec)+post; requestAnimationFrame(step);
+  });
+}
+
+function kpi(lab,val,foot,edge,sm){
+  const k=el("div","kpi");
+  k.innerHTML=`<div class="edge" style="background:${edge||'var(--acc)'}"></div>
+    <div class="lab">${lab}</div><div class="val ${sm?'sm':''}">${val}</div><div class="foot">${foot||""}</div>`;
+  return k;
+}
+function esc(s){return (s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+
+function renderTimeline(a){
+  const wrap=el("div","tl");
+  const workR=a.ranges.slice().sort((x,y)=>x.s-y.s);
+  const eduR=a.eduRanges.slice().sort((x,y)=>x.s-y.s);
+  const othR=a.otherRanges.slice().sort((x,y)=>x.s-y.s);
+  const allR=workR.concat(eduR,othR);
+  if(!allR.length){wrap.innerHTML=`<div class="mini">No dated periods extracted from this CV, so a timeline could not be drawn. Verify employment history manually.</div>`;return wrap;}
+  const now=ym(NOW.getMonth(),NOW.getFullYear());
+  const min=Math.min.apply(null,allR.map(r=>r.s));
+  const max=Math.max.apply(null,allR.map(r=>r.e).concat([now]));
+  const span=Math.max(1,max-min);
+  const pos=v=>((v-min)/span*100);
+  wrap.innerHTML=`<div class="legend" style="margin-bottom:8px"><span><i style="background:linear-gradient(90deg,var(--acc2),var(--acc))"></i>Work (counted)</span><span><i style="background:rgba(244,183,64,.5)"></i>Education (excluded)</span><span><i style="background:rgba(120,140,170,.55)"></i>Internship / academic (excluded)</span></div>`;
+  // coverage row (work merged) with gaps
+  if(a.merged.length){
+    const covRow=el("div","row");
+    covRow.innerHTML=`<div class="who"><b>Work coverage</b>${a.years.toFixed(1)} yrs</div>`;
+    const track=el("div","track");
+    a.merged.forEach(m=>{const seg=el("div","seg");seg.style.left=pos(m.s)+"%";seg.style.width=Math.max(1.5,pos(m.e)-pos(m.s))+"%";seg.title=fmtYM(m.s)+" – "+fmtYM(m.e);track.appendChild(seg);});
+    for(let i=1;i<a.merged.length;i++){const g0=a.merged[i-1].e,g1=a.merged[i].s;if(g1-g0>=6){const gp=el("div","gap");gp.style.left=pos(g0)+"%";gp.style.width=(pos(g1)-pos(g0))+"%";gp.title="Gap: "+fmtYM(g0)+" – "+fmtYM(g1);track.appendChild(gp);}}
+    covRow.appendChild(track);wrap.appendChild(covRow);
+  }
+  const addRow=(r,label,bg)=>{
+    const row=el("div","row");
+    row.innerHTML=`<div class="who"><b>${esc(label)}</b>${fmtYM(r.s)} – ${r.e>=now-1?"Present":fmtYM(r.e)}</div>`;
+    const tr=el("div","track");const seg=el("div","seg");
+    seg.style.left=pos(r.s)+"%";seg.style.width=Math.max(1.5,pos(r.e)-pos(r.s))+"%";seg.style.background=bg;
+    tr.appendChild(seg);row.appendChild(tr);wrap.appendChild(row);
+  };
+  workR.slice(0,6).forEach(r=>addRow(r,r.raw,"linear-gradient(90deg,var(--acc2),var(--acc))"));
+  eduR.slice(0,4).forEach(r=>addRow(r,"🎓 "+r.raw,"rgba(244,183,64,.5)"));
+  othR.slice(0,4).forEach(r=>addRow(r,"• "+r.raw,"rgba(120,140,170,.55)"));
+  // axis
+  const axis=el("div","axis");const marks=el("div","marks");
+  const y0=Math.floor(min/12),y1=Math.ceil(max/12);
+  let ticks="";const step=Math.max(1,Math.round((y1-y0)/6));
+  for(let y=y0;y<=y1;y+=step)ticks+=`<span>${y}</span>`;
+  axis.innerHTML=`<div></div>`;marks.innerHTML=ticks;axis.appendChild(marks);wrap.appendChild(axis);
+  return wrap;
+}
+
+function renderLevelMap(a){
+  const p=el("div","panel");
+  p.appendChild(el("h4",null,"Fit score by career level (skills 62% · experience 38%)"));
+  const tb=el("table","skilltable");
+  tb.innerHTML=`<tr><th>Level</th><th>${a.track==="des"?"Designer":"Engineer"} designation</th><th>Exp band</th><th>Skill fit</th><th style="width:200px">Overall match</th></tr>`;
+  a.fit.perLevel.forEach(pl=>{
+    const isBest=pl.L.i===a.best, isApplied=pl.L.i===a.applied.i;
+    const tag=isBest&&isApplied?`<span class="badge good" style="font-size:10px;padding:2px 7px">BEST · APPLIED</span>`
+      :isBest?`<span class="badge good" style="font-size:10px;padding:2px 7px">BEST FIT</span>`
+      :isApplied?`<span class="badge info" style="font-size:10px;padding:2px 7px">APPLIED</span>`:"";
+    const pct=Math.round(pl.combined*100);
+    const tr=el("tr");
+    if(isBest)tr.style.background="rgba(38,208,194,.08)";
+    tr.innerHTML=`<td><b>${pl.L.code}</b> ${pl.L.short} ${tag}</td>
+      <td style="color:var(--ink2)">${esc(a.track==="des"?pl.L.des:pl.L.eng)}</td>
+      <td style="color:var(--ink3)">${bandTxt(pl.L)}</td>
+      <td>${Math.round(pl.ratio*100)}%</td>
+      <td><div class="meter"><div class="cand" style="width:${pct}%;background:${isBest?'linear-gradient(90deg,var(--acc-d),var(--acc))':'linear-gradient(90deg,#26466b,#3b82f6)'}"></div></div><span class="mini">${pct}%</span></td>`;
+    tb.appendChild(tr);
+  });
+  p.appendChild(tb);
+  return p;
+}
+
+function renderSkillTable(a){
+  const tb=el("table","skilltable");
+  tb.innerHTML=`<tr><th>#</th><th>Skill</th><th>Grp</th><th style="width:170px">Candidate vs ${a.applied.code} ref</th><th>Cand</th><th>Ref</th><th>Gap</th><th>Evidence</th></tr>`;
+  a.sA.forEach((s,i)=>{
+    const ref=SKILLS[i].ref[a.applied.i];
+    const gap=s.score-ref;
+    const gcls=gap>0?"gp":gap<0?"gn":"gz";
+    const tr=el("tr");
+    tr.innerHTML=`<td class="mini">${i+1}</td>
+      <td>${esc(SKILLS[i].n)}</td>
+      <td><span class="grp">${SKILLS[i].g}</span></td>
+      <td><div class="meter" title="candidate ${s.score} / ref ${ref}">
+            <div class="cand" style="width:${s.score/4*100}%"></div>
+            <div class="ref" style="left:${ref/4*100}%"></div></div></td>
+      <td><b>${s.score}</b></td><td class="gz">${ref}</td>
+      <td class="gapcell ${gcls}">${gap>0?"+"+gap:gap}</td>
+      <td class="evi">${s.evidence.length?esc(s.evidence.join(", ")):"<span style='color:var(--bad)'>none found</span>"}</td>`;
+    tb.appendChild(tr);
+  });
+  return tb;
+}
+
+function renderRadar(a){
+  const groups=["G1","G2","G3","G4"];
+  const gl={G1:"Equipment",G2:"Analysis",G3:"Codes/Tools",G4:"Projects"};
+  const cand=[],ref=[];
+  groups.forEach(g=>{
+    const idx=SKILLS.map((s,i)=>s.g===g?i:-1).filter(i=>i>=0);
+    cand.push(idx.reduce((x,i)=>x+a.sA[i].score,0)/idx.length);
+    ref.push(idx.reduce((x,i)=>x+SKILLS[i].ref[a.applied.i],0)/idx.length);
+  });
+  const size=260,cx=size/2,cy=size/2,R=95,max=4;
+  const pt=(v,k)=>{const ang=-Math.PI/2+k*2*Math.PI/groups.length;const r=v/max*R;return [cx+r*Math.cos(ang),cy+r*Math.sin(ang)];};
+  const poly=arr=>arr.map((v,k)=>pt(v,k).join(",")).join(" ");
+  let grid="";
+  for(let ring=1;ring<=4;ring++){grid+=`<polygon points="${groups.map((_,k)=>pt(ring,k).join(",")).join(" ")}" fill="none" stroke="var(--line)" stroke-width="1"/>`;}
+  groups.forEach((_,k)=>{const[e,f]=pt(4,k);grid+=`<line x1="${cx}" y1="${cy}" x2="${e}" y2="${f}" stroke="var(--line)" stroke-width="1"/>`;});
+  let labels="";
+  groups.forEach((g,k)=>{const[e,f]=pt(4.7,k);labels+=`<text x="${e}" y="${f}" fill="var(--ink2)" font-size="10.5" text-anchor="middle" dominant-baseline="middle">${gl[g]}</text>`;});
+  const svg=`<svg viewBox="0 0 ${size} ${size}" width="100%" style="max-width:300px">
+    ${grid}${labels}
+    <polygon points="${poly(ref)}" fill="rgba(244,183,64,.14)" stroke="var(--warn)" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <polygon points="${poly(cand)}" fill="rgba(38,208,194,.20)" stroke="var(--acc)" stroke-width="2"/>
+    ${cand.map((v,k)=>{const[e,f]=pt(v,k);return `<circle cx="${e}" cy="${f}" r="3" fill="var(--acc)"/>`;}).join("")}
+  </svg>`;
+  const w=el("div","radar-wrap");w.innerHTML=svg;return w;
+}
+
+function renderBehav(a){
+  const tb=el("table","skilltable");
+  tb.innerHTML=`<tr><th>Dimension</th><th style="width:180px">Candidate vs ${a.applied.code}</th><th>Cand</th><th>Ref</th><th>Gap</th></tr>`;
+  a.sB.forEach((b,i)=>{
+    const ref=a.applied.i+1; // JCS ref = level index+1 (1..7)
+    const gap=b.score-ref;const gcls=gap>0?"gp":gap<0?"gn":"gz";
+    const tr=el("tr");
+    tr.innerHTML=`<td>${esc(b.dim)}</td>
+      <td><div class="meter"><div class="cand" style="width:${b.score/7*100}%"></div><div class="ref" style="left:${ref/7*100}%"></div></div></td>
+      <td><b>${b.score}</b></td><td class="gz">${ref}</td><td class="gapcell ${gcls}">${gap>0?"+"+gap:gap}</td>`;
+    tb.appendChild(tr);
+  });
+  return tb;
+}
+
+function renderComp(a){
+  const w=el("div","comp");
+  a.sC.forEach((c,i)=>{
+    const refLvl=a.applied.i;
+    const meet=c.level>=refLvl;
+    const cc=el("div","c");
+    cc.innerHTML=`<div class="cn"><span>${esc(c.name)}</span><span class="lvlpill" style="${meet?'':'color:var(--warn);border-color:rgba(244,183,64,.4)'}">${LEVELS[c.level].code} · ${esc(c.desc)}</span></div>
+      <div class="cd">Target for ${a.applied.code}: <b style="color:var(--ink)">${esc(COMP[i].d[refLvl])}</b> ${meet?'<span class="badge good" style="font-size:10px;padding:1px 7px;margin-left:6px">meets</span>':'<span class="badge warn" style="font-size:10px;padding:1px 7px;margin-left:6px">below</span>'}</div>`;
+    w.appendChild(cc);
+  });
+  return w;
+}
+
+function renderFocus(a){
+  const p=el("div","panel");
+  const top=a.focus.slice(0,6);
+  if(!top.length){
+    p.innerHTML=`<div class="mini">The candidate meets or exceeds the ${a.applied.code} reference on every technical skill — use the full question bank to confirm depth and probe for over‑qualification.</div>`;
+  }else{
+    p.appendChild(el("h4",null,`Prioritised probing areas — biggest gaps vs the ${a.applied.code} target`));
+    top.forEach(f=>{
+      const block=el("div","qblock");
+      const head=el("div","qhead");
+      const sev=f.gap>=3?"var(--bad)":f.gap>=2?"var(--warn)":"var(--info)";
+      head.innerHTML=`<span class="chev">▶</span><span class="qn">${esc(f.name)}</span>
+        <span class="grp">${f.g}</span>
+        <span class="prio" style="color:${sev}">gap ${f.gap} · cand ${f.cand}/ref ${f.ref}</span>`;
+      const body=el("div","qbody");
+      const ul=document.createElement("ul");ul.style.margin="8px 0 0";ul.style.paddingLeft="16px";
+      QBANK_A[f.i].forEach(q=>{const li=document.createElement("li");li.textContent=q;ul.appendChild(li);});
+      body.appendChild(ul);
+      head.onclick=()=>{head.classList.toggle("open");body.classList.toggle("open");};
+      block.appendChild(head);block.appendChild(body);p.appendChild(block);
+    });
+  }
+  const note=el("div","mini");note.style.marginTop="10px";
+  note.innerHTML="The full 20‑skill question bank, behavioral and competency questions are included in the exported Excel kit.";
+  p.appendChild(note);
+  return p;
+}
+
+/* ============================================================
+   EXCEL EXPORT (SheetJS) — mirrors the current Evaluation Kit
+   ============================================================ */
+function aoa(ws_data){return XLSX.utils.aoa_to_sheet(ws_data);}
+function setW(ws,widths){ws["!cols"]=widths.map(w=>({wch:w}));}
+
+// Fill the ORIGINAL 133 Interview Evaluation Kit template (preserving all its
+// formatting) — the Scorecard's REF (col E) and GAP (col G) are template formulas
+// driven by the Target Level in D7, so we set D7 + the YOUR SCORE / notes cells.
+async function exportKit(a){
+  const btnLabel="Interview Evaluation Kit";
+  try{
+    if(typeof ExcelJS==="undefined")throw new Error("Excel engine not available");
+    const L=a.applied.i;
+    const targetLevel=`${a.applied.code} ${a.applied.short}`;      // EXACT string the D7 formulas MATCH on
+    const wb=new ExcelJS.Workbook();
+    await wb.xlsx.load(b64ToBytes(KIT_TEMPLATE_B64).buffer);
+    const ws=wb.getWorksheet("SCORECARD")||wb.worksheets[1];
+    const set=(addr,v)=>{ const c=ws.getCell(addr); c.value=v; };
+    // Header — rows 3-7 (value cells are the merged D-columns)
+    set("D3", a.name||"");
+    set("D4", `${a.applied.code} · ${trackTitle(a,a.applied.i)}`);
+    set("D5", "");                                   // Interview Date — for the interviewer
+    set("D6", ($("#interviewer").value||"").trim());
+    set("D7", targetLevel);                          // drives every REF.SCORE formula
+    // Section A — Technical (rows 11-30): F = YOUR SCORE, H = NOTES (E ref & G gap auto)
+    a.sA.forEach((s,i)=>{
+      const r=11+i, ref=SKILLS[i].ref[L], gap=s.score-ref;
+      set("F"+r, s.score);
+      let note = s.evidence.length ? ("Evidence: "+s.evidence.join(", ")) : "No direct evidence found in CV";
+      if(gap<0) note = "GAP "+gap+" vs target — probe. "+note;
+      set("H"+r, note);
+    });
+    // Section B — Behavioral (rows 34-39): F = YOUR SCORE
+    a.sB.forEach((b,i)=>{
+      const r=34+i, ref=L+1, gap=b.score-ref;
+      set("F"+r, b.score);
+      set("H"+r, (gap<0?("GAP "+gap+" — "):"")+"auto-estimate; confirm in interview");
+    });
+    // Section C — Role Competencies (rows 43-47): F = YOUR ASSESSMENT (descriptor)
+    a.sC.forEach((c,i)=>{
+      const r=43+i, meet=c.level>=a.applied.i;
+      set("F"+r, c.desc);
+      set("H"+r, (meet?"Meets":"Below")+" target ("+COMP[i].d[a.applied.i]+")");
+    });
+    // Interviewer recommendation + comments
+    set("D56", kitRecommendation(a));
+    set("A59", kitObservations(a));
+    try{ wb.calcProperties.fullCalcOnLoad=true; }catch(e){}   // make Excel recompute E/G/overall on open
+    const buf=await wb.xlsx.writeBuffer();
+    downloadBlob(new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),
+      `133_Interview_Evaluation_Kit_${safe(a.name)}_${a.applied.code}.xlsx`);
+  }catch(err){
+    console.error(err);
+    alert("Could not generate the "+btnLabel+": "+(err.message||err));
+  }
+}
+function kitRecommendation(a){
+  const d=a.best-a.applied.i, ap=a.applied.code, bf=LEVELS[a.best].code;
+  if(d>=2) return "Over-qualified for "+ap+" (best-fit "+bf+"). Proceed only if scope & compensation match the seniority; probe motivation and retention risk.";
+  if(d===1) return "Slightly above the "+ap+" target — capable; confirm the role's scope meets the candidate's expectations.";
+  if(d===0) return "Well matched to "+ap+". Recommend proceeding to a standard technical interview.";
+  if(d===-1) return "Marginally below "+ap+". Proceed only if the gap areas are acceptable / trainable.";
+  return "Below the "+ap+" target (best-fit "+bf+"). Significant gaps — proceed only with a clear development plan.";
+}
+function kitObservations(a){
+  const topGaps=a.focus.slice(0,5).map(f=>f.name+" (gap "+f.gap+")").join(", ")||"none — meets or exceeds every technical target";
+  const flags=a.flags.filter(f=>f.sev==="high"||f.sev==="med").map(f=>f.ft);
+  const avgA=(a.sA.reduce((x,s)=>x+s.score,0)/a.sA.length).toFixed(1);
+  const avgB=(a.sB.reduce((x,b)=>x+b.score,0)/a.sB.length).toFixed(1);
+  return "AUTO PRE-SCREEN — verify every value during the interview.\n"
+    +"Best-fit designation: "+LEVELS[a.best].code+" · "+trackTitle(a,a.best)+"   |   Applied: "+a.applied.code+" · "+trackTitle(a,a.applied.i)+"\n"
+    +"Professional experience (work only): "+a.years.toFixed(1)+" yrs"
+      +(a.claimedYears?(" (CV states ~"+a.claimedYears+")"):"")
+      +(a.internMonths?("; ~"+(a.internMonths/12).toFixed(1)+" yr internship/academic excluded"):"")+"\n"
+    +"Averages — technical "+avgA+"/4, behavioral "+avgB+"/7.\n"
+    +"Priority probing areas (largest gaps vs target): "+topGaps+".\n"
+    +(flags.length?("Screening flags: "+flags.join("; ")+".\n"):"")
+    +(a.ocr?"NOTE: CV was read via OCR — double-check name, dates and scores.":"");
+}
+function downloadBlob(blob,name){
+  const url=URL.createObjectURL(blob);
+  const el=document.createElement("a"); el.href=url; el.download=name;
+  document.body.appendChild(el); el.click();
+  setTimeout(()=>{URL.revokeObjectURL(url); el.remove();},1500);
+}
+
+function exportAnalysis(a){
+  const wb=XLSX.utils.book_new();
+  const L=a.applied.i;
+  const rows=[];
+  rows.push(["CANDIDATE SCREENING ANALYSIS"]);
+  rows.push(["Generated by the Candidate Profile Analyzer","",new Date().toLocaleString()]);
+  rows.push([]);
+  rows.push(["Candidate",a.name]);
+  rows.push(["Email",a.email]);rows.push(["Phone",a.phone]);
+  rows.push(["Source file",a.file]);
+  rows.push(["Text source",a.ocr?"OCR (scanned/image PDF — verify)":"Digital text layer"]);
+  rows.push(["Position applied",`${a.applied.code} · ${trackTitle(a,a.applied.i)} (${a.track==="des"?"Designer":"Engineer"} track)`]);
+  rows.push(["Best-fit designation",`${LEVELS[a.best].code} · ${trackTitle(a,a.best)}`]);
+  rows.push(["Verdict",a.verdict.t]);
+  rows.push(["Professional experience — work only (yrs)",a.years.toFixed(1)]);
+  rows.push(["Internship / academic time excluded (yrs)",a.internMonths?(a.internMonths/12).toFixed(1):"—"]);
+  rows.push(["Education periods (excluded from experience)",a.eduRanges.length||"—"]);
+  rows.push(["Experience claimed in CV (yrs)",a.claimedYears||"—"]);
+  rows.push(["Skill-evidence level",LEVELS[a.fit.skillLevel].code+" "+LEVELS[a.fit.skillLevel].short]);
+  rows.push(["Experience level",LEVELS[a.fit.yearsLevel].code+" "+LEVELS[a.fit.yearsLevel].short]);
+  rows.push(["Overall match %",Math.round(a.fit.bestObj.combined*100)]);
+  rows.push([]);
+  rows.push(["FINDINGS & INCONSISTENCIES"]);
+  rows.push(["Severity","Finding","Detail"]);
+  a.flags.forEach(f=>rows.push([{high:"HIGH",med:"MEDIUM",low:"NOTE",ok:"OK"}[f.sev],f.ft,f.fb]));
+  rows.push([]);
+  rows.push(["CAREER TIMELINE (extracted date ranges)"]);
+  rows.push(["Category","Raw text","From","To","Duration (yrs)"]);
+  const tlAll=a.ranges.map(r=>["Work",r]).concat(a.otherRanges.map(r=>["Internship/Academic",r]),a.eduRanges.map(r=>["Education",r]));
+  tlAll.sort((x,y)=>x[1].s-y[1].s).forEach(([cat,r])=>rows.push([cat,r.raw,fmtYM(r.s),fmtYM(r.e),((r.e-r.s)/12).toFixed(1)]));
+  rows.push([]);
+  rows.push(["DESIGNATION FIT BY LEVEL"]);
+  rows.push(["Level","Designation","Exp band","Skill fit %","Overall match %"]);
+  a.fit.perLevel.forEach(p=>rows.push([p.L.code+" "+p.L.short,trackTitle(a,p.L.i),bandTxt(p.L),Math.round(p.ratio*100),Math.round(p.combined*100)]));
+  const ws1=aoa(rows);setW(ws1,[34,30,40,14,14]);XLSX.utils.book_append_sheet(wb,ws1,"SUMMARY");
+  // skill detail
+  const sd=[["TECHNICAL PROFILE — SECTION A (PCI 0-4)"],[],
+    ["#","Skill","Group","Candidate (auto)",`Ref ${a.applied.code}`,"Gap","Evidence keywords"]];
+  a.sA.forEach((s,i)=>sd.push([i+1,SKILLS[i].n,SKILLS[i].g,s.score,SKILLS[i].ref[L],s.score-SKILLS[i].ref[L],s.evidence.join("; ")]));
+  sd.push([]);sd.push(["BEHAVIORAL — SECTION B (JCS 1-7)"]);
+  sd.push(["#","Dimension","Candidate (auto)",`Ref ${a.applied.code}`,"Gap"]);
+  a.sB.forEach((b,i)=>sd.push([i+1,b.dim,b.score,L+1,b.score-(L+1)]));
+  sd.push([]);sd.push(["COMPETENCIES — SECTION C"]);
+  sd.push(["#","Competency","Candidate (auto)",`Target ${a.applied.code}`]);
+  a.sC.forEach((c,i)=>sd.push([i+1,c.name,`${LEVELS[c.level].code} · ${c.desc}`,COMP[i].d[L]]));
+  const ws2=aoa(sd);setW(ws2,[5,26,12,16,12,8,50]);XLSX.utils.book_append_sheet(wb,ws2,"SKILL DETAIL");
+  XLSX.writeFile(wb,`Screening_Analysis_${safe(a.name)}.xlsx`);
+}
+function safe(s){return String(s).replace(/[^A-Za-z0-9]+/g,"_").replace(/^_|_$/g,"").slice(0,40)||"Candidate";}
+
+/* ============================================================
+   UPLOAD WIRING
+   ============================================================ */
+const drop=$("#drop"),fileInput=$("#file"),filesBox=$("#files"),statusEl=$("#status"),bar=$("#bar"),analyzeBtn=$("#analyzeBtn");
+drop.addEventListener("click",e=>{if(e.target.closest(".filechip"))return;fileInput.click();});
+["dragenter","dragover"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("drag");}));
+["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();if(ev==="drop"||e.target===drop)drop.classList.remove("drag");}));
+drop.addEventListener("drop",e=>{e.preventDefault();drop.classList.remove("drag");handleFiles(e.dataTransfer.files);});
+fileInput.addEventListener("change",e=>handleFiles(e.target.files));
+
+async function handleFiles(list){
+  const pdfs=[...list].filter(f=>/pdf$/i.test(f.name)||f.type==="application/pdf");
+  if(!pdfs.length){setStatus("Please drop a PDF file.",true);return;}
+  const forceOcr=$("#forceOcr").checked;
+  analyzeBtn.disabled=true;
+  bar.style.display="block";bar.querySelector("i").style.width="6%";
+  for(let k=0;k<pdfs.length;k++){
+    const f=pdfs[k];
+    const prog=(m)=>{
+      if(m.status==="ocr-start"){setStatus(`<span class="spin"></span>No text layer in “${esc(f.name)}” — running OCR locally (first run loads the engine)…`);}
+      else if(m.status==="rendering"){setStatus(`<span class="spin"></span>OCR “${esc(f.name)}” · page ${m.page}/${m.pages} — rendering…`);}
+      else if(m.status==="recognizing text"){
+        const pct=Math.round((m.progress||0)*100);
+        setStatus(`<span class="spin"></span>OCR “${esc(f.name)}” — recognising text ${pct}%`);
+        bar.querySelector("i").style.width=(6+(k+ (m.progress||0))/pdfs.length*90)+"%";
+      } else if(/loading|initializ|loaded|initialized/i.test(m.status)){
+        setStatus(`<span class="spin"></span>OCR “${esc(f.name)}” — ${esc(m.status)}…`);
+      }
+    };
+    setStatus(`<span class="spin"></span>Reading “${esc(f.name)}” …`);
+    try{
+      const r=await extractPdf(f,prog,forceOcr);
+      if(r.text.replace(/\s/g,"").length<40){
+        setStatus(`“${esc(f.name)}” produced almost no readable text, even after OCR. It may be a photo of very low quality — check the file.`,true);
+      }
+      const existing=CV_FILES.find(c=>c.name===f.name);
+      if(existing){existing.text=r.text;existing.ocr=r.ocr;existing.pages=r.pages;}
+      else CV_FILES.push({name:f.name,text:r.text,ocr:r.ocr,pages:r.pages});
+    }catch(err){setStatus("Could not read "+esc(f.name)+": "+esc(err.message||err),true);console.error(err);}
+    bar.querySelector("i").style.width=(6+(k+1)/pdfs.length*90)+"%";
+  }
+  renderFileChips();
+  bar.querySelector("i").style.width="100%";
+  setTimeout(()=>{bar.style.display="none";bar.querySelector("i").style.width="0";},500);
+  if(CV_FILES.length){analyzeBtn.disabled=false;
+    const anyOcr=CV_FILES.some(c=>c.ocr);
+    setStatus(`${CV_FILES.length} CV${CV_FILES.length>1?"s":""} ready${anyOcr?" (OCR applied — verify the extracted text)":""} — set the applied position and click Analyze.`);}
+}
+function renderFileChips(){
+  filesBox.innerHTML="";
+  CV_FILES.forEach((c,i)=>{
+    const chip=el("div","filechip");
+    chip.innerHTML=`📄 <span>${esc(c.name)}</span><span class="mini">· ${c.text.split(/\s+/).length} words</span>${c.ocr?'<span class="ocrtag" title="Read via optical character recognition">OCR</span>':''}<span class="x" title="remove">✕</span>`;
+    chip.querySelector(".x").onclick=(e)=>{e.stopPropagation();CV_FILES.splice(i,1);renderFileChips();if(!CV_FILES.length){analyzeBtn.disabled=true;setStatus("Awaiting a CV…");}};
+    filesBox.appendChild(chip);
+  });
+}
+function setStatus(h,err){statusEl.innerHTML=h;statusEl.className="status"+(err?" err":"");}
+
+analyzeBtn.addEventListener("click",()=>{
+  if(!CV_FILES.length)return;
+  setStatus(`<span class="spin"></span>Analyzing…`);
+  setTimeout(()=>{
+    try{
+      const a=analyze(CV_FILES[0]);
+      // attach the rest for potential comparison (first one shown)
+      render(a);
+    }catch(err){setStatus("Analysis error: "+esc(err.message||err),true);console.error(err);}
+  },60);
+});
+</script>
+</body>
+</html>

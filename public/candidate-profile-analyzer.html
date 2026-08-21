@@ -183,6 +183,27 @@ header.top{
 details.raw{margin-top:18px}
 details.raw summary{cursor:pointer;color:var(--ink2);font-size:12.5px;padding:6px 0}
 .mini{font-size:11px;color:var(--ink3)}
+/* experience audit */
+.auditsums{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.auditsums span{font-size:11.5px;color:var(--ink2);background:var(--panel2);border:1px solid var(--line);
+  border-radius:999px;padding:5px 12px}
+.auditsums b{color:var(--ink);font-weight:700}
+table.audittable{width:100%;border-collapse:collapse;font-size:12.5px}
+table.audittable th{text-align:left;font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;
+  color:var(--ink3);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.audittable td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.audittable tr.off td{opacity:.4;text-decoration:line-through}
+table.audittable tr.off td:first-child{text-decoration:none;opacity:1}
+table.audittable select{background:var(--bg2);color:var(--ink);border:1px solid var(--line);
+  border-radius:7px;padding:3px 6px;font-size:12px;font-family:inherit}
+table.audittable input[type=checkbox]{accent-color:var(--acc);width:15px;height:15px;cursor:pointer}
+td.srcline{color:var(--ink3);max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.auditov{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px;
+  border-top:1px dashed var(--line);padding-top:14px}
+.auditov label{font-size:12px;color:var(--ink2);font-weight:600}
+.auditov input{width:110px;background:var(--bg2);color:var(--ink);border:1px solid var(--line);
+  border-radius:8px;padding:7px 9px;font-size:13px;font-family:inherit}
+.btn.sm{padding:7px 13px;font-size:12.5px}
 .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
 .tab{font-size:12px;padding:7px 13px;border:1px solid var(--line);border-radius:999px;background:var(--panel);cursor:pointer;color:var(--ink2)}
 .tab.active{background:var(--panel2);color:var(--acc);border-color:var(--acc-d)}
@@ -705,163 +726,253 @@ async function extractPdf(file,onProg,forceOcr){
 /* ============================================================
    CV PARSING & ANALYSIS
    ============================================================ */
+/* ============================================================
+   DATE / EXPERIENCE ENGINE  v2
+   Structured atom scanner + explicit pairing.
+   Replaces the old "many overlapping regexes each pushing a range"
+   approach, which both missed formats and invented phantom ranges.
+   ============================================================ */
 const MONTHS={jan:0,feb:1,mar:2,apr:3,apl:3,may:4,jun:5,jul:6,aug:7,sep:8,sept:8,oct:9,nov:10,dec:11,
   january:0,february:1,march:2,april:3,june:5,july:6,august:7,september:8,october:9,november:10,december:11};
-const NOW=new Date(2026,7,18); // per session context 2026-08-18
+const NOW=new Date();
+const NOW_YM=NOW.getFullYear()*12+NOW.getMonth();
+const MIN_YEAR=1955, MAX_YEAR=NOW.getFullYear()+1;
 
 function ym(month,year){return year*12+(month||0);}
-function fmtYM(v){const y=Math.floor(v/12),m=v%12;const mn=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];return mn[m]+" "+y;}
+function fmtYM(v){const y=Math.floor(v/12),m=((v%12)+12)%12;const mn=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];return mn[m]+" "+y;}
+const _monNum=s=>{if(!s)return 0;const k=String(s).toLowerCase().replace(/[^a-z]/g,"");return (MONTHS[k] ?? MONTHS[k.slice(0,4)] ?? MONTHS[k.slice(0,3)] ?? 0);};
 
-const _monNum=s=>{if(!s)return 0;const k=s.toLowerCase().replace(/[^a-z]/g,"");return (MONTHS[k] ?? MONTHS[k.slice(0,4)] ?? MONTHS[k.slice(0,3)] ?? 0);};
-// collapse spaces that PDF extraction inserts inside numbers ("202 6" -> "2026", "0 6" -> "06")
-function normNums(l){return l.replace(/(\d)\s+(?=\d)/g,"$1");}
+// two-digit year -> four digits. 00..(currentYY+1) => 2000s, else 1900s.
+const _yyCut=(NOW.getFullYear()%100)+1;
+function expandYY(n){return n<=_yyCut?2000+n:1900+n;}
+
+// Normalise a line: unify dashes/quotes, repair digits split by PDF extraction.
+function normLine(raw){
+  return String(raw)
+    .replace(/[‐-―−⁃]/g,"-")     // ‐ ‑ ‒ – — ― − ⁃  ->  -
+    .replace(/[‘’ʼ`´]/g,"'")// ‘ ’ ʼ ` ´      ->  '
+    .replace(/[   \t]/g," ")
+    .replace(/(\d)\s+(?=\d)/g,"$1")                  // "202 6" -> "2026"
+    .replace(/\s{2,}/g," ")
+    .trim();
+}
+function normNums(l){return normLine(l);}            // kept for callers of the old name
+
+const MONW="(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|apl|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sept(?:ember)?|sep|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)";
+const PRESW="(?:present|currently|current|till\\s*now|till\\s*date|till\\s*present|to\\s*date|to\\s*present|uptill\\s*now|up\\s*to\\s*now|as\\s*on\\s*date|ongoing|onwards?|continuing|continued|continue|contd\\.?|now)";
+// a gap between two atoms that means "…to…"
+const SEPW=/^\s*(?:-{1,2}|to|till|until|untill|through|thru|upto|up\s*to|\/|:|~)\s*$/i;
+// things that make a numeric pair a quantity, not a date
+const QTY_AFTER=/^\s*(?:engineers?|people|persons?|members?|staff|employees?|nos?\b|units?|vessels?|exchangers?|drawings?|documents?|projects?|jobs?|kg|mm|cm|ltr|litres?|psi|bar|mpa|mw|kv|kva|hrs?|hours?|days?|weeks?|%|percent|marks?|cgpa|gpa|students?|teams?)\b/i;
+// standard / code context immediately before a pair
+const CODE_BEFORE=/(?:asme|api|iso|astm|ansi|tema|aws|nace|uns|sa-?|is\s*:?\s*\d|en\s*\d|edition|addenda|clause|section|sect\.?|sec\.?|div(?:ision)?\.?|rev\.?|page|table|fig(?:ure)?\.?|para|appendix|\$|rs\.?|inr|usd|team\s+of|group\s+of|batch\s+of)\s*$/i;
+const SINCE_BEFORE=/(?:\bsince|\bfrom|w\.?\s?e\.?\s?f\.?|\bjoined(?:\s+in|\s+on)?|\beffective|\bstarting)\s*(?:the\s+)?[:\-]?\s*$/i;
+
+// ---- atom scanner -------------------------------------------------
+// Emits ordered, non-overlapping date atoms with their character offsets.
+function scanAtoms(t){
+  const rx=new RegExp(
+      "(\\d{1,2})[./-](\\d{1,2})[./-]((?:19|20)\\d{2})"      // 1,2,3   DD.MM.YYYY
+    +"|(\\d{1,2})[./-]((?:19|20)\\d{2})"                      // 4,5     MM/YYYY
+    +"|("+MONW+")\\.?\\s*[-/,']?\\s*((?:19|20)\\d{2})"        // 6,7     Mon YYYY
+    +"|("+MONW+")\\.?\\s*[-/,']\\s*(\\d{2})(?!\\d)"           // 8,9     Mon-YY / Mon'YY
+    +"|'(\\d{2})(?!\\d)"                                      // 10      'YY
+    +"|((?:19|20)\\d{2})"                                     // 11      YYYY
+    +"|("+PRESW+")"                                           // 12      present-ish
+    ,"gi");
+  const atoms=[];let m;
+  while((m=rx.exec(t))){
+    let a=null;
+    if(m[3]){                                   // DD.MM.YYYY  (or MM.DD.YYYY — month is the 1..12 one)
+      let d=+m[1],mo=+m[2],y=+m[3];
+      if(mo>12&&d<=12){const x=mo;mo=d;d=x;}
+      if(mo>=1&&mo<=12) a={m:mo-1,y};
+    }else if(m[5]){                             // MM/YYYY
+      const mo=+m[4],y=+m[5];
+      if(mo>=1&&mo<=12) a={m:mo-1,y};
+    }else if(m[7]){                             // Mon YYYY
+      a={m:_monNum(m[6]),y:+m[7]};
+    }else if(m[9]){                             // Mon'YY
+      a={m:_monNum(m[8]),y:expandYY(+m[9])};
+    }else if(m[10]){                            // 'YY
+      a={m:null,y:expandYY(+m[10])};
+    }else if(m[11]){                            // YYYY
+      a={m:null,y:+m[11]};
+    }else if(m[12]){                            // present
+      a={present:true};
+    }
+    if(!a)continue;
+    if(!a.present&&(a.y<MIN_YEAR||a.y>MAX_YEAR))continue;
+    a.start=m.index;a.end=m.index+m[0].length;a.txt=m[0];
+    atoms.push(a);
+  }
+  return atoms;
+}
+
+const _startOf=a=>ym(a.m==null?0:a.m,a.y);                 // unknown start month -> Jan
+const _endOf  =a=>a.present?NOW_YM:ym(a.m==null?11:a.m,a.y); // unknown end month  -> Dec
+
+function _mkRange(A,B,raw,openEnded){
+  let s=_startOf(A), e=_endOf(B);
+  if(!B.present&&e<s){const x=s;s=e;e=x;}
+  if(e>NOW_YM)e=NOW_YM;                                     // never count the future
+  if(e<s)return null;
+  const months=e-s;
+  if(months>55*12)return null;                              // implausible single role
+  // year-only endpoints are rounded out to Jan/Dec, so consecutive roles share
+  // their handover year — callers must not read that as a genuine overlap
+  const approx=(A.m==null)||(!B.present&&B.m==null);
+  return {s,e,raw:raw.trim().slice(0,60),open:!!openEnded,approx};
+}
 
 // parse every date range on a single line
 function parseDatesLine(line){
-  const t=normNums(line).replace(/[–—]/g,"-").replace(/\./g,"/");  // normalize dots to slashes for DD.MM.YYYY
+  const t=normLine(line);
+  if(!t)return [];
+  const atoms=scanAtoms(t);
+  if(!atoms.length)return [];
   const out=[];
-  const mon="(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\\.?";
-
-  // Helper to expand 2-digit year to 4-digit (70-99 -> 1970-1999, 00-30 -> 2000-2030)
-  const expandYear=y=>{if(y>=1900)return y;if(y<=30)return 2000+y;return 1900+y;};
-
-  const pt="(?:(\\d{1,2})[\\s./]+("+mon+")[\\s./]*|("+mon+")[\\s./]*)?((?:19|20)\\d{2})";
-  const sep="\\s*(?:-|to|till|until|through)\\s*";
-  const rx=new RegExp(pt+sep+"(?:(present|current|now|till\\s*date|to\\s*date|ongoing|till\\s*now)|"+pt+")","gi");
-  let m;
-  while((m=rx.exec(t))){
-    const mon1=m[2]||m[3], y1=+m[4];
-    const pres=m[5], mon2=m[7]||m[8], y2=+m[9];
-    let sV=ym(_monNum(mon1),y1);
-    let eV=pres?ym(NOW.getMonth(),NOW.getFullYear()):ym(mon2?_monNum(mon2):11,y2);
-    if(!pres && eV<sV){const x=sV;sV=eV;eV=x;}
-    if(y1>=1970 && y1<=NOW.getFullYear()+1) out.push({s:sV,e:eV,raw:m[0].trim()});
-  }
-
-  // numeric mm/yyyy - mm/yyyy (4-digit years)
-  const rx2=/(\d{1,2})\/((?:19|20)\d{2})\s*(?:-|to)\s*(?:(present|current|now)|(\d{1,2})\/((?:19|20)\d{2}))/gi;
-  while((m=rx2.exec(t))){
-    const sV=ym((+m[1]||1)-1,+m[2]);
-    const eV=m[3]?ym(NOW.getMonth(),NOW.getFullYear()):ym((+m[4]||12)-1,+m[5]);
-    out.push({s:Math.min(sV,eV),e:Math.max(sV,eV),raw:m[0].trim()});
-  }
-
-  // SLASH-ONLY FORMAT: 1995/1998 (no month components)
-  const rxSlashYear=/\b((?:19|20)\d{2})\s*\/\s*((?:19|20)\d{2})\b/gi;
-  while((m=rxSlashYear.exec(t))){
-    const y1=+m[1], y2=+m[2];
-    if(y1<y2 && y1>=1970 && y2<=NOW.getFullYear()+1){
-      const sV=ym(0,y1), eV=ym(11,y2);
-      out.push({s:sV,e:eV,raw:m[0].trim()});
-    }
-  }
-
-  // SHORT YEAR FORMAT: 1995-98, 1995-08, 1995/98, etc. (4-digit - 2-digit)
-  const rxShort=/\b((?:19|20)\d{2})\s*(?:-|\/|to)\s*(\d{2})(?!\d)/gi;
-  while((m=rxShort.exec(t))){
-    const y1=+m[1], y2=expandYear(+m[2]);
-    if(y1<y2 && y1>=1970){
-      const sV=ym(0,y1), eV=ym(11,y2);
-      out.push({s:sV,e:eV,raw:m[0].trim()});
-    }
-  }
-
-  // TWO-DIGIT YEAR FORMAT: 95-98, '95-'98, 95-'98, '95-98 (supports quotes on one or both sides)
-  const rxTwoDigit=/\b['`]?(\d{2})\s*(?:-|\/|to)\s*['`]?(\d{2})(?!\d)/gi;
-  while((m=rxTwoDigit.exec(t))){
-    const y1=expandYear(+m[1]), y2=expandYear(+m[2]);
-    if(y1<y2 && y1>=1970){
-      const sV=ym(0,y1), eV=ym(11,y2);
-      out.push({s:sV,e:eV,raw:m[0].trim()});
-    }
-  }
-
-  // INDIAN DOT FORMAT: DD.MM.YYYY - DD.MM.YYYY (converted to slashes by now)
-  const rxIndian=/(\d{1,2})\/(\d{1,2})\/(\d{4})\s*(?:-|to)\s*(?:(present|current|now)|(\d{1,2})\/(\d{1,2})\/(\d{4}))/gi;
-  while((m=rxIndian.exec(t))){
-    const d1=+m[1], m1=+m[2]-1, y1=+m[3];
-    const pres=m[4], d2=+m[5], m2=+m[6]-1, y2=+m[7];
-    if(y1>=1970 && y1<=NOW.getFullYear()+1){
-      const sV=ym(m1,y1);
-      const eV=pres?ym(NOW.getMonth(),NOW.getFullYear()):ym(m2,y2);
-      out.push({s:Math.min(sV,eV),e:Math.max(sV,eV),raw:m[0].trim()});
-    }
-  }
-
-  // DURATION-BASED: "1995 (3 years)" or "1995-3 years"
-  const rxDur=/((?:19|20)\d{2})\s*(?:\(|–|-|to)?\s*(\d{1,2})(?:\.\d)?\s*(?:years?|yrs?|y)(?!\d)/gi;
-  while((m=rxDur.exec(t))){
-    const startYear=+m[1], durationYears=+m[2];
-    if(startYear>=1970 && durationYears>0 && durationYears<=60){
-      const endYear=startYear+durationYears;
-      if(endYear<=NOW.getFullYear()+1){
-        const sV=ym(0,startYear), eV=ym(11,endYear);
-        out.push({s:sV,e:eV,raw:m[0].trim()});
+  const used=new Set();
+  for(let i=0;i<atoms.length;i++){
+    if(used.has(i))continue;
+    const A=atoms[i];
+    if(A.present)continue;                                  // "present" can only end a range
+    const before=t.slice(Math.max(0,A.start-16),A.start);
+    if(CODE_BEFORE.test(before))continue;                   // "ASME Sec VIII Div 1", "Rs. 2015" …
+    // (a) pair with the next atom when the gap is a range separator
+    const B=atoms[i+1];
+    if(B&&!used.has(i+1)){
+      const gap=t.slice(A.end,B.start);
+      if(gap.length<=10&&SEPW.test(gap)&&!QTY_AFTER.test(t.slice(B.end))){
+        const r=_mkRange(A,B,t.slice(A.start,B.end),B.present);
+        if(r){out.push(r);used.add(i+1);continue;}
       }
     }
+    // (b) short right-hand year: "1995-98", "2010 - 15", "1995/98"
+    const sy=/^\s*(?:-|to|till|until|through|thru|upto|up\s*to|\/)\s*'?(\d{2})(?!\d)/i.exec(t.slice(A.end));
+    if(sy&&!QTY_AFTER.test(t.slice(A.end+sy[0].length))){
+      const y2=expandYY(+sy[1]);
+      if(y2>A.y&&y2<=MAX_YEAR){
+        const r=_mkRange(A,{m:null,y:y2},t.slice(A.start,A.end+sy[0].length));
+        if(r){out.push(r);continue;}
+      }
+    }
+    // (c) open-ended — "since Oct 2022", "2019 onwards", "w.e.f. Jan 2020"
+    const onward=new RegExp("^\\s*(?:,|-|–)?\\s*(?:"+PRESW+")","i").test(t.slice(A.end));
+    if(SINCE_BEFORE.test(before)||onward){
+      const r=_mkRange(A,{present:true},t.slice(Math.max(0,A.start-8),A.end+10),true);
+      if(r)out.push(r);
+    }
   }
-
-  // open-ended: "Since OCT 2022", "From 2019", "w.e.f. Jan 2020" (no end -> up to now)
-  const rxSince=new RegExp("\\b(?:since|from|w\\.?e\\.?f\\.?|joined(?:\\s+in)?|effective)\\s+(?:("+mon+")[\\s./]*)?((?:19|20)\\d{2})(?!\\s*(?:-|to|till|through|onwards))","gi");
-  while((m=rxSince.exec(t))){
-    const sV=ym(m[1]?_monNum(m[1]):0,+m[2]);
-    const eV=ym(NOW.getMonth(),NOW.getFullYear());
-    if(+m[2]>=1970 && eV>=sV) out.push({s:sV,e:eV,raw:m[0].trim()});
-  }
-
-  // "<date> onwards / till date"
-  const rxOnward=new RegExp("(?:("+mon+")[\\s./]*)?((?:19|20)\\d{2})\\s*(?:onwards?|till\\s*date|to\\s*date|till\\s*now|to\\s*present)","gi");
-  while((m=rxOnward.exec(t))){
-    const sV=ym(m[1]?_monNum(m[1]):0,+m[2]);
-    out.push({s:sV,e:ym(NOW.getMonth(),NOW.getFullYear()),raw:m[0].trim()});
-  }
-
-  // de-dupe overlapping identical starts
   const seen=new Set();
   return out.filter(r=>{const k=r.s+"_"+r.e;if(seen.has(k))return false;seen.add(k);return true;});
 }
 
-// generic table-column words that must NOT be treated as section headings
-const COL_WORDS=new Set(["project","projects","employer","employers","duration","period","role","roles","company","companies","designation","designations","organization","organisation","from","to","year","years","client","clients","location","position","positions","title","tenure","responsibilities","date","dates","name","status","sl","sr","no","department","level","grade"]);
-// section headings (drop bare "projects" — it's a common experience/column label)
+// "(3 years 6 months)" / "5 Yrs" — metadata about a range, never a range itself
+function statedDurationMonths(line){
+  const t=normLine(line);
+  let best=0,m;
+  const rx=/(\d{1,2}(?:\.\d{1,2})?)\s*(?:\+)?\s*(?:years?|yrs?)(?:\s*(?:&|and|,)?\s*(\d{1,2})\s*(?:months?|mos?)\b)?/gi;
+  while((m=rx.exec(t))){
+    const mo=Math.round(parseFloat(m[1])*12)+(m[2]?+m[2]:0);
+    if(mo>0&&mo<=55*12)best=Math.max(best,mo);
+  }
+  return best;
+}
+
+/* ---------------- section / kind classification ---------------- */
+const COL_WORDS=new Set(["project","projects","employer","employers","duration","period","role","roles","company","companies","designation","designations","organization","organisation","organisations","from","to","year","years","client","clients","location","position","positions","title","tenure","responsibilities","date","dates","name","status","sl","sr","no","department","level","grade","total","exp","experience in years"]);
 const HEAD=[
-  {t:"EXP", re:/^(work\s+experience|professional\s+experience|experience|employment(\s+history)?|work\s+history|career(\s+history|\s+summary)?|professional\s+background|professional\s+experience\s+(summary|details))\b.{0,20}:?\s*$/i},
-  {t:"EDU", re:/^(?:(?:professional|educational|academic)\s+)?(education(al)?|qualifications?|academics?|scholastics?|academic\s+details)\b.{0,22}:?\s*$/i},
-  {t:"INT", re:/^(internships?(\s+and\s+other\s+projects?)?|trainings?|apprenticeships?|other\s+projects?|academic\s+projects?)\b.{0,30}:?\s*$/i},
+  {t:"EXP", re:/^(work\s+experience|professional\s+experience|experience|employment(\s+history)?|work\s+history|career(\s+history|\s+summary)?|professional\s+background|organizational\s+experience|organisational\s+experience|employment\s+details|work\s+profile|professional\s+experience\s+(summary|details))\b.{0,20}:?\s*$/i},
+  {t:"EDU", re:/^(?:(?:professional|educational|academic)\s+)?(education(al)?|qualifications?|academics?|scholastics?|academic\s+details|educational\s+background)\b.{0,22}:?\s*$/i},
+  {t:"INT", re:/^(internships?(\s+and\s+other\s+projects?)?|trainings?|apprenticeships?|other\s+projects?|academic\s+projects?|industrial\s+training)\b.{0,30}:?\s*$/i},
   {t:"OTHER",re:/^(summary|profile\s+summary|professional\s+summary|career\s+objective|objective|profile|skills?\s+summary|skill\s+summary|technical\s+skills?|skills?|software\s+\w+|core\s+competenc\w*|strengths?|certifications?|courses?|achievements?|accomplishments?|awards?|honou?rs?|extra[\s-]?curricular\w*|activities|hobbies|interests|languages?|personal\s+(details|information|profile|data)|contact|declaration|references?|publications?|patents?)\b.{0,22}:?\s*$/i},
 ];
 function headingType(line){
-  const l=line.trim().replace(/^[•\-*.\s|]+/,"").replace(/[|].*$/,"").trim();
-  if(!l || l.length>44 || l.split(/\s+/).length>5) return null;
+  const l=String(line).trim().replace(/^[•\-*.\s|]+/,"").replace(/[|].*$/,"").trim();
+  if(!l||l.length>44||l.split(/\s+/).length>5)return null;
   const key=l.toLowerCase().replace(/[^a-z ]/g,"").trim();
-  if(COL_WORDS.has(key)) return null;                    // a lone table-column header, not a section
-  for(const h of HEAD){ if(h.re.test(l)) return h.t; }
+  if(COL_WORDS.has(key))return null;                     // a lone table-column header, not a section
+  for(const h of HEAD){if(h.re.test(l))return h.t;}
   return null;
 }
-const EDU_CTX=/(universit|b\.?\s?tech|b\.?\s?e\b|m\.?\s?tech|m\.?\s?e\b|b\.?\s?sc|m\.?\s?sc|bachelor|master|\bmba\b|\bamie\b|diploma|\bd\.?m\.?e\b|polytechnic|institute\s+of\s+tech|\bschool\b|c\.?b\.?s\.?e|\bboard\b|semester|c\.?g\.?p\.?a|\bg\.?p\.?a\b|percentage|\bhonou?rs\b|graduation|graduate|matriculation|intermediate|10th|12th|secondary|senior\s+school|\bdegree\b)/i;
-const NONWORK_CTX=/(\bintern\b|internship|apprentice|\btrainee\b|technical\s+training|simulation|thesis|dissertation|academic\s+project|coursework|\bworkshop\b|training\s+(program|camp)|bootcamp)/i;
+/* Education signals. EVERY alternative is anchored with \b on the left —
+   an unanchored `m\.?\s?e\b` matches the "me" inside ASME, which silently
+   reclassified most static-equipment roles as education. Patterns that are
+   common engineering words on their own ("degree", "master", "graduate")
+   must carry qualifying context. */
+const EDU_CTX=new RegExp("("+[
+  "universit","\\bpolytechnic","\\bcollege\\b","institute\\s+of\\s+tech",
+  "\\bb\\.?\\s?tech\\b","\\bm\\.?\\s?tech\\b","\\bb\\.?\\s?e\\.?\\b","\\bm\\.?\\s?e\\.?\\b",
+  "\\bb\\.?\\s?sc\\b","\\bm\\.?\\s?sc\\b","\\bb\\.?\\s?arch\\b","\\bmba\\b","\\bamie\\b",
+  "\\bd\\.?\\s?m\\.?\\s?e\\b","\\bdiploma\\b","\\bbachelor","\\bmaster(?:'?s)?\\s+(?:of|in|degree)",
+  "\\b(?:bachelor|master|engineering)s?\\s+degree\\b","\\bschool\\b","\\bc\\.?b\\.?s\\.?e\\b",
+  "\\bh\\.?s\\.?c\\b","\\bs\\.?s\\.?c\\b","\\bboard\\s+of\\s+(?:secondary|higher)","\\bsemester\\b",
+  "\\bc\\.?g\\.?p\\.?a\\b","\\bg\\.?p\\.?a\\b","\\bpercentage\\b","\\baggregate\\b",
+  "\\bgraduation\\b","\\bpost[\\s-]?graduat","\\bmatriculation\\b","\\b10th\\b","\\b12th\\b",
+  "\\bsecondary\\b","\\bpassed\\s+out\\b","\\bpassing\\s+year\\b"
+].join("|")+")","i");
+const NONWORK_CTX=/(\bintern\b|\binternship\b|\bapprentice|\btrainee\b|technical\s+training|industrial\s+training|\bthesis\b|dissertation|academic\s+project|coursework|\bworkshop\b|training\s+(program|camp)|bootcamp)/i;
+// strong employer signals — these force WORK even inside a loosely-labelled section
+const WORK_CTX=/(pvt\.?\s*ltd|private\s+limited|\bltd\b|\blimited\b|\bllp\b|\binc\b|\bcorp\b|corporation|\bcompany\b|industries|\bengineer\b|engineers\b|engineering|consultan|technolog|solutions|services|refiner|petrochem|fabricat|\bworked\b|working\s+(?:as|with|at)|employed|employer|designation|reporting\s+to|resigned|\bclient\b|\bepc\b|\bfeed\b)/i;
+/* STRONG work signals only — a company suffix or an explicit employment word.
+   Generic engineering vocabulary ("engineering", "design") is deliberately
+   excluded: "B.E. Mechanical Engineering, Pune University" must stay education. */
+const WORK_STRONG=/(pvt\.?\s*ltd|private\s+limited|\bltd\b|\blimited\b|\bllp\b|\binc\b|\bcorp(?:oration)?\b|industries|refiner|petrochem|\bworked\b|working\s+(?:as|with|at)|\bemployed\b|\bemployer\b|\bdesignation\b|reporting\s+to|\bresigned\b|\bepc\b)/i;
 
-// section-aware extraction. Default = WORK; exclude only on a strong education / internship signal.
+/* Classification is LINE-FIRST: the line carrying the dates decides.
+   Neighbouring lines are only consulted when the line itself is silent AND
+   the section heading is ambiguous — otherwise a nearby "ASME"/"B.E." bleeds
+   across rows of a table and corrupts unrelated entries. */
+function classifyKind(section,lineCtx,nearCtx){
+  const near=nearCtx==null?lineCtx:nearCtx;
+  const eduL=EDU_CTX.test(lineCtx), nonL=NONWORK_CTX.test(lineCtx);
+  const workL=WORK_CTX.test(lineCtx), strongL=WORK_STRONG.test(lineCtx);
+  if(eduL&&!strongL)return "education";
+  if(nonL&&!strongL)return "other";
+  if(section==="EDU")return strongL?"work":"education";
+  if(section==="INT")return "other";
+  if(section==="EXP")return "work";
+  // ambiguous section (HEADER / OTHER / unlabelled) — allow neighbours to speak
+  if(workL||WORK_CTX.test(near))return "work";
+  if(EDU_CTX.test(near))return "education";
+  if(NONWORK_CTX.test(near))return "other";
+  return section==="OTHER"?"other":"work";
+}
+
+// section-aware extraction over the whole document
 function extractDates(text){
-  const lines=text.split("\n");
-  let section="HEADER", sawExp=false;
+  const lines=String(text).split("\n");
+  const norm=lines.map(normLine);
+  let section="HEADER",sawExp=false;
   const all=[];
-  for(const raw of lines){
-    const h=headingType(raw);
-    if(h){section=h; if(h==="EXP")sawExp=true; continue;}
-    const rs=parseDatesLine(raw);
-    if(!rs.length)continue;
-    const ctxEdu=EDU_CTX.test(raw), ctxNon=NONWORK_CTX.test(raw);
-    rs.forEach(r=>{
-      let kind;
-      if(section==="EDU"||ctxEdu) kind="education";
-      else if(section==="INT"||ctxNon) kind="other";        // internship / apprentice / academic
-      else if(section==="OTHER") kind="other";              // summary/skills/certs/awards etc.
-      else kind="work";                                     // EXP, HEADER or unlabelled default → work
-      all.push({...r,kind,section});
-    });
+  let undatedEmployers=0;
+  const pushFrom=(idx,rs)=>{
+    const near=[norm[idx-1]||"",norm[idx],norm[idx+1]||""].join(" ");
+    rs.forEach(r=>all.push({...r,kind:classifyKind(section,norm[idx],near),section,line:idx,src:norm[idx].slice(0,90)}));
+  };
+  // a line naming a real employer: company suffix or an explicit employer label
+  const EMPLOYER_LINE=/(pvt\.?\s*ltd|private\s+limited|\bltd\b\.?|\blimited\b|\bllp\b|\binc\b|\bcorp(?:oration)?\b|industries|refiner|\bengineering\b|technologies|\bemployer\b\s*[:\-]|\bcompany\b\s*[:\-]|\borganization\b\s*[:\-]|\borganisation\b\s*[:\-])/i;
+  for(let i=0;i<lines.length;i++){
+    const h=headingType(lines[i]);
+    if(h){section=h;if(h==="EXP")sawExp=true;continue;}
+    const rs=parseDatesLine(lines[i]);
+    if(!rs.length&&(section==="EXP"||section==="HEADER")&&EMPLOYER_LINE.test(norm[i])
+       &&!EDU_CTX.test(norm[i])&&!parseDatesLine(norm[i+1]||"").length&&!parseDatesLine(norm[i-1]||"").length){
+      undatedEmployers++;                                 // an employer whose dates we could not read
+    }
+    if(rs.length){pushFrom(i,rs);continue;}
+    // orphan pairing: a table column split "Jun 2005" / "Aug 2010" onto two short lines
+    const a1=scanAtoms(norm[i]);
+    if(a1.length===1&&!a1[0].present&&norm[i].replace(a1[0].txt,"").replace(/[^A-Za-z0-9]/g,"").length===0){
+      const nx=norm[i+1]||"";const a2=scanAtoms(nx);
+      if(a2.length===1&&nx.replace(a2[0].txt,"").replace(/[^A-Za-z0-9]/g,"").length===0){
+        const r=_mkRange(a1[0],a2[0],a1[0].txt+" – "+a2[0].txt,a2[0].present);
+        if(r){pushFrom(i,[r]);i++;}
+      }
+    }
   }
-  return {all,sawExp};
+  return {all,sawExp,undatedEmployers};
 }
 
 function mergeIntervals(rs){
@@ -875,6 +986,75 @@ function mergeIntervals(rs){
   }
   return out;
 }
+
+/* ---------------- claimed total experience ---------------- */
+// "22+ years of experience", "Total Experience : 22 Years", "Experience 22.5 yrs",
+// "22 years 6 months of experience"
+function claimedExperience(text){
+  const t=String(text).replace(/[ ]/g," ");
+  const cands=[];
+  const add=(v,strong,plus)=>{if(v>=0.5&&v<=55)cands.push({v:Math.round(v*10)/10,strong,plus:!!plus});};
+  let m;
+  const rxA=/(\d{1,2}(?:\.\d{1,2})?)\s*(\+|plus)?\s*(?:years?|yrs?)\s*(?:(?:&|and|,)?\s*(\d{1,2})\s*(?:months?|mos?)\s*)?(?:of\s+)?(?:rich\s+|total\s+|overall\s+|relevant\s+|professional\s+|hands[\s-]?on\s+|work(?:ing)?\s+)*(?:experience|exp\b)/gi;
+  while((m=rxA.exec(t))){
+    const pre=t.slice(Math.max(0,m.index-24),m.index);
+    add(parseFloat(m[1])+(m[3]?+m[3]/12:0),/total|overall/i.test(pre),m[2]||/\bover\b|more\s+than/i.test(pre));
+  }
+  const rxB=/(?:total|overall|cumulative)?\s*(?:work(?:ing)?\s+)?(?:experience|exp)\s*(?:\(in\s*years?\))?\s*[:\-–]\s*(?:approx\.?\s*|about\s*|around\s*|(over)\s*|(more\s+than)\s*)?(\d{1,2}(?:\.\d{1,2})?)\s*(\+|plus)?\s*(?:years?|yrs?)?(?:\s*(?:&|and|,)?\s*(\d{1,2})\s*(?:months?|mos?))?/gi;
+  while((m=rxB.exec(t)))add(parseFloat(m[3])+(m[5]?+m[5]/12:0),true,m[1]||m[2]||m[4]);
+  if(!cands.length)return 0;
+  const strong=cands.filter(c=>c.strong);
+  const pool=strong.length?strong:cands;
+  const top=pool.reduce((a,c)=>c.v>a.v?c:a,pool[0]);
+  claimedExperience.lastWasMinimum=!!top.plus;   // "22+ yrs" / "over 22 yrs" = a floor, not an exact figure
+  return top.v;
+}
+
+/* ---------------- experience reconciliation ----------------
+   Three independent estimates, then a documented choice.
+     union  – months actually covered by dated work ranges
+     span   – first work start → last work end (career span)
+     claim  – what the CV says in words
+   Dates can be missed (odd formats, scans); claims can be stale or
+   inflated. Agreement is the norm; disagreement is surfaced, never hidden. */
+function reconcileExperience(merged,claim,override,undatedEmployers,claimIsMinimum){
+  const union=merged.reduce((a,r)=>a+(r.e-r.s),0)/12;
+  const span=merged.length?(merged[merged.length-1].e-merged[0].s)/12:0;
+  const undated=undatedEmployers||0;
+  const R={union,span,claim:claim||0,undatedEmployers:undated};
+  if(override!=null&&override!==""&&!isNaN(+override)&&+override>=0){
+    R.years=+override;R.basis="manual override entered by the reviewer";R.confidence="manual";return R;
+  }
+  if(!merged.length){
+    R.years=claim||0;R.basis=claim?"CV's stated total — no dated roles could be read":"no dated roles and no stated total";
+    R.confidence=claim?"low":"none";return R;
+  }
+  R.years=union;R.basis="union of the dated roles";R.confidence="high";
+  const gapToClaim=claim-union;
+  if(claim&&gapToClaim>=2){
+    if(claim<=span+1.5){
+      // the claim fits inside the career span → we simply missed some role dates
+      R.years=claim;R.confidence="medium";
+      R.basis="CV's stated total — it fits inside the "+span.toFixed(1)+" yr career span, so some role dates were not machine-readable";
+    }else if(undated>0){
+      // there are employers on the CV whose dates we could not read at all
+      R.years=claim;R.confidence="medium";
+      R.basis="CV's stated total — "+undated+" employer"+(undated>1?"s":"")+" on the CV carr"+(undated>1?"y":"ies")+" no readable dates, so the dated span understates the career";
+    }else{
+      R.confidence="medium";
+      R.basis="union of the dated roles — the CV claims "+claim+" yrs, which exceeds the "+span.toFixed(1)+" yr span between the first and last dated role";
+    }
+  }else if(claim&&union>claim+3&&!claimIsMinimum){
+    R.confidence="medium";
+    R.basis="union of the dated roles — this exceeds the CV's stated "+claim+" yrs, so check for overlapping or duplicated entries";
+  }else if(claim&&claimIsMinimum&&union>=claim-0.5){
+    R.basis="union of the dated roles — consistent with the CV's stated "+claim+"+ yrs";
+  }
+  R.years=Math.round(R.years*10)/10;
+  return R;
+}
+
+
 
 // address / location words that must never be mistaken for a name
 const ADDR_RE=/\b(apartment|apartments|apt|flat|plot|street|road|nagar|extension|extn|colony|layout|sector|block|phase|lane|avenue|cross|floor|near|opposite|opp|box|pincode|\bpin\b|district|dist|taluk|tehsil|village|town|city|state|country|building|residency|enclave|society|chowk|marg|puram|pakkam|halli|wadi|gali|bhavan|towers?|complex|no\.)\b/i;
@@ -1033,7 +1213,19 @@ function bestFit(sA,years){
   let yearsLevel=0;LEVELS.forEach(L=>{if(years>=L.yMin)yearsLevel=L.i;});
   // overall best = argmax combined
   let best=perLevel[0];perLevel.forEach(p=>{if(p.combined>best.combined)best=p;});
-  return {perLevel,skillLevel,yearsLevel,best:best.L.i,bestObj:best};
+  let bi=best.L.i, clamped=null;
+  /* The framework defines each level by a minimum number of years, so tenure
+     sets the band and the skill evidence positions the candidate inside it.
+     Without this, a keyword-thin CV from a 28-year veteran lands on "Trainee",
+     which the career manual does not permit. Skills may still pull the level
+     down by up to two steps (thin evidence for the seniority claimed) or push
+     it one step above what tenure alone implies. */
+  if(years>=1){
+    const lo=Math.max(0,yearsLevel-2), hi=Math.min(LEVELS.length-1,yearsLevel+1);
+    const bounded=Math.max(lo,Math.min(hi,bi));
+    if(bounded!==bi){clamped={from:bi,to:bounded};bi=bounded;}
+  }
+  return {perLevel,skillLevel,yearsLevel,best:bi,bestObj:perLevel[bi],clamped};
 }
 
 function detectFlags(a){
@@ -1054,16 +1246,32 @@ function detectFlags(a){
   const raw=a.ranges.slice().sort((x,y)=>x.s-y.s);
   for(let i=1;i<raw.length;i++){
     const ov=Math.min(raw[i-1].e,raw[i].e)-raw[i].s;
-    if(ov>=6 && !(raw[i].s<=raw[i-1].s && raw[i].e>=raw[i-1].e)){
+    // a shared handover year between two year-only ranges is a rounding artefact
+    const floor=(raw[i-1].approx||raw[i].approx)?13:6;
+    if(ov>=floor && !(raw[i].s<=raw[i-1].s && raw[i].e>=raw[i-1].e)){
       push("low","Overlapping engagements",
         `Two roles overlap by ~${(ov/12).toFixed(1)} yr ("${raw[i-1].raw}" & "${raw[i].raw}"). May be concurrent/part‑time — verify.`);
       break;
     }
   }
   // claimed vs computed experience
-  if(a.claimedYears && Math.abs(a.claimedYears-years)>=2.5){
-    push("med","Experience claim vs. timeline mismatch",
-      `CV states ~${a.claimedYears} yrs but the dated work history spans ~${years.toFixed(1)} yrs. Reconcile the difference.`);
+  const R=a.rec||{};
+  const claimSatisfied=a.claimIsMinimum && R.union>=a.claimedYears-0.5;   // "22+ yrs" is a floor
+  if(a.claimedYears && !claimSatisfied && Math.abs(a.claimedYears-R.union)>=2.5){
+    push(R.confidence==="high"?"med":"low","Experience claim vs. dated timeline",
+      `The CV states ~${a.claimedYears} yrs; the dated roles cover ~${(R.union||0).toFixed(1)} yrs across a ${(R.span||0).toFixed(1)} yr span. `+
+      `Reported figure: ${years.toFixed(1)} yrs — ${R.basis}. Confirm the actual total with the candidate.`);
+  }
+  if(R.confidence==="low"||R.confidence==="none"){
+    push("high","Experience total is not reliable",
+      `${R.basis}. Check the Experience audit below and set the correct total before using this report.`);
+  }
+  if(R.confidence==="manual"){
+    push("ok","Experience total set manually",`Using ${years.toFixed(1)} yrs as entered by the reviewer.`);
+  }
+  if(a.undatedEmployers>0){
+    push("low","Employers without readable dates",
+      `${a.undatedEmployers} employer${a.undatedEmployers>1?"s appear":" appears"} on the CV with no date range the parser could read. Their tenure is not in the dated timeline — see the Experience audit.`);
   }
   // job hopping
   const shortRoles=a.ranges.filter(r=>(r.e-r.s)<18).length;
@@ -1113,45 +1321,48 @@ function detectFlags(a){
 function analyze(file){
   const text=file.text;
   const det=extractDates(text);
-  const workRanges=det.all.filter(r=>r.kind==="work");
-  const eduRanges=det.all.filter(r=>r.kind==="education");
-  const otherRanges=det.all.filter(r=>r.kind==="other");           // internships / academic projects
-  // flag when work was inferred without an explicit Experience heading
-  const expInferred=(!det.sawExp && workRanges.length>0);
-  const ranges=workRanges;                                          // "experience" = work only
-  const merged=mergeIntervals(ranges);
-  let coveredMonths=merged.reduce((a,r)=>a+(r.e-r.s),0);
-  let years=coveredMonths/12;
-  const internMonths=mergeIntervals(otherRanges).reduce((a,r)=>a+(r.e-r.s),0);
-  // explicit "N years experience"
-  let claimedYears=0;
-  const cm=text.match(/(\d{1,2}(?:\.\d)?)\s*\+?\s*(?:years?|yrs?)\b[^.]{0,30}(?:experience|exp\b)/i)
-        || text.match(/(?:experience|exp)[^.]{0,20}?(\d{1,2}(?:\.\d)?)\s*\+?\s*(?:years?|yrs?)/i);
-  if(cm)claimedYears=parseFloat(cm[1]);
-  if(years<0.4 && claimedYears)years=claimedYears;
-  const sA=scoreSkills(text);
-  const sB=estimateBehavioral(sA,years,text);
-  const sC=estimateCompetencies(sA,sB,years,text);
-  const fit=bestFit(sA,years);
   const [track,li]=$("#appliedRole").value.split(":");
-  const applied=LEVELS[+li];
-  const name=guessName(text,$("#nameOverride").value);
-  const email=(text.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/)||[])[0]||"";
-  const phone=extractPhone(text);
-  const a={file:file.name,name,email,phone,text,ocr:!!file.ocr,wordCount:text.split(/\s+/).length,
-    ranges,merged,years,claimedYears,eduRanges,otherRanges,internMonths,expInferred,sawExp:det.sawExp,
-    sA,sB,sC,fit,best:fit.best,applied,track,
-    firstStart:merged.length?merged[0].s:null,lastEnd:merged.length?merged[merged.length-1].e:null};
+  const a={file:file.name,text,ocr:!!file.ocr,wordCount:text.split(/\s+/).length,
+    allRanges:det.all.map((r,i)=>({...r,id:i,excluded:false})),
+    sawExp:det.sawExp,undatedEmployers:det.undatedEmployers,
+    claimedYears:claimedExperience(text),
+    claimIsMinimum:!!claimedExperience.lastWasMinimum,
+    override:"",
+    name:guessName(text,$("#nameOverride").value),
+    email:(text.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/)||[])[0]||"",
+    phone:extractPhone(text),
+    sA:scoreSkills(text),                       // skill scores do not depend on years
+    applied:LEVELS[+li],track};
+  recompute(a);
+  return a;
+}
+
+/* Everything downstream of the experience number, re-runnable so the reviewer
+   can correct a range or override the total and see the whole report update. */
+function recompute(a){
+  const kind=k=>a.allRanges.filter(r=>r.kind===k&&!r.excluded);
+  a.ranges=kind("work");
+  a.eduRanges=kind("education");
+  a.otherRanges=kind("other");
+  a.merged=mergeIntervals(a.ranges);
+  a.internMonths=mergeIntervals(a.otherRanges).reduce((s,r)=>s+(r.e-r.s),0);
+  a.expInferred=(!a.sawExp&&a.ranges.length>0);
+  a.rec=reconcileExperience(a.merged,a.claimedYears,a.override,a.undatedEmployers,a.claimIsMinimum);
+  a.years=a.rec.years;
+  a.firstStart=a.merged.length?a.merged[0].s:null;
+  a.lastEnd=a.merged.length?a.merged[a.merged.length-1].e:null;
+  a.sB=estimateBehavioral(a.sA,a.years,a.text);
+  a.sC=estimateCompetencies(a.sA,a.sB,a.years,a.text);
+  a.fit=bestFit(a.sA,a.years);
+  a.best=a.fit.best;
   a.flags=detectFlags(a);
-  // verdict
-  const d=a.best-applied.i;
+  const d=a.best-a.applied.i;
   a.verdict=d>=2?{cls:"bad",t:"Over‑qualified for the role"}:
             d===1?{cls:"warn",t:"Slightly above target"}:
             d===0?{cls:"good",t:"Well matched to the role"}:
             d===-1?{cls:"warn",t:"Slightly below target"}:
             {cls:"bad",t:"Below the target level"};
-  // recommended interview focus = skills with largest gap vs applied
-  a.focus=SKILLS.map((sk,i)=>({i,name:sk.n,g:sk.g,gap:sk.ref[applied.i]-sA[i].score,ref:sk.ref[applied.i],cand:sA[i].score}))
+  a.focus=SKILLS.map((sk,i)=>({i,name:sk.n,g:sk.g,gap:sk.ref[a.applied.i]-a.sA[i].score,ref:sk.ref[a.applied.i],cand:a.sA[i].score}))
     .filter(x=>x.gap>0).sort((x,y)=>y.gap-x.gap);
   return a;
 }
@@ -1160,6 +1371,66 @@ function analyze(file){
    RENDER DASHBOARD
    ============================================================ */
 function trackTitle(a,li){return a.track==="des"?LEVELS[li].des:LEVELS[li].eng;}
+
+/* Experience audit — shows every date range the parser found, what it was
+   counted as, and the line it came from. Anything wrong can be reclassified
+   or dropped, and the total can be overridden outright; the whole report
+   recomputes. An automated reading you cannot inspect is not trustworthy. */
+function renderExpAudit(a){
+  const wrap=el("div","panel expaudit");wrap.style.marginTop="16px";
+  const R=a.rec;
+  const KIND=[["work","Work"],["education","Education"],["other","Internship / academic"]];
+  const conf={high:["good","High"],medium:["warn","Check"],low:["bad","Low"],none:["bad","None"],manual:["good","Manual"]}[R.confidence]||["warn","—"];
+  wrap.innerHTML=
+    `<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px">
+       <h4 style="margin:0">Experience audit</h4>
+       <span class="badge ${conf[0]}">${conf[1]} confidence</span>
+       <span style="font-size:12px;color:var(--ink2)">${esc(R.basis)}</span>
+     </div>
+     <div class="auditsums">
+       <span>Union of dated roles <b>${R.union.toFixed(1)}</b> yrs</span>
+       <span>First → last dated role <b>${R.span.toFixed(1)}</b> yrs</span>
+       <span>Stated in CV <b>${R.claim?R.claim+" yrs":"—"}</b></span>
+       <span>Reported <b style="color:var(--acc)">${a.years.toFixed(1)}</b> yrs</span>
+     </div>`;
+  if(!a.allRanges.length){
+    wrap.appendChild(el("div","mini","No date ranges could be read from this CV. Enter the correct total below."));
+  }else{
+    const tbl=el("table","audittable");
+    tbl.innerHTML="<tr><th>Count</th><th>Period</th><th>Length</th><th>Counted as</th><th>Source line</th></tr>";
+    a.allRanges.forEach(r=>{
+      const tr=el("tr");
+      if(r.excluded)tr.className="off";
+      const cb=el("input");cb.type="checkbox";cb.checked=!r.excluded;
+      cb.onchange=()=>{r.excluded=!cb.checked;recompute(a);render(a);};
+      const td0=el("td");td0.appendChild(cb);
+      const sel=el("select");
+      KIND.forEach(([v,lbl])=>{const o=el("option",null,lbl);o.value=v;if(r.kind===v)o.selected=true;sel.appendChild(o);});
+      sel.onchange=()=>{r.kind=sel.value;recompute(a);render(a);};
+      const td3=el("td");td3.appendChild(sel);
+      const td1=el("td",null,fmtYM(r.s)+" → "+(r.open?"present":fmtYM(r.e)));
+      const td2=el("td",null,((r.e-r.s)/12).toFixed(1)+" yrs");
+      const td4=el("td","srcline",r.src||r.raw||"");
+      td4.title=r.src||r.raw||"";
+      [td0,td1,td2,td3,td4].forEach(td=>tr.appendChild(td));
+      tbl.appendChild(tr);
+    });
+    wrap.appendChild(tbl);
+  }
+  const ov=el("div","auditov");
+  ov.innerHTML=`<label for="yrsOverride">Override the total</label>`;
+  const inp=el("input");inp.type="number";inp.step="0.5";inp.min="0";inp.max="55";inp.id="yrsOverride";
+  inp.placeholder=a.years.toFixed(1);inp.value=a.override||"";
+  const apply=el("button","btn sm","Apply");
+  const clear=el("button","btn ghost sm","Reset to auto");
+  apply.onclick=()=>{a.override=inp.value;recompute(a);render(a);};
+  clear.onclick=()=>{a.override="";recompute(a);render(a);};
+  inp.onkeydown=e=>{if(e.key==="Enter")apply.onclick();};
+  ov.appendChild(inp);ov.appendChild(apply);ov.appendChild(clear);
+  ov.appendChild(el("span","mini","Whatever is shown here is what goes into the Excel kit and every score below."));
+  wrap.appendChild(ov);
+  return wrap;
+}
 
 function render(a){
   ANALYSIS=a;
@@ -1181,12 +1452,18 @@ function render(a){
   cards.appendChild(kpi("Candidate",esc(a.name),(a.email?esc(a.email):"")+(a.phone?" · "+esc(a.phone):"")||"—","var(--acc2)"));
   cards.appendChild(kpi("Applied for",`${a.applied.code} · ${a.applied.short}`,esc(trackTitle(a,a.applied.i)),"var(--info)","sm"));
   cards.appendChild(kpi("Best‑fit designation",`${LEVELS[a.best].code} · ${LEVELS[a.best].short}`,esc(trackTitle(a,a.best)),"var(--acc)","sm"));
-  const yfoot=(a.ranges.length?`${a.ranges.length} role${a.ranges.length>1?"s":""} · work only`:"no work dates")
+  const CONF={high:"verified against dated roles",medium:"needs a quick check",low:"unreliable — please confirm",none:"no dates found",manual:"set manually"};
+  const yfoot=(a.ranges.length?`${a.ranges.length} dated role${a.ranges.length>1?"s":""}`:"no dated roles")
       + (a.eduRanges.length?" · education excluded":"")
-      + (a.claimedYears?` · CV states ~${a.claimedYears}`:"");
-  const yc=kpi("Professional experience",a.years.toFixed(1)+" yrs",yfoot,"var(--warn)");
+      + (a.claimedYears?` · CV states ~${a.claimedYears}`:"")
+      + ` · ${CONF[a.rec.confidence]||""}`;
+  const yc=kpi("Professional experience",a.years.toFixed(1)+" yrs",yfoot,
+      a.rec.confidence==="high"||a.rec.confidence==="manual"?"var(--good)":a.rec.confidence==="medium"?"var(--warn)":"var(--bad)");
   cards.appendChild(yc);
   d.appendChild(cards);
+
+  // experience audit — every detected range, correctable
+  d.appendChild(renderExpAudit(a));
 
   // verdict banner
   const vb=el("div","panel");vb.style.marginTop="16px";
