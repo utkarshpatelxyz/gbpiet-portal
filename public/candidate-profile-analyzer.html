@@ -718,9 +718,13 @@ function normNums(l){return l.replace(/(\d)\s+(?=\d)/g,"$1");}
 
 // parse every date range on a single line
 function parseDatesLine(line){
-  const t=normNums(line).replace(/[–—]/g,"-");
+  const t=normNums(line).replace(/[–—]/g,"-").replace(/\./g,"/");  // normalize dots to slashes for DD.MM.YYYY
   const out=[];
   const mon="(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\\.?";
+
+  // Helper to expand 2-digit year to 4-digit (70-99 -> 1970-1999, 00-30 -> 2000-2030)
+  const expandYear=y=>{if(y>=1900)return y;if(y<=30)return 2000+y;return 1900+y;};
+
   const pt="(?:(\\d{1,2})[\\s./]+("+mon+")[\\s./]*|("+mon+")[\\s./]*)?((?:19|20)\\d{2})";
   const sep="\\s*(?:-|to|till|until|through)\\s*";
   const rx=new RegExp(pt+sep+"(?:(present|current|now|till\\s*date|to\\s*date|ongoing|till\\s*now)|"+pt+")","gi");
@@ -733,13 +737,70 @@ function parseDatesLine(line){
     if(!pres && eV<sV){const x=sV;sV=eV;eV=x;}
     if(y1>=1970 && y1<=NOW.getFullYear()+1) out.push({s:sV,e:eV,raw:m[0].trim()});
   }
-  // numeric mm/yyyy - mm/yyyy
+
+  // numeric mm/yyyy - mm/yyyy (4-digit years)
   const rx2=/(\d{1,2})\/((?:19|20)\d{2})\s*(?:-|to)\s*(?:(present|current|now)|(\d{1,2})\/((?:19|20)\d{2}))/gi;
   while((m=rx2.exec(t))){
     const sV=ym((+m[1]||1)-1,+m[2]);
     const eV=m[3]?ym(NOW.getMonth(),NOW.getFullYear()):ym((+m[4]||12)-1,+m[5]);
     out.push({s:Math.min(sV,eV),e:Math.max(sV,eV),raw:m[0].trim()});
   }
+
+  // SLASH-ONLY FORMAT: 1995/1998 (no month components)
+  const rxSlashYear=/\b((?:19|20)\d{2})\s*\/\s*((?:19|20)\d{2})\b/gi;
+  while((m=rxSlashYear.exec(t))){
+    const y1=+m[1], y2=+m[2];
+    if(y1<y2 && y1>=1970 && y2<=NOW.getFullYear()+1){
+      const sV=ym(0,y1), eV=ym(11,y2);
+      out.push({s:sV,e:eV,raw:m[0].trim()});
+    }
+  }
+
+  // SHORT YEAR FORMAT: 1995-98, 1995-08, 1995/98, etc. (4-digit - 2-digit)
+  const rxShort=/\b((?:19|20)\d{2})\s*(?:-|\/|to)\s*(\d{2})(?!\d)/gi;
+  while((m=rxShort.exec(t))){
+    const y1=+m[1], y2=expandYear(+m[2]);
+    if(y1<y2 && y1>=1970){
+      const sV=ym(0,y1), eV=ym(11,y2);
+      out.push({s:sV,e:eV,raw:m[0].trim()});
+    }
+  }
+
+  // TWO-DIGIT YEAR FORMAT: 95-98, '95-'98, 95-'98, '95-98 (supports quotes on one or both sides)
+  const rxTwoDigit=/\b['`]?(\d{2})\s*(?:-|\/|to)\s*['`]?(\d{2})(?!\d)/gi;
+  while((m=rxTwoDigit.exec(t))){
+    const y1=expandYear(+m[1]), y2=expandYear(+m[2]);
+    if(y1<y2 && y1>=1970){
+      const sV=ym(0,y1), eV=ym(11,y2);
+      out.push({s:sV,e:eV,raw:m[0].trim()});
+    }
+  }
+
+  // INDIAN DOT FORMAT: DD.MM.YYYY - DD.MM.YYYY (converted to slashes by now)
+  const rxIndian=/(\d{1,2})\/(\d{1,2})\/(\d{4})\s*(?:-|to)\s*(?:(present|current|now)|(\d{1,2})\/(\d{1,2})\/(\d{4}))/gi;
+  while((m=rxIndian.exec(t))){
+    const d1=+m[1], m1=+m[2]-1, y1=+m[3];
+    const pres=m[4], d2=+m[5], m2=+m[6]-1, y2=+m[7];
+    if(y1>=1970 && y1<=NOW.getFullYear()+1){
+      const sV=ym(m1,y1);
+      const eV=pres?ym(NOW.getMonth(),NOW.getFullYear()):ym(m2,y2);
+      out.push({s:Math.min(sV,eV),e:Math.max(sV,eV),raw:m[0].trim()});
+    }
+  }
+
+  // DURATION-BASED: "1995 (3 years)" or "1995-3 years"
+  const rxDur=/((?:19|20)\d{2})\s*(?:\(|–|-|to)?\s*(\d{1,2})(?:\.\d)?\s*(?:years?|yrs?|y)(?!\d)/gi;
+  while((m=rxDur.exec(t))){
+    const startYear=+m[1], durationYears=+m[2];
+    if(startYear>=1970 && durationYears>0 && durationYears<=60){
+      const endYear=startYear+durationYears;
+      if(endYear<=NOW.getFullYear()+1){
+        const sV=ym(0,startYear), eV=ym(11,endYear);
+        out.push({s:sV,e:eV,raw:m[0].trim()});
+      }
+    }
+  }
+
   // open-ended: "Since OCT 2022", "From 2019", "w.e.f. Jan 2020" (no end -> up to now)
   const rxSince=new RegExp("\\b(?:since|from|w\\.?e\\.?f\\.?|joined(?:\\s+in)?|effective)\\s+(?:("+mon+")[\\s./]*)?((?:19|20)\\d{2})(?!\\s*(?:-|to|till|through|onwards))","gi");
   while((m=rxSince.exec(t))){
@@ -747,12 +808,14 @@ function parseDatesLine(line){
     const eV=ym(NOW.getMonth(),NOW.getFullYear());
     if(+m[2]>=1970 && eV>=sV) out.push({s:sV,e:eV,raw:m[0].trim()});
   }
+
   // "<date> onwards / till date"
   const rxOnward=new RegExp("(?:("+mon+")[\\s./]*)?((?:19|20)\\d{2})\\s*(?:onwards?|till\\s*date|to\\s*date|till\\s*now|to\\s*present)","gi");
   while((m=rxOnward.exec(t))){
     const sV=ym(m[1]?_monNum(m[1]):0,+m[2]);
     out.push({s:sV,e:ym(NOW.getMonth(),NOW.getFullYear()),raw:m[0].trim()});
   }
+
   // de-dupe overlapping identical starts
   const seen=new Set();
   return out.filter(r=>{const k=r.s+"_"+r.e;if(seen.has(k))return false;seen.add(k);return true;});
