@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1740" height="1200" viewBox="0 0 1740 1200" font-family="Segoe UI,Arial,sans-serif">
+<rect width="1740" height="1200" fill="#ffffff"/>
+<defs><marker id="a" markerWidth="8" markerHeight="8" refX="6.5" refY="3" orient="auto"><path d="M0,0 L6.5,3 L0,6 Z" fill="#29ABE2"/></marker></defs>
+<rect x="452" y="290" width="846" height="470" rx="12" fill="none" stroke="#E0662B" stroke-width="2" stroke-dasharray="9 6"/><rect x="470" y="277" width="427.6" height="26" rx="13" fill="#FCEEE6" stroke="#E0662B"/><text x="479" y="294" font-size="11.5" font-weight="800" fill="#E0662B">🔒 IN-BROWSER  ·  IN-MEMORY ONLY  ·  NO SERVER  ·  WIPED ON REFRESH</text>
+<line x1="275.0" y1="194" x2="275.0" y2="250" stroke="#29ABE2" stroke-width="1.7" marker-end="url(#a)"/>
+<line x1="275.0" y1="300" x2="275.0" y2="352" stroke="#29ABE2" stroke-width="1.7" marker-end="url(#a)"/>
+<line x1="275.0" y1="402" x2="275.0" y2="452" stroke="#29ABE2" stroke-width="1.7" marker-end="url(#a)"/>
+<line x1="275.0" y1="506" x2="275.0" y2="548" stroke="#29ABE2" stroke-width="1.7" marker-end="url(#a)"/>
+<line x1="275.0" y1="588" x2="275.0" y2="600" stroke="#29ABE2" stroke-width="1.7" marker-end="url(#a)"/>
+<line x1="275.0" y1="640" x2="275.0" y2="652" stroke="#29ABE2" stroke-width="1.7" marker-end="url(#a)"/>
+<path d="M620.0,222 L620.0,276.0 L626.0,276.0 L626.0,330" fill="none" stroke="#29ABE2" stroke-width="1.7" marker-end="url(#a)"/>
+<line x1="1130.0" y1="222" x2="1130.0" y2="330" stroke="#29ABE2" stroke-width="1.7" marker-end="url(#a)"/>
+<line x1="1130.0" y1="380" x2="1130.0" y2="404" stroke="#29ABE2" stroke-width="1.7" marker-end="url(#a)"/>
+<path d="M1130.0,454 L1130.0,466.0 L626.0,466.0 L626.0,478" fill="none" stroke="#29ABE2" stroke-width="1.7" marker-end="url(#a)"/>
+<line x1="626.0" y1="380" x2="626.0" y2="478" stroke="#29ABE2" stroke-width="1.7" marker-end="url(#a)"/>
+<line x1="776" y1="503.0" x2="980" y2="503.0" stroke="#29ABE2" stroke-width="1.7" marker-end="url(#a)"/>
+<path d="M1130.0,528 L1130.0,544.0 L878.0,544.0 L878.0,560" fill="none" stroke="#29ABE2" stroke-width="1.7" marker-end="url(#a)"/>
+<path d="M626.0,380 L626.0,470.0 L878.0,470.0 L878.0,560" fill="none" stroke="#29ABE2" stroke-width="1.7" marker-end="url(#a)"/>
+<path d="M1130.0,528 L1130.0,660.0 L620.0,660.0 L620.0,792" fill="none" stroke="#29ABE2" stroke-width="1.7" marker-end="url(#a)"/>
+<line x1="878.0" y1="610" x2="878.0" y2="792" stroke="#29ABE2" stroke-width="1.7" marker-end="url(#a)"/>
+<line x1="770" y1="813.0" x2="986" y2="813.0" stroke="#29ABE2" stroke-width="1.7" marker-end="url(#a)"/>
+<rect x="40" y="26" width="1660" height="54" rx="6" fill="#F2F2F2"/><text x="62" y="60.0" font-size="20" font-weight="800" fill="#2BA8E0">Recruitment Screening — Data Flow  (Static Equipment, Dept 133)</text>
+<rect x="40" y="100" width="360" height="34" rx="5" fill="#F2F2F2"/><text x="220.0" y="122.0" font-size="13.5" font-weight="700" fill="#2BA8E0" text-anchor="middle">Screening Data Flow — Lvl 0</text>
+<rect x="430" y="100" width="860" height="34" rx="5" fill="#F2F2F2"/><text x="860.0" y="122.0" font-size="13.5" font-weight="700" fill="#2BA8E0" text-anchor="middle">Screening Data Flow — Lvl 1</text>
+<rect x="1320" y="100" width="380" height="34" rx="5" fill="#F2F2F2"/><text x="1510.0" y="122.0" font-size="13.5" font-weight="700" fill="#2BA8E0" text-anchor="middle">Legend</text>
+<rect x="177.0" y="150" width="223.0" height="44" rx="22.0" fill="#4FB6E8"/><circle cx="177.0" cy="172.0" r="27.0" fill="#C7E7F7"/><text x="288.5" y="176.5" font-size="12" fill="#0d2a3a" text-anchor="middle" font-weight="600">Open Analyzer (browser)</text>
+<circle cx="231.0" cy="222.32" r="8.32" fill="#F79892"/><path d="M218,244 Q218,227.312 231.0,227.312 Q244,227.312 244,244 Z" fill="#F79892"/>
+<rect x="150" y="250" width="250" height="50" rx="6" fill="#AFDCF3"/><path d="M156,250 L192,250 L192,300 L156,300 Q150,300 150,294 L150,256 Q150,250 156,250 Z" fill="#4FB6E8"/><text x="296.0" y="279.25" font-size="11.5" fill="#0d2a3a" text-anchor="middle" font-weight="600">Upload Framework Config</text>
+<g><rect x="414" y="260.0" width="30" height="30" rx="4" fill="#1D9C57"/><text x="429.0" y="280.4" font-size="15.0" fill="#fff" text-anchor="middle" font-weight="800">X</text></g>
+<circle cx="231.0" cy="326.32" r="8.32" fill="#F79892"/><path d="M218,348 Q218,331.312 231.0,331.312 Q244,331.312 244,348 Z" fill="#F79892"/>
+<rect x="150" y="352" width="250" height="50" rx="6" fill="#AFDCF3"/><path d="M156,352 L192,352 L192,402 L156,402 Q150,402 150,396 L150,358 Q150,352 156,352 Z" fill="#4FB6E8"/><text x="296.0" y="381.25" font-size="11.5" fill="#0d2a3a" text-anchor="middle" font-weight="600">Upload Résumé (PDF)</text>
+<g><rect x="414" y="362.0" width="30" height="30" rx="4" fill="#E03B2E"/><text x="429.0" y="380.9" font-size="9.6" fill="#fff" text-anchor="middle" font-weight="800">PDF</text></g>
+<circle cx="231.0" cy="428.32" r="8.32" fill="#F79892"/><path d="M218,450 Q218,433.312 231.0,433.312 Q244,433.312 244,450 Z" fill="#F79892"/>
+<rect x="150" y="452" width="250" height="54" rx="8" fill="#DFF1FB"/><path d="M360,448 L400,448 Q408,448 402,479.0 L364,479.0 Z" fill="#29ABE2"/><text x="268.0" y="483.25" font-size="11.5" fill="#0d2a3a" text-anchor="middle" font-weight="600">Analyzer Engine (in-house)</text>
+<g><rect x="422" y="464.0" width="30" height="30" rx="6" fill="#2E7DD6"/><path d="M437.0,472.4 L444.8,479.6 L442.4,479.6 L442.4,486.2 L431.6,486.2 L431.6,479.6 L429.2,479.6 Z" fill="#fff"/></g>
+<g><rect x="458" y="464.0" width="30" height="30" rx="4" fill="#2AA7C9"/><text x="473.0" y="483.2" font-size="12.6" fill="#fff" text-anchor="middle" font-weight="800">AI</text></g>
+<path d="M166,548 L400,548 L384,588 L150,588 Z" fill="#fff" stroke="#7FC3E6"/><path d="M166,548 L196,548 L180,588 L150,588 Z" fill="#4FB6E8"/><text x="282.0" y="572.0" font-size="11" fill="#0d2a3a" text-anchor="middle" font-weight="600">Candidate Dashboard</text>
+<path d="M166,600 L400,600 L384,640 L150,640 Z" fill="#fff" stroke="#7FC3E6"/><path d="M166,600 L196,600 L180,640 L150,640 Z" fill="#4FB6E8"/><text x="282.0" y="624.0" font-size="11" fill="#0d2a3a" text-anchor="middle" font-weight="600">Interview Evaluation Kit</text>
+<path d="M166,652 L400,652 L384,692 L150,692 Z" fill="#fff" stroke="#7FC3E6"/><path d="M166,652 L196,652 L180,692 L150,692 Z" fill="#4FB6E8"/><text x="282.0" y="676.0" font-size="11" fill="#0d2a3a" text-anchor="middle" font-weight="600">Shortlist Decision</text>
+<rect x="470" y="168" width="300" height="54" rx="6" fill="#AFDCF3"/><path d="M476,168 L512,168 L512,222 L476,222 Q470,222 470,216 L470,174 Q470,168 476,168 Z" fill="#4FB6E8"/><text x="641.0" y="192.0" font-size="11.5" fill="#0d2a3a" text-anchor="middle" font-weight="600">Configuration Workbook (levels · skills</text><text x="641.0" y="206.5" font-size="11.5" fill="#0d2a3a" text-anchor="middle" font-weight="600">· scoring)</text>
+<g><rect x="784" y="180.0" width="30" height="30" rx="4" fill="#1D9C57"/><text x="799.0" y="200.4" font-size="15.0" fill="#fff" text-anchor="middle" font-weight="800">X</text></g>
+<rect x="980" y="168" width="300" height="54" rx="6" fill="#AFDCF3"/><path d="M986,168 L1022,168 L1022,222 L986,222 Q980,222 980,216 L980,174 Q980,168 986,168 Z" fill="#4FB6E8"/><text x="1151.0" y="199.25" font-size="11.5" fill="#0d2a3a" text-anchor="middle" font-weight="600">Résumés (PDF, incl. scanned)</text>
+<g><rect x="1294" y="180.0" width="30" height="30" rx="4" fill="#E03B2E"/><text x="1309.0" y="198.9" font-size="9.6" fill="#fff" text-anchor="middle" font-weight="800">PDF</text></g>
+<circle cx="622.0" cy="245.68" r="7.68" fill="#F79892"/><path d="M610,266 Q610,250.288 622.0,250.288 Q634,250.288 634,266 Z" fill="#F79892"/>
+<circle cx="1132.0" cy="245.68" r="7.68" fill="#F79892"/><path d="M1120,266 Q1120,250.288 1132.0,250.288 Q1144,250.288 1144,266 Z" fill="#F79892"/>
+<rect x="476" y="330" width="300" height="50" rx="8" fill="#DFF1FB"/><path d="M736,326 L776,326 Q784,326 778,355.0 L740,355.0 Z" fill="#29ABE2"/><text x="619.0" y="359.25" font-size="11.5" fill="#0d2a3a" text-anchor="middle" font-weight="600">Config Loader (framework → memory)</text>
+<g><rect x="798" y="340.0" width="30" height="30" rx="6" fill="#2E7DD6"/><path d="M813.0,348.4 L820.8,355.6 L818.4,355.6 L818.4,362.2 L807.6,362.2 L807.6,355.6 L805.2,355.6 Z" fill="#fff"/></g>
+<rect x="980" y="330" width="300" height="50" rx="8" fill="#DFF1FB"/><path d="M1240,326 L1280,326 Q1288,326 1282,355.0 L1244,355.0 Z" fill="#29ABE2"/><text x="1123.0" y="359.25" font-size="11.5" fill="#0d2a3a" text-anchor="middle" font-weight="600">PDF Text / OCR Extraction</text>
+<g><rect x="1302" y="340.0" width="30" height="30" rx="6" fill="#2E7DD6"/><path d="M1317.0,348.4 L1324.8,355.6 L1322.4,355.6 L1322.4,362.2 L1311.6,362.2 L1311.6,355.6 L1309.2,355.6 Z" fill="#fff"/></g>
+<g><rect x="1338" y="340.0" width="30" height="30" rx="4" fill="#2AA7C9"/><text x="1353.0" y="359.2" font-size="12.6" fill="#fff" text-anchor="middle" font-weight="800">AI</text></g>
+<rect x="980" y="404" width="300" height="50" rx="8" fill="#DFF1FB"/><path d="M1240,400 L1280,400 Q1288,400 1282,429.0 L1244,429.0 Z" fill="#29ABE2"/><text x="1123.0" y="433.25" font-size="11.5" fill="#0d2a3a" text-anchor="middle" font-weight="600">Experience Engine (date reconciliation)</text>
+<g><rect x="1302" y="414.0" width="30" height="30" rx="6" fill="#2E7DD6"/><path d="M1317.0,422.4 L1324.8,429.6 L1322.4,429.6 L1322.4,436.2 L1311.6,436.2 L1311.6,429.6 L1309.2,429.6 Z" fill="#fff"/></g>
+<rect x="476" y="478" width="300" height="50" rx="8" fill="#DFF1FB"/><path d="M736,474 L776,474 Q784,474 778,503.0 L740,503.0 Z" fill="#29ABE2"/><text x="619.0" y="507.25" font-size="11.5" fill="#0d2a3a" text-anchor="middle" font-weight="600">Skill Scoring (PCI 0–4, keywords)</text>
+<g><rect x="798" y="488.0" width="30" height="30" rx="6" fill="#2E7DD6"/><path d="M813.0,496.4 L820.8,503.6 L818.4,503.6 L818.4,510.2 L807.6,510.2 L807.6,503.6 L805.2,503.6 Z" fill="#fff"/></g>
+<rect x="980" y="478" width="300" height="50" rx="8" fill="#DFF1FB"/><path d="M1240,474 L1280,474 Q1288,474 1282,503.0 L1244,503.0 Z" fill="#29ABE2"/><text x="1123.0" y="507.25" font-size="11.5" fill="#0d2a3a" text-anchor="middle" font-weight="600">Best-fit Level + Screening Flags</text>
+<g><rect x="1302" y="488.0" width="30" height="30" rx="6" fill="#2E7DD6"/><path d="M1317.0,496.4 L1324.8,503.6 L1322.4,503.6 L1322.4,510.2 L1311.6,510.2 L1311.6,503.6 L1309.2,503.6 Z" fill="#fff"/></g>
+<rect x="728" y="560" width="300" height="50" rx="8" fill="#DFF1FB"/><path d="M988,556 L1028,556 Q1036,556 1030,585.0 L992,585.0 Z" fill="#29ABE2"/><text x="871.0" y="589.25" font-size="11.5" fill="#0d2a3a" text-anchor="middle" font-weight="600">Report Builder (kit from framework)</text>
+<g><rect x="1050" y="570.0" width="30" height="30" rx="6" fill="#2E7DD6"/><path d="M1065.0,578.4 L1072.8,585.6 L1070.4,585.6 L1070.4,592.2 L1059.6,592.2 L1059.6,585.6 L1057.2,585.6 Z" fill="#fff"/></g>
+<g><rect x="1086" y="570.0" width="30" height="30" rx="4" fill="#1D9C57"/><text x="1101.0" y="590.4" font-size="15.0" fill="#fff" text-anchor="middle" font-weight="800">X</text></g>
+<circle cx="702.0" cy="653.68" r="7.68" fill="#F79892"/><path d="M690,674 Q690,658.288 702.0,658.288 Q714,658.288 714,674 Z" fill="#F79892"/>
+<path d="M486,792 L770,792 L754,834 L470,834 Z" fill="#fff" stroke="#7FC3E6"/><path d="M486,792 L516,792 L500,834 L470,834 Z" fill="#4FB6E8"/><text x="627.0" y="817.0" font-size="11" fill="#0d2a3a" text-anchor="middle" font-weight="600">Candidate Dashboard</text>
+<path d="M744,792 L1028,792 L1012,834 L728,834 Z" fill="#fff" stroke="#7FC3E6"/><path d="M744,792 L774,792 L758,834 L728,834 Z" fill="#4FB6E8"/><text x="885.0" y="817.0" font-size="11" fill="#0d2a3a" text-anchor="middle" font-weight="600">Interview Evaluation Kit (Excel)</text>
+<path d="M1002,792 L1286,792 L1270,834 L986,834 Z" fill="#fff" stroke="#7FC3E6"/><path d="M1002,792 L1032,792 L1016,834 L986,834 Z" fill="#4FB6E8"/><text x="1143.0" y="817.0" font-size="11" fill="#0d2a3a" text-anchor="middle" font-weight="600">Shortlist / Interview Decision</text>
+<circle cx="1370.0" cy="171.68" r="7.68" fill="#F79892"/><path d="M1358,194 Q1358,176.288 1370.0,176.288 Q1382,176.288 1382,194 Z" fill="#F79892"/><text x="1414" y="185" font-size="12.5" fill="#20323f">Manual step</text>
+<circle cx="1369.0" cy="232.0" r="12.6" fill="none" stroke="#1D9C57" stroke-width="3"/><circle cx="1369.0" cy="232.0" r="4.2" fill="#1D9C57"/><text x="1414" y="237" font-size="12.5" fill="#20323f">In-browser / automatic</text>
+<g><rect x="1354" y="269" width="30" height="30" rx="4" fill="#1D9C57"/><text x="1369.0" y="289.4" font-size="15.0" fill="#fff" text-anchor="middle" font-weight="800">X</text></g><text x="1414" y="289" font-size="12.5" fill="#20323f">Excel</text>
+<g><rect x="1354" y="321" width="30" height="30" rx="4" fill="#E03B2E"/><text x="1369.0" y="339.9" font-size="9.6" fill="#fff" text-anchor="middle" font-weight="800">PDF</text></g><text x="1414" y="341" font-size="12.5" fill="#20323f">PDF</text>
+<g><rect x="1354" y="373" width="30" height="30" rx="4" fill="#2AA7C9"/><text x="1369.0" y="392.2" font-size="12.6" fill="#fff" text-anchor="middle" font-weight="800">AI</text></g><text x="1414" y="393" font-size="12.5" fill="#20323f">OCR / AI extraction</text>
+<g><rect x="1354" y="425" width="30" height="30" rx="6" fill="#2E7DD6"/><path d="M1369.0,433.4 L1376.8,440.6 L1374.4,440.6 L1374.4,447.2 L1363.6,447.2 L1363.6,440.6 L1361.2,440.6 Z" fill="#fff"/></g><text x="1414" y="445" font-size="12.5" fill="#20323f">In-house software</text>
+<rect x="1340" y="480" width="58" height="24" rx="4" fill="#AFDCF3"/><rect x="1340" y="480" width="14" height="24" rx="3" fill="#4FB6E8"/><text x="1414" y="497" font-size="12.5" fill="#20323f">Document / process</text>
+<rect x="1340" y="532" width="58" height="24" rx="6" fill="#DFF1FB"/><path d="M1384,532 L1398,532 Q1404,532 1398,544 L1382,544 Z" fill="#29ABE2"/><text x="1414" y="549" font-size="12.5" fill="#20323f">Software</text>
+<path d="M1350,584 L1398,584 L1388,608 L1340,608 Z" fill="#fff" stroke="#7FC3E6"/><path d="M1350,584 L1366,584 L1356,608 L1340,608 Z" fill="#4FB6E8"/><text x="1414" y="601" font-size="12.5" fill="#20323f">Output</text>
+<rect x="1356" y="637" width="42" height="22" rx="11" fill="#4FB6E8"/><circle cx="1356" cy="648" r="13" fill="#C7E7F7"/><text x="1414" y="653" font-size="12.5" fill="#20323f">Start / user</text>
+<line x1="1340" y1="700" x2="1398" y2="700" stroke="#29ABE2" stroke-width="2" marker-end="url(#a)"/><text x="1414" y="705" font-size="12.5" fill="#20323f">Data flow</text>
+<rect x="1340" y="740" width="58" height="24" rx="6" fill="none" stroke="#E0662B" stroke-width="1.6" stroke-dasharray="6 4"/><text x="1369.0" y="757" font-size="14" text-anchor="middle">🔒</text><text x="1414" y="757" font-size="12.5" fill="#20323f">Confidential — in-memory only</text>
+</svg>
