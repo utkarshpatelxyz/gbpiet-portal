@@ -36,9 +36,10 @@ def shape_xml(sid,b):
  <Cell N='LocPinX' V='{round(win/2,4)}' F='Width*0.5'/><Cell N='LocPinY' V='{round(hin/2,4)}' F='Height*0.5'/>
  <Cell N='FillForegnd' V='{fill}'/><Cell N='FillPattern' V='1'/>
  <Cell N='LineColor' V='{line}'/><Cell N='LineWeight' V='0.013'/><Cell N='Rounding' V='0.08'/>
- <Cell N='Char.Color' V='{tc}'/><Cell N='Char.Size' V='{bold_size}pt'/>
- <Cell N='VerticalAlign' V='0'/><Cell N='Para.HorzAlign' V='0'/>
+ <Cell N='VerticalAlign' V='0'/>
  <Cell N='LeftMargin' V='0.08'/><Cell N='TopMargin' V='0.04'/><Cell N='BottomMargin' V='0.04'/>
+ <Section N='Character'><Row IX='0'><Cell N='Color' V='{tc}'/><Cell N='Size' V='{round(bold_size/72.0,4)}'/><Cell N='Style' V='1'/></Row></Section>
+ <Section N='Paragraph'><Row IX='0'><Cell N='HorzAlign' V='0'/></Row></Section>
  <Section N='Geometry' IX='0'>
   <Cell N='NoFill' V='0'/><Cell N='NoLine' V='0'/>
   <Row T='RelMoveTo' IX='1'><Cell N='X' V='0'/><Cell N='Y' V='0'/></Row>
@@ -47,7 +48,7 @@ def shape_xml(sid,b):
   <Row T='RelLineTo' IX='4'><Cell N='X' V='0'/><Cell N='Y' V='1'/></Row>
   <Row T='RelLineTo' IX='5'><Cell N='X' V='0'/><Cell N='Y' V='0'/></Row>
  </Section>
- <Text>{text}</Text>
+ <Text><cp IX='0'/><pp IX='0'/>{text}</Text>
 </Shape>'''
 
 def anchor(a,b):

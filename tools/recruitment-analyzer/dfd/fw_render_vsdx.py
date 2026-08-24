@@ -9,11 +9,16 @@ C=M.C; PT=72.0; PW_IN,PH_IN=M.W/PT,M.H/PT
 def ix(v): return round(v/PT,4)
 def iy(v): return round(PH_IN - v/PT,4)
 byid=M.byid
+def _hx(c):
+    c=str(c).strip()
+    if c.startswith('#') and len(c)==4: c='#'+''.join(ch*2 for ch in c[1:])
+    return c.upper() if c.startswith('#') else c
 SH=[]; _id=[1]
 def nid():
     i=_id[0]; _id[0]+=1; return i
 
 def txtbox(x,y,w,h,fill,line,text="",tcol="#20323F",size=9.5,rounding=0.05,nofill=False,noline=False,dashed=False,bold=True):
+    fill=_hx(fill); line=_hx(line); tcol=_hx(tcol)
     pinx=ix(x+w/2); piny=iy(y+h/2); win=round(w/PT,4); hin=round(h/PT,4)
     t=html.escape(text)
     fillcell = f"<Cell N='FillPattern' V='0'/>" if nofill else f"<Cell N='FillForegnd' V='{fill}'/><Cell N='FillPattern' V='1'/>"
@@ -22,18 +27,20 @@ def txtbox(x,y,w,h,fill,line,text="",tcol="#20323F",size=9.5,rounding=0.05,nofil
 <Cell N='PinX' V='{pinx}'/><Cell N='PinY' V='{piny}'/><Cell N='Width' V='{win}'/><Cell N='Height' V='{hin}'/>
 <Cell N='LocPinX' V='{round(win/2,4)}' F='Width*0.5'/><Cell N='LocPinY' V='{round(hin/2,4)}' F='Height*0.5'/>
 {fillcell}{linecell}<Cell N='Rounding' V='{rounding}'/>
-<Cell N='Char.Color' V='{tcol}'/><Cell N='Char.Size' V='{size}pt'/><Cell N='Char.Style' V='{1 if bold else 0}'/>
-<Cell N='VerticalAlign' V='1'/><Cell N='Para.HorzAlign' V='1'/>
+<Cell N='VerticalAlign' V='1'/>
 <Cell N='LeftMargin' V='0.03'/><Cell N='RightMargin' V='0.03'/><Cell N='TopMargin' V='0.02'/><Cell N='BottomMargin' V='0.02'/>
+<Section N='Character'><Row IX='0'><Cell N='Color' V='{tcol}'/><Cell N='Size' V='{round(size/72.0,4)}'/><Cell N='Style' V='{1 if bold else 0}'/></Row></Section>
+<Section N='Paragraph'><Row IX='0'><Cell N='HorzAlign' V='1'/></Row></Section>
 <Section N='Geometry' IX='0'><Cell N='NoFill' V='{1 if nofill else 0}'/><Cell N='NoLine' V='{1 if noline else 0}'/>
 <Row T='RelMoveTo' IX='1'><Cell N='X' V='0'/><Cell N='Y' V='0'/></Row>
 <Row T='RelLineTo' IX='2'><Cell N='X' V='1'/><Cell N='Y' V='0'/></Row>
 <Row T='RelLineTo' IX='3'><Cell N='X' V='1'/><Cell N='Y' V='1'/></Row>
 <Row T='RelLineTo' IX='4'><Cell N='X' V='0'/><Cell N='Y' V='1'/></Row>
 <Row T='RelLineTo' IX='5'><Cell N='X' V='0'/><Cell N='Y' V='0'/></Row></Section>
-<Text>{t}</Text></Shape>"""
+<Text><cp IX='0'/><pp IX='0'/>{t}</Text></Shape>"""
 
 def poly(pts,fill,line="#FFFFFF",noline=True):
+    fill=_hx(fill); line=_hx(line)
     # pts: list of (x,y) in diagram points; absolute-inch geometry, pin at origin
     rows=[f"<Row T='MoveTo' IX='1'><Cell N='X' V='{ix(pts[0][0])}'/><Cell N='Y' V='{iy(pts[0][1])}'/></Row>"]
     for k,(px,py) in enumerate(pts[1:],start=2):
