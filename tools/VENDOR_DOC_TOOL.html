@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>VENDOR DOC TOOL — Document Status Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <!-- SheetJS fork that can also WRITE styled workbooks (same global `XLSX`) -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <style>
@@ -19,11 +20,13 @@
   --info:#5C6B7A; --info-bg:#F0F2F5;
   --gold:#B8860B;
   --spring:cubic-bezier(.34,1.56,.64,1); --ease:cubic-bezier(.4,0,.2,1);
-  --font:'Montserrat','Segoe UI',Arial,sans-serif;
+  --font:'Inter','Segoe UI',system-ui,-apple-system,Arial,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   --sh1:0 1px 3px rgba(11,37,69,.07); --sh2:0 6px 24px rgba(11,37,69,.10); --sh3:0 16px 50px rgba(11,37,69,.18);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1.5;-webkit-font-smoothing:antialiased;}
+body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1.5;
+  -webkit-font-smoothing:antialiased;font-feature-settings:'cv05','ss01';}
 body::before{content:'';position:fixed;inset:-20% -10%;z-index:-2;pointer-events:none;
   background:radial-gradient(40rem 40rem at 10% 6%,rgba(37,99,235,.12),transparent 60%),
              radial-gradient(38rem 38rem at 92% 4%,rgba(6,182,212,.10),transparent 60%);}
@@ -105,6 +108,7 @@ button,input,select,textarea{font-family:inherit;color:inherit}
 .kpi.dang .n{color:var(--dang)} .kpi.warn .n{color:var(--warn)} .kpi.ok .n{color:var(--ok)}
 .kpi::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--line2)}
 .kpi.dang::after{background:var(--dang)}.kpi.warn::after{background:var(--warn)}
+.kpi.info::after{background:var(--line2)}.kpi.info .n{color:var(--muted)}
 .kpi.ok::after{background:var(--ok)}.kpi.blue::after{background:var(--blue)}
 
 .sec{display:flex;align-items:baseline;gap:12px;margin:26px 0 12px}
@@ -114,50 +118,107 @@ button,input,select,textarea{font-family:inherit;color:inherit}
 .sec .rule{flex:1;height:1px;background:var(--line)}
 
 .cols{display:grid;grid-template-columns:1.2fr 1fr;gap:16px}
+.cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:6px}
+@media(max-width:1100px){.cols3{grid-template-columns:1fr}}
 @media(max-width:980px){.cols{grid-template-columns:1fr}}
 .panel{background:var(--sf);border:1px solid var(--line);border-radius:16px;box-shadow:var(--sh1);overflow:hidden}
 .panel h3{font-size:13px;font-weight:800;color:var(--navy);padding:14px 18px;border-bottom:1px solid var(--line)}
 .panel .bd{padding:16px 18px}
 
-/* bars */
-.brow{display:flex;align-items:center;gap:10px;margin-bottom:9px}
-.brow .nm{flex:0 0 190px;font-size:11.5px;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.brow .tr{flex:1;height:16px;background:var(--sf2);border-radius:4px;overflow:hidden;border:1px solid var(--line)}
-.brow .tr>i{display:block;height:100%;border-radius:3px;transition:width .8s var(--ease)}
-.brow .vv{flex:0 0 40px;text-align:right;font-size:11.5px;font-weight:800;color:var(--navy)}
+/* ── charts: labelled horizontal bars ──────────────────────────────────── */
+.brow{display:grid;grid-template-columns:1fr 46px 44px;gap:10px;align-items:center;margin-bottom:11px}
+.brow:last-child{margin-bottom:0}
+.brow .nm{font-size:11.5px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brow .vv{text-align:right;font-size:13px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums}
+.brow .pc{text-align:right;font-size:10.5px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.brow .bar{grid-column:1/-1;height:9px;border-radius:5px;background:#EDF1F6;overflow:hidden;
+  border:1px solid var(--line);margin-top:-4px}
+.brow .bar>i{display:block;height:100%;border-radius:5px;transition:width .7s var(--ease)}
+.chart-note{font-size:10.5px;color:var(--muted);font-weight:600;margin-top:12px;padding-top:10px;
+  border-top:1px dashed var(--line2)}
 
-/* table */
-.tbl{width:100%;border-collapse:collapse;font-size:12px}
-.tbl th{background:var(--sf2);text-align:left;padding:9px 12px;font-size:9.5px;font-weight:800;
-  letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:2}
-.tbl td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
-.tbl tr:hover td{background:var(--sf2)}
-.tbl tr.click{cursor:pointer}
-.tbl .mono{font-family:ui-monospace,Menlo,monospace;font-size:11px}
-.tscroll{max-height:520px;overflow:auto}
-
-.tag{display:inline-block;font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:5px;white-space:nowrap}
+/* ── generic tag ───────────────────────────────────────────────────────── */
+.tag{display:inline-block;font-size:9.5px;font-weight:800;padding:2.5px 7px;border-radius:5px;white-space:nowrap;
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;vertical-align:middle;
+  letter-spacing:.02em;line-height:1.35}
 .tag.ok{background:var(--ok-bg);color:#1B7A4E}
 .tag.warn{background:var(--warn-bg);color:#9A6414}
 .tag.dang{background:var(--dang-bg);color:#9C2C24}
 .tag.info{background:var(--info-bg);color:#49586A}
 .tag.blue{background:#E8F0FE;color:#1A4FBF}
+.tag.lime{background:#EDF7E4;color:#4A7A22}
+.tag.plum{background:#F3EDFB;color:#6B3FA0}
+.tag.ghost{background:transparent;border:1px solid var(--line2);color:var(--muted)}
 
-/* tree */
-.tree{border-top:1px solid var(--line)}
-.xref{border-bottom:1px solid var(--line)}
-.xref-h{display:flex;align-items:center;gap:10px;padding:11px 18px;cursor:pointer;background:var(--sf)}
-.xref-h:hover{background:var(--sf2)}
-.xref-h .ar{font-size:9px;color:var(--muted);transition:transform .2s}
-.xref.open .xref-h .ar{transform:rotate(90deg)}
-.xref-h .nm{font-weight:800;font-size:13px;color:var(--navy)}
-.xref-h .sub{font-size:11px;color:var(--muted)}
-.xref-b{display:none;background:var(--sf2);padding:4px 0 10px}
-.xref.open .xref-b{display:block}
-.code-g{margin:6px 18px 0;background:var(--sf);border:1px solid var(--line);border-radius:10px;overflow:hidden}
-.code-h{padding:8px 12px;font-size:11px;font-weight:800;color:var(--navy);background:var(--sf2);
-  border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center}
-.code-h .d{font-weight:600;color:var(--muted);font-size:10.5px}
+/* ── filter toolbar ────────────────────────────────────────────────────── */
+.tools{background:var(--sf);border:1px solid var(--line);border-bottom:none;border-radius:14px 14px 0 0;
+  box-shadow:var(--sh1);padding:12px 14px 11px}
+.tools-r{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.tools-r + .tools-r{margin-top:9px;padding-top:10px;border-top:1px dashed var(--line)}
+.srch{position:relative;flex:1 1 280px;min-width:200px}
+.srch input{width:100%;padding:9px 12px 9px 32px;font-size:12.5px;font-weight:600;color:var(--navy);
+  border:1px solid var(--line2);border-radius:9px;background:var(--sf2)}
+.srch input:focus{outline:none;border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.srch .ic{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:12px;opacity:.45}
+.sel2{padding:9px 10px;font-size:11.5px;font-weight:700;color:var(--navy);border:1px solid var(--line2);
+  border-radius:9px;background:var(--sf2);cursor:pointer;max-width:230px}
+.sel2:focus{outline:none;border-color:var(--blue);background:#fff}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;font-size:11px;font-weight:700;
+  border:1px solid var(--line2);border-radius:20px;background:var(--sf2);color:var(--muted);cursor:pointer;
+  user-select:none;white-space:nowrap;transition:all .15s var(--ease)}
+.chip:hover{border-color:var(--blue);color:var(--blue)}
+.chip .n{font-size:10px;font-weight:800;opacity:.7;font-variant-numeric:tabular-nums}
+.chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.chip.on .n{opacity:.85}
+.chip.on.wr{background:var(--warn);border-color:var(--warn)}
+.chip.on.dg{background:var(--dang);border-color:var(--dang)}
+.chip.on.gr{background:var(--ok);border-color:var(--ok)}
+.tools .fill{flex:1}
+.tools .res{font-size:11.5px;font-weight:700;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.tools .res b{color:var(--navy)}
+.lbl{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  margin-right:2px;white-space:nowrap}
+
+/* ── the document table ────────────────────────────────────────────────── */
+.dt-wrap{background:var(--sf);border:1px solid var(--line);border-radius:0 0 14px 14px;box-shadow:var(--sh1);
+  overflow:hidden}
+.dt-scroll{max-height:74vh;overflow:auto}
+table.dt{width:100%;border-collapse:separate;border-spacing:0;font-size:12px;table-layout:fixed}
+table.dt thead th{position:sticky;top:0;z-index:3;background:#EFF4F9;text-align:left;padding:10px 12px;
+  font-size:9px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#54677C;
+  border-bottom:1px solid var(--line2);white-space:nowrap;cursor:pointer;user-select:none}
+table.dt thead th:hover{color:var(--blue)}
+table.dt thead th .sa{margin-left:5px;font-size:8px;opacity:.22}
+table.dt thead th.on{color:var(--navy);background:#E4EDF6}
+table.dt thead th.on .sa{opacity:1;color:var(--blue)}
+table.dt tbody td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle;
+  background:var(--sf);overflow:hidden}
+table.dt tbody tr{cursor:pointer}
+table.dt tbody tr:nth-child(even) td{background:#FAFCFE}
+table.dt tbody tr:hover td{background:#EAF2FF}
+table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:default}
+.grp-t{font-size:11.5px;font-weight:800;color:var(--navy);letter-spacing:.01em}
+.grp-s{font-size:10.5px;font-weight:600;color:var(--muted)}
+.docno{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--navy);word-break:break-all;line-height:1.35}
+.doctitle{font-size:11px;color:var(--muted);font-weight:500;margin-top:3px;line-height:1.35;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.flags{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap}
+.s1{font-size:11.5px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.s1.mono{font-family:var(--mono);font-size:11px}
+.s2{font-size:10.5px;font-weight:500;color:var(--muted);margin-top:2px;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.num{font-variant-numeric:tabular-nums}
+.revbig{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--navy)}
+.meter{height:5px;border-radius:3px;background:#E7ECF3;overflow:hidden;display:flex;margin:5px 0 3px}
+.meter i{display:block;height:100%}
+.empty{padding:44px 30px;text-align:center;color:var(--muted);font-size:12.5px;font-weight:600}
+
+/* legacy compact table (revision history etc.) */
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{background:var(--sf2);text-align:left;padding:9px 12px;font-size:9.5px;font-weight:800;
+  letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)}
+.tbl td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl .mono{font-family:var(--mono);font-size:11px}
 
 /* doc detail */
 .dh{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start;margin:16px 0}
@@ -287,16 +348,49 @@ button,input,select,textarea{font-family:inherit;color:inherit}
   <button class="back" onclick="go('filter')">← Change scope</button>
   <div id="dash-head"></div>
   <div class="kpis" id="kpis"></div>
-  <div class="cols">
-    <div class="panel"><h3>Action required — documents still circulating</h3>
-      <div class="tscroll"><table class="tbl" id="tbl-act"></table></div></div>
-    <div>
-      <div class="panel" style="margin-bottom:16px"><h3>Ageing of circulating documents</h3><div class="bd" id="age"></div></div>
-      <div class="panel"><h3>Top blocking departments</h3><div class="bd" id="block"></div></div>
+
+  <div class="cols3">
+    <div class="panel"><h3>Documents by status</h3><div class="bd" id="ch-status"></div></div>
+    <div class="panel"><h3>Ageing — documents still circulating</h3><div class="bd" id="ch-age"></div></div>
+    <div class="panel"><h3>Disciplines still to close</h3><div class="bd" id="ch-dept"></div></div>
+  </div>
+
+  <div class="sec"><h2>All documents</h2><span class="cnt" id="doc-cnt"></span><div class="rule"></div></div>
+
+  <div class="tools">
+    <div class="tools-r">
+      <div class="srch"><span class="ic">🔎</span>
+        <input id="f-q" type="search" placeholder="Search document number, title, equipment, supplier, code…" autocomplete="off"></div>
+      <select class="sel2" id="f-status"></select>
+      <select class="sel2" id="f-equip"></select>
+      <select class="sel2" id="f-code"></select>
+      <select class="sel2" id="f-group">
+        <option value="">No grouping</option>
+        <option value="xref">Group by equipment</option>
+        <option value="code">Group by code</option>
+        <option value="vendor">Group by supplier</option>
+      </select>
+    </div>
+    <div class="tools-r" id="f-chips"></div>
+    <div class="tools-r">
+      <span class="lbl">Showing</span><span class="res" id="f-res"></span>
+      <div class="fill"></div>
+      <button class="chip" onclick="clearFilters()">✕ Clear all filters</button>
+      <button class="chip" onclick="exportTableXlsx()">⤓ Export this list to Excel</button>
     </div>
   </div>
-  <div class="sec"><h2>Browse by equipment</h2><span class="cnt" id="xref-cnt"></span><div class="rule"></div></div>
-  <div class="panel"><div class="tree" id="tree"></div></div>
+
+  <div class="dt-wrap"><div class="dt-scroll">
+    <table class="dt" id="dt">
+      <colgroup>
+        <col style="width:auto"><col style="width:150px"><col style="width:158px"><col style="width:74px">
+        <col style="width:166px"><col style="width:118px"><col style="width:84px"><col style="width:186px">
+      </colgroup>
+      <thead id="dt-head"></thead>
+      <tbody id="dt-body"></tbody>
+    </table>
+  </div></div>
+
   <div class="foot" id="foot1"></div>
 </div></div>
 
@@ -357,6 +451,12 @@ function fmt(d){
   if(!d) return '';
   return String(d.getUTCDate()).padStart(2,'0')+' '+
     ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'][d.getUTCMonth()]+' '+d.getUTCFullYear();
+}
+function fmtS(d){   // compact form for the secondary line in the table
+  if(!d) return '';
+  return String(d.getUTCDate()).padStart(2,'0')+' '+
+    ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'][d.getUTCMonth()]+' '+
+    String(d.getUTCFullYear()).slice(2);
 }
 const daysBetween=(a,b)=> (!a||!b)?null:Math.round((b-a)/86400000);
 
@@ -501,6 +601,9 @@ function buildDash(){
       status:sv(a,'DOCUMENT STATUS'), ret:sv(a,'RETURN STATUS FOR THE SUPPLIER'),
       overall:sv(a,'STATUS'),
       received:xdate(cell(a,'RECEIVED DATE')), circ:xdate(cell(a,'CIRCULATE DATE')),
+      official:xdate(cell(a,'OFFICIAL DATE')), delay:sv(a,'DELAY SINCE OFFICIAL DATE'),
+      reviewCode:sv(a,'REVIEW CODE'), returned:xdate(cell(a,'RETURNED DATE')),
+      comment:sv(a,'STATUS COMMENT'),
       days:parseInt(sv(a,'TOTAL DAYS IN CIRCULATION'))||null,
       depts:rowDepts(a)
     }));
@@ -512,7 +615,13 @@ function buildDash(){
     });
     const latest=revs[0], a=latest.row;
     return {
-      tr, label: tr.indexOf('#UNRECEIVED#')===0 ? '(not yet received)' : tr,
+      tr,
+      unrec: tr.indexOf('#UNRECEIVED#')===0,
+      /* A document that was never received has no TR number, so it is shown
+         under the supplier's own number instead of an internal key. */
+      label: tr.indexOf('#UNRECEIVED#')===0
+               ? (sv(a,'SUPPLIER NUMBER') || sv(a,'CLIENT NUMBER') || '(not yet received)')
+               : tr,
       xref:sv(a,'CROSS REFERENCE'), equip:sv(a,'EQUIPMENT NAME'),
       code:sv(a,'CODE'), codeDesc:sv(a,'CODE DESCRIPTION'),
       title:sv(a,'DOCUMENT TITTLE')||sv(a,'DOCUMENT TITLE'),
@@ -525,12 +634,29 @@ function buildDash(){
     };
   });
   docs.forEach(d=>{
-    d.pendingDepts = d.latest.depts.filter(x=>x.pending);
-    d.blockers     = d.latest.depts.filter(x=>x.blocking && !x.originator);
-    d.ownerPending = d.latest.depts.filter(x=>x.blocking && x.originator);
-    d.days = d.latest.days!=null ? d.latest.days : daysBetween(d.latest.circ,new Date());
-    d.due  = d.latest.circ ? new Date(d.latest.circ.getTime()+DEADLINE_DAYS*86400000) : null;
+    const L=d.latest;
+    d.pendingDepts = L.depts.filter(x=>x.pending);
+    d.blockers     = L.depts.filter(x=>x.blocking && !x.originator);
+    d.ownerPending = L.depts.filter(x=>x.blocking && x.originator);
+    d.days = L.days!=null ? L.days : daysBetween(L.circ,new Date());
+    d.due  = L.circ ? new Date(L.circ.getTime()+DEADLINE_DAYS*86400000) : null;
     d.over = d.days!=null ? d.days-DEADLINE_DAYS : null;
+    /* glimpse figures shown straight in the list */
+    d.status   = L.status || 'NEVER RECEIVED';
+    d.ret      = L.ret;
+    d.overall  = L.overall;              // OPEN / CLOSE
+    d.circDate = L.circ;
+    d.rev      = L.trRev;
+    d.nRev     = d.revs.length;
+    d.depAll   = L.depts.length;         // disciplines marked applicable
+    d.depDone  = L.depts.filter(x=>x.closed).length;
+    d.depOpen  = d.depAll - d.depDone;
+    d.depRevOpen = L.depts.filter(x=>x.review && !x.closed).length;
+    /* the first issue carries the contractual date */
+    const first = d.revs[d.revs.length-1];
+    d.official = d.revs.map(r=>r.official).find(Boolean) || (first?first.official:null);
+    d.searchKey = [d.tr,d.title,d.xref,d.equip,d.code,d.codeDesc,d.vendor,d.client,d.supplier,d.status]
+                    .join(' ').toUpperCase();
   });
   S.docs=docs;
   renderDash();
@@ -538,96 +664,331 @@ function buildDash(){
 }
 
 /* ── Dashboard ─────────────────────────────────────────────────────────── */
+/* Colour + ordering for the DOCUMENT STATUS values that appear in the file. */
+const STATUS_META = {
+  'CIRCULATING'                  :{cls:'warn', col:'#D9922E', o:1},
+  'NEVER RECEIVED'               :{cls:'ghost',col:'#98A6B5', o:2},
+  'REJECTED'                     :{cls:'dang', col:'#D4574E', o:3},
+  'REVIEWED WITH MAJOR COMMENTS' :{cls:'dang', col:'#E07A3C', o:4},
+  'REVIEWED WITH MINOR COMMENTS' :{cls:'lime', col:'#8FBF4E', o:5},
+  'REVIEWED WITHOUT COMMENTS'    :{cls:'ok',   col:'#2E9E6B', o:6},
+  'FOR INFORMATION'              :{cls:'blue', col:'#3B82F6', o:7},
+  'AS BUILT'                     :{cls:'plum', col:'#6B3FA0', o:8},
+  'VOID'                         :{cls:'info', col:'#8895A5', o:9}
+};
+const stMeta = st => STATUS_META[String(st||'').toUpperCase()] || {cls:'info',col:'#8895A5',o:99};
+/* The full wording is kept for tooltips and exports; the chip needs to fit. */
+const STATUS_SHORT = {
+  'REVIEWED WITH MINOR COMMENTS':'MINOR COMMENTS',
+  'REVIEWED WITH MAJOR COMMENTS':'MAJOR COMMENTS',
+  'REVIEWED WITHOUT COMMENTS'   :'NO COMMENTS'
+};
+const stShort = st => STATUS_SHORT[String(st||'').toUpperCase()] || String(st||'—');
+
 function ageBucket(d){
-  if(d==null) return '—';
-  if(d<=7) return '0–7 days';
+  if(d==null) return null;
+  if(d<=7)  return '0–7 days';
   if(d<=15) return '8–15 days';
   if(d<=30) return '16–30 days';
   if(d<=60) return '31–60 days';
   return '60+ days';
 }
 const AGES=['0–7 days','8–15 days','16–30 days','31–60 days','60+ days'];
-const AGECOL={'0–7 days':'var(--ok)','8–15 days':'#8FBF4E','16–30 days':'var(--warn)','31–60 days':'#E07A3C','60+ days':'var(--dang)'};
+const AGECOL={'0–7 days':'#2E9E6B','8–15 days':'#8FBF4E','16–30 days':'#D9922E',
+              '31–60 days':'#E07A3C','60+ days':'#D4574E'};
+
+/* Nothing is pre-filtered: the list opens complete and the user narrows it. */
+const F = { q:'', status:'', equip:'', code:'', quick:'', group:'', sort:'doc', dir:1 };
+
+const COLS = [
+  {k:'doc',   t:'Document number & title', get:d=>(d.unrec?'\uffff':'')+(d.unrec?(d.xref+' '+d.code):d.tr)},
+  {k:'equip', t:'Equipment',               get:d=>d.xref},
+  {k:'code',  t:'Code',                    get:d=>d.code},
+  {k:'rev',   t:'Rev',                     get:d=>d.rev},
+  {k:'status',t:'Document status',         get:d=>stMeta(d.status).o},
+  {k:'circ',  t:'Circulated',              get:d=>d.circDate?d.circDate.getTime():-1},
+  {k:'age',   t:'Days',                    get:d=>d.days==null?-1:d.days},
+  {k:'dep',   t:'Disciplines',             get:d=>d.depOpen}
+];
+
+/* Quick filters shown as chips — each is a predicate over the document. */
+const QUICK = [
+  {k:'',       t:'All documents',  cls:'',   f:()=>true},
+  {k:'circ',   t:'Circulating',    cls:'wr', f:d=>d.circulating},
+  {k:'over',   t:'Past deadline',  cls:'dg', f:d=>d.circulating&&d.over>0},
+  {k:'blocked',t:'Held by others', cls:'dg', f:d=>d.blockers.length>0},
+  {k:'open',   t:'Status OPEN',    cls:'wr', f:d=>String(d.overall).toUpperCase()==='OPEN'},
+  {k:'closed', t:'Status CLOSE',   cls:'gr', f:d=>String(d.overall).toUpperCase()==='CLOSE'},
+  {k:'never',  t:'Never received', cls:'',   f:d=>String(d.status).toUpperCase()==='NEVER RECEIVED'},
+  {k:'crit',   t:'Critical',       cls:'dg', f:d=>d.critical},
+  {k:'key',    t:'Key drawing',    cls:'',   f:d=>d.keydrw},
+  {k:'multi',  t:'Multi-revision', cls:'',   f:d=>d.nRev>1}
+];
 
 function renderDash(){
   const docs=S.docs, circ=docs.filter(d=>d.circulating);
   const over=circ.filter(d=>d.over!=null&&d.over>0);
-  const blocked=circ.filter(d=>d.blockers.length>0);
-  const crit=circ.filter(d=>d.critical);
+  const blocked=docs.filter(d=>d.blockers.length>0);
+  const open=docs.filter(d=>String(d.overall).toUpperCase()==='OPEN');
+  const closed=docs.filter(d=>String(d.overall).toUpperCase()==='CLOSE');
+  const never=docs.filter(d=>d.unrec || String(d.status).toUpperCase()==='NEVER RECEIVED');
 
-  $('crumbs').innerHTML=`<span class="c" onclick="go('filter')">${esc(S.po)}</span><span class="s">/</span><span class="c on">${esc(S.dep)}</span>`;
+  $('crumbs').innerHTML=`<span class="c" onclick="go('filter')">${esc(S.po)}</span>`+
+    `<span class="s">/</span><span class="c on">${esc(S.dep)}</span>`;
   $('dash-head').innerHTML=`<div class="sec" style="margin-top:6px"><h2>${esc(S.po)} · ${esc(S.dep)}</h2>
-    <span class="cnt">${S.sub.length.toLocaleString()} rows · ${docs.length.toLocaleString()} documents</span><div class="rule"></div></div>`;
+    <span class="cnt">${docs.length.toLocaleString()} documents from ${S.sub.length.toLocaleString()} revision rows</span>
+    <div class="rule"></div></div>`;
 
   $('kpis').innerHTML=[
-    ['blue',docs.length,'Documents (unique)'],
-    ['warn',circ.length,'Still circulating'],
-    ['dang',over.length,'Past '+DEADLINE_DAYS+'-day deadline'],
-    ['dang',blocked.length,'Blocked by other depts'],
-    ['warn',crit.length,'Critical & circulating'],
-    ['ok',docs.length-circ.length,'Closed / returned']
-  ].map(([c,n,l])=>`<div class="kpi ${c}"><div class="n">${n.toLocaleString()}</div><div class="l">${l}</div></div>`).join('');
+    ['blue',docs.length,'Documents'],
+    ['blue',S.sub.length,'Revisions on record'],
+    ['warn',circ.length,'Circulating now'],
+    ['dang',over.length,'Past the '+DEADLINE_DAYS+'-day deadline'],
+    ['dang',blocked.length,'Waiting on another discipline'],
+    ['info',never.length,'Never received'],
+    ['warn',open.length,'Workbook STATUS = OPEN'],
+    ['ok',closed.length,'Workbook STATUS = CLOSE']
+  ].map(([c,n,l])=>`<div class="kpi ${c}"><div class="n num">${n.toLocaleString()}</div>
+      <div class="l">${l}</div></div>`).join('');
 
-  /* action table */
-  const rows=circ.slice().sort((a,b)=>(b.days||0)-(a.days||0));
-  $('tbl-act').innerHTML =
-    `<thead><tr><th>Document (TR)</th><th>Equipment</th><th>Code</th><th>Rev</th><th>In circ.</th><th>Blocking</th></tr></thead><tbody>`+
-    (rows.length?rows.map(d=>{
-      const st=d.over>0?'dang':(d.days>=8?'warn':'ok');
-      return `<tr class="click" onclick="openDoc('${esc(d.tr).replace(/'/g,"\\'")}')">
-        <td><div class="mono" style="font-weight:700;color:var(--navy)">${esc(d.label)}</div>
-            <div style="color:var(--muted);font-size:11px">${esc(d.title||'')}</div>
-            ${d.critical?'<span class="tag dang">CRITICAL</span>':''}</td>
-        <td>${esc(d.xref)}</td><td class="mono">${esc(d.code)}</td>
-        <td><b>${esc(d.latest.trRev)}</b></td>
-        <td><span class="tag ${st}">${d.days!=null?d.days+'d':'—'}</span></td>
-        <td>${d.blockers.length?`<span class="tag dang">${d.blockers.length} dept${d.blockers.length>1?'s':''}</span>`
-            :(d.ownerPending.length?'<span class="tag warn">Owner</span>':'<span class="tag info">—</span>')}</td></tr>`;
-    }).join(''):'<tr><td colspan="6" class="empty">No circulating documents in this scope — everything is closed.</td></tr>')+'</tbody>';
+  /* ── chart 1: every document by its status ───────────────────────────── */
+  const sc={}; docs.forEach(d=>{ const k=String(d.status).toUpperCase(); sc[k]=(sc[k]||0)+1; });
+  bars('ch-status', Object.entries(sc).sort((a,b)=>stMeta(a[0]).o-stMeta(b[0]).o)
+        .map(([k,v])=>({label:k,value:v,col:stMeta(k).col})), docs.length,
+       'Click a bar to filter the list below.', k=>{ F.status=k; F.quick=''; applyFilters(); });
 
-  /* ageing */
+  /* ── chart 2: how long circulating documents have been out ───────────── */
   const ac={}; AGES.forEach(a=>ac[a]=0);
-  circ.forEach(d=>{ const b=ageBucket(d.days); if(ac[b]!=null)ac[b]++; });
-  const amax=Math.max(1,...Object.values(ac));
-  $('age').innerHTML=AGES.map(a=>`<div class="brow"><div class="nm">${a}</div>
-    <div class="tr"><i style="width:${ac[a]/amax*100}%;background:${AGECOL[a]}"></i></div>
-    <div class="vv">${ac[a]}</div></div>`).join('') || '<div class="empty">No data</div>';
+  circ.forEach(d=>{ const b=ageBucket(d.days); if(b) ac[b]++; });
+  bars('ch-age', AGES.map(a=>({label:a,value:ac[a],col:AGECOL[a]})), Math.max(1,circ.length),
+       DEADLINE_DAYS+' days are allowed from the circulate date.', null);
 
-  /* blocking departments */
+  /* ── chart 3: who still has to close something ───────────────────────── */
   const bc={};
-  circ.forEach(d=>d.blockers.forEach(x=>{ bc[x.name]=(bc[x.name]||0)+1; }));
-  const bl=Object.entries(bc).sort((a,b)=>b[1]-a[1]).slice(0,10);
-  const bmax=Math.max(1,...bl.map(x=>x[1]));
-  $('block').innerHTML= bl.length? bl.map(([n,c])=>`<div class="brow"><div class="nm" title="${esc(n)}">${esc(n)}</div>
-    <div class="tr"><i style="width:${c/bmax*100}%;background:var(--dang)"></i></div><div class="vv">${c}</div></div>`).join('')
-    : '<div class="empty">No department is blocking a circulating document.</div>';
+  docs.filter(d=>d.circulating).forEach(d=>d.latest.depts.forEach(x=>{
+    if(!x.closed && x.review) bc[x.name]=(bc[x.name]||0)+1; }));
+  const bl=Object.entries(bc).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  bars('ch-dept', bl.map(([n,c])=>({label:n,value:c,col:'#D4574E'})), Math.max(1,circ.length),
+       bl.length?'Counted only where the discipline is marked FOR REVIEW with no closed date.'
+                :'', null);
 
-  /* tree: cross reference → code → docs */
-  const byX={};
-  docs.forEach(d=>{ (byX[d.xref||'(no cross reference)']=byX[d.xref||'(no cross reference)']||[]).push(d); });
-  const xs=Object.keys(byX).sort();
-  $('xref-cnt').textContent=xs.length+' equipment items';
-  $('tree').innerHTML=xs.map((x,i)=>{
-    const list=byX[x], c=list.filter(d=>d.circulating).length;
-    const byC={}; list.forEach(d=>{ (byC[d.code||'(no code)']=byC[d.code||'(no code)']||[]).push(d); });
-    return `<div class="xref" id="x${i}"><div class="xref-h" onclick="document.getElementById('x${i}').classList.toggle('open')">
-      <span class="ar">▶</span>
-      <div style="flex:1"><div class="nm">${esc(x)}</div>
-        <div class="sub">${esc(list[0].equip||'')} · ${list.length} document${list.length>1?'s':''}</div></div>
-      ${c?`<span class="tag warn">${c} circulating</span>`:'<span class="tag ok">all closed</span>'}</div>
-      <div class="xref-b">${Object.keys(byC).sort().map(code=>`
-        <div class="code-g"><div class="code-h"><span class="mono">${esc(code)}</span>
-          <span class="d">${esc(byC[code][0].codeDesc||'')}</span></div>
-          <table class="tbl"><tbody>${byC[code].map(d=>`
-            <tr class="click" onclick="openDoc('${esc(d.tr).replace(/'/g,"\\'")}')">
-              <td class="mono" style="font-weight:700">${esc(d.label)}</td>
-              <td>rev <b>${esc(d.latest.trRev)}</b>${d.revs.length>1?` <span class="tag info">${d.revs.length} revs</span>`:''}</td>
-              <td>${d.circulating?`<span class="tag warn">CIRCULATING</span>`:`<span class="tag ok">${esc(d.latest.status||'CLOSED')}</span>`}</td>
-              <td style="text-align:right">${d.circulating&&d.days!=null?`<span class="tag ${d.over>0?'dang':'info'}">${d.days}d</span>`:''}</td>
-            </tr>`).join('')}</tbody></table></div>`).join('')}</div></div>`;
-  }).join('');
-
+  /* ── the list ────────────────────────────────────────────────────────── */
+  buildToolbar();
+  applyFilters();
   $('foot1').textContent='Source: '+S.meta.title+' · Project '+S.meta.project+' · as of '+S.meta.asOf;
+}
+
+/* Labelled bar chart: name on the left, count and share on the right, bar under. */
+function bars(id, data, total, note, onclick){
+  const el=$(id);
+  if(!data.length){ el.innerHTML='<div class="empty" style="padding:26px">Nothing to show.</div>'; return; }
+  const max=Math.max(1,...data.map(d=>d.value));
+  el.innerHTML=data.map((d,i)=>`
+    <div class="brow" ${onclick?`data-i="${i}" style="cursor:pointer"`:''}>
+      <div class="nm" title="${esc(d.label)}">${esc(d.label)}</div>
+      <div class="vv">${d.value.toLocaleString()}</div>
+      <div class="pc">${total?Math.round(d.value/total*100)+'%':''}</div>
+      <div class="bar"><i style="width:${d.value/max*100}%;background:${d.col}"></i></div>
+    </div>`).join('') + (note?`<div class="chart-note">${esc(note)}</div>`:'');
+  if(onclick) el.querySelectorAll('.brow[data-i]').forEach(r=>
+    r.onclick=()=>onclick(data[+r.dataset.i].label));
+}
+
+/* ── toolbar ───────────────────────────────────────────────────────────── */
+function buildToolbar(){
+  const docs=S.docs;
+  const opts=(id,label,vals,cur)=>{
+    $(id).innerHTML=`<option value="">${label}</option>`+
+      vals.map(([v,n,extra])=>`<option value="${esc(v)}"${v===cur?' selected':''}>${esc(v)}${extra?' — '+esc(extra):''} (${n})</option>`).join('');
+  };
+  const tally=(fn)=>{ const m={}; docs.forEach(d=>{const k=fn(d); if(k) m[k]=(m[k]||0)+1;}); return m; };
+
+  const st=tally(d=>String(d.status).toUpperCase());
+  opts('f-status','All statuses',
+       Object.entries(st).sort((a,b)=>stMeta(a[0]).o-stMeta(b[0]).o).map(([v,n])=>[v,n]), F.status);
+
+  const eqDesc={}; docs.forEach(d=>{ if(d.xref && !eqDesc[d.xref]) eqDesc[d.xref]=d.equip; });
+  const eq=tally(d=>d.xref);
+  opts('f-equip','All equipment',
+       Object.keys(eq).sort().map(v=>[v,eq[v],eqDesc[v]]), F.equip);
+
+  const cdDesc={}; docs.forEach(d=>{ if(d.code && !cdDesc[d.code]) cdDesc[d.code]=d.codeDesc; });
+  const cd=tally(d=>d.code);
+  opts('f-code','All codes',
+       Object.keys(cd).sort().map(v=>[v,cd[v],cdDesc[v]]), F.code);
+
+  $('f-chips').innerHTML=QUICK.map(q=>{
+    const n=q.k?docs.filter(q.f).length:docs.length;
+    return `<button class="chip ${q.cls} ${F.quick===q.k?'on':''}" data-q="${q.k}"
+      ${n?'':'style="opacity:.4" disabled'}>${esc(q.t)}<span class="n">${n.toLocaleString()}</span></button>`;
+  }).join('');
+  $('f-chips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
+    F.quick=c.dataset.q; if(F.quick) F.status=''; applyFilters(); buildToolbar();
+  });
+
+  $('f-group').value=F.group;
+  $('f-q').value=F.q;
+  let t=null;
+  $('f-q').oninput = e=>{ clearTimeout(t); t=setTimeout(()=>{ F.q=e.target.value.trim().toUpperCase(); applyFilters(); },160); };
+  $('f-status').onchange=e=>{ F.status=e.target.value; F.quick=''; applyFilters(); buildToolbar(); };
+  $('f-equip').onchange =e=>{ F.equip =e.target.value; applyFilters(); };
+  $('f-code').onchange  =e=>{ F.code  =e.target.value; applyFilters(); };
+  $('f-group').onchange =e=>{ F.group =e.target.value; applyFilters(); };
+}
+function clearFilters(){
+  F.q=''; F.status=''; F.equip=''; F.code=''; F.quick=''; F.group='';
+  buildToolbar(); applyFilters();
+}
+
+/* ── filter + sort + render ────────────────────────────────────────────── */
+function currentRows(){
+  const q=F.q, qf=(QUICK.find(x=>x.k===F.quick)||QUICK[0]).f;
+  let out=S.docs.filter(d=>
+       (!q || d.searchKey.indexOf(q)>=0)
+    && (!F.status || String(d.status).toUpperCase()===F.status)
+    && (!F.equip  || d.xref===F.equip)
+    && (!F.code   || d.code===F.code)
+    && qf(d));
+  const col=COLS.find(c=>c.k===F.sort)||COLS[0];
+  out.sort((a,b)=>{
+    let x=col.get(a), y=col.get(b);
+    if(typeof x==='string'||typeof y==='string'){ x=String(x||''); y=String(y||''); return x.localeCompare(y)*F.dir; }
+    return ((x||0)-(y||0))*F.dir;
+  });
+  return out;
+}
+function applyFilters(){
+  const rows=currentRows();
+  S.view=rows;
+  $('doc-cnt').textContent=S.docs.length.toLocaleString()+' in this scope';
+  $('f-res').innerHTML=`<b>${rows.length.toLocaleString()}</b> of ${S.docs.length.toLocaleString()} documents`;
+
+  $('dt-head').innerHTML='<tr>'+COLS.map(c=>
+    `<th class="${F.sort===c.k?'on':''}" data-k="${c.k}"${c.k==='age'?' style="text-align:right"':''}>${esc(c.t)}
+      <span class="sa">${F.sort===c.k?(F.dir>0?'▲':'▼'):'▲'}</span></th>`).join('')+'</tr>';
+  $('dt-head').querySelectorAll('th').forEach(th=>th.onclick=()=>{
+    const k=th.dataset.k;
+    if(F.sort===k) F.dir=-F.dir; else { F.sort=k; F.dir = (k==='age'||k==='circ'||k==='dep')?-1:1; }
+    applyFilters();
+  });
+
+  if(!rows.length){ $('dt-body').innerHTML=`<tr><td colspan="8" class="empty">
+      No document matches these filters. <b style="color:var(--blue);cursor:pointer" onclick="clearFilters()">Clear the filters</b> to see all
+      ${S.docs.length.toLocaleString()} documents.</td></tr>`; return; }
+
+  let html='', last=null;
+  const gkey = F.group==='xref'?(d=>d.xref||'(no equipment)')
+             : F.group==='code'?(d=>d.code||'(no code)')
+             : F.group==='vendor'?(d=>d.vendor||'(no supplier)') : null;
+  rows.forEach(d=>{
+    if(gkey){ const g=gkey(d);
+      if(g!==last){ last=g;
+        const n=rows.filter(x=>gkey(x)===g).length, c=rows.filter(x=>gkey(x)===g&&x.circulating).length;
+        const sub = F.group==='xref' ? (d.equip||'') : F.group==='code' ? (d.codeDesc||'') : '';
+        html+=`<tr class="grp"><td colspan="8"><span class="grp-t">${esc(g)}</span>
+          ${sub?`<span class="grp-s"> · ${esc(sub)}</span>`:''}
+          <span class="grp-s"> · ${n} document${n>1?'s':''}${c?', '+c+' circulating':''}</span></td></tr>`;
+      }
+    }
+    html+=docRow(d);
+  });
+  $('dt-body').innerHTML=html;
+  $('dt-body').querySelectorAll('tr[data-tr]').forEach(tr=>
+    tr.onclick=()=>openDoc(tr.dataset.tr));
+}
+
+function docRow(d){
+  const m=stMeta(d.status);
+  const ageCls = !d.circulating ? 'info' : (d.over>0?'dang':(d.days>=8?'warn':'ok'));
+  const done=d.depDone, all=d.depAll, openN=d.depOpen;
+  const pct = all? done/all*100 : 0;
+  const names=d.latest.depts.filter(x=>!x.closed&&x.review).map(x=>x.name);
+  const flags=[
+    d.nRev>1 ? `<span class="tag blue">${d.nRev} REVISIONS</span>` : '',
+    d.unrec ? '<span class="tag ghost">NO TR RAISED</span>' : '',
+    d.critical ? '<span class="tag dang">CRITICAL</span>' : '',
+    d.keydrw ? '<span class="tag plum">KEY DRAWING</span>' : '',
+    d.category ? `<span class="tag ghost">${esc(d.category)}</span>` : '',
+    String(d.overall).toUpperCase()==='OPEN'
+      ? '<span class="tag warn" title="STATUS column of the workbook">STATUS: OPEN</span>' :
+    String(d.overall).toUpperCase()==='CLOSE'
+      ? '<span class="tag ok" title="STATUS column of the workbook">STATUS: CLOSE</span>' : ''
+  ].filter(Boolean).join('');
+
+  /* discipline glimpse — what a reader needs without opening the document */
+  let depMain, depSub;
+  if(!all){ depMain='—'; depSub= d.unrec ? 'not circulated yet' : 'no discipline marked'; }
+  else {
+    depMain = done+' of '+all+' closed';
+    depSub  = names.length
+      ? `<b style="color:var(--dang)">${names.length} awaiting review</b> · ${esc(names.slice(0,2).join(', '))}${names.length>2?' +'+(names.length-2):''}`
+      : (openN ? openN+' open for information' : 'all disciplines closed');
+  }
+
+  return `<tr data-tr="${esc(d.tr)}">
+    <td>
+      <div class="docno">${esc(d.label)}</div>
+      <div class="doctitle" title="${esc(d.title||'')}">${esc(d.title||'—')}</div>
+      ${flags?`<div class="flags">${flags}</div>`:''}
+    </td>
+    <td><div class="s1" title="${esc(d.xref)}">${esc(d.xref||'—')}</div>
+        <div class="s2" title="${esc(d.equip||'')}">${esc(d.equip||'')}</div></td>
+    <td><div class="s1 mono">${esc(d.code||'—')}</div>
+        <div class="s2" title="${esc(d.codeDesc||'')}">${esc(d.codeDesc||'')}</div></td>
+    <td><div class="revbig">${esc(d.rev||'—')}</div>
+        <div class="s2">${d.nRev>1?'of '+d.nRev:''}</div></td>
+    <td><span class="tag ${m.cls}" title="${esc(d.status)}">${esc(stShort(d.status))}</span>
+        <div class="s2" title="${esc(d.ret||'')}">${d.circulating?'awaiting return status'
+          :esc([(d.ret||'').split(' - ')[0], d.latest.reviewCode?'code '+d.latest.reviewCode:'']
+                .filter(Boolean).join(' · '))}</div></td>
+    <td><div class="s1 num">${fmtS(d.circDate)||'—'}</div>
+        <div class="s2 num">${d.circulating&&d.due?'due '+fmtS(d.due)
+          :(d.official?'plan '+fmtS(d.official):'')}</div></td>
+    <td style="text-align:right">
+        ${d.days!=null?`<span class="tag ${ageCls} num">${d.days}d</span>`:'<span class="s2">—</span>'}
+        <div class="s2 num">${d.circulating&&d.over!=null
+          ? (d.over>0?'+'+d.over+' late':d.over===0?'due today':Math.abs(d.over)+'d left') : ''}</div></td>
+    <td>
+      <div class="s1">${depMain}</div>
+      ${all?`<div class="meter"><i style="width:${pct}%;background:var(--ok)"></i>
+             <i style="width:${100-pct}%;background:${openN?'#E3B7B3':'transparent'}"></i></div>`:''}
+      <div class="s2" title="${esc(names.join(', '))}">${depSub}</div>
+    </td>
+  </tr>`;
+}
+
+/* Export exactly what the user is looking at, filters, sorting and all. */
+function exportTableXlsx(){
+  if(typeof XLSX==='undefined') return alert('Spreadsheet engine not loaded.');
+  const rows=S.view||[];
+  if(!rows.length) return alert('There is nothing in the list to export.');
+  const head=['DOCUMENT NUMBER','DOCUMENT TITLE','EQUIPMENT','EQUIPMENT NAME','CODE','CODE DESCRIPTION',
+    'REV','REVISIONS','DOCUMENT STATUS','RETURN STATUS','OVERALL','CATEGORY','CRITICAL','KEY DRW',
+    'SUPPLIER','CIRCULATED','DUE ('+DEADLINE_DAYS+'D)','DAYS IN CIRCULATION','DISCIPLINES CLOSED',
+    'DISCIPLINES OPEN','AWAITING REVIEW FROM'];
+  const aoa=[['CONSOLIDATED STATUS — FILTERED DOCUMENT LIST'],
+             [S.po+'  ·  '+S.dep],
+             ['as of '+S.meta.asOf+'  ·  '+rows.length+' of '+S.docs.length+' documents'],[],head];
+  rows.forEach(d=>aoa.push([d.label,d.title||'',d.xref||'',d.equip||'',d.code||'',d.codeDesc||'',
+    d.rev||'',d.nRev,d.status,d.ret||'',d.overall||'',d.category||'',d.critical?'Y':'N',d.keydrw?'Y':'N',
+    d.vendor||'',fmt(d.circDate),d.circulating?fmt(d.due):'',d.days==null?'':d.days,
+    d.depDone,d.depOpen,d.latest.depts.filter(x=>!x.closed&&x.review).map(x=>x.name).join('; ')]));
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols']=[{wch:40},{wch:52},{wch:16},{wch:30},{wch:12},{wch:38},{wch:6},{wch:10},{wch:30},{wch:32},
+               {wch:9},{wch:10},{wch:9},{wch:9},{wch:38},{wch:13},{wch:13},{wch:9},{wch:9},{wch:9},{wch:44}];
+  ws['!freeze']={xSplit:0,ySplit:5};
+  if(ws['A1']) ws['A1'].s={font:{bold:true,sz:14,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'0B2545'}}};
+  if(ws['A2']) ws['A2'].s={font:{bold:true,sz:11,color:{rgb:'0B2545'}}};
+  head.forEach((_,i)=>{ const k=XLSX.utils.encode_cell({r:4,c:i});
+    if(ws[k]) ws[k].s={font:{bold:true,sz:9,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'2563EB'}},
+                       alignment:{wrapText:true,vertical:'center'}}; });
+  for(let r=5;r<aoa.length;r++) for(let c=0;c<head.length;c++){
+    const k=XLSX.utils.encode_cell({r,c}); if(!ws[k]) continue;
+    ws[k].s={font:{sz:9},alignment:{vertical:'top',wrapText:c===1||c===5||c===20},
+             border:{bottom:{style:'hair',color:{rgb:'D3DBE6'}}}};
+  }
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Document list');
+  XLSX.writeFile(wb,'Document_List_'+String(S.po).replace(/[^\w.-]+/g,'_')+'.xlsx',{cellStyles:true});
 }
 
 /* ── Document detail ───────────────────────────────────────────────────── */
@@ -666,12 +1027,20 @@ function openDoc(tr){
     <div class="meta">
       <div class="m"><div class="k">Received</div><div class="v">${fmt(L.received)||'—'}</div></div>
       <div class="m"><div class="k">Circulated</div><div class="v">${fmt(L.circ)||'—'}</div></div>
-      <div class="m ${st}"><div class="k">Days in circulation</div><div class="v">${d.days!=null?d.days:'—'}</div></div>
+      <div class="m ${st}"><div class="k">${d.circulating?'Days in circulation':'Days it took'}</div>
+        <div class="v">${d.days!=null?d.days:'—'}</div></div>
+      ${d.circulating?`
       <div class="m ${d.over>0?'dang':'ok'}"><div class="k">Due (${DEADLINE_DAYS}d)</div><div class="v">${fmt(d.due)||'—'}</div></div>
       <div class="m ${d.over>0?'dang':'ok'}"><div class="k">${d.over>0?'Overdue by':'Days left'}</div>
-        <div class="v">${d.over==null?'—':(d.over>0?d.over+'d':Math.abs(d.over)+'d')}</div></div>
+        <div class="v">${d.over==null?'—':(d.over>0?d.over+'d':Math.abs(d.over)+'d')}</div></div>`:''}
       <div class="m"><div class="k">Overall status</div><div class="v">${esc(L.overall||'—')}</div></div>
+      ${d.official?`<div class="m"><div class="k">Official (planned) date</div><div class="v">${fmt(d.official)}</div></div>`:''}
+      ${L.reviewCode?`<div class="m"><div class="k">Review code</div><div class="v">${esc(L.reviewCode)}</div></div>`:''}
+      ${L.returned?`<div class="m"><div class="k">Returned to supplier</div><div class="v">${fmt(L.returned)}</div></div>`:''}
+      <div class="m"><div class="k">Disciplines closed</div><div class="v">${d.depDone} / ${d.depAll}</div></div>
     </div>
+    ${L.comment?`<div class="panel" style="margin-bottom:16px"><h3>Status comment</h3>
+      <div class="bd" style="font-size:12.5px">${esc(L.comment)}</div></div>`:''}
 
     <div class="cols">
       <div class="panel"><h3>Applicable disciplines — who still has to close</h3>
@@ -694,9 +1063,15 @@ function openDoc(tr){
         <div class="panel"><h3>Revision history (${d.revs.length})</h3>
           ${d.revs.map((r,i)=>`<div class="revrow ${i===0?'cur':''}">
             <div class="rv">rev ${esc(r.trRev||'—')}</div>
-            <div style="flex:1">${esc(r.status||'—')}${r.ret?` <span style="color:var(--muted)">· ${esc(r.ret)}</span>`:''}</div>
-            <div style="color:var(--muted);font-size:11.5px">${fmt(r.circ)||''}</div>
-            ${i===0?'<span class="tag blue">LATEST</span>':'<span class="tag info">superseded</span>'}
+            <div style="flex:1">
+              <span class="tag ${stMeta(r.status).cls}">${esc(r.status||'—')}</span>
+              <div class="s2" style="margin-top:3px">${esc(r.ret||'')}${r.reviewCode?' · code '+esc(r.reviewCode):''}</div>
+            </div>
+            <div style="text-align:right">
+              <div class="s2 num">${r.circ?'circulated '+fmt(r.circ):(r.received?'received '+fmt(r.received):'')}</div>
+              <div class="s2 num">${r.returned?'returned '+fmt(r.returned):''}</div>
+            </div>
+            ${i===0?'<span class="tag blue">LATEST</span>':'<span class="tag ghost">superseded</span>'}
           </div>`).join('')}</div>
       </div>
     </div>`;
@@ -811,6 +1186,7 @@ function resetAll(){
   $('crumbs').innerHTML='';go('upload');
 }
 window.openDoc=openDoc;window.buildDash=buildDash;window.go=go;window.resetAll=resetAll;
+window.clearFilters=clearFilters;window.exportTableXlsx=exportTableXlsx;
 window.openReport=openReport;window.backToDoc=backToDoc;window.printReport=printReport;
 window.copyReport=copyReport;window.exportReportXlsx=exportReportXlsx;
 </script>
