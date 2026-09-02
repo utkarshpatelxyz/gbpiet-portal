@@ -244,6 +244,42 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .revrow.cur{background:#EAF3FF}
 .revrow .rv{flex:0 0 62px;font-weight:800;color:var(--navy)}
 
+/* report — open points */
+.re-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--sf);border:1px solid var(--line);
+  border-radius:14px;padding:12px 16px;box-shadow:var(--sh1);margin-bottom:16px}
+.re-bar input{flex:1 1 220px;min-width:180px;padding:9px 12px;font-size:12.5px;font-weight:600;color:var(--navy);
+  border:1px solid var(--line2);border-radius:9px;background:var(--sf2)}
+.re-bar input:focus{outline:none;border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.pts{padding:0 16px 14px}
+.pts-h{font-size:9.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);
+  margin:4px 0 8px;padding-top:12px;border-top:1px dashed var(--line2)}
+.pt{background:var(--sf2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.pt-h{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.pt-n{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--blue);flex:0 0 auto}
+.pt-t{flex:1;font-size:12.5px;font-weight:800;color:var(--navy)}
+.pt-x{border:none;background:none;color:var(--muted);cursor:pointer;font-size:14px;line-height:1;padding:2px 4px}
+.pt-x:hover{color:var(--dang)}
+.rmk-row{display:flex;gap:7px;align-items:flex-start;margin-bottom:6px}
+.rmk-row .bul{flex:0 0 auto;font-size:11px;color:var(--muted);padding-top:9px;font-family:var(--mono)}
+.rmk-row textarea{flex:1;min-height:38px;padding:8px 10px;font-size:12px;border:1px solid var(--line2);
+  border-radius:8px;background:#fff;resize:vertical;line-height:1.45}
+.rmk-row textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.addr{border:1px dashed var(--line2);background:transparent;color:var(--blue);font-size:11px;font-weight:800;
+  border-radius:7px;padding:5px 11px;cursor:pointer;margin-left:20px}
+.addr:hover{background:#EAF2FF;border-style:solid}
+.pt-none{font-size:12px;color:var(--muted);font-weight:600;padding:8px 2px}
+
+/* basket */
+.bk-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.bk-row:last-child{border-bottom:none}
+.bk-row .g{flex:1;min-width:0}
+.bk-row .t{font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--navy);word-break:break-all}
+.bk-row .s{font-size:11px;color:var(--muted);font-weight:600;margin-top:2px}
+.bk-grp{background:#E3EBF4;padding:8px 16px;font-size:11.5px;font-weight:800;color:var(--navy)}
+.navbtn{position:relative}
+.navbtn .badge{display:inline-block;margin-left:6px;background:var(--blue);color:#fff;border-radius:10px;
+  padding:1px 7px;font-size:10px;font-weight:800}
+
 /* report */
 .rep-dept{background:var(--sf);border:1px solid var(--line);border-radius:14px;margin-bottom:14px;overflow:hidden;box-shadow:var(--sh1)}
 .rep-dh{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--sf2);border-bottom:1px solid var(--line)}
@@ -282,7 +318,8 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
   .p-d{margin-bottom:10px;break-inside:avoid}
   .p-d h3{font-size:9pt;background:#0B2545;color:#fff;padding:4px 8px;border-radius:3px}
   .p-d .role{font-size:7.5pt;color:#5C6B7A;margin:4px 0}
-  .p-d ul{margin:4px 0 4px 16px;font-size:8pt}
+  .p-d ol{margin:4px 0 4px 16px;font-size:8pt}
+  .p-d ul{margin:2px 0 4px 14px;font-size:7.5pt;color:#3C4A5A}
   .p-d .rm{font-size:8pt;border:1px solid #E4E9F0;padding:5px 7px;border-radius:3px;background:#F6F9FC;margin-top:4px}
   .p-sign{display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px;margin-top:26px}
   .p-sign div{border-top:1px solid #0B2545;padding-top:3px;font-size:7pt;color:#5C6B7A}
@@ -297,6 +334,8 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
   <div class="crumbs" id="crumbs"></div>
   <div class="sp"></div>
   <div class="pill" id="navinfo" style="display:none"></div>
+  <button class="btn btn-g btn-s navbtn" id="btn-basket" style="display:none" onclick="openBasket()">
+    Consolidated report<span class="badge" id="bk-n">0</span></button>
   <button class="btn btn-g btn-s" id="btn-reset" style="display:none" onclick="resetAll()">Load another file</button>
 </div></div>
 
@@ -407,9 +446,27 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
   <div id="rep-head"></div>
   <div id="rep-body"></div>
   <div class="acts">
-    <button class="btn btn-p" onclick="printReport()">🖨 Print / Save as PDF</button>
-    <button class="btn btn-g" onclick="exportReportXlsx()">⤓ Download as Excel</button>
+    <button class="btn btn-p" onclick="addToBasket()">＋ Add to consolidated report</button>
+    <button class="btn btn-g" onclick="exportOneRow()">⤓ Download this document (1 row)</button>
+    <button class="btn btn-g" onclick="printReport()">🖨 Print / Save as PDF</button>
     <button class="btn btn-g" onclick="copyReport()">⧉ Copy as text</button>
+  </div>
+  <div class="foot"></div>
+</div></div>
+
+<!-- 6 ── CONSOLIDATED REPORT ─────────────────────────────────────────────── -->
+<div class="screen" id="sc-basket"><div class="wrap">
+  <button class="back" onclick="go('dash')">← Back to the document list</button>
+  <div class="sec" style="margin-top:6px"><h2>Consolidated open-point report</h2>
+    <span class="cnt" id="bk-cnt"></span><div class="rule"></div></div>
+  <p style="font-size:12.5px;color:var(--muted);margin-bottom:16px">
+    One row per equipment and document type. Every department in the workbook gets its own column,
+    applicable or not, so rows from different documents line up.<br>
+    The list is kept in this browser, so it survives a reload and can be built up over several sittings.</p>
+  <div class="panel"><div id="bk-list"></div></div>
+  <div class="acts">
+    <button class="btn btn-p" onclick="exportBasketXlsx()">⤓ Download consolidated Excel</button>
+    <button class="btn btn-g" onclick="clearBasket()">✕ Empty the report</button>
   </div>
   <div class="foot"></div>
 </div></div>
@@ -436,7 +493,7 @@ const THINGS = [
 
 const DEADLINE_DAYS = 15;   // days allowed from CIRCULATE DATE to close
 
-const S = { rows:[], hdr:{}, depts:[], meta:{}, po:null, dep:null, sub:[], docs:[], cur:null, report:{} };
+const S = { rows:[], hdr:{}, depts:[], meta:{}, po:null, dep:null, sub:[], docs:[], cur:null, basket:[] };
 const $ = id => document.getElementById(id);
 const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
@@ -521,6 +578,7 @@ function parseBook(bytes){
 
   $('loadbox').classList.remove('on');
   buildFilters();
+  loadBasket();
   $('btn-reset').style.display='';
   go('filter');
 }
@@ -976,7 +1034,6 @@ function exportTableXlsx(){
   const ws=XLSX.utils.aoa_to_sheet(aoa);
   ws['!cols']=[{wch:40},{wch:52},{wch:16},{wch:30},{wch:12},{wch:38},{wch:6},{wch:10},{wch:30},{wch:32},
                {wch:9},{wch:10},{wch:9},{wch:9},{wch:38},{wch:13},{wch:13},{wch:9},{wch:9},{wch:9},{wch:44}];
-  ws['!freeze']={xSplit:0,ySplit:5};
   if(ws['A1']) ws['A1'].s={font:{bold:true,sz:14,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'0B2545'}}};
   if(ws['A2']) ws['A2'].s={font:{bold:true,sz:11,color:{rgb:'0B2545'}}};
   head.forEach((_,i)=>{ const k=XLSX.utils.encode_cell({r:4,c:i});
@@ -1058,7 +1115,7 @@ function openDoc(tr){
           ${(!d.blockers.length&&!d.ownerPending.length)?
             `<p style="font-size:12.5px">No discipline marked <b>FOR REVIEW</b> is outstanding.
              ${L.depts.filter(x=>x.pending&&!x.review).length?'Remaining entries are <b>FOR INFORMATION</b> only — no action needed.':''}</p>`:''}
-          ${d.circulating?`<button class="btn btn-p btn-s" style="margin-top:14px" onclick="openReport()">Prepare pending report →</button>`:''}
+          ${d.circulating?`<button class="btn btn-p btn-s" style="margin-top:14px" onclick="openReport()">Record open points →</button>`:''}
         </div></div>
         <div class="panel"><h3>Revision history (${d.revs.length})</h3>
           ${d.revs.map((r,i)=>`<div class="revrow ${i===0?'cur':''}">
@@ -1079,104 +1136,318 @@ function openDoc(tr){
 }
 function backToDoc(){ if(S.cur) openDoc(S.cur.tr); else go('dash'); }
 
-/* ── Pending report ────────────────────────────────────────────────────── */
+/* ── Pending report ────────────────────────────────────────────────────────
+   The report an engineer used to keep by hand is an open-point matrix: one row
+   per equipment and document type, and one column per department holding that
+   department's open points as numbered lines.  The screen below captures that
+   row — tick the items that are outstanding, then write one or more remarks
+   against each ticked item.
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* R = the report being edited. depts[i].pts is an ordered list of open points. */
+let R = null;
+
+const unitOf = x => { const m=String(x||'').match(/^([A-Za-z0-9]+)-/); return m?m[1]:''; };
+
 function openReport(){
   const d=S.cur; if(!d) return;
-  S.report={};
-  const targets=d.latest.depts.filter(x=>x.pending);   // everything still open
-  $('rep-head').innerHTML=`<div class="sec" style="margin-top:6px"><h2>Pending report — ${esc(d.label)}</h2>
-      <span class="cnt">${targets.length} open discipline${targets.length>1?'s':''}</span><div class="rule"></div></div>
-    <p style="font-size:12.5px;color:var(--muted);margin-bottom:16px">
-      Tick what is outstanding for each discipline and add a remark. The report can then be printed,
-      downloaded or copied and sent on.</p>`;
-  $('rep-body').innerHTML = targets.length? targets.map((x,i)=>`
+  const targets=d.latest.depts.filter(x=>x.pending);      // still open on this revision
+  R = { tr:d.tr, re:'', depts:targets.map(x=>({name:x.name, raw:x.raw, review:x.review,
+                                               originator:x.originator, pts:[], general:''})) };
+  $('rep-head').innerHTML=`<div class="sec" style="margin-top:6px"><h2>Open points — ${esc(d.label)}</h2>
+      <span class="cnt">${targets.length} open discipline${targets.length===1?'':'s'}</span><div class="rule"></div></div>
+    <p style="font-size:12.5px;color:var(--muted);margin-bottom:14px">
+      Tick what is outstanding for each department, then write a remark against each ticked point.
+      A point can carry several remarks — each one becomes its own line in the department's cell.</p>
+    <div class="re-bar">
+      <span class="lbl">Equipment</span><b style="font-size:12.5px;color:var(--navy)">${esc(d.xref)}</b>
+      <span class="lbl">Document type</span><b style="font-size:12.5px;color:var(--navy)">${esc(d.code)}</b>
+      <span class="lbl">Responsible engineer</span>
+      <input id="rep-re" placeholder="Name of the engineer this report is from" value="">
+    </div>`;
+
+  $('rep-body').innerHTML = targets.length ? R.depts.map((x,i)=>`
     <div class="rep-dept">
       <div class="rep-dh">
         <div class="nm">${esc(x.name)}</div>
         ${x.review?`<span class="tag ${x.originator?'warn':'dang'}">${esc(x.raw)}</span>`
                   :`<span class="tag info">${esc(x.raw)}</span>`}
+        <span class="tag ghost" id="cnt-${i}">0 open points</span>
       </div>
-      <div class="things">${THINGS.map((t,j)=>`
+      <div class="things">${THINGS.map(t=>`
         <label class="thing"><input type="checkbox" data-d="${i}" data-t="${esc(t)}"> ${esc(t)}</label>`).join('')}</div>
-      <div class="rmk"><label>Remark for ${esc(x.name)}</label>
-        <textarea data-r="${i}" placeholder="Why is this discipline holding the document? What exactly is required?"></textarea></div>
-    </div>`).join('') : '<div class="panel"><div class="empty">Nothing is outstanding on this revision.</div></div>';
-  S.repTargets=targets;
+      <div class="pts" id="pts-${i}"></div>
+      <div class="rmk"><label>General remark for ${esc(x.name)} (optional)</label>
+        <textarea data-g="${i}" placeholder="Anything that is not tied to one specific point."></textarea></div>
+    </div>`).join('')
+    : '<div class="panel"><div class="empty">Nothing is outstanding on this revision.</div></div>';
+
+  $('rep-re').oninput = e=>{ R.re=e.target.value; };
+  $('rep-body').querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{
+    const i=+cb.dataset.d, t=cb.dataset.t, dep=R.depts[i];
+    if(cb.checked){ if(!dep.pts.some(p=>p.thing===t)) dep.pts.push({thing:t,remarks:['']}); }
+    else dep.pts = dep.pts.filter(p=>p.thing!==t);
+    renderPts(i);
+  });
+  $('rep-body').querySelectorAll('textarea[data-g]').forEach(ta=>
+    ta.oninput=()=>{ R.depts[+ta.dataset.g].general=ta.value; });
+  R.depts.forEach((_,i)=>renderPts(i));
   go('report');
 }
-function collectReport(){
-  const out=[];
-  (S.repTargets||[]).forEach((x,i)=>{
-    const things=[...document.querySelectorAll(`input[data-d="${i}"]:checked`)].map(c=>c.dataset.t);
-    const rmEl=document.querySelector(`textarea[data-r="${i}"]`);
-    const remark=rmEl?rmEl.value.trim():'';
-    if(things.length||remark) out.push({dept:x.name,role:x.raw,things,remark});
-  });
-  return out;
+
+/* Draw one department's open points; each point holds one or more remark lines. */
+function renderPts(i){
+  const dep=R.depts[i], box=$('pts-'+i);
+  $('cnt-'+i).textContent = dep.pts.length+' open point'+(dep.pts.length===1?'':'s');
+  if(!dep.pts.length){ box.innerHTML='<div class="pt-none">No point ticked yet — tick an item above to add a remark against it.</div>'; return; }
+  box.innerHTML='<div class="pts-h">Open points and remarks</div>'+dep.pts.map((p,j)=>`
+    <div class="pt">
+      <div class="pt-h"><span class="pt-n">${j+1}.</span><span class="pt-t">${esc(p.thing)}</span>
+        <button class="pt-x" data-rm="${i}:${j}" title="Remove this point">✕</button></div>
+      ${p.remarks.map((r,k)=>`<div class="rmk-row"><span class="bul">${j+1}.${k+1}</span>
+        <textarea data-p="${i}:${j}:${k}" placeholder="What exactly is outstanding on ${esc(p.thing).toLowerCase()}?">${esc(r)}</textarea>
+        ${p.remarks.length>1?`<button class="pt-x" data-rr="${i}:${j}:${k}" title="Remove this remark">✕</button>`:''}
+      </div>`).join('')}
+      <button class="addr" data-add="${i}:${j}">+ Add another remark</button>
+    </div>`).join('');
+
+  box.querySelectorAll('textarea[data-p]').forEach(ta=>ta.oninput=()=>{
+    const [a,b,c]=ta.dataset.p.split(':').map(Number); R.depts[a].pts[b].remarks[c]=ta.value; });
+  box.querySelectorAll('[data-add]').forEach(bt=>bt.onclick=()=>{
+    const [a,b]=bt.dataset.add.split(':').map(Number); R.depts[a].pts[b].remarks.push(''); renderPts(a);
+    const l=box.querySelectorAll('textarea[data-p]'); if(l.length) l[l.length-1].focus(); });
+  box.querySelectorAll('[data-rr]').forEach(bt=>bt.onclick=()=>{
+    const [a,b,c]=bt.dataset.rr.split(':').map(Number); R.depts[a].pts[b].remarks.splice(c,1); renderPts(a); });
+  box.querySelectorAll('[data-rm]').forEach(bt=>bt.onclick=()=>{
+    const [a,b]=bt.dataset.rm.split(':').map(Number);
+    const t=R.depts[a].pts[b].thing; R.depts[a].pts.splice(b,1);
+    const cb=$('rep-body').querySelector(`input[data-d="${a}"][data-t="${CSS.escape(t)}"]`);
+    document.querySelectorAll(`input[data-d="${a}"]`).forEach(x=>{ if(x.dataset.t===t) x.checked=false; });
+    renderPts(a); });
 }
+
+/* The department cell exactly as it reads in the engineers' own sheet:
+     1. Nozzles & Orientation
+        - N1 relocated to 180° (informed to vendor)                          */
+function deptCellText(dep){
+  const lines=[];
+  dep.pts.forEach((p,j)=>{
+    lines.push((j+1)+'. '+p.thing);
+    p.remarks.map(r=>r.trim()).filter(Boolean).forEach(r=>lines.push('   - '+r));
+  });
+  if(dep.general.trim()) lines.push((lines.length?'':'')+'Note: '+dep.general.trim());
+  return lines.join('\n');
+}
+function reportHasContent(){
+  return !!R && R.depts.some(d=>d.pts.length || d.general.trim());
+}
+
+/* ── the one-row snapshot that feeds every Excel export ────────────────── */
+function snapshot(){
+  const d=S.cur, L=d.latest;
+  const state={};                       // every department in the workbook
+  S.depts.forEach(x=>state[x.name]={app:false,review:false,raw:'',closed:null});
+  L.depts.forEach(x=>{ state[x.name]={app:true,review:x.review,raw:x.raw,closed:x.closed?fmt(x.closed):null}; });
+  const cells={};
+  R.depts.forEach(dep=>{ const t=deptCellText(dep); if(t) cells[dep.name]=t; });
+  const all=[];
+  R.depts.forEach(dep=>dep.pts.forEach(p=>all.push(dep.name+' — '+p.thing+
+    (p.remarks.filter(r=>r.trim()).length?': '+p.remarks.map(r=>r.trim()).filter(Boolean).join(' / '):''))));
+  return {
+    id: S.po+'|'+d.tr,
+    po:S.po, dep:S.dep, re:R.re||'',
+    unit:unitOf(d.xref), xref:d.xref||'', equip:d.equip||'',
+    tr:d.tr, label:d.label, title:d.title||'',
+    code:d.code||'', codeDesc:d.codeDesc||'', rev:d.rev||'',
+    status:d.status, ret:L.ret||'', reviewCode:L.reviewCode||'',
+    days:d.days==null?'':d.days, circ:fmt(L.circ), due:d.circulating?fmt(d.due):'',
+    vendor:d.vendor||'', critical:d.critical, nRev:d.nRev,
+    state, cells,
+    openPoints: all.map((x,i)=>(i+1)+'. '+x).join('\n'),
+    savedAt: new Date().toISOString()
+  };
+}
+
+/* ── the consolidated basket ───────────────────────────────────────────── */
+const BK_KEY='vdt.openpoints.v1';
+function loadBasket(){ try{ S.basket=JSON.parse(localStorage.getItem(BK_KEY))||[]; }catch(e){ S.basket=[]; } paintBasket(); }
+function saveBasket(){ try{ localStorage.setItem(BK_KEY,JSON.stringify(S.basket)); }catch(e){} paintBasket(); }
+function paintBasket(){
+  const n=(S.basket||[]).length;
+  $('bk-n').textContent=n;
+  $('btn-basket').style.display = S.rows.length? '' : 'none';
+}
+function addToBasket(){
+  if(!reportHasContent()) return alert('Tick at least one point, or write a general remark, before adding this document.');
+  const snap=snapshot();
+  const i=S.basket.findIndex(x=>x.id===snap.id);
+  if(i>=0){ if(!confirm('This document is already in the consolidated report. Replace it with what is on screen?')) return;
+            S.basket[i]=snap; } else S.basket.push(snap);
+  saveBasket();
+  alert('Added. The consolidated report now holds '+S.basket.length+' document'+(S.basket.length===1?'':'s')+'.');
+}
+function openBasket(){ renderBasket(); go('basket'); }
+function clearBasket(){
+  if(!S.basket.length) return;
+  if(!confirm('Remove all '+S.basket.length+' documents from the consolidated report?')) return;
+  S.basket=[]; saveBasket(); renderBasket();
+}
+function removeFromBasket(id){ S.basket=S.basket.filter(x=>x.id!==id); saveBasket(); renderBasket(); }
+function renderBasket(){
+  const b=(S.basket||[]).slice().sort((x,y)=>
+    (x.xref||'').localeCompare(y.xref||'') || (x.code||'').localeCompare(y.code||'') || x.tr.localeCompare(y.tr));
+  $('bk-cnt').textContent = b.length+' document'+(b.length===1?'':'s');
+  if(!b.length){ $('bk-list').innerHTML='<div class="empty">Nothing here yet. Open a document, fill in its open points, then choose <b>Add to consolidated report</b>.</div>'; return; }
+  let html='', last=null;
+  b.forEach(e=>{
+    if(e.xref!==last){ last=e.xref;
+      html+=`<div class="bk-grp">${esc(e.xref||'(no equipment)')}${e.equip?' · '+esc(e.equip):''}</div>`; }
+    const nPts=Object.keys(e.cells).length;
+    html+=`<div class="bk-row">
+      <div class="g"><div class="t">${esc(e.label)}</div>
+        <div class="s">${esc(e.code)}${e.codeDesc?' — '+esc(e.codeDesc):''} · rev ${esc(e.rev||'—')}
+          · ${nPts} department${nPts===1?'':'s'} with open points${e.re?' · RE '+esc(e.re):''}</div></div>
+      <span class="tag ${stMeta(e.status).cls}">${esc(stShort(e.status))}</span>
+      <button class="chip" onclick="removeFromBasket('${esc(e.id).replace(/'/g,"\\'")}')">Remove</button>
+    </div>`;
+  });
+  $('bk-list').innerHTML=html;
+}
+
+/* ── Excel: the open-point matrix ──────────────────────────────────────── */
+const FIXED_COLS=[
+  ['UNIT',            e=>e.unit,     8],
+  ['EQ. TAG NO',      e=>e.xref,    16],
+  ['EQUIPMENT NAME',  e=>e.equip,   30],
+  ['RE',              e=>e.re,      16],
+  ['PURCHASE ORDER',  e=>e.po,      15],
+  ['DOCUMENT NUMBER', e=>e.label,   40],
+  ['DOCUMENT TYPE',   e=>e.code+(e.codeDesc?' — '+e.codeDesc:''), 40],
+  ['REV',             e=>e.rev,      7],
+  ['DOCUMENT STATUS', e=>[e.reviewCode?'CODE '+e.reviewCode:'',e.status].filter(Boolean).join(' - '), 34],
+  ['CIRCULATED',      e=>e.circ,    13],
+  ['DAYS',            e=>e.days,     7],
+  ['OPEN POINTS',     e=>e.openPoints, 52]
+];
+function buildMatrixSheet(entries,titleLine){
+  const deptNames=S.depts.map(d=>d.name);
+  const head=FIXED_COLS.map(c=>c[0]).concat(deptNames);
+  const aoa=[['OPEN POINT REPORT'],[titleLine],
+             ['as of '+S.meta.asOf+'  ·  generated '+new Date().toLocaleString()],[],head];
+  entries.forEach(e=>{
+    const row=FIXED_COLS.map(c=>c[1](e));
+    deptNames.forEach(n=>{
+      const st=e.state[n]||{};
+      if(e.cells[n])      row.push(e.cells[n]);          // open points captured here
+      else if(!st.app)    row.push('N/A');               // not applicable to this document
+      else if(st.closed)  row.push('Closed '+st.closed);
+      else                row.push('-');
+    });
+    aoa.push(row);
+  });
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols']=FIXED_COLS.map(c=>({wch:c[2]})).concat(deptNames.map(()=>({wch:34})));
+  ws['!autofilter']={ref:XLSX.utils.encode_range({s:{r:4,c:0},e:{r:aoa.length-1,c:head.length-1}})};
+  /* row heights follow the tallest cell, so the numbered lines stay visible */
+  ws['!rows']=aoa.map((r,i)=>{
+    if(i<4) return {hpt:i===0?22:16};
+    if(i===4) return {hpt:34};
+    const lines=Math.max(...r.map(c=>String(c==null?'':c).split('\n').length));
+    return {hpt:Math.min(220,Math.max(30,lines*13))};
+  });
+  const B={style:'thin',color:{rgb:'BFCCDA'}};
+  const put=(r,c,st)=>{ const k=XLSX.utils.encode_cell({r,c}); if(!ws[k]) ws[k]={t:'s',v:''}; ws[k].s=st; };
+  put(0,0,{font:{bold:true,sz:15,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'0B2545'}},
+           alignment:{vertical:'center'}});
+  put(1,0,{font:{bold:true,sz:11,color:{rgb:'0B2545'}}});
+  put(2,0,{font:{sz:9,italic:true,color:{rgb:'5C6B7A'}}});
+  head.forEach((_,c)=>put(4,c,{font:{bold:true,sz:9,color:{rgb:'FFFFFF'}},
+    fill:{fgColor:{rgb:c<FIXED_COLS.length?'0B2545':'2563EB'}},
+    alignment:{wrapText:true,vertical:'center',horizontal:'center'},
+    border:{top:B,bottom:B,left:B,right:B}}));
+  for(let r=5;r<aoa.length;r++){
+    const alt = (r%2===1);
+    for(let c=0;c<head.length;c++){
+      const v=String(aoa[r][c]==null?'':aoa[r][c]);
+      const isNA = v==='N/A', isNone = v==='-', hasPts = c>=FIXED_COLS.length && v && !isNA && !isNone && v.indexOf('Closed ')!==0;
+      put(r,c,{font:{sz:9,color:{rgb:isNA?'A7B3C0':'1A2432'},bold:hasPts?false:false},
+        fill:{fgColor:{rgb: hasPts?'FDF3E2' : (isNA?'F4F6F8' : (alt?'FAFCFE':'FFFFFF'))}},
+        alignment:{wrapText:true,vertical:'top',horizontal:isNA||isNone?'center':'left'},
+        border:{top:B,bottom:B,left:B,right:B}});
+    }
+  }
+  return ws;
+}
+function exportOneRow(){
+  if(!reportHasContent()) return alert('Tick at least one point, or write a general remark, first.');
+  if(typeof XLSX==='undefined') return alert('Spreadsheet engine not loaded.');
+  const e=snapshot();
+  const ws=buildMatrixSheet([e], e.xref+'  ·  '+e.code+'  ·  '+e.label);
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Open points');
+  XLSX.writeFile(wb,'Open_Points_'+e.label.replace(/[^\w.-]+/g,'_')+'.xlsx',{cellStyles:true});
+}
+function exportBasketXlsx(){
+  if(!S.basket.length) return alert('The consolidated report is empty.');
+  if(typeof XLSX==='undefined') return alert('Spreadsheet engine not loaded.');
+  const rows=S.basket.slice().sort((x,y)=>
+    (x.unit||'').localeCompare(y.unit||'') || (x.xref||'').localeCompare(y.xref||'') ||
+    (x.code||'').localeCompare(y.code||'') || x.label.localeCompare(y.label));
+  const pos=[...new Set(rows.map(r=>r.po))];
+  const ws=buildMatrixSheet(rows, pos.join(', ')+'  ·  '+rows.length+' documents across '+
+    new Set(rows.map(r=>r.xref)).size+' equipment items');
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Open points');
+  XLSX.writeFile(wb,'Consolidated_Open_Points_'+pos[0]+'.xlsx',{cellStyles:true});
+}
+
+/* ── printable / copyable versions ─────────────────────────────────────── */
 function reportMeta(){
   const d=S.cur,L=d.latest;
-  return [['Purchase order',S.po],['Originator department',S.dep],['Equipment',d.xref+' — '+(d.equip||'')],
-    ['TR number',d.label],['Revision',L.trRev],['Document title',d.title||''],
-    ['Code',d.code+' — '+(d.codeDesc||'')],['Supplier',d.vendor||''],
+  return [['Purchase order',S.po],['Originator department',S.dep],
+    ['Unit',unitOf(d.xref)],['Equipment',d.xref+' — '+(d.equip||'')],
+    ['Responsible engineer',R?R.re:''],
+    ['Document number',d.label],['Document type',d.code+' — '+(d.codeDesc||'')],
+    ['Revision',L.trRev],['Document title',d.title||''],['Supplier',d.vendor||''],
     ['Circulated',fmt(L.circ)],['Days in circulation',(d.days!=null?d.days:'—')+' (limit '+DEADLINE_DAYS+')'],
     ['Status',L.status]];
 }
 function printReport(){
-  const items=collectReport(); const d=S.cur;
-  if(!items.length) return alert('Tick at least one item or write a remark first.');
+  if(!reportHasContent()) return alert('Tick at least one point, or write a general remark, first.');
+  const d=S.cur;
   $('printarea').innerHTML=`
-    <div class="p-h"><h1>Pending Report — ${esc(d.label)}</h1>
+    <div class="p-h"><h1>Open Points — ${esc(d.label)}</h1>
       <div class="s">${esc(d.title||'')} · generated ${new Date().toLocaleString()}</div></div>
     <div class="p-meta">${reportMeta().map(([k,v])=>`<div><b>${esc(k)}</b>${esc(v||'—')}</div>`).join('')}</div>
-    ${items.map(it=>`<div class="p-d"><h3>${esc(it.dept)}</h3>
-      <div class="role">Marked: ${esc(it.role)}</div>
-      ${it.things.length?`<ul>${it.things.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''}
-      ${it.remark?`<div class="rm"><b>Remark:</b> ${esc(it.remark)}</div>`:''}</div>`).join('')}
+    ${R.depts.filter(x=>x.pts.length||x.general.trim()).map(x=>`<div class="p-d">
+      <h3>${esc(x.name)}</h3><div class="role">Marked: ${esc(x.raw)}</div>
+      ${x.pts.length?`<ol>${x.pts.map(p=>`<li><b>${esc(p.thing)}</b>
+        ${p.remarks.filter(r=>r.trim()).length?`<ul>${p.remarks.filter(r=>r.trim())
+          .map(r=>`<li>${esc(r.trim())}</li>`).join('')}</ul>`:''}</li>`).join('')}</ol>`:''}
+      ${x.general.trim()?`<div class="rm"><b>Note:</b> ${esc(x.general.trim())}</div>`:''}</div>`).join('')}
     <div class="p-sign"><div>Prepared by</div><div>Checked by</div><div>Discipline Leader</div></div>`;
   setTimeout(()=>window.print(),60);
 }
 function reportText(){
-  const items=collectReport(); const d=S.cur;
-  let t='PENDING REPORT — '+d.label+'\n'+(d.title||'')+'\n'+'='.repeat(60)+'\n';
+  const d=S.cur;
+  let t='OPEN POINTS — '+d.label+'\n'+(d.title||'')+'\n'+'='.repeat(64)+'\n';
   reportMeta().forEach(([k,v])=>{ t+=k.padEnd(24)+': '+(v||'—')+'\n'; });
-  t+='\n';
-  items.forEach(it=>{
-    t+='-'.repeat(60)+'\n'+it.dept+'   ['+it.role+']\n';
-    if(it.things.length) it.things.forEach(x=>t+='   [x] '+x+'\n');
-    if(it.remark) t+='   Remark: '+it.remark+'\n';
+  R.depts.filter(x=>x.pts.length||x.general.trim()).forEach(x=>{
+    t+='\n'+'-'.repeat(64)+'\n'+x.name+'   ['+x.raw+']\n';
+    x.pts.forEach((p,j)=>{ t+=(j+1)+'. '+p.thing+'\n';
+      p.remarks.map(r=>r.trim()).filter(Boolean).forEach(r=>t+='   - '+r+'\n'); });
+    if(x.general.trim()) t+='   Note: '+x.general.trim()+'\n';
   });
   return t;
 }
 function copyReport(){
-  const items=collectReport();
-  if(!items.length) return alert('Tick at least one item or write a remark first.');
+  if(!reportHasContent()) return alert('Tick at least one point, or write a general remark, first.');
   navigator.clipboard.writeText(reportText())
     .then(()=>alert('Report copied to clipboard.'))
     .catch(()=>alert('Could not copy — use Print or Download instead.'));
 }
-function exportReportXlsx(){
-  const items=collectReport(); const d=S.cur;
-  if(!items.length) return alert('Tick at least one item or write a remark first.');
-  if(typeof XLSX==='undefined') return alert('Spreadsheet engine not loaded.');
-  const aoa=[['PENDING REPORT'],[d.label],[d.title||''],[]];
-  reportMeta().forEach(([k,v])=>aoa.push([k,v||'']));
-  aoa.push([],['DISCIPLINE','MARKED AS','PENDING ITEMS','REMARK']);
-  items.forEach(it=>aoa.push([it.dept,it.role,it.things.join('; '),it.remark]));
-  const ws=XLSX.utils.aoa_to_sheet(aoa);
-  ws['!cols']=[{wch:34},{wch:26},{wch:60},{wch:50}];
-  const hdrRow=aoa.findIndex(r=>r[0]==='DISCIPLINE');
-  ['A','B','C','D'].forEach((c,i)=>{
-    const t=ws['A1']; if(t) t.s={font:{bold:true,sz:14,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'0B2545'}}};
-    const k=c+(hdrRow+1); if(ws[k]) ws[k].s={font:{bold:true,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'2563EB'}}};
-  });
-  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Pending Report');
-  XLSX.writeFile(wb,'Pending_Report_'+d.label.replace(/[^\w.-]+/g,'_')+'.xlsx',{cellStyles:true});
-}
 
 /* ── nav ───────────────────────────────────────────────────────────────── */
 function go(s){
-  ['upload','filter','dash','doc','report'].forEach(x=>$('sc-'+x).classList.toggle('on',x===s));
+  ['upload','filter','dash','doc','report','basket'].forEach(x=>$('sc-'+x).classList.toggle('on',x===s));
   window.scrollTo(0,0);
   if(s==='filter') $('crumbs').innerHTML='';
 }
@@ -1188,7 +1459,9 @@ function resetAll(){
 window.openDoc=openDoc;window.buildDash=buildDash;window.go=go;window.resetAll=resetAll;
 window.clearFilters=clearFilters;window.exportTableXlsx=exportTableXlsx;
 window.openReport=openReport;window.backToDoc=backToDoc;window.printReport=printReport;
-window.copyReport=copyReport;window.exportReportXlsx=exportReportXlsx;
+window.copyReport=copyReport;window.exportOneRow=exportOneRow;
+window.addToBasket=addToBasket;window.openBasket=openBasket;window.clearBasket=clearBasket;
+window.removeFromBasket=removeFromBasket;window.exportBasketXlsx=exportBasketXlsx;
 </script>
 </body>
 </html>
