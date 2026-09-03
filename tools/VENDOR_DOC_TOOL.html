@@ -419,7 +419,7 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .chartbox:hover{background:var(--sf2)}
 .chartbox .cue{position:absolute;right:8px;top:8px;font-size:10px;font-weight:800;color:var(--blue);
   opacity:.85;pointer-events:none}
-.half.open .chartbox .cue{opacity:0}
+.cblock.open .chartbox .cue{opacity:0}
 .dw{position:relative;width:100%;display:flex;justify-content:center}
 .dw svg{display:block;overflow:visible}
 .dw .sl{cursor:pointer;transition:opacity .15s}
@@ -450,9 +450,11 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 
 /* per-document-type progress, revealed by clicking the chart */
 .bytype{max-height:0;overflow:hidden;opacity:0;transition:max-height .5s var(--ease),opacity .35s var(--ease)}
-.half.open .bytype{max-height:3000px;opacity:1;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line2)}
+.cblock.open .bytype{max-height:4000px;opacity:1;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line2)}
 .bt-h{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
 .trow{display:grid;grid-template-columns:120px 1fr 44px;gap:10px;align-items:center;padding:5px 0}
+.trow.wide{grid-template-columns:158px 1fr 44px}
+.trow .c1.nm{font-family:var(--font);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .trow+.trow{border-top:1px solid var(--line)}
 .trow .tc{min-width:0}
 .trow .tc .c1{font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--navy)}
@@ -460,6 +462,20 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .trow .sbar{height:15px;border-radius:4px}
 .trow .pv{text-align:right;font-size:11.5px;font-weight:800;color:var(--ok);font-variant-numeric:tabular-nums}
 .trow .pv.zero{color:var(--muted)}
+/* one chart block: header + controls, donut, overall bar, expandable detail */
+.cblock{margin-top:18px;padding-top:15px;border-top:1px solid var(--line)}
+.cblock.first{border-top:none;padding-top:6px;margin-top:10px}
+.cb-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:7px}
+.cb-t{font-size:12.5px;font-weight:800;color:var(--navy);flex:1 1 130px;min-width:0}
+.cb-tools{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.cb-tools .ms-btn{padding:6px 9px;font-size:10.5px;max-width:180px}
+.cb-tools .chip{padding:6px 11px;font-size:10.5px}
+.cb-note{font-size:10.5px;color:var(--muted);font-weight:600;margin-bottom:9px;line-height:1.55}
+.cb-note b{color:var(--ink)}
+.cb-note .lnk{color:var(--blue);cursor:pointer;font-weight:800;text-decoration:underline}
+.cb-note.warn2{color:#9A6414;background:var(--warn-bg);border:1px solid #F0DCB6;border-radius:8px;padding:6px 10px}
+.you{font-size:8.5px;font-weight:800;background:var(--navy);color:#fff;border-radius:20px;padding:1px 6px;margin-left:5px}
+
 .half-empty{padding:34px 16px;text-align:center;color:var(--muted);font-size:12.5px;font-weight:600;line-height:1.6}
 
 /* print */
@@ -555,32 +571,80 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
   <div class="split">
     <!-- LEFT — the whole purchase order -->
     <section class="half all" id="halfA">
-      <div class="half-h"><h3>Full purchase order</h3>
+      <div class="half-h"><h3 id="titleA">Full purchase order</h3>
         <span class="tagx" style="background:#E8F0FE;color:#1A4FBF">ALL DOCUMENTS</span></div>
       <div class="half-sub" id="subA"></div>
       <div class="mini" id="miniA"></div>
-      <div class="chartbox" id="boxA" onclick="toggleHalf('A')">
-        <span class="cue">click for progress by type →</span>
-        <div class="dw" id="dwA"></div>
+
+      <!-- chart 1 — documents per document type -->
+      <div class="cblock" id="cbA-codes">
+        <div class="cb-h"><div class="cb-t">Documents by type</div>
+          <div class="cb-tools"><div id="fcA"></div>
+            <button class="chip" onclick="event.stopPropagation();exportCodeReport('A')">⤓ Report</button></div></div>
+        <div class="cb-note" id="exA"></div>
+        <div class="chartbox" id="boxA" onclick="toggleBlock('A','codes')">
+          <span class="cue">click for progress by type →</span>
+          <div class="dw" id="dwA"></div>
+        </div>
+        <div class="pie-legend" id="lgA"></div>
+        <div class="pblock" id="ovA"></div>
+        <div class="bytype" id="btA"></div>
       </div>
-      <div class="pie-legend" id="lgA"></div>
-      <div class="pblock" id="ovA"></div>
-      <div class="bytype" id="btA"></div>
+
+      <!-- chart 2 — which disciplines still have to review them -->
+      <div class="cblock" id="cbA-disc">
+        <div class="cb-h"><div class="cb-t">Disciplines that must review</div>
+          <div class="cb-tools">
+            <button class="chip" onclick="event.stopPropagation();exportDiscReport('A')">⤓ Report</button></div></div>
+        <div class="cb-note">From columns AC–CT. A discipline marked <b>FOR REVIEW</b> with no date in its closed-date
+          column is still pending; N/A and for-information entries are ignored.</div>
+        <div class="chartbox" id="dboxA" onclick="toggleBlock('A','disc')">
+          <span class="cue">click for progress by discipline →</span>
+          <div class="dw" id="ddwA"></div>
+        </div>
+        <div class="pie-legend" id="dlgA"></div>
+        <div class="pblock" id="dovA"></div>
+        <div class="bytype" id="dbtA"></div>
+      </div>
     </section>
 
     <!-- RIGHT — only what the chosen discipline has to review -->
     <section class="half rev" id="halfB">
-      <div class="half-h"><h3 id="titleB">For your review</h3>
+      <div class="half-h"><h3 id="titleB">For review</h3>
         <span class="tagx" style="background:var(--dang-bg);color:#9C2C24">FOR REVIEW ONLY</span></div>
       <div class="half-sub" id="subB"></div>
       <div class="mini" id="miniB"></div>
-      <div class="chartbox" id="boxB" onclick="toggleHalf('B')">
-        <span class="cue">click for progress by type →</span>
-        <div class="dw" id="dwB"></div>
+
+      <!-- chart 1 — documents per document type -->
+      <div class="cblock" id="cbB-codes">
+        <div class="cb-h"><div class="cb-t">Documents by type</div>
+          <div class="cb-tools"><div id="fcB"></div>
+            <button class="chip" onclick="event.stopPropagation();exportCodeReport('B')">⤓ Report</button></div></div>
+        <div class="cb-note" id="exB"></div>
+        <div class="chartbox" id="boxB" onclick="toggleBlock('B','codes')">
+          <span class="cue">click for progress by type →</span>
+          <div class="dw" id="dwB"></div>
+        </div>
+        <div class="pie-legend" id="lgB"></div>
+        <div class="pblock" id="ovB"></div>
+        <div class="bytype" id="btB"></div>
       </div>
-      <div class="pie-legend" id="lgB"></div>
-      <div class="pblock" id="ovB"></div>
-      <div class="bytype" id="btB"></div>
+
+      <!-- chart 2 — which disciplines still have to review them -->
+      <div class="cblock" id="cbB-disc">
+        <div class="cb-h"><div class="cb-t">Disciplines that must review</div>
+          <div class="cb-tools">
+            <button class="chip" onclick="event.stopPropagation();exportDiscReport('B')">⤓ Report</button></div></div>
+        <div class="cb-note">From columns AC–CT. A discipline marked <b>FOR REVIEW</b> with no date in its closed-date
+          column is still pending; N/A and for-information entries are ignored.</div>
+        <div class="chartbox" id="dboxB" onclick="toggleBlock('B','disc')">
+          <span class="cue">click for progress by discipline →</span>
+          <div class="dw" id="ddwB"></div>
+        </div>
+        <div class="pie-legend" id="dlgB"></div>
+        <div class="pblock" id="dovB"></div>
+        <div class="bytype" id="dbtB"></div>
+      </div>
     </section>
   </div>
 
@@ -681,7 +745,7 @@ const THINGS = [
 const DEADLINE_DAYS = 15;   // days allowed from CIRCULATE DATE to close
 
 const S = { rows:[], hdr:{}, depts:[], meta:{}, po:null, dep:null, disc:null, discIdx:null, discCidx:null,
-            sub:[], docs:[], cur:null, basket:[] };
+            sub:[], docs:[], cur:null, basket:[], inc:{A:null,B:null} };
 const $ = id => document.getElementById(id);
 const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
@@ -1163,7 +1227,7 @@ function statusBand(st){
 const CODE_PALETTE = ['#2563EB','#0EA5A4','#7C3AED','#DB2777','#D9922E','#2E9E6B','#E07A3C','#3B82F6',
   '#8FBF4E','#9333EA','#0891B2','#CA8A04','#DC2626','#4F46E5','#059669','#B45309','#64748B','#EC4899'];
 
-let STAT=null;
+let STAT={};
 
 function statsFor(docs){
   const by={};
@@ -1179,12 +1243,38 @@ function statsFor(docs){
            progress: docs.length? Math.round(totals.without/docs.length*100) : 0 };
 }
 
-function renderDash(){
-  const all=S.docs;
-  /* the right-hand half: only what my discipline column asks me to review */
-  const rev=all.filter(d=>d.myRole==='review'||d.myRole==='review-org');
-  STAT={ all:statsFor(all), rev:statsFor(rev) };
+/* Which disciplines still owe a review on these documents.
+   Columns AC–CT: a column reading FOR REVIEW (or FOR REVIEW - ORIGINATOR) is a
+   review this discipline owes; its paired closed-date column says whether it is
+   done.  N/A and for-information entries are not a review, so they are ignored.
+   One document can appear against several disciplines — that is the point. */
+function discStatsFor(docs){
+  const by={};
+  docs.forEach(d=>d.latest.depts.forEach(x=>{
+    if(!x.review) return;
+    const e=(by[x.name]=by[x.name]||{name:x.name,total:0,closed:0,pending:0,ownDocs:0});
+    e.total++; if(x.closed) e.closed++; else e.pending++;
+    if(x.originator) e.ownDocs++;
+  }));
+  const list=Object.values(by).sort((a,b)=>b.total-a.total);
+  list.forEach((e,i)=>{ e.col=CODE_PALETTE[i%CODE_PALETTE.length];
+                        e.pct=e.total?Math.round(e.closed/e.total*100):0; });
+  const total=list.reduce((n,e)=>n+e.total,0), closed=list.reduce((n,e)=>n+e.closed,0);
+  return { list, total, closed, pending:total-closed,
+           progress: total? Math.round(closed/total*100) : 0,
+           docs: docs.length };
+}
 
+/* the documents behind one half, after any document types the reader hid */
+function halfBase(id){
+  return id==='A' ? S.docs : S.docs.filter(d=>d.myRole==='review'||d.myRole==='review-org');
+}
+function halfDocs(id){
+  const inc=S.inc[id], base=halfBase(id);
+  return inc ? base.filter(d=>inc.has(d.code||'(no code)')) : base;
+}
+
+function renderDash(){
   $('crumbs').innerHTML=`<span class="c" onclick="go('filter')">${esc(S.dep)}</span>`+
     `<span class="s">/</span><span class="c">${esc(S.disc||'')}</span>`+
     `<span class="s">/</span><span class="c on">${esc(S.po)}</span>`;
@@ -1193,19 +1283,44 @@ function renderDash(){
       <span class="cnt">${S.poDesc?esc(S.poDesc)+' &nbsp;·&nbsp; ':''}latest revision of every document</span>
       <div class="rule"></div></div>`;
 
+  $('titleA').textContent='Full purchase order';
   $('titleB').textContent='For review — '+(S.disc||'your discipline');
   $('subA').textContent='Everything raised by '+S.dep+' under this purchase order.';
   $('subB').innerHTML='Documents whose <b>'+esc(S.disc||'')+'</b> column reads '+
     '<b>FOR REVIEW</b> or <b>FOR REVIEW - ORIGINATOR</b>.';
 
-  renderHalf('A', STAT.all);
-  renderHalf('B', STAT.rev);
-  $('halfA').classList.remove('open'); $('halfB').classList.remove('open');
+  /* one "document types" picker per half — everything on, unticking hides a type */
+  ['A','B'].forEach(id=>{
+    const codes={}, desc={};
+    halfBase(id).forEach(d=>{ const c=d.code||'(no code)';
+      codes[c]=(codes[c]||0)+1; if(desc[c]==null) desc[c]=d.codeDesc||''; });
+    S.inc[id]=new Set(Object.keys(codes));
+    const list=Object.keys(codes).sort();
+    dropdown($('fc'+id),{ placeholder:'Document types',
+      options:list.map(c=>({v:c,t:c,s:desc[c],n:codes[c]})), multi:true, selected:S.inc[id],
+      onChange:()=>renderHalf(id) });
+    $('cb'+id+'-codes').classList.add('first');
+    $('cb'+id+'-codes').classList.remove('open');
+    $('cb'+id+'-disc').classList.remove('open');
+  });
+
+  renderHalf('A'); renderHalf('B');
   $('foot1').textContent='Source: '+S.meta.title+' · Project '+S.meta.project+' · as of '+S.meta.asOf;
 }
 
-function renderHalf(id, st){
-  const empty = !st.total;
+function renderHalf(id){
+  const docs=halfDocs(id), base=halfBase(id);
+  const st=statsFor(docs), ds=discStatsFor(docs);
+  STAT[id]={ st, ds, docs };
+
+  const hidden=base.length-docs.length;
+  const allCodes=new Set(base.map(d=>d.code||'(no code)')).size;
+  $('ex'+id).innerHTML = hidden
+    ? `<span class="lnk" onclick="event.stopPropagation();resetCodes('${id}')">Show all</span>
+       — ${st.byCode.length} of ${allCodes} document types shown, ${hidden.toLocaleString()} document${hidden===1?'':'s'} hidden.`
+    : `All ${allCodes} document types included — untick any in <b>Document types</b> to take it out of the chart.`;
+  $('ex'+id).className = hidden? 'cb-note warn2' : 'cb-note';
+
   $('mini'+id).innerHTML=[
     ['', st.total, 'documents'],
     ['', st.byCode.length, 'document types'],
@@ -1213,42 +1328,80 @@ function renderHalf(id, st){
     ['warn', st.totals.circ, 'circulating']
   ].map(([c,n,l])=>`<div class="m ${c}"><div class="n">${n.toLocaleString()}</div><div class="l">${l}</div></div>`).join('');
 
-  if(empty){
-    $('dw'+id).innerHTML='<div class="half-empty">No document in this purchase order is marked<br>FOR REVIEW for this discipline.</div>';
+  /* ── chart 1: documents per document type ───────────────────────────── */
+  if(!st.total){
+    $('dw'+id).innerHTML='<div class="half-empty">'+(base.length
+      ? 'Every document type is hidden.<br>Tick one in <b>Document types</b> to bring the chart back.'
+      : 'No document in this purchase order is marked<br>FOR REVIEW for this discipline.')+'</div>';
     $('lg'+id).innerHTML=''; $('ov'+id).innerHTML=''; $('bt'+id).innerHTML='';
     $('box'+id).style.pointerEvents='none';
+  } else {
+    $('box'+id).style.pointerEvents='';
+    const top=st.byCode.slice(0,10);
+    const restN=st.byCode.slice(10).reduce((n,c)=>n+c.total,0);
+    const slices=top.map(c=>({key:c.code, label:c.code+(c.desc?' — '+c.desc:''), value:c.total, col:c.col}));
+    if(restN) slices.push({key:'', label:(st.byCode.length-10)+' more types', value:restN, col:'#B8C4D0'});
+    $('dw'+id).innerHTML=
+      `<svg viewBox="0 0 220 220" width="220" height="220" role="img">${donutSVG(slices,220,.56)}</svg>
+       <div class="donut-ctr"><div class="v">${st.total.toLocaleString()}</div><div class="l">documents</div></div>`;
+    $('lg'+id).innerHTML=slices.map(d=>`<div class="li"><span class="dot" style="background:${d.col}"></span>
+        <span>${esc(d.key||d.label)}</span> <b>${d.value.toLocaleString()}</b>
+        <span class="p">${Math.round(d.value/st.total*100)}%</span></div>`).join('');
+    $('ov'+id).innerHTML=`
+      <div class="pblock-h"><span class="t">Overall progress</span>
+        <span class="v">${st.progress}% <small>${st.totals.without.toLocaleString()} of ${st.total.toLocaleString()} closed</small></span></div>
+      ${sbar(st.totals, st.total)}
+      <div class="sbar-lab">${BANDS.filter(b=>st.totals[b.key]).map(b=>
+        `<span class="li"><span class="dot" style="background:${b.col}"></span>${esc(b.label)} <b>${st.totals[b.key].toLocaleString()}</b></span>`).join('')}</div>`;
+    $('bt'+id).innerHTML=`<div class="bt-h">Progress by document type</div>`+
+      st.byCode.map(c=>`<div class="trow">
+        <div class="tc"><div class="c1">${esc(c.code)}</div>
+          <div class="c2" title="${esc(c.desc)}">${esc(c.desc||'')} · ${c.total} doc${c.total>1?'s':''}</div></div>
+        ${sbar(c.bands, c.total)}
+        <div class="pv ${c.pct?'':'zero'}">${c.pct}%</div>
+      </div>`).join('');
+  }
+
+  /* ── chart 2: disciplines that still owe a review ────────────────────── */
+  if(!ds.total){
+    $('ddw'+id).innerHTML='<div class="half-empty">No discipline is marked FOR REVIEW<br>on these documents.</div>';
+    $('dlg'+id).innerHTML=''; $('dov'+id).innerHTML=''; $('dbt'+id).innerHTML='';
+    $('dbox'+id).style.pointerEvents='none';
     return;
   }
-  $('box'+id).style.pointerEvents='';
-
-  /* donut — one slice per document type (top 10, remainder pooled) */
-  const top=st.byCode.slice(0,10);
-  const restN=st.byCode.slice(10).reduce((n,c)=>n+c.total,0);
-  const slices=top.map(c=>({label:c.code+(c.desc?' — '+c.desc:''), value:c.total, col:c.col}));
-  if(restN) slices.push({label:(st.byCode.length-10)+' more types', value:restN, col:'#B8C4D0'});
-  $('dw'+id).innerHTML=
-    `<svg viewBox="0 0 220 220" width="220" height="220" role="img">${donutSVG(slices,220,.56)}</svg>
-     <div class="donut-ctr"><div class="v">${st.total.toLocaleString()}</div><div class="l">documents</div></div>`;
-  $('lg'+id).innerHTML=slices.map((d,i)=>`<div class="li"><span class="dot" style="background:${d.col}"></span>
-      <span>${esc(i<top.length?top[i].code:d.label)}</span> <b>${d.value.toLocaleString()}</b>
-      <span class="p">${Math.round(d.value/st.total*100)}%</span></div>`).join('');
-
-  /* overall progress */
-  $('ov'+id).innerHTML=`
-    <div class="pblock-h"><span class="t">Overall progress</span>
-      <span class="v">${st.progress}% <small>${st.totals.without.toLocaleString()} of ${st.total.toLocaleString()} closed</small></span></div>
-    ${sbar(st.totals, st.total)}
-    <div class="sbar-lab">${BANDS.filter(b=>st.totals[b.key]).map(b=>
-      `<span class="li"><span class="dot" style="background:${b.col}"></span>${esc(b.label)} <b>${st.totals[b.key].toLocaleString()}</b></span>`).join('')}</div>`;
-
-  /* progress per document type — revealed when the chart is clicked */
-  $('bt'+id).innerHTML=`<div class="bt-h">Progress by document type</div>`+
-    st.byCode.map(c=>`<div class="trow">
-      <div class="tc"><div class="c1">${esc(c.code)}</div>
-        <div class="c2" title="${esc(c.desc)}">${esc(c.desc||'')} · ${c.total} doc${c.total>1?'s':''}</div></div>
-      ${sbar(c.bands, c.total)}
-      <div class="pv ${c.pct?'':'zero'}">${c.pct}%</div>
+  $('dbox'+id).style.pointerEvents='';
+  const dtop=ds.list.slice(0,10);
+  const drest=ds.list.slice(10).reduce((n,e)=>n+e.total,0);
+  const dsl=dtop.map(e=>({key:e.name, label:e.name+' — '+e.total+' to review, '+e.pending+' pending',
+                          value:e.total, col:e.col}));
+  if(drest) dsl.push({key:'', label:(ds.list.length-10)+' more disciplines', value:drest, col:'#B8C4D0'});
+  $('ddw'+id).innerHTML=
+    `<svg viewBox="0 0 220 220" width="220" height="220" role="img">${donutSVG(dsl,220,.56)}</svg>
+     <div class="donut-ctr"><div class="v">${ds.list.length}</div><div class="l">disciplines</div></div>`;
+  $('dlg'+id).innerHTML=dsl.map(d=>`<div class="li"><span class="dot" style="background:${d.col}"></span>
+      <span>${esc(d.key||d.label)}${d.key&&d.key===S.disc?'<span class="you">YOU</span>':''}</span>
+      <b>${d.value.toLocaleString()}</b>
+      <span class="p">${Math.round(d.value/ds.total*100)}%</span></div>`).join('');
+  $('dov'+id).innerHTML=`
+    <div class="pblock-h"><span class="t">Reviews closed</span>
+      <span class="v">${ds.progress}% <small>${ds.closed.toLocaleString()} of ${ds.total.toLocaleString()} reviews · ${ds.pending.toLocaleString()} pending</small></span></div>
+    ${dbar(ds.closed, ds.pending)}
+    <div class="sbar-lab">
+      <span class="li"><span class="dot" style="background:#2E9E6B"></span>Review closed <b>${ds.closed.toLocaleString()}</b></span>
+      <span class="li"><span class="dot" style="background:#D4574E"></span>Still pending <b>${ds.pending.toLocaleString()}</b></span>
+      <span class="li" style="color:var(--muted)">across ${ds.docs.toLocaleString()} documents</span></div>`;
+  $('dbt'+id).innerHTML=`<div class="bt-h">Progress by discipline</div>`+
+    ds.list.map(e=>`<div class="trow wide">
+      <div class="tc"><div class="c1 nm">${esc(e.name)}${e.name===S.disc?'<span class="you">YOU</span>':''}</div>
+        <div class="c2">${e.total} to review · ${e.pending} pending</div></div>
+      ${dbar(e.closed, e.pending)}
+      <div class="pv ${e.pct?'':'zero'}">${e.pct}%</div>
     </div>`).join('');
+}
+function resetCodes(id){
+  halfBase(id).forEach(d=>S.inc[id].add(d.code||'(no code)'));
+  const el=$('fc'+id); if(el && el.setSel) el.setSel(S.inc[id]);
+  renderHalf(id);
 }
 
 /* a stacked status bar: green closed first, circulating and unreceived last */
@@ -1256,6 +1409,13 @@ function sbar(bands, total){
   return `<div class="sbar">`+BANDS.map(b=>{ const v=bands[b.key]; if(!v) return '';
     return `<i style="width:${v/total*100}%;background:${b.col}" title="${esc(b.label)}: ${v}"></i>`;
   }).join('')+`</div>`;
+}
+/* closed vs pending, for the discipline view */
+function dbar(closed, pending){
+  const t=(closed+pending)||1;
+  return `<div class="sbar">
+    <i style="width:${closed/t*100}%;background:#2E9E6B" title="Review closed: ${closed}"></i>
+    <i style="width:${pending/t*100}%;background:#D4574E" title="Still pending: ${pending}"></i></div>`;
 }
 
 /* flat donut, drawn as SVG arcs so slices stay crisp and hoverable */
@@ -1283,8 +1443,76 @@ function arcPath(cx,cy,R,r,a0,a1){
   return `M${x1} ${y1}A${R} ${R} 0 ${big} 1 ${x2} ${y2}L${x3} ${y3}A${r} ${r} 0 ${big} 0 ${x4} ${y4}Z`;
 }
 
-function toggleHalf(id){ $('half'+id).classList.toggle('open'); }
-window.toggleHalf=toggleHalf;
+function toggleBlock(id, which){ $('cb'+id+'-'+which).classList.toggle('open'); }
+
+/* ── reports behind each chart ─────────────────────────────────────────── */
+function halfName(id){ return id==='A' ? 'Full purchase order' : 'For review — '+(S.disc||''); }
+function reportHead(id, title, extra){
+  return [[title],
+          [S.po+'  ·  '+S.dep+(S.disc?'  ·  reviewing as '+S.disc:'')],
+          [halfName(id)+'  ·  as of '+S.meta.asOf+'  ·  '+extra],[]];
+}
+function styleReport(ws, aoa, head, hdrRow, widths){
+  ws['!cols']=widths.map(w=>({wch:w}));
+  const B={style:'thin',color:{rgb:'BFCCDA'}};
+  const put=(r,c,st)=>{ const k=XLSX.utils.encode_cell({r,c}); if(!ws[k]) ws[k]={t:'s',v:''}; ws[k].s=st; };
+  put(0,0,{font:{bold:true,sz:14,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'0B2545'}}});
+  put(1,0,{font:{bold:true,sz:11,color:{rgb:'0B2545'}}});
+  put(2,0,{font:{sz:9,italic:true,color:{rgb:'5C6B7A'}}});
+  head.forEach((_,c)=>put(hdrRow,c,{font:{bold:true,sz:9,color:{rgb:'FFFFFF'}},
+    fill:{fgColor:{rgb:'2563EB'}},alignment:{wrapText:true,vertical:'center',horizontal:'center'},
+    border:{top:B,bottom:B,left:B,right:B}}));
+  for(let r=hdrRow+1;r<aoa.length;r++){
+    const last = r===aoa.length-1 && String(aoa[r][0]).indexOf('TOTAL')===0;
+    for(let c=0;c<head.length;c++) put(r,c,{
+      font:{sz:9,bold:last},
+      fill:{fgColor:{rgb: last?'FFF7CC' : (r%2? 'FAFCFE':'FFFFFF')}},
+      alignment:{vertical:'top',wrapText:c===1,horizontal:c>=2?'center':'left'},
+      border:{top:B,bottom:B,left:B,right:B}});
+  }
+}
+function exportCodeReport(id){
+  if(typeof XLSX==='undefined') return alert('Spreadsheet engine not loaded.');
+  const st=(STAT[id]||{}).st;
+  if(!st || !st.total) return alert('There is nothing in this chart to report on.');
+  const hidden=halfBase(id).length-st.total;
+  const head=['CODE','DESCRIPTION','DOCUMENTS','REVIEWED WITHOUT COMMENTS','REVIEWED WITH MINOR COMMENTS',
+    'REVIEWED WITH MAJOR COMMENTS','CIRCULATING','NEVER RECEIVED / REJECTED / VOID','% CLOSED'];
+  const aoa=reportHead(id,'DOCUMENTS BY TYPE',
+    st.total.toLocaleString()+' documents · '+st.byCode.length+' types'+(hidden?' · '+hidden+' documents hidden by the type filter':''));
+  aoa.push(head);
+  st.byCode.forEach(c=>aoa.push([c.code,c.desc,c.total,c.bands.without,c.bands.minor,c.bands.major,
+    c.bands.circ,c.bands.other,c.pct/100]));
+  aoa.push(['TOTAL','',st.total,st.totals.without,st.totals.minor,st.totals.major,st.totals.circ,
+            st.totals.other,st.progress/100]);
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  styleReport(ws,aoa,head,4,[14,42,12,14,14,14,12,16,10]);
+  for(let r=5;r<aoa.length;r++){ const k=XLSX.utils.encode_cell({r,c:8});
+    if(ws[k]){ ws[k].t='n'; ws[k].z='0%'; } }
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Documents by type');
+  XLSX.writeFile(wb,'Documents_by_type_'+String(S.po)+'_'+(id==='A'?'PO':'FOR_REVIEW')+'.xlsx',{cellStyles:true});
+}
+function exportDiscReport(id){
+  if(typeof XLSX==='undefined') return alert('Spreadsheet engine not loaded.');
+  const ds=(STAT[id]||{}).ds;
+  if(!ds || !ds.total) return alert('There is nothing in this chart to report on.');
+  const head=['DISCIPLINE','DOCUMENTS TO REVIEW','REVIEW CLOSED','STILL PENDING','% CLOSED','OF WHICH ORIGINATOR'];
+  const aoa=reportHead(id,'DISCIPLINES THAT MUST REVIEW',
+    ds.total.toLocaleString()+' reviews across '+ds.docs.toLocaleString()+' documents · '+ds.pending.toLocaleString()+' pending');
+  aoa.push(head);
+  ds.list.forEach(e=>aoa.push([e.name+(e.name===S.disc?'  (your discipline)':''),
+    e.total,e.closed,e.pending,e.pct/100,e.ownDocs]));
+  aoa.push(['TOTAL',ds.total,ds.closed,ds.pending,ds.progress/100,'']);
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  styleReport(ws,aoa,head,4,[36,18,14,14,10,18]);
+  for(let r=5;r<aoa.length;r++){ const k=XLSX.utils.encode_cell({r,c:4});
+    if(ws[k] && typeof ws[k].v==='number'){ ws[k].t='n'; ws[k].z='0%'; } }
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Disciplines to review');
+  XLSX.writeFile(wb,'Disciplines_to_review_'+String(S.po)+'_'+(id==='A'?'PO':'FOR_REVIEW')+'.xlsx',{cellStyles:true});
+}
+
+window.toggleBlock=toggleBlock; window.resetCodes=resetCodes;
+window.exportCodeReport=exportCodeReport; window.exportDiscReport=exportDiscReport;
 
 /* Labelled bar chart: name on the left, count and share on the right, bar under. */
 function bars(id, data, total, note, onclick){
