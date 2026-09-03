@@ -454,18 +454,23 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
   <div class="card fl-wrap">
     <div class="fl-head">
       <h2>Select the scope</h2>
-      <p>The dashboard is built only for the Purchase Order and Originator Department you choose.</p>
+      <p>Start from your originator department, confirm the discipline column you review from, then pick the purchase order.</p>
     </div>
     <div class="fl-body">
       <div class="fld">
-        <label>Purchase Order</label>
-        <div id="sel-po" style="display:block"></div>
-        <div class="hint" id="po-hint"></div>
-      </div>
-      <div class="fld">
-        <label>Originator Department</label>
+        <label>1 · Originator Department</label>
         <div id="sel-dep" style="display:block"></div>
         <div class="hint" id="dep-hint"></div>
+      </div>
+      <div class="fld">
+        <label>2 · Your Discipline <span style="font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0">— the review column (AC–CT) read for each document</span></label>
+        <div id="sel-disc" style="display:block"></div>
+        <div class="hint" id="disc-hint"></div>
+      </div>
+      <div class="fld">
+        <label>3 · Purchase Order</label>
+        <div id="sel-po" style="display:block"></div>
+        <div class="hint" id="po-hint"></div>
       </div>
       <button class="btn btn-p" id="btn-build" disabled onclick="buildDash()">Build dashboard →</button>
     </div>
@@ -503,6 +508,7 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
     <div class="tools-r">
       <div class="srch"><span class="ic">🔎</span>
         <input id="f-q" type="search" placeholder="Search document number, title, equipment, supplier, code…" autocomplete="off"></div>
+      <div id="f-myrole"></div>
       <div id="f-status"></div>
       <div id="f-code"></div>
       <div id="f-equip"></div>
@@ -634,7 +640,8 @@ const THINGS = [
 
 const DEADLINE_DAYS = 15;   // days allowed from CIRCULATE DATE to close
 
-const S = { rows:[], hdr:{}, depts:[], meta:{}, po:null, dep:null, sub:[], docs:[], cur:null, basket:[] };
+const S = { rows:[], hdr:{}, depts:[], meta:{}, po:null, dep:null, disc:null, discIdx:null, discCidx:null,
+            sub:[], docs:[], cur:null, basket:[] };
 const $ = id => document.getElementById(id);
 const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
@@ -805,51 +812,100 @@ function cell(a,name){ const i=S.hdr[name]; return i===undefined?'':a[i]; }
 function sv(a,name){ const v=cell(a,name); return v==null?'':String(v).trim(); }
 
 function buildFilters(){
-  const poDesc={}, poCount={}, poDocs={}, poVend={}, poOrig={};
-  S.rows.forEach(a=>{ const p=sv(a,'PURCHASE ORDER');
-    poCount[p]=(poCount[p]||0)+1;
-    (poDocs[p]=poDocs[p]||new Set()).add(sv(a,'TR NUMBER')||Math.random());
+  /* PO metadata is gathered once; the PO list itself is filled after a
+     department is chosen, so the reader picks department → discipline → PO. */
+  const poDesc={}, poVend={}, poDocs={}, depDocs={};
+  S.rows.forEach(a=>{ const p=sv(a,'PURCHASE ORDER'), d=sv(a,'ORIGINATOR DEPARTMENT')||'(blank)';
     if(!poDesc[p]) poDesc[p]=sv(a,'PURCHASE ORDER DESCRIPTION');
     if(!poVend[p]) poVend[p]=sv(a,'SUPPLIER');
-    if(!poOrig[p]) poOrig[p]=sv(a,'ORIGINATOR DEPARTMENT'); });
-  const pos=Object.keys(poCount).sort();
+    (poDocs[p]=poDocs[p]||new Set()).add(sv(a,'TR NUMBER')||Math.random());
+    (depDocs[d]=depDocs[d]||new Set()).add(sv(a,'TR NUMBER')||Math.random()); });
   S.poDescAll=poDesc;
+  const deps=Object.keys(depDocs).sort();
 
-  dropdown($('sel-po'),{
-    placeholder:'Search or pick a purchase order…',
-    /* the sub-line is searched too, so a reader can type a vendor, an
-       equipment category or the raising department instead of the number */
-    options: pos.map(p=>({v:p, t:p,
-      s:[poDesc[p],poVend[p],poOrig[p]].filter(Boolean).join('  ·  '),
-      n:poDocs[p].size})),
-    multi:false,
-    onChange: sel=>{ S.po=[...sel][0]||null; S.dep=null; fillDeps(); }
-  });
+  function updateBuild(){ $('btn-build').disabled=!(S.dep && S.disc && S.po); }
+  function setDisc(name){ S.disc=name;
+    S.discIdx = name ? (S.depts.find(x=>x.name===name)||{}).i : null;
+    S.discCidx= name ? (S.depts.find(x=>x.name===name)||{}).ci : null; }
+
   const depEl = dropdown($('sel-dep'),{
-    placeholder:'Select a purchase order first',
-    options:[], multi:false,
-    onChange: sel=>{ S.dep=[...sel][0]||null; $('btn-build').disabled=!S.dep; }
+    placeholder:'Search or pick an originator department…',
+    options: deps.map(d=>({v:d, t:d, n:depDocs[d].size})),
+    multi:false,
+    onChange: sel=>{ S.dep=[...sel][0]||null; S.po=null; setDisc(null);
+                     fillDisc(); fillPos(); updateBuild(); }
   });
-  function fillDeps(){
-    $('btn-build').disabled=true;
-    if(!S.po){ depEl.setOpts([]); depEl.setSel(new Set()); $('dep-hint').textContent=''; return; }
-    const deps={};
-    S.rows.forEach(a=>{ if(sv(a,'PURCHASE ORDER')===S.po){
-      const d=sv(a,'ORIGINATOR DEPARTMENT')||'(blank)'; deps[d]=(deps[d]||0)+1; } });
-    const list=Object.keys(deps).sort();
-    depEl._cfg.placeholder = 'Pick an originator department…';
-    depEl.setOpts(list.map(d=>({v:d,t:d,n:deps[d]})));
-    /* almost every PO is raised by a single department — take the shortcut */
-    if(list.length===1){ depEl.setSel(new Set([list[0]])); S.dep=list[0]; $('btn-build').disabled=false; }
-    else depEl.setSel(new Set());
-    $('dep-hint').textContent = list.length===1
-      ? 'Only one department raises documents under this PO — already selected.'
-      : list.length+' originator departments raise documents under this PO';
+  const discEl = dropdown($('sel-disc'),{
+    placeholder:'Select a department first',
+    options:[], multi:false,
+    onChange: sel=>{ setDisc([...sel][0]||null); updateBuild(); }
+  });
+  const poEl = dropdown($('sel-po'),{
+    placeholder:'Select a department first',
+    options:[], multi:false,
+    onChange: sel=>{ S.po=[...sel][0]||null; updateBuild(); }
+  });
+
+  /* The discipline list is the AC–CT columns.  For the chosen department we
+     also count how many of its documents each discipline is applicable to,
+     and detect the one that carries the "- ORIGINATOR" mark — that is the
+     department's own column, so it is offered pre-selected. */
+  function fillDisc(){
+    if(!S.dep){ discEl.setOpts([]); discEl.setSel(new Set()); $('disc-hint').textContent=''; return; }
+    const cnt={}, org={};
+    S.rows.forEach(a=>{ if((sv(a,'ORIGINATOR DEPARTMENT')||'(blank)')!==S.dep) return;
+      S.depts.forEach(d=>{ const raw=(a[d.i]==null?'':String(a[d.i]).trim()).toUpperCase();
+        if(raw && raw!=='NA' && raw!=='N/A'){ cnt[d.name]=(cnt[d.name]||0)+1;
+          if(raw.indexOf('ORIGINATOR')>=0) org[d.name]=(org[d.name]||0)+1; } }); });
+    discEl._cfg.placeholder='Confirm your discipline (columns AC–CT)…';
+    discEl.setOpts(S.depts.map(d=>({v:d.name, t:d.name,
+      s: org[d.name] ? 'your department’s own review column' : '', n:cnt[d.name]||0})));
+    const own=Object.entries(org).sort((a,b)=>b[1]-a[1])[0];
+    if(own){ discEl.setSel(new Set([own[0]])); setDisc(own[0]);
+      $('disc-hint').innerHTML='Auto-detected <b>'+esc(own[0])+'</b> as this department’s own column — change it if you review a different discipline.'; }
+    else { discEl.setSel(new Set()); setDisc(null);
+      $('disc-hint').textContent='Pick the discipline column that documents are reviewed from.'; }
   }
-  $('po-hint').textContent=pos.length+' purchase orders in this file · '+S.rows.length.toLocaleString()+' document rows';
+  function fillPos(){
+    if(!S.dep){ poEl.setOpts([]); poEl.setSel(new Set()); $('po-hint').textContent=''; return; }
+    const pos={};
+    S.rows.forEach(a=>{ if((sv(a,'ORIGINATOR DEPARTMENT')||'(blank)')!==S.dep) return;
+      const p=sv(a,'PURCHASE ORDER'); pos[p]=(pos[p]||0)+1; });
+    const list=Object.keys(pos).sort();
+    poEl._cfg.placeholder='Search or pick a purchase order…';
+    poEl.setOpts(list.map(p=>({v:p, t:p,
+      s:[poDesc[p],poVend[p]].filter(Boolean).join('  ·  '), n:poDocs[p].size})));
+    if(list.length===1){ poEl.setSel(new Set([list[0]])); S.po=list[0]; }
+    else poEl.setSel(new Set());
+    $('po-hint').textContent = list.length+' purchase order'+(list.length===1?'':'s')+' raised by '+S.dep;
+  }
+  $('dep-hint').textContent=deps.length+' originator departments in this file · '+S.rows.length.toLocaleString()+' document rows';
   $('navinfo').style.display='';
   $('navinfo').innerHTML='Project <b>'+esc(S.meta.project)+'</b> · as of '+esc(S.meta.asOf);
-  fillDeps();
+}
+
+/* ── "My discipline" — the value in the chosen AC–CT column for a document ──
+   Once the reader confirms which discipline column is theirs, every document
+   carries a role read straight from that column: for review (and whether the
+   document is the reviewer's own origination), for information, N/A, or blank
+   (kept by the department internally, not formally routed).  This is what the
+   action-oriented views build on. */
+const MYROLE = {
+  'review-org':{t:'For review — originator', short:'REVIEW · OWN',  cls:'dang',  act:true,  o:1},
+  'review'    :{t:'For review',              short:'FOR REVIEW',    cls:'dang',  act:true,  o:2},
+  'info-org'  :{t:'For information — originator', short:'INFO · OWN', cls:'blue', act:false, o:3},
+  'info'      :{t:'For information',         short:'FOR INFORMATION',cls:'blue',  act:false, o:4},
+  'na'        :{t:'Not applicable',          short:'N/A',           cls:'ghost', act:false, o:5},
+  'blank'     :{t:'Internal / not routed',   short:'INTERNAL',      cls:'info',  act:false, o:6}
+};
+function myRoleKey(raw){
+  const t=String(raw||'').trim().toUpperCase();
+  if(!t) return 'blank';
+  if(t==='NA'||t==='N/A') return 'na';
+  const org=t.indexOf('ORIGINATOR')>=0;
+  if(t.indexOf('FOR REVIEW')===0)      return org?'review-org':'review';
+  if(t.indexOf('FOR INFORMATION')===0) return org?'info-org':'info';
+  return 'blank';
 }
 
 /* ── Build the filtered document model ─────────────────────────────────── */
@@ -951,6 +1007,14 @@ function buildDash(){
     d.official = d.revs.map(r=>r.official).find(Boolean) || (first?first.official:null);
     d.searchKey = [d.tr,d.title,d.xref,d.equip,d.code,d.codeDesc,d.vendor,d.client,d.supplier,d.status]
                     .join(' ').toUpperCase();
+    /* the reviewer's own column, read straight from the latest revision */
+    const a0=L.row;
+    d.myRoleRaw = S.discIdx!=null ? (a0[S.discIdx]==null?'':String(a0[S.discIdx]).trim()) : '';
+    d.myRole    = myRoleKey(d.myRoleRaw);
+    d.myClosed  = S.discCidx!=null ? xdate(a0[S.discCidx]) : null;
+    /* actionable = my column asks me to review it and I have not closed it */
+    d.myAction  = MYROLE[d.myRole].act && !d.myClosed;
+    d.myRoleLabel = MYROLE[d.myRole].t;
   });
   S.docs=docs;
   renderDash();
@@ -994,7 +1058,7 @@ const AGECOL={'0–7 days':'#2E9E6B','8–15 days':'#8FBF4E','16–30 days':'#D9
 /* Nothing is pre-filtered: the list opens complete and the user narrows it.
    Every filter is additive — statuses, codes, equipment, suppliers,
    departments and the quick chips all combine. */
-const F = { q:'', status:new Set(), code:new Set(), equip:new Set(), vendor:new Set(),
+const F = { q:'', myrole:new Set(), status:new Set(), code:new Set(), equip:new Set(), vendor:new Set(),
             dept:new Set(), quick:new Set(), group:'', sort:'doc', dir:1 };
 
 const COLS = [
@@ -1011,6 +1075,7 @@ const COLS = [
 /* Quick filters shown as chips. They stack, so "Circulating" + "Critical"
    narrows to documents that are both. */
 const QUICK = [
+  {k:'myact',  t:'Awaiting your review', cls:'dg', f:d=>d.myAction},
   {k:'circ',   t:'Circulating',    cls:'wr', f:d=>d.circulating},
   {k:'over',   t:'Past deadline',  cls:'dg', f:d=>d.circulating&&d.over>0},
   {k:'blocked',t:'Held by others', cls:'dg', f:d=>d.blockers.length>0},
@@ -1028,10 +1093,12 @@ const QUICK = [
 function renderDash(){
   const docs=S.docs;
 
-  $('crumbs').innerHTML=`<span class="c" onclick="go('filter')">${esc(S.po)}</span>`+
-    `<span class="s">/</span><span class="c on">${esc(S.dep)}</span>`;
+  $('crumbs').innerHTML=`<span class="c" onclick="go('filter')">${esc(S.dep)}</span>`+
+    `<span class="s">/</span><span class="c">${esc(S.disc||'')}</span>`+
+    `<span class="s">/</span><span class="c on">${esc(S.po)}</span>`;
   $('dash-head').innerHTML=`<div class="sec" style="margin-top:6px"><h2>${esc(S.po)} · ${esc(S.dep)}</h2>
-    <span class="cnt">${esc(S.poDesc||'')}</span><div class="rule"></div></div>`;
+    <span class="cnt">Reviewing as <b style="color:var(--navy)">${esc(S.disc||'—')}</b>${S.poDesc?' &nbsp;·&nbsp; '+esc(S.poDesc):''}</span>
+    <div class="rule"></div></div>`;
 
   buildToolbar();
   applyFilters();
@@ -1067,16 +1134,20 @@ function renderSummary(rows){
   document.querySelectorAll('#ribbon [data-k],#ribbon-leg [data-k]').forEach(el=>el.onclick=()=>{
     F.status=new Set([el.dataset.k]); syncPickers(); applyFilters(); });
 
+  const mine=rows.filter(d=>d.myAction);
   $('kpis').innerHTML=[
-    ['warn',circ.length,'Circulating now','Latest revision is out for review'],
-    ['dang',over.length,'Past the '+DEADLINE_DAYS+'-day deadline','Circulating longer than allowed'],
-    ['dang',blocked.length,'Held by another discipline','FOR REVIEW with no closed date'],
+    ['dang',mine.length,'Awaiting your review','Marked FOR REVIEW in your '+(S.disc||'')+' column, not yet closed', 'myact'],
+    ['warn',circ.length,'Circulating now','Latest revision is out for review',''],
+    ['dang',over.length,'Past the '+DEADLINE_DAYS+'-day deadline','Circulating longer than allowed',''],
+    ['dang',blocked.length,'Held by another discipline','FOR REVIEW with no closed date',''],
     ['ok',rows.filter(d=>String(d.status).toUpperCase()==='REVIEWED WITHOUT COMMENTS').length,
-      'Approved without comments','Closed clean'],
+      'Approved without comments','Closed clean',''],
     ['info',rows.filter(d=>String(d.status).toUpperCase()==='NEVER RECEIVED').length,
-      'Never received','Planned but never issued']
-  ].map(([c,n,l,h])=>`<div class="kpi ${c}" title="${esc(h)}"><div class="n num">${n.toLocaleString()}</div>
-      <div class="l">${l}</div></div>`).join('');
+      'Never received','Planned but never issued','']
+  ].map(([c,n,l,h,act])=>`<div class="kpi ${c}" title="${esc(h)}" ${act?`data-act="${act}" style="cursor:pointer"`:''}>
+      <div class="n num">${n.toLocaleString()}</div><div class="l">${l}</div></div>`).join('');
+  const mk=$('kpis').querySelector('[data-act="myact"]');
+  if(mk) mk.onclick=()=>{ F.quick=new Set(['myact']); syncPickers(); buildToolbar(); applyFilters(); };
 
   /* ── charts, all against the filtered set ─────────────────────────────── */
   const ac={}; AGES.forEach(a=>ac[a]=0);
@@ -1117,6 +1188,8 @@ function bars(id, data, total, note, onclick){
 
 /* ── toolbar ───────────────────────────────────────────────────────────── */
 const PICKERS=[
+  {id:'f-myrole', key:'myrole', ph:'Your discipline’s call', get:d=>[d.myRoleLabel], sub:()=>'',
+     ord:v=>MYROLE[Object.keys(MYROLE).find(k=>MYROLE[k].t===v)||'blank'].o},
   {id:'f-status', key:'status', ph:'All statuses',    get:d=>[String(d.status).toUpperCase()], sub:()=>''},
   {id:'f-code',   key:'code',   ph:'All codes',       get:d=>[d.code],   sub:d=>d.codeDesc},
   {id:'f-equip',  key:'equip',  ph:'All equipment',   get:d=>[d.xref],   sub:d=>d.equip},
@@ -1127,7 +1200,10 @@ function buildToolbar(){
   PICKERS.forEach(p=>{
     const n={}, sub={};
     S.docs.forEach(d=>p.get(d).forEach(v=>{ if(!v) return; n[v]=(n[v]||0)+1; if(sub[v]==null) sub[v]=p.sub(d)||''; }));
-    const opts=Object.keys(n).sort((a,b)=> p.key==='status' ? stMeta(a).o-stMeta(b).o : a.localeCompare(b))
+    const opts=Object.keys(n).sort((a,b)=>
+        p.key==='status' ? stMeta(a).o-stMeta(b).o
+      : p.ord ? p.ord(a)-p.ord(b)
+      : a.localeCompare(b))
                  .map(v=>({v,t:v,s:sub[v],n:n[v]}));
     dropdown($(p.id),{ placeholder:p.ph, options:opts, multi:true, selected:F[p.key],
       onChange:()=>applyFilters() });
@@ -1170,6 +1246,7 @@ function currentRows(){
   const q=F.q, quick=[...F.quick].map(k=>QUICK.find(x=>x.k===k)).filter(Boolean);
   let out=S.docs.filter(d=>
        (!q || d.searchKey.indexOf(q)>=0)
+    && (!F.myrole.size || F.myrole.has(d.myRoleLabel))
     && (!F.status.size || F.status.has(String(d.status).toUpperCase()))
     && (!F.code.size   || F.code.has(d.code))
     && (!F.equip.size  || F.equip.has(d.xref))
@@ -1246,7 +1323,9 @@ function docRow(d){
   const done=d.depDone, all=d.depAll, openN=d.depOpen;
   const pct = all? done/all*100 : 0;
   const names=d.latest.depts.filter(x=>!x.closed&&x.review).map(x=>x.name);
+  const mr=MYROLE[d.myRole];
   const flags=[
+    `<span class="tag ${mr.cls}" title="Your ${esc(S.disc||'')} column: ${esc(d.myRoleRaw||'(blank)')}"${d.myAction?' style="box-shadow:0 0 0 1px var(--dang) inset"':''}>${d.myAction?'▶ ':''}${mr.short}</span>`,
     d.nRev>1 ? `<span class="tag blue">${d.nRev} REVISIONS</span>` : '',
     d.unrec ? '<span class="tag ghost">NO TR RAISED</span>' : '',
     d.critical ? '<span class="tag dang">CRITICAL</span>' : '',
@@ -1307,18 +1386,19 @@ function exportTableXlsx(){
   if(!rows.length) return alert('There is nothing in the list to export.');
   const head=['DOCUMENT NUMBER','DOCUMENT TITLE','EQUIPMENT','EQUIPMENT NAME','CODE','CODE DESCRIPTION',
     'REV','REVISIONS','DOCUMENT STATUS','RETURN STATUS','OVERALL','CATEGORY','CRITICAL','KEY DRW',
-    'SUPPLIER','CIRCULATED','DUE ('+DEADLINE_DAYS+'D)','DAYS IN CIRCULATION','DISCIPLINES CLOSED',
-    'DISCIPLINES OPEN','AWAITING REVIEW FROM'];
+    'SUPPLIER','CIRCULATED','DUE ('+DEADLINE_DAYS+'D)','DAYS IN CIRCULATION',
+    (S.disc||'YOUR')+' COLUMN','DISCIPLINES CLOSED','DISCIPLINES OPEN','AWAITING REVIEW FROM'];
   const aoa=[['CONSOLIDATED STATUS — FILTERED DOCUMENT LIST'],
-             [S.po+'  ·  '+S.dep],
+             [S.dep+'  ·  reviewing as '+(S.disc||'—')+'  ·  '+S.po],
              ['as of '+S.meta.asOf+'  ·  '+rows.length+' of '+S.docs.length+' documents'],[],head];
   rows.forEach(d=>aoa.push([d.label,d.title||'',d.xref||'',d.equip||'',d.code||'',d.codeDesc||'',
     d.rev||'',d.nRev,d.status,d.ret||'',d.overall||'',d.category||'',d.critical?'Y':'N',d.keydrw?'Y':'N',
     d.vendor||'',fmt(d.circDate),d.circulating?fmt(d.due):'',d.days==null?'':d.days,
+    d.myRoleRaw||'(blank)',
     d.depDone,d.depOpen,d.latest.depts.filter(x=>!x.closed&&x.review).map(x=>x.name).join('; ')]));
   const ws=XLSX.utils.aoa_to_sheet(aoa);
   ws['!cols']=[{wch:40},{wch:52},{wch:16},{wch:30},{wch:12},{wch:38},{wch:6},{wch:10},{wch:30},{wch:32},
-               {wch:9},{wch:10},{wch:9},{wch:9},{wch:38},{wch:13},{wch:13},{wch:9},{wch:9},{wch:9},{wch:44}];
+               {wch:9},{wch:10},{wch:9},{wch:9},{wch:38},{wch:13},{wch:13},{wch:9},{wch:24},{wch:9},{wch:9},{wch:44}];
   if(ws['A1']) ws['A1'].s={font:{bold:true,sz:14,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'0B2545'}}};
   if(ws['A2']) ws['A2'].s={font:{bold:true,sz:11,color:{rgb:'0B2545'}}};
   head.forEach((_,i)=>{ const k=XLSX.utils.encode_cell({r:4,c:i});
@@ -1326,7 +1406,7 @@ function exportTableXlsx(){
                        alignment:{wrapText:true,vertical:'center'}}; });
   for(let r=5;r<aoa.length;r++) for(let c=0;c<head.length;c++){
     const k=XLSX.utils.encode_cell({r,c}); if(!ws[k]) continue;
-    ws[k].s={font:{sz:9},alignment:{vertical:'top',wrapText:c===1||c===5||c===20},
+    ws[k].s={font:{sz:9},alignment:{vertical:'top',wrapText:c===1||c===5||c===21},
              border:{bottom:{style:'hair',color:{rgb:'D3DBE6'}}}};
   }
   const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Document list');
@@ -1354,7 +1434,8 @@ function openDoc(tr){
       <div class="t">${esc(d.label)}</div>
       <div class="s">${esc(d.title||'')}</div>
       <div style="margin-top:8px">
-        ${d.circulating?'<span class="tag warn">CIRCULATING</span>':'<span class="tag ok">'+esc(L.status)+'</span>'}
+        <span class="tag ${MYROLE[d.myRole].cls}" title="Your ${esc(S.disc||'')} column reads: ${esc(d.myRoleRaw||'(blank)')}">${d.myAction?'▶ ':''}${esc(S.disc||'You')}: ${MYROLE[d.myRole].short}</span>
+        ${d.circulating?'<span class="tag warn" style="margin-left:5px">CIRCULATING</span>':'<span class="tag ok" style="margin-left:5px">'+esc(L.status)+'</span>'}
         ${d.critical?'<span class="tag dang" style="margin-left:5px">CRITICAL</span>':''}
         ${d.keydrw?'<span class="tag blue" style="margin-left:5px">KEY DRAWING</span>':''}
         ${d.category?'<span class="tag info" style="margin-left:5px">'+esc(d.category)+'</span>':''}
@@ -1936,7 +2017,7 @@ function go(s){
   if(s==='filter') $('crumbs').innerHTML='';
 }
 function resetAll(){
-  S.rows=[];S.docs=[];S.cur=null;S.po=null;S.dep=null;
+  S.rows=[];S.docs=[];S.cur=null;S.po=null;S.dep=null;S.disc=null;S.discIdx=null;S.discCidx=null;
   $('file').value='';$('btn-reset').style.display='none';$('navinfo').style.display='none';
   $('crumbs').innerHTML='';go('upload');
 }
