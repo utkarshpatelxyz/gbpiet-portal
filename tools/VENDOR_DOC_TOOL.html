@@ -392,67 +392,75 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .foot{padding:24px 0 40px;text-align:center;font-size:11px;color:var(--muted);font-weight:600;
   border-top:1px solid var(--line);margin-top:24px}
 
-/* ── Status overview: stage, 3D pies, 3D cylinders ─────────────────────── */
-.stat-hero{display:flex;flex-wrap:wrap;gap:14px 26px;align-items:baseline;margin:14px 0 6px}
-.stat-hero .big{font-size:30px;font-weight:800;color:var(--navy);letter-spacing:-.6px;font-variant-numeric:tabular-nums}
+/* ── Status overview: two halves, flat donuts, progress bars ───────────── */
+.stat-hero{display:flex;flex-wrap:wrap;gap:14px 26px;align-items:baseline;margin:14px 0 4px}
+.stat-hero .big{font-size:28px;font-weight:800;color:var(--navy);letter-spacing:-.6px;font-variant-numeric:tabular-nums}
 .stat-hero .lab{font-size:12.5px;font-weight:700;color:var(--muted)}
 .stat-hero .pct{color:var(--ok)}
-.stage{display:flex;gap:18px;align-items:stretch;margin-top:6px;transition:.45s var(--ease)}
-.pies{display:grid;grid-template-columns:1fr 1fr;gap:18px;flex:1 1 auto;min-width:0;transition:.45s var(--ease)}
-.pie-card{padding:16px 18px;display:flex;flex-direction:column;transition:.45s var(--ease)}
-#pieCard1{cursor:pointer}
-#pieCard1:hover{box-shadow:var(--sh2);border-color:var(--bdr2,#C9D6E2)}
-.pie-card h3{border:none;padding:0 0 10px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.pie-cue{font-size:10.5px;font-weight:700;color:var(--blue);letter-spacing:.01em}
-.pie3d{position:relative;width:230px;height:190px;margin:6px auto 4px}
-.pie3d .rot{position:absolute;left:0;right:0;top:8px;height:190px;margin:auto;width:200px;
-  transform-style:preserve-3d;transform:rotateX(58deg);}
-.pie3d .disc{position:absolute;inset:0;border-radius:50%}
-.pie3d .hole{position:absolute;width:44%;height:44%;left:28%;top:28%;border-radius:50%;
-  background:var(--sf);transform:translateZ(1px)}
-.pie3d .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;pointer-events:none}
-.pie3d .ctr .v{font-size:30px;font-weight:800;color:var(--navy);line-height:1;font-variant-numeric:tabular-nums}
-.pie3d .ctr .l{font-size:9.5px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-top:3px}
+
+.split{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:10px;align-items:start}
+@media(max-width:1060px){.split{grid-template-columns:1fr}}
+.half{background:var(--sf);border:1px solid var(--line);border-radius:16px;box-shadow:var(--sh1);
+  padding:18px 20px 20px;display:flex;flex-direction:column;min-width:0}
+.half.all{border-top:3px solid var(--blue)}
+.half.rev{border-top:3px solid var(--dang)}
+.half-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.half-h h3{font-size:15.5px;font-weight:800;color:var(--navy);padding:0;border:none}
+.tagx{font-size:9.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:3px 9px;border-radius:20px}
+.half-sub{font-size:11.5px;color:var(--muted);font-weight:600;margin:6px 0 12px;line-height:1.55}
+.mini{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+.mini .m{flex:1 1 90px;background:var(--sf2);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+.mini .m .n{font-size:19px;font-weight:800;color:var(--navy);line-height:1;font-variant-numeric:tabular-nums}
+.mini .m .l{font-size:9.5px;font-weight:700;color:var(--muted);margin-top:4px;letter-spacing:.02em}
+.mini .m.ok .n{color:var(--ok)}.mini .m.warn .n{color:var(--warn)}.mini .m.dang .n{color:var(--dang)}
+
+/* flat donut */
+.chartbox{position:relative;cursor:pointer;border-radius:12px;padding:8px 0 2px;transition:background .15s}
+.chartbox:hover{background:var(--sf2)}
+.chartbox .cue{position:absolute;right:8px;top:8px;font-size:10px;font-weight:800;color:var(--blue);
+  opacity:.85;pointer-events:none}
+.half.open .chartbox .cue{opacity:0}
+.dw{position:relative;width:100%;display:flex;justify-content:center}
+.dw svg{display:block;overflow:visible}
+.dw .sl{cursor:pointer;transition:opacity .15s}
+.dw:hover .sl{opacity:.82}
+.dw .sl:hover{opacity:1}
+.donut-ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  pointer-events:none}
+.donut-ctr .v{font-size:27px;font-weight:800;color:var(--navy);line-height:1;font-variant-numeric:tabular-nums}
+.donut-ctr .l{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px}
 .pie-legend{display:flex;flex-wrap:wrap;gap:5px 14px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line2)}
 .pie-legend .li{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:600;color:var(--ink)}
 .pie-legend .dot{width:10px;height:10px;border-radius:3px;flex:0 0 auto}
 .pie-legend b{font-weight:800;font-variant-numeric:tabular-nums}
 .pie-legend .p{color:var(--muted);font-weight:600}
 
-/* cylinders live to the right, hidden until a pie is opened */
-.cylwrap{flex:0 0 0;width:0;opacity:0;overflow:hidden;background:var(--sf);border:1px solid var(--line);
-  border-radius:16px;box-shadow:var(--sh1);transition:.45s var(--ease);display:flex;flex-direction:column}
-.stage.zoom .cylwrap{flex:1 1 62%;width:auto;opacity:1;padding:16px 18px}
-.stage.zoom .pies{grid-template-columns:1fr;flex:0 0 300px}
-.stage.zoom #pieCard2{display:none}
-.stage.zoom #pieCard1{transform:scale(1.02)}
-.stage.zoom .pie-cue{display:none}
-.cyl-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:6px}
-.cyl-sub{font-size:11px;color:var(--muted);font-weight:600;max-width:640px;margin-top:4px;line-height:1.5}
-.cyl-scroll{flex:1;overflow-x:auto;overflow-y:hidden;padding:8px 2px 4px}
-.cyl-row{display:flex;gap:20px;align-items:flex-end;min-height:300px;padding:10px 6px 0}
-.cyl{display:flex;flex-direction:column;align-items:center;gap:0;flex:0 0 auto;cursor:default}
-.cyl .barbox{position:relative;width:58px;height:230px;display:flex;align-items:flex-end}
-.cyl .stack{position:relative;width:100%;height:100%;transform-origin:bottom;transform:scaleY(0);
-  transition:transform .8s var(--spring);border-radius:0 0 29px 29px/0 0 14px 14px;overflow:hidden}
-.stage.shown .cyl .stack{transform:scaleY(1)}
-.cyl .cyl-seg{position:relative;width:100%}
-/* barrel shading: dark edges → light centre highlight */
-.cyl .cyl-seg::after{content:'';position:absolute;inset:0;
-  background:linear-gradient(90deg,rgba(0,0,0,.30),rgba(255,255,255,.34) 42%,rgba(255,255,255,.10) 60%,rgba(0,0,0,.30))}
-.cyl .cap{position:absolute;top:-7px;left:0;width:100%;height:14px;border-radius:50%;
-  filter:brightness(1.12);z-index:2}
-.cyl .barbox::before{content:'';position:absolute;left:0;right:0;bottom:-6px;height:12px;border-radius:50%;
-  background:rgba(11,37,69,.16);filter:blur(3px)}
-.cyl .code{font-size:11px;font-weight:800;color:var(--navy);font-family:var(--mono);margin-top:14px;white-space:nowrap}
-.cyl .tot{font-size:10.5px;font-weight:700;color:var(--muted);margin-top:2px}
-.cyl .pct{font-size:11px;font-weight:800;color:var(--ok);margin-top:1px;font-variant-numeric:tabular-nums}
-.cyl-legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line2)}
-.cyl-legend .li{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:600}
-.cyl-legend .dot{width:11px;height:11px;border-radius:3px}
-@media(max-width:1000px){.pies{grid-template-columns:1fr}.stage{flex-direction:column}
-  .stage.zoom .pies{flex:none}}
+/* progress bars */
+.pblock{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line2)}
+.pblock-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:7px}
+.pblock-h .t{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.pblock-h .v{font-size:22px;font-weight:800;color:var(--ok);line-height:1;font-variant-numeric:tabular-nums}
+.pblock-h .v small{font-size:11px;font-weight:700;color:var(--muted);margin-left:5px}
+.sbar{display:flex;height:22px;border-radius:6px;overflow:hidden;border:1px solid var(--line);background:var(--sf2)}
+.sbar i{display:block;height:100%;transition:width .8s var(--ease)}
+.sbar-lab{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:9px}
+.sbar-lab .li{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:600;color:var(--ink)}
+.sbar-lab .dot{width:9px;height:9px;border-radius:2px}
+.sbar-lab b{font-weight:800;font-variant-numeric:tabular-nums}
+
+/* per-document-type progress, revealed by clicking the chart */
+.bytype{max-height:0;overflow:hidden;opacity:0;transition:max-height .5s var(--ease),opacity .35s var(--ease)}
+.half.open .bytype{max-height:3000px;opacity:1;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line2)}
+.bt-h{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.trow{display:grid;grid-template-columns:120px 1fr 44px;gap:10px;align-items:center;padding:5px 0}
+.trow+.trow{border-top:1px solid var(--line)}
+.trow .tc{min-width:0}
+.trow .tc .c1{font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--navy)}
+.trow .tc .c2{font-size:9.5px;color:var(--muted);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trow .sbar{height:15px;border-radius:4px}
+.trow .pv{text-align:right;font-size:11.5px;font-weight:800;color:var(--ok);font-variant-numeric:tabular-nums}
+.trow .pv.zero{color:var(--muted)}
+.half-empty{padding:34px 16px;text-align:center;color:var(--muted);font-size:12.5px;font-weight:600;line-height:1.6}
 
 /* print */
 #printarea{display:none}
@@ -544,31 +552,36 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
   <button class="back" onclick="go('filter')">← Change scope</button>
   <div id="stat-head"></div>
 
-  <div class="stage" id="stage">
-    <!-- left rail: the two pies (side by side until one is opened) -->
-    <div class="pies" id="pies">
-      <div class="panel pie-card" id="pieCard1" onclick="openBreakdown()">
-        <h3>Documents by type <span class="pie-cue">click to break down by status →</span></h3>
-        <div class="pie3d" id="pie1"></div>
-        <div class="pie-legend" id="pie1leg"></div>
+  <div class="split">
+    <!-- LEFT — the whole purchase order -->
+    <section class="half all" id="halfA">
+      <div class="half-h"><h3>Full purchase order</h3>
+        <span class="tagx" style="background:#E8F0FE;color:#1A4FBF">ALL DOCUMENTS</span></div>
+      <div class="half-sub" id="subA"></div>
+      <div class="mini" id="miniA"></div>
+      <div class="chartbox" id="boxA" onclick="toggleHalf('A')">
+        <span class="cue">click for progress by type →</span>
+        <div class="dw" id="dwA"></div>
       </div>
-      <div class="panel pie-card" id="pieCard2">
-        <h3>Overall progress</h3>
-        <div class="pie3d" id="pie2"></div>
-        <div class="pie-legend" id="pie2leg"></div>
-      </div>
-    </div>
+      <div class="pie-legend" id="lgA"></div>
+      <div class="pblock" id="ovA"></div>
+      <div class="bytype" id="btA"></div>
+    </section>
 
-    <!-- right rail: the per-code 3D cylinders, shown once a pie is opened -->
-    <div class="cylwrap" id="cylwrap">
-      <div class="cyl-top">
-        <div><h3 style="border:none;padding:0">Status by document type</h3>
-          <div class="cyl-sub">Each cylinder is one document code, filled bottom-up — green is closed (reviewed without comments), amber on top is still circulating. Latest revision of every document.</div></div>
-        <button class="chip" onclick="closeBreakdown()">← Back to overview</button>
+    <!-- RIGHT — only what the chosen discipline has to review -->
+    <section class="half rev" id="halfB">
+      <div class="half-h"><h3 id="titleB">For your review</h3>
+        <span class="tagx" style="background:var(--dang-bg);color:#9C2C24">FOR REVIEW ONLY</span></div>
+      <div class="half-sub" id="subB"></div>
+      <div class="mini" id="miniB"></div>
+      <div class="chartbox" id="boxB" onclick="toggleHalf('B')">
+        <span class="cue">click for progress by type →</span>
+        <div class="dw" id="dwB"></div>
       </div>
-      <div class="cyl-scroll"><div class="cyl-row" id="cylRow"></div></div>
-      <div class="cyl-legend" id="cylLeg"></div>
-    </div>
+      <div class="pie-legend" id="lgB"></div>
+      <div class="pblock" id="ovB"></div>
+      <div class="bytype" id="btB"></div>
+    </section>
   </div>
 
   <div class="foot" id="foot1"></div>
@@ -1118,20 +1131,25 @@ const QUICK = [
 ];
 
 /* ── Status overview ───────────────────────────────────────────────────────
-   The screen the reader lands on after "Check Status".  It answers "how is
-   this PO doing for its originator department" — never mind the reviewer's own
-   discipline here.  Two 3D pies (documents per code, and overall progress),
-   and, once a pie is opened, a 3D cylinder per document code stacked by the
-   DOCUMENT STATUS (column W) of each document's latest revision.
+   The screen behind "Check Status", split down the middle:
+
+     left  — the whole purchase order for its originator department;
+     right — only the documents the chosen discipline actually has to review,
+             i.e. the AC–CT column picked on the scope screen reads
+             FOR REVIEW or FOR REVIEW - ORIGINATOR.
+
+   Each side carries a donut of documents per document type, an overall
+   progress bar, and — once the chart is clicked — a progress bar per
+   document type.  Every figure counts a document once, on its latest
+   revision, from DOCUMENT STATUS (column W).
    ────────────────────────────────────────────────────────────────────────── */
 
-/* The four statuses the request names, plus a catch-all, bottom → top.
-   "Reviewed without comments" is the closed / progress band. */
-const CYL_BANDS = [
-  {key:'without', label:'Reviewed without comments', col:'#2E9E6B', done:true},
-  {key:'minor',   label:'Reviewed with minor comments', col:'#8FBF4E'},
-  {key:'major',   label:'Reviewed with major comments', col:'#E07A3C'},
-  {key:'circ',    label:'Circulating (action required)', col:'#D9922E'},
+/* The statuses the report cares about; "reviewed without comments" is closed. */
+const BANDS = [
+  {key:'without', label:'Reviewed without comments',        col:'#2E9E6B'},
+  {key:'minor',   label:'Reviewed with minor comments',     col:'#8FBF4E'},
+  {key:'major',   label:'Reviewed with major comments',     col:'#E07A3C'},
+  {key:'circ',    label:'Circulating — action required',    col:'#D9922E'},
   {key:'other',   label:'Never received / rejected / void', col:'#9CA9B7'}
 ];
 function statusBand(st){
@@ -1142,135 +1160,131 @@ function statusBand(st){
   if(t==='CIRCULATING')                  return 'circ';
   return 'other';
 }
-/* a stable, distinct colour per document code for the "by type" pie */
 const CODE_PALETTE = ['#2563EB','#0EA5A4','#7C3AED','#DB2777','#D9922E','#2E9E6B','#E07A3C','#3B82F6',
-  '#8FBF4E','#9333EA','#0891B2','#CA8A04','#DC2626','#4F46E5','#059669','#B45309','#6B7280','#EC4899'];
+  '#8FBF4E','#9333EA','#0891B2','#CA8A04','#DC2626','#4F46E5','#059669','#B45309','#64748B','#EC4899'];
 
-function shade(hex,f){ /* f<1 darker, f>1 lighter */
-  const n=parseInt(hex.slice(1),16); let r=(n>>16)&255,g=(n>>8)&255,b=n&255;
-  const m=v=> Math.max(0,Math.min(255, Math.round(f<1? v*f : v+(255-v)*(f-1))));
-  return '#'+[m(r),m(g),m(b)].map(v=>v.toString(16).padStart(2,'0')).join('');
-}
+let STAT=null;
 
-let STAT=null;   // { byCode:[{code,desc,total,bands:{},done,col}], totals, progress }
-
-function renderDash(){
-  const docs=S.docs;
-  $('crumbs').innerHTML=`<span class="c" onclick="go('filter')">${esc(S.dep)}</span>`+
-    `<span class="s">/</span><span class="c">${esc(S.disc||'')}</span>`+
-    `<span class="s">/</span><span class="c on">${esc(S.po)}</span>`;
-
-  /* group latest-revision documents by CODE */
+function statsFor(docs){
   const by={};
   docs.forEach(d=>{ const c=d.code||'(no code)';
     (by[c]=by[c]||{code:c,desc:d.codeDesc||'',total:0,bands:{without:0,minor:0,major:0,circ:0,other:0}});
     by[c].total++; by[c].bands[statusBand(d.status)]++; });
   const byCode=Object.values(by).sort((a,b)=>b.total-a.total);
-  byCode.forEach((c,i)=>{ c.col=CODE_PALETTE[i%CODE_PALETTE.length]; c.done=c.bands.without; });
-
+  byCode.forEach((c,i)=>{ c.col=CODE_PALETTE[i%CODE_PALETTE.length];
+                          c.pct=Math.round(c.bands.without/c.total*100); });
   const totals={without:0,minor:0,major:0,circ:0,other:0};
   docs.forEach(d=>totals[statusBand(d.status)]++);
-  const progress = docs.length? Math.round(totals.without/docs.length*100) : 0;
-  STAT={ byCode, totals, total:docs.length, progress };
+  return { byCode, totals, total:docs.length,
+           progress: docs.length? Math.round(totals.without/docs.length*100) : 0 };
+}
 
+function renderDash(){
+  const all=S.docs;
+  /* the right-hand half: only what my discipline column asks me to review */
+  const rev=all.filter(d=>d.myRole==='review'||d.myRole==='review-org');
+  STAT={ all:statsFor(all), rev:statsFor(rev) };
+
+  $('crumbs').innerHTML=`<span class="c" onclick="go('filter')">${esc(S.dep)}</span>`+
+    `<span class="s">/</span><span class="c">${esc(S.disc||'')}</span>`+
+    `<span class="s">/</span><span class="c on">${esc(S.po)}</span>`;
   $('stat-head').innerHTML=`
     <div class="sec" style="margin-top:6px"><h2>${esc(S.po)} · ${esc(S.dep)}</h2>
-      <span class="cnt">${S.poDesc?esc(S.poDesc)+' &nbsp;·&nbsp; ':''}${docs.length.toLocaleString()} documents · latest revision each</span>
-      <div class="rule"></div></div>
-    <div class="stat-hero">
-      <div><span class="big">${docs.length.toLocaleString()}</span> <span class="lab">documents</span></div>
-      <div><span class="big">${byCode.length}</span> <span class="lab">document types</span></div>
-      <div><span class="big pct">${progress}%</span> <span class="lab">closed (reviewed without comments)</span></div>
-      <div><span class="big" style="color:var(--warn)">${totals.circ.toLocaleString()}</span> <span class="lab">circulating — action required</span></div>
-    </div>`;
+      <span class="cnt">${S.poDesc?esc(S.poDesc)+' &nbsp;·&nbsp; ':''}latest revision of every document</span>
+      <div class="rule"></div></div>`;
 
-  /* pie 1 — quantity per document code (top 10 + Other) */
-  const top=byCode.slice(0,10);
-  const restN=byCode.slice(10).reduce((n,c)=>n+c.total,0);
-  const pie1=top.map(c=>({label:c.code, sub:c.desc, value:c.total, col:c.col}));
-  if(restN) pie1.push({label:'Other', sub:byCode.length-10+' more types', value:restN, col:'#B8C4D0'});
-  pie3d($('pie1'), pie1, {});
-  legend($('pie1leg'), pie1, docs.length);
+  $('titleB').textContent='For review — '+(S.disc||'your discipline');
+  $('subA').textContent='Everything raised by '+S.dep+' under this purchase order.';
+  $('subB').innerHTML='Documents whose <b>'+esc(S.disc||'')+'</b> column reads '+
+    '<b>FOR REVIEW</b> or <b>FOR REVIEW - ORIGINATOR</b>.';
 
-  /* pie 2 — overall progress by status band */
-  const pie2=CYL_BANDS.map(b=>({label:b.label, value:totals[b.key], col:b.col})).filter(x=>x.value>0);
-  pie3d($('pie2'), pie2, {donut:true, centerV:progress+'%', centerL:'closed'});
-  legend($('pie2leg'), pie2, docs.length);
-
-  /* reset the stage to the two-pie overview */
-  $('stage').classList.remove('zoom','shown');
-  $('cylRow').innerHTML=''; $('cylLeg').innerHTML='';
+  renderHalf('A', STAT.all);
+  renderHalf('B', STAT.rev);
+  $('halfA').classList.remove('open'); $('halfB').classList.remove('open');
   $('foot1').textContent='Source: '+S.meta.title+' · Project '+S.meta.project+' · as of '+S.meta.asOf;
 }
 
-/* Build one tilted, extruded disc.  `data`=[{label,value,col,sub}]. */
-function pie3d(host, data, opt){
+function renderHalf(id, st){
+  const empty = !st.total;
+  $('mini'+id).innerHTML=[
+    ['', st.total, 'documents'],
+    ['', st.byCode.length, 'document types'],
+    ['ok', st.totals.without, 'closed'],
+    ['warn', st.totals.circ, 'circulating']
+  ].map(([c,n,l])=>`<div class="m ${c}"><div class="n">${n.toLocaleString()}</div><div class="l">${l}</div></div>`).join('');
+
+  if(empty){
+    $('dw'+id).innerHTML='<div class="half-empty">No document in this purchase order is marked<br>FOR REVIEW for this discipline.</div>';
+    $('lg'+id).innerHTML=''; $('ov'+id).innerHTML=''; $('bt'+id).innerHTML='';
+    $('box'+id).style.pointerEvents='none';
+    return;
+  }
+  $('box'+id).style.pointerEvents='';
+
+  /* donut — one slice per document type (top 10, remainder pooled) */
+  const top=st.byCode.slice(0,10);
+  const restN=st.byCode.slice(10).reduce((n,c)=>n+c.total,0);
+  const slices=top.map(c=>({label:c.code+(c.desc?' — '+c.desc:''), value:c.total, col:c.col}));
+  if(restN) slices.push({label:(st.byCode.length-10)+' more types', value:restN, col:'#B8C4D0'});
+  $('dw'+id).innerHTML=
+    `<svg viewBox="0 0 220 220" width="220" height="220" role="img">${donutSVG(slices,220,.56)}</svg>
+     <div class="donut-ctr"><div class="v">${st.total.toLocaleString()}</div><div class="l">documents</div></div>`;
+  $('lg'+id).innerHTML=slices.map((d,i)=>`<div class="li"><span class="dot" style="background:${d.col}"></span>
+      <span>${esc(i<top.length?top[i].code:d.label)}</span> <b>${d.value.toLocaleString()}</b>
+      <span class="p">${Math.round(d.value/st.total*100)}%</span></div>`).join('');
+
+  /* overall progress */
+  $('ov'+id).innerHTML=`
+    <div class="pblock-h"><span class="t">Overall progress</span>
+      <span class="v">${st.progress}% <small>${st.totals.without.toLocaleString()} of ${st.total.toLocaleString()} closed</small></span></div>
+    ${sbar(st.totals, st.total)}
+    <div class="sbar-lab">${BANDS.filter(b=>st.totals[b.key]).map(b=>
+      `<span class="li"><span class="dot" style="background:${b.col}"></span>${esc(b.label)} <b>${st.totals[b.key].toLocaleString()}</b></span>`).join('')}</div>`;
+
+  /* progress per document type — revealed when the chart is clicked */
+  $('bt'+id).innerHTML=`<div class="bt-h">Progress by document type</div>`+
+    st.byCode.map(c=>`<div class="trow">
+      <div class="tc"><div class="c1">${esc(c.code)}</div>
+        <div class="c2" title="${esc(c.desc)}">${esc(c.desc||'')} · ${c.total} doc${c.total>1?'s':''}</div></div>
+      ${sbar(c.bands, c.total)}
+      <div class="pv ${c.pct?'':'zero'}">${c.pct}%</div>
+    </div>`).join('');
+}
+
+/* a stacked status bar: green closed first, circulating and unreceived last */
+function sbar(bands, total){
+  return `<div class="sbar">`+BANDS.map(b=>{ const v=bands[b.key]; if(!v) return '';
+    return `<i style="width:${v/total*100}%;background:${b.col}" title="${esc(b.label)}: ${v}"></i>`;
+  }).join('')+`</div>`;
+}
+
+/* flat donut, drawn as SVG arcs so slices stay crisp and hoverable */
+function donutSVG(data, size, innerRatio){
+  const R=size/2-4, r=R*innerRatio, cx=size/2, cy=size/2;
   const tot=data.reduce((n,d)=>n+d.value,0)||1;
-  const GAP=0.9;                       // deg of white between slices
-  let ang=0; const bright=[], dark=[];
-  data.forEach(d=>{ const sweep=d.value/tot*360; const a0=ang, a1=ang+sweep; ang=a1;
-    const e=Math.max(a0, a1-GAP);
-    bright.push(`${d.col} ${a0}deg ${e}deg`, `#ffffff ${e}deg ${a1}deg`);
-    dark.push(`${shade(d.col,.7)} ${a0}deg ${e}deg`, `${shade(d.col,.7)} ${e}deg ${a1}deg`);
+  if(data.length===1)
+    return `<circle cx="${cx}" cy="${cy}" r="${(R+r)/2}" fill="none"
+      stroke="${data[0].col}" stroke-width="${R-r}"><title>${esc(data[0].label)}: ${data[0].value}</title></circle>`;
+  let a=-90, out='';
+  data.forEach(d=>{
+    const sweep=d.value/tot*360; if(sweep<=0) return;
+    const a0=a, a1=Math.min(a+sweep, a+359.99); a+=sweep;
+    out+=`<path class="sl" d="${arcPath(cx,cy,R,r,a0,a1)}" fill="${d.col}" stroke="#fff" stroke-width="1.6"
+      stroke-linejoin="round"><title>${esc(d.label)}: ${d.value} (${Math.round(d.value/tot*100)}%)</title></path>`;
   });
-  const topG=`conic-gradient(${bright.join(',')})`;
-  const sideG=`conic-gradient(${dark.join(',')})`;
-  const DEPTH=20;                       // extrusion layers (px of thickness)
-  let layers='';
-  for(let i=DEPTH;i>=1;i--) layers+=`<div class="disc" style="background:${sideG};transform:translateZ(-${i}px)"></div>`;
-  layers+=`<div class="disc" style="background:${topG}"></div>`;
-  if(opt.donut) layers+=`<div class="hole"></div>`;
-  host.innerHTML=`<div class="rot">${layers}</div>`+
-    (opt.donut?`<div class="ctr"><div class="v">${esc(opt.centerV)}</div><div class="l">${esc(opt.centerL)}</div></div>`:'');
+  return out;
 }
-function legend(host, data, tot){
-  host.innerHTML=data.map(d=>`<div class="li"><span class="dot" style="background:${d.col}"></span>
-    <span>${esc(d.label)}</span> <b>${d.value.toLocaleString()}</b>
-    <span class="p">${tot?Math.round(d.value/tot*100):0}%</span></div>`).join('');
+const _pt=(cx,cy,rad,deg)=>{ const t=deg*Math.PI/180;
+  return [ (cx+rad*Math.cos(t)).toFixed(2), (cy+rad*Math.sin(t)).toFixed(2) ]; };
+function arcPath(cx,cy,R,r,a0,a1){
+  const big=(a1-a0)>180?1:0;
+  const [x1,y1]=_pt(cx,cy,R,a0), [x2,y2]=_pt(cx,cy,R,a1);
+  const [x3,y3]=_pt(cx,cy,r,a1), [x4,y4]=_pt(cx,cy,r,a0);
+  return `M${x1} ${y1}A${R} ${R} 0 ${big} 1 ${x2} ${y2}L${x3} ${y3}A${r} ${r} 0 ${big} 0 ${x4} ${y4}Z`;
 }
 
-/* Clicking the "by type" pie zooms it left and grows a 3D cylinder per code. */
-function openBreakdown(){
-  if(!STAT) return;
-  buildCylinders();
-  $('stage').classList.add('zoom');
-  requestAnimationFrame(()=>requestAnimationFrame(()=>$('stage').classList.add('shown')));
-}
-function closeBreakdown(){ $('stage').classList.remove('zoom','shown'); }
-
-function buildCylinders(){
-  const H=230;                          // px full height of a cylinder
-  const maxTot=Math.max(1,...STAT.byCode.map(c=>c.total));
-  $('cylRow').innerHTML=STAT.byCode.map(c=>{
-    /* height of the whole barrel scales with how many documents the code has,
-       so a big code reads as a tall column; a floor keeps small ones visible */
-    const barH=Math.round(28 + (H-28)*c.total/maxTot);
-    let segs='', capDone=false;
-    /* DOM order is top → bottom, so reverse the bands: circulating / other at
-       the top, "reviewed without comments" at the bottom as the progress fill.
-       The first visible (top) band carries the elliptical cap. */
-    const order=CYL_BANDS.slice().reverse();
-    order.forEach((b,idx)=>{
-      const v=c.bands[b.key]; if(!v) return;
-      const h=v/c.total*100;
-      const cap = !capDone ? `<div class="cap" style="background:${shade(b.col,1.15)}"></div>` : '';
-      capDone=true;
-      segs+=`<div class="cyl-seg" title="${esc(b.label)}: ${v}" style="height:${h}%;background:${b.col}">${cap}</div>`;
-    });
-    const pct=Math.round((c.bands.without||0)/c.total*100);
-    return `<div class="cyl">
-      <div class="barbox" style="height:${barH}px">
-        <div class="stack" title="${esc(c.code)} — ${esc(c.desc)}">${segs}</div>
-      </div>
-      <div class="pct">${pct}%</div>
-      <div class="code" title="${esc(c.desc)}">${esc(c.code)}</div>
-      <div class="tot">${c.total} doc${c.total>1?'s':''}</div>
-    </div>`;
-  }).join('');
-  $('cylLeg').innerHTML=CYL_BANDS.map(b=>`<div class="li"><span class="dot" style="background:${b.col}"></span>
-    ${esc(b.label)} <b>${STAT.totals[b.key].toLocaleString()}</b></div>`).join('');
-}
-window.openBreakdown=openBreakdown; window.closeBreakdown=closeBreakdown;
+function toggleHalf(id){ $('half'+id).classList.toggle('open'); }
+window.toggleHalf=toggleHalf;
 
 /* Labelled bar chart: name on the left, count and share on the right, bar under. */
 function bars(id, data, total, note, onclick){
