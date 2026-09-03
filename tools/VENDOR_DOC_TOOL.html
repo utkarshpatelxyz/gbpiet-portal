@@ -82,6 +82,9 @@ button,input,select,textarea{font-family:inherit;color:inherit}
 .fl-head h2{font-size:19px;font-weight:800;color:var(--navy)}
 .fl-head p{font-size:12.5px;color:var(--muted);margin-top:4px}
 .fl-body{padding:24px 26px}
+.fld .ms{display:block}
+.fld .ms-btn{width:100%;max-width:none;padding:12px 14px;font-size:13.5px;justify-content:space-between}
+.fld .ms-pop{width:100%;max-width:none}
 .fld{margin-bottom:18px}
 .fld label{display:block;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
   color:var(--muted);margin-bottom:6px}
@@ -179,6 +182,67 @@ button,input,select,textarea{font-family:inherit;color:inherit}
 .lbl{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
   margin-right:2px;white-space:nowrap}
 
+/* ── searchable dropdown (single or multi select) ──────────────────────── */
+.ms{position:relative;display:inline-block}
+.ms-btn{display:inline-flex;align-items:center;gap:7px;max-width:260px;padding:9px 11px;font-size:11.5px;
+  font-weight:700;color:var(--navy);border:1px solid var(--line2);border-radius:9px;background:var(--sf2);
+  cursor:pointer;white-space:nowrap}
+.ms-btn:hover{border-color:var(--blue)}
+.ms.on .ms-btn{border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.ms-btn .lab{overflow:hidden;text-overflow:ellipsis}
+.ms-btn .ms-n{background:var(--blue);color:#fff;border-radius:10px;padding:1px 6px;font-size:9.5px;font-weight:800}
+.ms-btn .car{opacity:.5;font-size:9px}
+.ms-pop{display:none;position:absolute;z-index:90;top:calc(100% + 5px);left:0;min-width:290px;max-width:400px;
+  background:var(--sf);border:1px solid var(--line2);border-radius:12px;box-shadow:var(--sh3);overflow:hidden}
+.ms.on .ms-pop{display:block}
+.ms-qw{padding:9px;border-bottom:1px solid var(--line)}
+.ms-q{width:100%;padding:8px 10px;font-size:12px;font-weight:600;border:1px solid var(--line2);
+  border-radius:8px;background:var(--sf2)}
+.ms-q:focus{outline:none;border-color:var(--blue);background:#fff}
+.ms-acts{display:flex;gap:8px;align-items:center;padding:7px 10px;border-bottom:1px solid var(--line);
+  background:var(--sf2)}
+.ms-acts button{border:none;background:none;color:var(--blue);font-size:10.5px;font-weight:800;cursor:pointer;padding:0}
+.ms-acts button:hover{text-decoration:underline}
+.ms-acts .ms-cnt{margin-left:auto;font-size:10px;font-weight:700;color:var(--muted)}
+.ms-list{max-height:290px;overflow:auto;padding:4px 0}
+.ms-row{display:flex;align-items:flex-start;gap:9px;padding:7px 12px;cursor:pointer;font-size:12px}
+.ms-row:hover{background:#EDF4FF}
+.ms-row input{margin-top:2px;width:14px;height:14px;accent-color:var(--blue);cursor:pointer;flex:0 0 auto}
+.ms-row .tt{flex:1;min-width:0}
+.ms-row .t1{font-weight:700;color:var(--navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ms-row .t2{font-size:10.5px;color:var(--muted);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ms-row .cn{flex:0 0 auto;font-size:10px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
+.ms-row.sel{background:#F2F7FF}
+.ms-none{padding:16px;text-align:center;font-size:11.5px;color:var(--muted);font-weight:600}
+
+/* active filter pills */
+.pills{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.pill2{display:inline-flex;align-items:center;gap:6px;padding:5px 8px 5px 10px;border-radius:16px;
+  background:#E8F0FE;border:1px solid #C7DBFA;color:#1A4FBF;font-size:10.5px;font-weight:700}
+.pill2 b{font-weight:800}
+.pill2 span{cursor:pointer;opacity:.6;font-size:12px;line-height:1}
+.pill2 span:hover{opacity:1}
+
+/* ── summary ribbon ────────────────────────────────────────────────────── */
+.sum{display:grid;grid-template-columns:minmax(230px,300px) 1fr;gap:0;background:var(--sf);
+  border:1px solid var(--line);border-radius:16px;box-shadow:var(--sh1);overflow:hidden;margin:18px 0 14px}
+@media(max-width:900px){.sum{grid-template-columns:1fr}}
+.sum-l{padding:18px 22px;background:linear-gradient(160deg,#0B2545,#154070);color:#fff}
+.sum-l .big{font-size:40px;font-weight:800;letter-spacing:-1.4px;line-height:1;font-variant-numeric:tabular-nums}
+.sum-l .cap{font-size:11px;font-weight:700;opacity:.72;margin-top:5px;letter-spacing:.04em}
+.sum-l .sub{font-size:11px;font-weight:600;opacity:.6;margin-top:12px;padding-top:10px;
+  border-top:1px solid rgba(255,255,255,.18)}
+.sum-r{padding:16px 20px}
+.ribbon{display:flex;height:26px;border-radius:7px;overflow:hidden;border:1px solid var(--line);background:var(--sf2)}
+.ribbon i{display:block;height:100%;cursor:pointer;transition:filter .15s}
+.ribbon i:hover{filter:brightness(1.12)}
+.leg{display:flex;flex-wrap:wrap;gap:5px 16px;margin-top:12px}
+.leg-i{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:600;color:var(--ink);cursor:pointer}
+.leg-i:hover{color:var(--blue)}
+.leg-i .dot{width:9px;height:9px;border-radius:3px;flex:0 0 auto}
+.leg-i b{font-weight:800;font-variant-numeric:tabular-nums}
+.leg-i .p{color:var(--muted);font-weight:600}
+
 /* ── the document table ────────────────────────────────────────────────── */
 .dt-wrap{background:var(--sf);border:1px solid var(--line);border-radius:0 0 14px 14px;box-shadow:var(--sh1);
   overflow:hidden}
@@ -268,6 +332,32 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
   border-radius:7px;padding:5px 11px;cursor:pointer;margin-left:20px}
 .addr:hover{background:#EAF2FF;border-style:solid}
 .pt-none{font-size:12px;color:var(--muted);font-weight:600;padding:8px 2px}
+
+/* VDR status report */
+.vdr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.vin{width:100%;padding:10px 12px;font-size:13px;font-weight:600;color:var(--navy);
+  border:1px solid var(--line2);border-radius:9px;background:var(--sf2)}
+.vin:focus{outline:none;border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.vcode{display:grid;grid-template-columns:1fr auto auto auto;gap:10px;align-items:center;
+  padding:8px 16px;border-bottom:1px solid var(--line);font-size:11.5px}
+.vcode:last-child{border-bottom:none}
+.vcode .cd{min-width:0}
+.vcode .c1{font-family:var(--mono);font-weight:700;color:var(--navy);font-size:11px}
+.vcode .c2{font-size:10.5px;color:var(--muted);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vcode .qty{font-size:11px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums;min-width:34px;text-align:right}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:7px;overflow:hidden}
+.seg button{border:none;background:var(--sf2);color:var(--muted);font-size:9.5px;font-weight:800;
+  padding:5px 9px;cursor:pointer;border-right:1px solid var(--line2)}
+.seg button:last-child{border-right:none}
+.seg button.on{background:var(--navy);color:#fff}
+.seg button.on.cr{background:var(--warn)} .seg button.on.ex{background:var(--dang)}
+.vt{width:100%;border-collapse:collapse;font-size:12px}
+.vt td{padding:6px 10px;border:1px solid var(--line2)}
+.vt td.k{font-weight:600}
+.vt td.v{text-align:right;font-weight:800;font-variant-numeric:tabular-nums;width:64px}
+.vt tr.tot td{background:#FFF7CC;font-weight:800}
+.vt tr.pend td{background:#E7F5DA;font-weight:800}
+.vt tr.hd td{background:#E8ECEF;font-weight:800;font-size:10px;letter-spacing:.06em;text-transform:uppercase}
 
 /* basket */
 .bk-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line)}
@@ -369,12 +459,12 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
     <div class="fl-body">
       <div class="fld">
         <label>Purchase Order</label>
-        <select id="sel-po"><option value="">— Select a purchase order —</option></select>
+        <div id="sel-po" style="display:block"></div>
         <div class="hint" id="po-hint"></div>
       </div>
       <div class="fld">
         <label>Originator Department</label>
-        <select id="sel-dep" disabled><option value="">— Select a purchase order first —</option></select>
+        <div id="sel-dep" style="display:block"></div>
         <div class="hint" id="dep-hint"></div>
       </div>
       <button class="btn btn-p" id="btn-build" disabled onclick="buildDash()">Build dashboard →</button>
@@ -386,12 +476,25 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 <div class="screen" id="sc-dash"><div class="wrap">
   <button class="back" onclick="go('filter')">← Change scope</button>
   <div id="dash-head"></div>
+
+  <div class="sum">
+    <div class="sum-l">
+      <div class="big" id="sum-n">0</div>
+      <div class="cap" id="sum-cap">documents in this scope</div>
+      <div class="sub" id="sum-sub"></div>
+    </div>
+    <div class="sum-r">
+      <div class="ribbon" id="ribbon"></div>
+      <div class="leg" id="ribbon-leg"></div>
+    </div>
+  </div>
+
   <div class="kpis" id="kpis"></div>
 
   <div class="cols3">
-    <div class="panel"><h3>Documents by status</h3><div class="bd" id="ch-status"></div></div>
     <div class="panel"><h3>Ageing — documents still circulating</h3><div class="bd" id="ch-age"></div></div>
     <div class="panel"><h3>Disciplines still to close</h3><div class="bd" id="ch-dept"></div></div>
+    <div class="panel"><h3>Documents by type</h3><div class="bd" id="ch-code"></div></div>
   </div>
 
   <div class="sec"><h2>All documents</h2><span class="cnt" id="doc-cnt"></span><div class="rule"></div></div>
@@ -400,9 +503,11 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
     <div class="tools-r">
       <div class="srch"><span class="ic">🔎</span>
         <input id="f-q" type="search" placeholder="Search document number, title, equipment, supplier, code…" autocomplete="off"></div>
-      <select class="sel2" id="f-status"></select>
-      <select class="sel2" id="f-equip"></select>
-      <select class="sel2" id="f-code"></select>
+      <div id="f-status"></div>
+      <div id="f-code"></div>
+      <div id="f-equip"></div>
+      <div id="f-vendor"></div>
+      <div id="f-dept"></div>
       <select class="sel2" id="f-group">
         <option value="">No grouping</option>
         <option value="xref">Group by equipment</option>
@@ -411,11 +516,14 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
       </select>
     </div>
     <div class="tools-r" id="f-chips"></div>
+    <div class="tools-r" id="f-pills-r" style="display:none"><span class="lbl">Active</span>
+      <div class="pills" id="f-pills"></div></div>
     <div class="tools-r">
       <span class="lbl">Showing</span><span class="res" id="f-res"></span>
       <div class="fill"></div>
       <button class="chip" onclick="clearFilters()">✕ Clear all filters</button>
       <button class="chip" onclick="exportTableXlsx()">⤓ Export this list to Excel</button>
+      <button class="chip on" onclick="openVdr()">📊 Generate status report</button>
     </div>
   </div>
 
@@ -450,6 +558,39 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
     <button class="btn btn-g" onclick="exportOneRow()">⤓ Download this document (1 row)</button>
     <button class="btn btn-g" onclick="printReport()">🖨 Print / Save as PDF</button>
     <button class="btn btn-g" onclick="copyReport()">⧉ Copy as text</button>
+  </div>
+  <div class="foot"></div>
+</div></div>
+
+<!-- 7 ── VDR STATUS REPORT ────────────────────────────────────────────────── -->
+<div class="screen" id="sc-vdr"><div class="wrap">
+  <button class="back" onclick="go('dash')">← Back to the document list</button>
+  <div class="sec" style="margin-top:6px"><h2>Vendor document status report</h2>
+    <span class="cnt" id="vdr-scope"></span><div class="rule"></div></div>
+  <p style="font-size:12.5px;color:var(--muted);margin-bottom:16px">
+    Counts the documents currently in your filtered list — each document once, on its latest revision.
+    Split them into critical and other document types below; anything you exclude is left out of both totals.</p>
+
+  <div class="card" style="padding:18px 20px;margin-bottom:16px">
+    <div class="vdr-grid">
+      <div class="fld"><label>Project name</label><input class="vin" id="v-proj"></div>
+      <div class="fld"><label>Month</label><input class="vin" id="v-month"></div>
+      <div class="fld"><label>Week</label><input class="vin" id="v-week"></div>
+      <div class="fld"><label>Vendor</label><input class="vin" id="v-vendor"></div>
+      <div class="fld"><label>PO number line</label><input class="vin" id="v-po"></div>
+      <div class="fld"><label>PO description line</label><input class="vin" id="v-podesc"></div>
+    </div>
+  </div>
+
+  <div class="cols">
+    <div class="panel"><h3>Which document types are critical?</h3>
+      <div class="bd" style="padding:0"><div id="v-codes"></div></div></div>
+    <div><div class="panel"><h3>Report preview</h3><div class="bd" id="v-prev"></div></div></div>
+  </div>
+  <div class="acts">
+    <button class="btn btn-p" onclick="exportVdrXlsx()">⤓ Download the status report</button>
+    <button class="btn btn-g" onclick="vdrPreset('critflag')">Preset · use the CRITICAL-CRIT flag</button>
+    <button class="btn btn-g" onclick="vdrPreset('gacal')">Preset · GA + calculations only</button>
   </div>
   <div class="foot"></div>
 </div></div>
@@ -583,38 +724,132 @@ function parseBook(bytes){
   go('filter');
 }
 
+/* ── A dropdown you can type into ───────────────────────────────────────────
+   Used everywhere a list can get long: the purchase-order picker, and every
+   filter on the dashboard.  `multi:true` turns it into a checkbox list, so a
+   reader can hold several statuses or codes at once instead of one at a time.
+   ─────────────────────────────────────────────────────────────────────────── */
+const OPEN_DD = new Set();
+document.addEventListener('mousedown',e=>{
+  OPEN_DD.forEach(el=>{ if(!el.contains(e.target)) el.classList.remove('on'); });
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') OPEN_DD.forEach(el=>el.classList.remove('on')); });
+
+function dropdown(el, cfg){
+  /* cfg = {placeholder, options:[{v,t,s,n}], multi, selected:Set, onChange, disabled} */
+  el.classList.add('ms'); OPEN_DD.add(el);
+  el._cfg=cfg; el._sel=cfg.selected||new Set();
+  el.innerHTML=`<button type="button" class="ms-btn"><span class="lab"></span>
+      <span style="display:flex;align-items:center;gap:6px"><span class="ms-n" style="display:none"></span>
+      <span class="car">▼</span></span></button>
+    <div class="ms-pop">
+      <div class="ms-qw"><input class="ms-q" placeholder="Type to search…" autocomplete="off"></div>
+      ${cfg.multi?`<div class="ms-acts"><button type="button" data-a="all">Select all</button>
+        <button type="button" data-a="none">Clear</button><span class="ms-cnt"></span></div>`:''}
+      <div class="ms-list"></div></div>`;
+  const btn=el.querySelector('.ms-btn'), q=el.querySelector('.ms-q'), list=el.querySelector('.ms-list');
+
+  function paint(){
+    const sel=el._sel, n=sel.size;
+    const lab=el.querySelector('.lab'), badge=el.querySelector('.ms-n');
+    if(cfg.multi){
+      lab.textContent = n===0 ? cfg.placeholder
+        : n===1 ? (cfg.options.find(o=>sel.has(o.v))||{t:''}).t : cfg.placeholder;
+      badge.style.display = n>1?'':'none'; badge.textContent=n;
+    } else {
+      const o=cfg.options.find(x=>sel.has(x.v));
+      lab.textContent = o? o.t : cfg.placeholder;
+      badge.style.display='none';
+    }
+    lab.style.color = n? 'var(--navy)' : 'var(--muted)';
+    const c=el.querySelector('.ms-cnt'); if(c) c.textContent=n+' selected';
+  }
+  function draw(){
+    const term=q.value.trim().toUpperCase();
+    const rows=cfg.options.filter(o=>!term ||
+      (o.t+' '+(o.s||'')).toUpperCase().indexOf(term)>=0);
+    list.innerHTML = rows.length ? rows.map(o=>`
+      <label class="ms-row ${el._sel.has(o.v)?'sel':''}">
+        <input type="${cfg.multi?'checkbox':'radio'}" ${el._sel.has(o.v)?'checked':''} data-v="${esc(o.v)}">
+        <span class="tt"><span class="t1">${esc(o.t)}</span>
+          ${o.s?`<span class="t2">${esc(o.s)}</span>`:''}</span>
+        ${o.n!=null?`<span class="cn">${o.n.toLocaleString()}</span>`:''}
+      </label>`).join('')
+      : '<div class="ms-none">Nothing matches “'+esc(q.value)+'”.</div>';
+    list.querySelectorAll('input').forEach(inp=>inp.onchange=()=>{
+      const v=inp.dataset.v;
+      if(cfg.multi){ if(inp.checked) el._sel.add(v); else el._sel.delete(v); }
+      else { el._sel=new Set([v]); el.classList.remove('on'); }
+      paint(); draw(); cfg.onChange(el._sel);
+    });
+  }
+  btn.onclick=()=>{ if(el.classList.contains('disabled')) return;
+    const was=el.classList.contains('on');
+    OPEN_DD.forEach(x=>x.classList.remove('on'));
+    if(!was){ el.classList.add('on'); q.value=''; draw(); setTimeout(()=>q.focus(),10); } };
+  q.oninput=draw;
+  q.onkeydown=e=>{ if(e.key==='Enter'){ const f=list.querySelector('input'); if(f){ f.checked=!f.checked; f.onchange(); } e.preventDefault(); } };
+  el.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{
+    const term=q.value.trim().toUpperCase();
+    const shown=cfg.options.filter(o=>!term||(o.t+' '+(o.s||'')).toUpperCase().indexOf(term)>=0);
+    if(b.dataset.a==='all') shown.forEach(o=>el._sel.add(o.v)); else shown.forEach(o=>el._sel.delete(o.v));
+    paint(); draw(); cfg.onChange(el._sel); });
+  el.setOpts=o=>{ cfg.options=o; draw(); paint(); };
+  el.setSel =v=>{ el._sel=v; draw(); paint(); };
+  paint(); draw();
+  return el;
+}
+
 /* ── Filters ───────────────────────────────────────────────────────────── */
 function cell(a,name){ const i=S.hdr[name]; return i===undefined?'':a[i]; }
 function sv(a,name){ const v=cell(a,name); return v==null?'':String(v).trim(); }
 
 function buildFilters(){
-  const H=S.hdr;
-  const poDesc={}, poCount={};
+  const poDesc={}, poCount={}, poDocs={}, poVend={}, poOrig={};
   S.rows.forEach(a=>{ const p=sv(a,'PURCHASE ORDER');
     poCount[p]=(poCount[p]||0)+1;
-    if(!poDesc[p]){ const d=sv(a,'PURCHASE ORDER DESCRIPTION'); if(d) poDesc[p]=d; } });
+    (poDocs[p]=poDocs[p]||new Set()).add(sv(a,'TR NUMBER')||Math.random());
+    if(!poDesc[p]) poDesc[p]=sv(a,'PURCHASE ORDER DESCRIPTION');
+    if(!poVend[p]) poVend[p]=sv(a,'SUPPLIER');
+    if(!poOrig[p]) poOrig[p]=sv(a,'ORIGINATOR DEPARTMENT'); });
   const pos=Object.keys(poCount).sort();
-  const sel=$('sel-po');
-  sel.innerHTML='<option value="">— Select a purchase order —</option>'+
-    pos.map(p=>`<option value="${esc(p)}">${esc(p)}${poDesc[p]?' — '+esc(poDesc[p]):''}</option>`).join('');
+  S.poDescAll=poDesc;
+
+  dropdown($('sel-po'),{
+    placeholder:'Search or pick a purchase order…',
+    /* the sub-line is searched too, so a reader can type a vendor, an
+       equipment category or the raising department instead of the number */
+    options: pos.map(p=>({v:p, t:p,
+      s:[poDesc[p],poVend[p],poOrig[p]].filter(Boolean).join('  ·  '),
+      n:poDocs[p].size})),
+    multi:false,
+    onChange: sel=>{ S.po=[...sel][0]||null; S.dep=null; fillDeps(); }
+  });
+  const depEl = dropdown($('sel-dep'),{
+    placeholder:'Select a purchase order first',
+    options:[], multi:false,
+    onChange: sel=>{ S.dep=[...sel][0]||null; $('btn-build').disabled=!S.dep; }
+  });
+  function fillDeps(){
+    $('btn-build').disabled=true;
+    if(!S.po){ depEl.setOpts([]); depEl.setSel(new Set()); $('dep-hint').textContent=''; return; }
+    const deps={};
+    S.rows.forEach(a=>{ if(sv(a,'PURCHASE ORDER')===S.po){
+      const d=sv(a,'ORIGINATOR DEPARTMENT')||'(blank)'; deps[d]=(deps[d]||0)+1; } });
+    const list=Object.keys(deps).sort();
+    depEl._cfg.placeholder = 'Pick an originator department…';
+    depEl.setOpts(list.map(d=>({v:d,t:d,n:deps[d]})));
+    /* almost every PO is raised by a single department — take the shortcut */
+    if(list.length===1){ depEl.setSel(new Set([list[0]])); S.dep=list[0]; $('btn-build').disabled=false; }
+    else depEl.setSel(new Set());
+    $('dep-hint').textContent = list.length===1
+      ? 'Only one department raises documents under this PO — already selected.'
+      : list.length+' originator departments raise documents under this PO';
+  }
   $('po-hint').textContent=pos.length+' purchase orders in this file · '+S.rows.length.toLocaleString()+' document rows';
   $('navinfo').style.display='';
   $('navinfo').innerHTML='Project <b>'+esc(S.meta.project)+'</b> · as of '+esc(S.meta.asOf);
-
-  sel.onchange=()=>{
-    const po=sel.value; const ds=$('sel-dep');
-    S.po=po||null; S.dep=null; $('btn-build').disabled=true;
-    if(!po){ ds.disabled=true; ds.innerHTML='<option value="">— Select a purchase order first —</option>';
-             $('dep-hint').textContent=''; return; }
-    const deps={};
-    S.rows.forEach(a=>{ if(sv(a,'PURCHASE ORDER')===po){ const d=sv(a,'ORIGINATOR DEPARTMENT')||'(blank)'; deps[d]=(deps[d]||0)+1; } });
-    const list=Object.keys(deps).sort();
-    ds.disabled=false;
-    ds.innerHTML='<option value="">— Select an originator department —</option>'+
-      list.map(d=>`<option value="${esc(d)}">${esc(d)} (${deps[d]})</option>`).join('');
-    $('dep-hint').textContent=list.length+' originator departments raise documents under this PO';
-  };
-  $('sel-dep').onchange=()=>{ S.dep=$('sel-dep').value||null; $('btn-build').disabled=!S.dep; };
+  fillDeps();
 }
 
 /* ── Build the filtered document model ─────────────────────────────────── */
@@ -642,6 +877,7 @@ function buildDash(){
   const po=S.po, dep=S.dep;
   const sub=S.rows.filter(a=>sv(a,'PURCHASE ORDER')===po && (sv(a,'ORIGINATOR DEPARTMENT')||'(blank)')===dep);
   S.sub=sub;
+  S.poDesc = sub.length? sv(sub[0],'PURCHASE ORDER DESCRIPTION') : '';
 
   /* group revisions by TR NUMBER (fall back to client number) */
   const byDoc={}; let anon=0;
@@ -755,11 +991,14 @@ const AGES=['0–7 days','8–15 days','16–30 days','31–60 days','60+ days']
 const AGECOL={'0–7 days':'#2E9E6B','8–15 days':'#8FBF4E','16–30 days':'#D9922E',
               '31–60 days':'#E07A3C','60+ days':'#D4574E'};
 
-/* Nothing is pre-filtered: the list opens complete and the user narrows it. */
-const F = { q:'', status:'', equip:'', code:'', quick:'', group:'', sort:'doc', dir:1 };
+/* Nothing is pre-filtered: the list opens complete and the user narrows it.
+   Every filter is additive — statuses, codes, equipment, suppliers,
+   departments and the quick chips all combine. */
+const F = { q:'', status:new Set(), code:new Set(), equip:new Set(), vendor:new Set(),
+            dept:new Set(), quick:new Set(), group:'', sort:'doc', dir:1 };
 
 const COLS = [
-  {k:'doc',   t:'Document number & title', get:d=>(d.unrec?'\uffff':'')+(d.unrec?(d.xref+' '+d.code):d.tr)},
+  {k:'doc',   t:'Document number & title', get:d=>(d.unrec?'￿':'')+(d.unrec?(d.xref+' '+d.code):d.tr)},
   {k:'equip', t:'Equipment',               get:d=>d.xref},
   {k:'code',  t:'Code',                    get:d=>d.code},
   {k:'rev',   t:'Rev',                     get:d=>d.rev},
@@ -769,71 +1008,95 @@ const COLS = [
   {k:'dep',   t:'Disciplines',             get:d=>d.depOpen}
 ];
 
-/* Quick filters shown as chips — each is a predicate over the document. */
+/* Quick filters shown as chips. They stack, so "Circulating" + "Critical"
+   narrows to documents that are both. */
 const QUICK = [
-  {k:'',       t:'All documents',  cls:'',   f:()=>true},
   {k:'circ',   t:'Circulating',    cls:'wr', f:d=>d.circulating},
   {k:'over',   t:'Past deadline',  cls:'dg', f:d=>d.circulating&&d.over>0},
   {k:'blocked',t:'Held by others', cls:'dg', f:d=>d.blockers.length>0},
+  {k:'ownerp', t:'On my department',cls:'wr',f:d=>d.ownerPending.length>0},
   {k:'open',   t:'Status OPEN',    cls:'wr', f:d=>String(d.overall).toUpperCase()==='OPEN'},
   {k:'closed', t:'Status CLOSE',   cls:'gr', f:d=>String(d.overall).toUpperCase()==='CLOSE'},
   {k:'never',  t:'Never received', cls:'',   f:d=>String(d.status).toUpperCase()==='NEVER RECEIVED'},
   {k:'crit',   t:'Critical',       cls:'dg', f:d=>d.critical},
   {k:'key',    t:'Key drawing',    cls:'',   f:d=>d.keydrw},
-  {k:'multi',  t:'Multi-revision', cls:'',   f:d=>d.nRev>1}
+  {k:'multi',  t:'Multi-revision', cls:'',   f:d=>d.nRev>1},
+  {k:'ifr',    t:'IFR',            cls:'',   f:d=>String(d.category).toUpperCase()==='IFR'},
+  {k:'ifi',    t:'IFI',            cls:'',   f:d=>String(d.category).toUpperCase()==='IFI'}
 ];
 
 function renderDash(){
-  const docs=S.docs, circ=docs.filter(d=>d.circulating);
-  const over=circ.filter(d=>d.over!=null&&d.over>0);
-  const blocked=docs.filter(d=>d.blockers.length>0);
-  const open=docs.filter(d=>String(d.overall).toUpperCase()==='OPEN');
-  const closed=docs.filter(d=>String(d.overall).toUpperCase()==='CLOSE');
-  const never=docs.filter(d=>d.unrec || String(d.status).toUpperCase()==='NEVER RECEIVED');
+  const docs=S.docs;
 
   $('crumbs').innerHTML=`<span class="c" onclick="go('filter')">${esc(S.po)}</span>`+
     `<span class="s">/</span><span class="c on">${esc(S.dep)}</span>`;
   $('dash-head').innerHTML=`<div class="sec" style="margin-top:6px"><h2>${esc(S.po)} · ${esc(S.dep)}</h2>
-    <span class="cnt">${docs.length.toLocaleString()} documents from ${S.sub.length.toLocaleString()} revision rows</span>
-    <div class="rule"></div></div>`;
+    <span class="cnt">${esc(S.poDesc||'')}</span><div class="rule"></div></div>`;
+
+  buildToolbar();
+  applyFilters();
+  $('foot1').textContent='Source: '+S.meta.title+' · Project '+S.meta.project+' · as of '+S.meta.asOf;
+}
+
+/* Everything above the list reflects the filtered set, so the headline numbers
+   and the charts always agree with the rows underneath them. */
+function renderSummary(rows){
+  const circ=rows.filter(d=>d.circulating);
+  const over=circ.filter(d=>d.over!=null&&d.over>0);
+  const blocked=rows.filter(d=>d.blockers.length>0);
+  const revs=rows.reduce((n,d)=>n+d.nRev,0);
+  const filtered = rows.length!==S.docs.length;
+
+  $('sum-n').textContent=rows.length.toLocaleString();
+  $('sum-cap').textContent= filtered
+    ? 'documents after filtering (of '+S.docs.length.toLocaleString()+')' : 'documents in this scope';
+  $('sum-sub').innerHTML= revs.toLocaleString()+' revisions on record &nbsp;·&nbsp; '+
+    new Set(rows.map(d=>d.xref)).size+' equipment items &nbsp;·&nbsp; '+
+    new Set(rows.map(d=>d.code)).size+' document types';
+
+  /* composition ribbon — one segment per status, click to filter */
+  const sc={}; rows.forEach(d=>{ const k=String(d.status).toUpperCase(); sc[k]=(sc[k]||0)+1; });
+  const seg=Object.entries(sc).sort((a,b)=>stMeta(a[0]).o-stMeta(b[0]).o);
+  const tot=Math.max(1,rows.length);
+  $('ribbon').innerHTML=seg.map(([k,v])=>
+    `<i data-k="${esc(k)}" style="width:${v/tot*100}%;background:${stMeta(k).col}" title="${esc(k)}: ${v}"></i>`).join('')
+    || '<i style="width:100%;background:var(--line2)"></i>';
+  $('ribbon-leg').innerHTML=seg.map(([k,v])=>
+    `<span class="leg-i" data-k="${esc(k)}"><span class="dot" style="background:${stMeta(k).col}"></span>
+      ${esc(k)} <b>${v.toLocaleString()}</b> <span class="p">${Math.round(v/tot*100)}%</span></span>`).join('');
+  document.querySelectorAll('#ribbon [data-k],#ribbon-leg [data-k]').forEach(el=>el.onclick=()=>{
+    F.status=new Set([el.dataset.k]); syncPickers(); applyFilters(); });
 
   $('kpis').innerHTML=[
-    ['blue',docs.length,'Documents'],
-    ['blue',S.sub.length,'Revisions on record'],
-    ['warn',circ.length,'Circulating now'],
-    ['dang',over.length,'Past the '+DEADLINE_DAYS+'-day deadline'],
-    ['dang',blocked.length,'Waiting on another discipline'],
-    ['info',never.length,'Never received'],
-    ['warn',open.length,'Workbook STATUS = OPEN'],
-    ['ok',closed.length,'Workbook STATUS = CLOSE']
-  ].map(([c,n,l])=>`<div class="kpi ${c}"><div class="n num">${n.toLocaleString()}</div>
+    ['warn',circ.length,'Circulating now','Latest revision is out for review'],
+    ['dang',over.length,'Past the '+DEADLINE_DAYS+'-day deadline','Circulating longer than allowed'],
+    ['dang',blocked.length,'Held by another discipline','FOR REVIEW with no closed date'],
+    ['ok',rows.filter(d=>String(d.status).toUpperCase()==='REVIEWED WITHOUT COMMENTS').length,
+      'Approved without comments','Closed clean'],
+    ['info',rows.filter(d=>String(d.status).toUpperCase()==='NEVER RECEIVED').length,
+      'Never received','Planned but never issued']
+  ].map(([c,n,l,h])=>`<div class="kpi ${c}" title="${esc(h)}"><div class="n num">${n.toLocaleString()}</div>
       <div class="l">${l}</div></div>`).join('');
 
-  /* ── chart 1: every document by its status ───────────────────────────── */
-  const sc={}; docs.forEach(d=>{ const k=String(d.status).toUpperCase(); sc[k]=(sc[k]||0)+1; });
-  bars('ch-status', Object.entries(sc).sort((a,b)=>stMeta(a[0]).o-stMeta(b[0]).o)
-        .map(([k,v])=>({label:k,value:v,col:stMeta(k).col})), docs.length,
-       'Click a bar to filter the list below.', k=>{ F.status=k; F.quick=''; applyFilters(); });
-
-  /* ── chart 2: how long circulating documents have been out ───────────── */
+  /* ── charts, all against the filtered set ─────────────────────────────── */
   const ac={}; AGES.forEach(a=>ac[a]=0);
   circ.forEach(d=>{ const b=ageBucket(d.days); if(b) ac[b]++; });
   bars('ch-age', AGES.map(a=>({label:a,value:ac[a],col:AGECOL[a]})), Math.max(1,circ.length),
        DEADLINE_DAYS+' days are allowed from the circulate date.', null);
 
-  /* ── chart 3: who still has to close something ───────────────────────── */
   const bc={};
-  docs.filter(d=>d.circulating).forEach(d=>d.latest.depts.forEach(x=>{
-    if(!x.closed && x.review) bc[x.name]=(bc[x.name]||0)+1; }));
+  circ.forEach(d=>d.latest.depts.forEach(x=>{ if(!x.closed && x.review) bc[x.name]=(bc[x.name]||0)+1; }));
   const bl=Object.entries(bc).sort((a,b)=>b[1]-a[1]).slice(0,8);
   bars('ch-dept', bl.map(([n,c])=>({label:n,value:c,col:'#D4574E'})), Math.max(1,circ.length),
-       bl.length?'Counted only where the discipline is marked FOR REVIEW with no closed date.'
-                :'', null);
+       bl.length?'Counted where the discipline is marked FOR REVIEW with no closed date.':'',
+       n=>{ F.dept=new Set([n]); syncPickers(); applyFilters(); });
 
-  /* ── the list ────────────────────────────────────────────────────────── */
-  buildToolbar();
-  applyFilters();
-  $('foot1').textContent='Source: '+S.meta.title+' · Project '+S.meta.project+' · as of '+S.meta.asOf;
+  const cc={}; rows.forEach(d=>{ const k=d.code||'(no code)'; cc[k]=(cc[k]||0)+1; });
+  const cl=Object.entries(cc).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const cdesc={}; rows.forEach(d=>{ if(d.code&&!cdesc[d.code]) cdesc[d.code]=d.codeDesc; });
+  bars('ch-code', cl.map(([n,c])=>({label:n+(cdesc[n]?' — '+cdesc[n]:''),value:c,col:'#2563EB',key:n})),
+       Math.max(1,rows.length), 'Click a bar to keep only that document type.',
+       (_,i)=>{ F.code=new Set([cl[i][0]]); syncPickers(); applyFilters(); });
 }
 
 /* Labelled bar chart: name on the left, count and share on the right, bar under. */
@@ -849,64 +1112,70 @@ function bars(id, data, total, note, onclick){
       <div class="bar"><i style="width:${d.value/max*100}%;background:${d.col}"></i></div>
     </div>`).join('') + (note?`<div class="chart-note">${esc(note)}</div>`:'');
   if(onclick) el.querySelectorAll('.brow[data-i]').forEach(r=>
-    r.onclick=()=>onclick(data[+r.dataset.i].label));
+    r.onclick=()=>onclick(data[+r.dataset.i].key||data[+r.dataset.i].label, +r.dataset.i));
 }
 
 /* ── toolbar ───────────────────────────────────────────────────────────── */
+const PICKERS=[
+  {id:'f-status', key:'status', ph:'All statuses',    get:d=>[String(d.status).toUpperCase()], sub:()=>''},
+  {id:'f-code',   key:'code',   ph:'All codes',       get:d=>[d.code],   sub:d=>d.codeDesc},
+  {id:'f-equip',  key:'equip',  ph:'All equipment',   get:d=>[d.xref],   sub:d=>d.equip},
+  {id:'f-vendor', key:'vendor', ph:'All suppliers',   get:d=>[d.vendor], sub:()=>''},
+  {id:'f-dept',   key:'dept',   ph:'Any discipline',  get:d=>d.latest.depts.map(x=>x.name), sub:()=>''}
+];
 function buildToolbar(){
-  const docs=S.docs;
-  const opts=(id,label,vals,cur)=>{
-    $(id).innerHTML=`<option value="">${label}</option>`+
-      vals.map(([v,n,extra])=>`<option value="${esc(v)}"${v===cur?' selected':''}>${esc(v)}${extra?' — '+esc(extra):''} (${n})</option>`).join('');
-  };
-  const tally=(fn)=>{ const m={}; docs.forEach(d=>{const k=fn(d); if(k) m[k]=(m[k]||0)+1;}); return m; };
-
-  const st=tally(d=>String(d.status).toUpperCase());
-  opts('f-status','All statuses',
-       Object.entries(st).sort((a,b)=>stMeta(a[0]).o-stMeta(b[0]).o).map(([v,n])=>[v,n]), F.status);
-
-  const eqDesc={}; docs.forEach(d=>{ if(d.xref && !eqDesc[d.xref]) eqDesc[d.xref]=d.equip; });
-  const eq=tally(d=>d.xref);
-  opts('f-equip','All equipment',
-       Object.keys(eq).sort().map(v=>[v,eq[v],eqDesc[v]]), F.equip);
-
-  const cdDesc={}; docs.forEach(d=>{ if(d.code && !cdDesc[d.code]) cdDesc[d.code]=d.codeDesc; });
-  const cd=tally(d=>d.code);
-  opts('f-code','All codes',
-       Object.keys(cd).sort().map(v=>[v,cd[v],cdDesc[v]]), F.code);
-
-  $('f-chips').innerHTML=QUICK.map(q=>{
-    const n=q.k?docs.filter(q.f).length:docs.length;
-    return `<button class="chip ${q.cls} ${F.quick===q.k?'on':''}" data-q="${q.k}"
-      ${n?'':'style="opacity:.4" disabled'}>${esc(q.t)}<span class="n">${n.toLocaleString()}</span></button>`;
+  PICKERS.forEach(p=>{
+    const n={}, sub={};
+    S.docs.forEach(d=>p.get(d).forEach(v=>{ if(!v) return; n[v]=(n[v]||0)+1; if(sub[v]==null) sub[v]=p.sub(d)||''; }));
+    const opts=Object.keys(n).sort((a,b)=> p.key==='status' ? stMeta(a).o-stMeta(b).o : a.localeCompare(b))
+                 .map(v=>({v,t:v,s:sub[v],n:n[v]}));
+    dropdown($(p.id),{ placeholder:p.ph, options:opts, multi:true, selected:F[p.key],
+      onChange:()=>applyFilters() });
+  });
+  $('f-chips').innerHTML='<span class="lbl">Quick filters</span>'+QUICK.map(q=>{
+    const n=S.docs.filter(q.f).length;
+    return `<button class="chip ${q.cls} ${F.quick.has(q.k)?'on':''}" data-q="${q.k}"
+      ${n?'':'style="opacity:.35" disabled'}>${esc(q.t)}<span class="n">${n.toLocaleString()}</span></button>`;
   }).join('');
   $('f-chips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
-    F.quick=c.dataset.q; if(F.quick) F.status=''; applyFilters(); buildToolbar();
+    const k=c.dataset.q;
+    if(F.quick.has(k)) F.quick.delete(k); else F.quick.add(k);
+    c.classList.toggle('on',F.quick.has(k)); applyFilters();
   });
-
   $('f-group').value=F.group;
   $('f-q').value=F.q;
   let t=null;
   $('f-q').oninput = e=>{ clearTimeout(t); t=setTimeout(()=>{ F.q=e.target.value.trim().toUpperCase(); applyFilters(); },160); };
-  $('f-status').onchange=e=>{ F.status=e.target.value; F.quick=''; applyFilters(); buildToolbar(); };
-  $('f-equip').onchange =e=>{ F.equip =e.target.value; applyFilters(); };
-  $('f-code').onchange  =e=>{ F.code  =e.target.value; applyFilters(); };
-  $('f-group').onchange =e=>{ F.group =e.target.value; applyFilters(); };
+  $('f-group').onchange =e=>{ F.group=e.target.value; applyFilters(); };
+}
+/* Push programmatic filter changes (a chart click, a pill ✕) back into the pickers. */
+function syncPickers(){
+  PICKERS.forEach(p=>{ const el=$(p.id); if(el && el.setSel) el.setSel(F[p.key]); });
+  $('f-chips').querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',F.quick.has(c.dataset.q)));
 }
 function clearFilters(){
-  F.q=''; F.status=''; F.equip=''; F.code=''; F.quick=''; F.group='';
-  buildToolbar(); applyFilters();
+  F.q=''; F.group='';
+  PICKERS.forEach(p=>F[p.key]=new Set());
+  F.quick=new Set();
+  $('f-q').value=''; $('f-group').value='';
+  syncPickers(); applyFilters();
+}
+function dropFilter(key,val){
+  if(key==='quick') F.quick.delete(val); else F[key].delete(val);
+  syncPickers(); applyFilters();
 }
 
 /* ── filter + sort + render ────────────────────────────────────────────── */
 function currentRows(){
-  const q=F.q, qf=(QUICK.find(x=>x.k===F.quick)||QUICK[0]).f;
+  const q=F.q, quick=[...F.quick].map(k=>QUICK.find(x=>x.k===k)).filter(Boolean);
   let out=S.docs.filter(d=>
        (!q || d.searchKey.indexOf(q)>=0)
-    && (!F.status || String(d.status).toUpperCase()===F.status)
-    && (!F.equip  || d.xref===F.equip)
-    && (!F.code   || d.code===F.code)
-    && qf(d));
+    && (!F.status.size || F.status.has(String(d.status).toUpperCase()))
+    && (!F.code.size   || F.code.has(d.code))
+    && (!F.equip.size  || F.equip.has(d.xref))
+    && (!F.vendor.size || F.vendor.has(d.vendor))
+    && (!F.dept.size   || d.latest.depts.some(x=>F.dept.has(x.name)))
+    && quick.every(x=>x.f(d)));
   const col=COLS.find(c=>c.k===F.sort)||COLS[0];
   out.sort((a,b)=>{
     let x=col.get(a), y=col.get(b);
@@ -915,9 +1184,25 @@ function currentRows(){
   });
   return out;
 }
+function renderPills(){
+  const out=[];
+  PICKERS.forEach(p=>F[p.key].forEach(v=>out.push([p.key,v,p.ph.replace(/^A(ll|ny) /,'')])));
+  F.quick.forEach(k=>{ const q=QUICK.find(x=>x.k===k); if(q) out.push(['quick',k,'quick',q.t]); });
+  if(F.q) out.push(['q',F.q,'search']);
+  $('f-pills-r').style.display = out.length? '' : 'none';
+  $('f-pills').innerHTML = out.map(([key,v,cat,lbl])=>
+    `<span class="pill2"><b>${esc(lbl||v)}</b>
+      <span data-k="${esc(key)}" data-v="${esc(v)}">✕</span></span>`).join('');
+  $('f-pills').querySelectorAll('span[data-k]').forEach(x=>x.onclick=()=>{
+    if(x.dataset.k==='q'){ F.q=''; $('f-q').value=''; syncPickers(); applyFilters(); }
+    else dropFilter(x.dataset.k,x.dataset.v);
+  });
+}
 function applyFilters(){
   const rows=currentRows();
   S.view=rows;
+  renderSummary(rows);
+  renderPills();
   $('doc-cnt').textContent=S.docs.length.toLocaleString()+' in this scope';
   $('f-res').innerHTML=`<b>${rows.length.toLocaleString()}</b> of ${S.docs.length.toLocaleString()} documents`;
 
@@ -1445,9 +1730,208 @@ function copyReport(){
     .catch(()=>alert('Could not copy — use Print or Download instead.'));
 }
 
+/* ── Vendor document status report ─────────────────────────────────────────
+   The weekly sheet an engineer sends out: two blocks of counts — critical
+   document types and everything else, with quality dossiers left out — over
+   whatever the reader has filtered the list down to.  Each document is counted
+   once, on its latest revision, so the totals are document counts and not
+   revision counts.
+   ────────────────────────────────────────────────────────────────────────── */
+const VDR_ROWS = [
+  ['With Major comments',       'REVIEWED WITH MAJOR COMMENTS'],
+  ['With Minor comments',       'REVIEWED WITH MINOR COMMENTS'],
+  ['Never received',            'NEVER RECEIVED'],
+  ['Approved without comments', 'REVIEWED WITHOUT COMMENTS'],
+  ['Circulating',               'CIRCULATING'],
+  ['As-Built',                  'AS BUILT']
+];
+/* Codes whose documents are quality records rather than engineering deliverables. */
+const DOSSIER_PREFIX = ['DOS','VDB','CER','QAC','MDR','PLN','PRC'];
+
+/* cls: code -> 'crit' | 'other' | 'excl'.
+   strict: in the sheet this mirrors, the block total is the sum of the six
+   status rows — void, rejected and for-information documents are left out
+   altogether.  Turn it off to count every document in the block. */
+const V = { cls:{}, strict:true };
+
+function openVdr(){
+  const rows=S.view||S.docs;
+  if(!rows.length) return alert('The filtered list is empty — there is nothing to report on.');
+  const codes=[...new Set(rows.map(d=>d.code||'(no code)'))].sort();
+  codes.forEach(c=>{ if(!V.cls[c]) V.cls[c]=defaultClass(c,rows); });
+  Object.keys(V.cls).forEach(c=>{ if(!codes.includes(c)) delete V.cls[c]; });
+
+  const d0=rows[0];
+  if(!$('v-proj').value)   $('v-proj').value   = S.meta.title ? S.meta.project+' — '+S.meta.title : String(S.meta.project||'');
+  if(!$('v-month').value)  $('v-month').value  = new Date().toLocaleString('en',{month:'long',year:'numeric'});
+  if(!$('v-week').value)   $('v-week').value   = 'Week '+isoWeek(new Date());
+  if(!$('v-vendor').value) $('v-vendor').value = vendorName(rows);
+  if(!$('v-po').value)     $('v-po').value     = S.po;
+  if(!$('v-podesc').value) $('v-podesc').value = S.poDesc || S.dep;
+  ['v-proj','v-month','v-week','v-vendor','v-po','v-podesc'].forEach(id=>$(id).oninput=renderVdr);
+  renderVdr();
+  go('vdr');
+}
+function isoWeek(d){
+  const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  t.setUTCDate(t.getUTCDate()+4-(t.getUTCDay()||7));
+  return Math.ceil((((t-new Date(Date.UTC(t.getUTCFullYear(),0,1)))/86400000)+1)/7);
+}
+function vendorName(rows){
+  const n={}; rows.forEach(d=>{ if(d.vendor) n[d.vendor]=(n[d.vendor]||0)+1; });
+  const top=Object.entries(n).sort((a,b)=>b[1]-a[1])[0];
+  if(!top) return '';
+  /* "B000001230 - BERGAMA ENDUSTRI ..." → "BERGAMA ENDUSTRI ..." */
+  return top[0].replace(/^[A-Z]?\d{6,}\s*-\s*/,'');
+}
+function defaultClass(code,rows){
+  if(DOSSIER_PREFIX.some(p=>code.startsWith(p))) return 'excl';
+  const mine=rows.filter(d=>(d.code||'(no code)')===code);
+  return mine.length && mine.every(d=>d.critical) ? 'crit' : 'other';
+}
+function vdrPreset(kind){
+  const rows=S.view||S.docs;
+  Object.keys(V.cls).forEach(c=>{
+    if(kind==='critflag') V.cls[c]=defaultClass(c,rows);
+    else { /* GA drawings + calculations only */
+      V.cls[c] = DOSSIER_PREFIX.some(p=>c.startsWith(p)) ? 'excl'
+               : (/^(PLG|CAL)/.test(c) ? 'crit' : 'other'); }
+  });
+  renderVdr();
+}
+function vdrCounts(){
+  const rows=S.view||S.docs;
+  const pick=k=>rows.filter(d=>V.cls[d.code||'(no code)']===k);
+  const block=list=>{
+    const o={rows:VDR_ROWS.map(([label,st])=>
+      [label, list.filter(d=>String(d.status).toUpperCase()===st).length])};
+    const listed=o.rows.reduce((n,r)=>n+r[1],0);
+    o.unlisted = list.length - listed;       // VOID, REJECTED, FOR INFORMATION
+    o.total = V.strict ? listed : list.length;
+    const approved=list.filter(d=>String(d.status).toUpperCase()==='REVIEWED WITHOUT COMMENTS').length;
+    o.pending = o.total - approved;          // everything not yet approved clean
+    return o;
+  };
+  const c=block(pick('crit')), o=block(pick('other'));
+  return { crit:c, other:o, excluded:pick('excl').length,
+           dropped: V.strict ? c.unlisted+o.unlisted : 0, all:rows.length };
+}
+function renderVdr(){
+  const rows=S.view||S.docs;
+  $('vdr-scope').textContent = rows.length.toLocaleString()+' document'+(rows.length===1?'':'s')+
+    (rows.length!==S.docs.length? ' after filtering (of '+S.docs.length.toLocaleString()+')' : ' in this scope');
+
+  const n={}, desc={};
+  rows.forEach(d=>{ const c=d.code||'(no code)'; n[c]=(n[c]||0)+1; if(!desc[c]) desc[c]=d.codeDesc||''; });
+  const tally={crit:0,other:0,excl:0};
+  Object.keys(V.cls).forEach(c=>tally[V.cls[c]]+=(n[c]||0));
+  $('v-codes').innerHTML=`<div class="vcode" style="background:var(--sf2);font-weight:800">
+      <div class="cd"><div class="c1" style="font-family:var(--font)">${Object.keys(V.cls).length} document types</div>
+        <div class="c2">Critical ${tally.crit.toLocaleString()} · Other ${tally.other.toLocaleString()} · Excluded ${tally.excl.toLocaleString()}</div></div>
+      <div class="qty">${rows.length.toLocaleString()}</div><div></div><div></div>
+    </div>`+Object.keys(V.cls).sort().map(c=>`
+    <div class="vcode">
+      <div class="cd"><div class="c1">${esc(c)}</div><div class="c2" title="${esc(desc[c]||'')}">${esc(desc[c]||'')}</div></div>
+      <div class="qty">${(n[c]||0).toLocaleString()}</div>
+      <div class="seg" data-c="${esc(c)}">
+        <button data-v="crit"  class="cr ${V.cls[c]==='crit'?'on':''}">Critical</button>
+        <button data-v="other" class="${V.cls[c]==='other'?'on':''}">Other</button>
+        <button data-v="excl"  class="ex ${V.cls[c]==='excl'?'on':''}">Exclude</button>
+      </div>
+      <div></div>
+    </div>`).join('');
+  $('v-codes').querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{
+    V.cls[b.parentNode.dataset.c]=b.dataset.v; renderVdr(); });
+
+  const C=vdrCounts();
+  const blk=(title,o)=>`
+    <tr class="tot"><td class="k">${esc(title)}</td><td class="v">${o.total.toLocaleString()}</td></tr>
+    ${o.rows.map(([l,v])=>`<tr><td class="k">${esc(l)}</td><td class="v">${v.toLocaleString()}</td></tr>`).join('')}
+    <tr class="pend"><td class="k">Approval Pending</td><td class="v">${o.pending.toLocaleString()}</td></tr>
+    ${o.unlisted?`<tr><td class="k" style="color:var(--muted);font-size:11px">Not in the list above (void, rejected, for information)</td>
+      <td class="v" style="color:var(--muted)">${o.unlisted}</td></tr>`:''}`;
+  $('v-prev').innerHTML=`<table class="vt">
+    <tr class="hd"><td colspan="2">${esc($('v-vendor').value||'Vendor')} · ${esc($('v-po').value||'')}</td></tr>
+    ${blk('Total No.Critical Documents',C.crit)}
+    <tr><td colspan="2" style="height:8px;border-left:none;border-right:none"></td></tr>
+    ${blk('Total Other Documents (Excluding quality docs / Dossiers)',C.other)}
+    </table>
+    <label class="thing" style="margin-top:12px;font-size:11.5px">
+      <input type="checkbox" id="v-strict" ${V.strict?'checked':''}>
+      Leave void, rejected and for-information documents out of the totals</label>
+    <div class="chart-note">
+      ${C.crit.total.toLocaleString()} critical + ${C.other.total.toLocaleString()} other
+      + ${C.excluded.toLocaleString()} quality docs / dossiers
+      ${C.dropped?'+ '+C.dropped.toLocaleString()+' void / rejected / for information ':''}=
+      ${C.all.toLocaleString()} in the filtered list.<br>
+      Approval Pending = total − approved without comments.</div>`;
+  $('v-strict').onchange=e=>{ V.strict=e.target.checked; renderVdr(); };
+}
+
+function exportVdrXlsx(){
+  if(typeof XLSX==='undefined') return alert('Spreadsheet engine not loaded.');
+  const C=vdrCounts();
+  if(!C.all) return alert('Nothing to report on.');
+  const A=(r,c)=>XLSX.utils.encode_cell({r,c});
+  const aoa=[];
+  const push=(a,b,cc,d)=>aoa.push([a===undefined?'':a,b===undefined?'':b,cc===undefined?'':cc,d===undefined?'':d]);
+  push($('v-proj').value);                                   // 1
+  push('Month','',$('v-month').value);                       // 2
+  push('Week','',$('v-week').value);                         // 3
+  push();                                                    // 4
+  push('VENDOR','PO NUMBER','VENDOR DOCUMENT STATUS');       // 5
+  const body=[];
+  body.push(['Total No.Critical Documents',C.crit.total,'tot']);
+  C.crit.rows.forEach(([l,v])=>body.push([l,v,'']));
+  body.push(['Approval Pending',C.crit.pending,'pend']);
+  body.push(['','','gap']);
+  body.push(['Total Other Documents (Excluding quality docs / Dossiers)',C.other.total,'tot']);
+  C.other.rows.forEach(([l,v])=>body.push([l,v,'']));
+  body.push(['Approval Pending',C.other.pending,'pend']);
+  body.forEach((b,i)=>push(i===0?$('v-vendor').value:'', i===0?($('v-po').value+'\n'+$('v-podesc').value):'',
+                           b[0], b[2]==='gap'?'':b[1]));
+  push();
+
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  const last=aoa.length-1, firstBody=5, lastBody=5+body.length-1, gap=5+body.findIndex(b=>b[2]==='gap');
+  ws['!cols']=[{wch:15},{wch:36},{wch:58},{wch:10}];
+  ws['!rows']=aoa.map((r,i)=> i===0?{hpt:24} : (i===firstBody?{hpt:30}:{hpt:16}));
+  ws['!merges']=[
+    {s:{r:0,c:0},e:{r:0,c:3}}, {s:{r:1,c:0},e:{r:1,c:1}}, {s:{r:1,c:2},e:{r:1,c:3}},
+    {s:{r:2,c:0},e:{r:2,c:1}}, {s:{r:2,c:2},e:{r:2,c:3}}, {s:{r:3,c:0},e:{r:3,c:3}},
+    {s:{r:firstBody,c:0},e:{r:lastBody,c:0}}, {s:{r:firstBody,c:1},e:{r:lastBody,c:1}},
+    {s:{r:gap,c:2},e:{r:gap,c:3}}, {s:{r:last,c:0},e:{r:last,c:3}}
+  ];
+  const B={style:'thin',color:{rgb:'000000'}};
+  const bord={top:B,bottom:B,left:B,right:B};
+  const put=(r,c,st)=>{ const k=A(r,c); if(!ws[k]) ws[k]={t:'s',v:''}; ws[k].s=st; };
+  put(0,0,{font:{bold:true,sz:14},alignment:{horizontal:'center',vertical:'center'},border:bord});
+  for(let r=1;r<=3;r++) for(let c=0;c<4;c++)
+    put(r,c,{font:{bold:r<3,sz:11},alignment:{horizontal:'left',vertical:'center'},border:bord});
+  for(let c=0;c<4;c++) put(4,c,{font:{bold:true,sz:11},fill:{fgColor:{rgb:'D0CECE'}},
+    alignment:{horizontal:'center',vertical:'center'},border:bord});
+  put(firstBody,0,{font:{bold:true,sz:12},alignment:{horizontal:'center',vertical:'center',wrapText:true},border:bord});
+  put(firstBody,1,{font:{bold:true,sz:11},alignment:{horizontal:'center',vertical:'center',wrapText:true},border:bord});
+  body.forEach((b,i)=>{
+    const r=firstBody+i;
+    const fill = b[2]==='tot' ? 'FFFF00' : b[2]==='pend' ? '92D050' : null;
+    for(let c=2;c<4;c++){
+      const st={font:{bold:!!fill,sz:11},alignment:{horizontal:c===3?'center':'left',vertical:'center',wrapText:c===2},border:bord};
+      if(fill) st.fill={fgColor:{rgb:fill}};
+      put(r,c,st);
+    }
+    if(i>0){ for(let c=0;c<2;c++) put(r,c,{border:bord}); }
+  });
+  for(let c=0;c<4;c++) put(last,c,{border:bord});
+
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,($('v-week').value||'Status').slice(0,28).replace(/[\\\/\?\*\[\]:]/g,' '));
+  XLSX.writeFile(wb,'VDR_Status_'+String(S.po).replace(/[^\w.-]+/g,'_')+'.xlsx',{cellStyles:true});
+}
+
 /* ── nav ───────────────────────────────────────────────────────────────── */
 function go(s){
-  ['upload','filter','dash','doc','report','basket'].forEach(x=>$('sc-'+x).classList.toggle('on',x===s));
+  ['upload','filter','dash','doc','report','basket','vdr'].forEach(x=>$('sc-'+x).classList.toggle('on',x===s));
   window.scrollTo(0,0);
   if(s==='filter') $('crumbs').innerHTML='';
 }
@@ -1457,7 +1941,8 @@ function resetAll(){
   $('crumbs').innerHTML='';go('upload');
 }
 window.openDoc=openDoc;window.buildDash=buildDash;window.go=go;window.resetAll=resetAll;
-window.clearFilters=clearFilters;window.exportTableXlsx=exportTableXlsx;
+window.clearFilters=clearFilters;window.dropFilter=dropFilter;
+window.openVdr=openVdr;window.renderVdr=renderVdr;window.vdrPreset=vdrPreset;window.exportVdrXlsx=exportVdrXlsx;window.exportTableXlsx=exportTableXlsx;
 window.openReport=openReport;window.backToDoc=backToDoc;window.printReport=printReport;
 window.copyReport=copyReport;window.exportOneRow=exportOneRow;
 window.addToBasket=addToBasket;window.openBasket=openBasket;window.clearBasket=clearBasket;
