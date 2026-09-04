@@ -50,6 +50,14 @@ button,input,select,textarea{font-family:inherit;color:inherit}
 .sp{flex:1}
 .pill{font-size:11px;font-weight:700;color:#fff;background:rgba(255,255,255,.16);
   border:1px solid rgba(255,255,255,.28);padding:5px 11px;border-radius:20px;white-space:nowrap}
+.projchip{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.16);
+  border:1px solid rgba(255,255,255,.3);border-radius:11px;padding:5px 12px;white-space:nowrap}
+.projchip .k{font-size:8.5px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;
+  color:rgba(255,255,255,.72);line-height:1.1}
+.projchip .pn{font-size:17px;font-weight:800;color:#fff;letter-spacing:-.3px;line-height:1.05;
+  font-variant-numeric:tabular-nums}
+.projchip .pd{font-size:9.5px;font-weight:700;color:rgba(255,255,255,.8);line-height:1.2}
+.projchip .bar{width:1px;height:26px;background:rgba(255,255,255,.3)}
 .nav .btn-g{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.34);color:#fff}
 .nav .btn-g:hover{background:#fff;border-color:#fff;color:#17558A}
 .nav .navbtn .badge{background:#fff;color:#17558A}
@@ -407,7 +415,23 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .pb-scope{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:11.5px;font-weight:700;color:var(--muted)}
 .pb-scope .v{background:var(--sf2);border:1px solid var(--line);border-radius:8px;padding:6px 11px;color:var(--navy)}
 
-/* ── sheet tabs, in the spirit of Excel's sheet strip ───────────────────── */
+/* ── sheet tabs pinned to the bottom-left corner, as Excel does ─────────── */
+.sheettabs{position:fixed;left:14px;bottom:0;z-index:70;display:none;align-items:flex-end;gap:3px;
+  filter:drop-shadow(0 -3px 10px rgba(11,37,69,.16))}
+.sheettabs.on{display:flex}
+.sheettabs .sh{border:1px solid var(--line2);border-bottom:none;background:#E9EEF4;color:var(--muted);
+  border-radius:8px 8px 0 0;padding:7px 15px 8px;font-size:11px;font-weight:800;cursor:pointer;
+  display:flex;align-items:center;gap:7px;transition:all .16s var(--ease);white-space:nowrap}
+.sheettabs .sh:hover{background:#F6F9FC;color:var(--navy)}
+.sheettabs .sh.on{background:var(--sf);color:var(--navy);padding-bottom:11px}
+.sheettabs .sh.on[data-s="action"]{border-top:2px solid var(--dang)}
+.sheettabs .sh.on[data-s="overview"]{border-top:2px solid var(--blue)}
+.sheettabs .cnt2{font-size:9px;font-weight:800;background:var(--dang);color:#fff;border-radius:20px;padding:1px 6px}
+.mode-chip{font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;
+  border-radius:20px;background:var(--dang-bg);color:#9C2C24}
+.mode-chip.ovw{background:#E8F0FE;color:#1A4FBF}
+
+/* ── legacy sheet strip (kept for the note only) ────────────────────────── */
 .sheetbar{display:flex;align-items:flex-end;gap:4px;margin:14px 0 0;padding:0 4px}
 .sheet{border:1px solid var(--line);border-bottom:none;background:var(--sf2);color:var(--muted);
   border-radius:10px 10px 0 0;padding:10px 20px;font-size:12.5px;font-weight:800;cursor:pointer;
@@ -490,11 +514,19 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .cc-tools .chip{padding:5px 10px;font-size:10px}
 .cc-sub{font-size:10.5px;color:var(--muted);font-weight:600;margin-bottom:9px;line-height:1.5}
 .cc-sub b{color:var(--ink)}
+.cc-top{display:flex;flex-direction:column;justify-content:flex-start}
 
-.mini{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px}
-.mini .m{flex:1 1 76px;background:var(--sf2);border:1px solid var(--line);border-radius:9px;padding:7px 9px}
-.mini .m .n{font-size:17px;font-weight:800;color:var(--navy);line-height:1;font-variant-numeric:tabular-nums}
-.mini .m .l{font-size:9px;font-weight:700;color:var(--muted);margin-top:3px}
+/* donut on the left, the figures beside it — identical in both cards, so the
+   two halves line up row for row */
+.cc-body{display:grid;grid-template-columns:minmax(140px,182px) 1fr;gap:14px;align-items:center;
+  min-height:186px}
+@media(max-width:520px){.cc-body{grid-template-columns:1fr}}
+.mini{display:flex;flex-direction:column;gap:6px;min-width:0}
+.mini .m{background:var(--sf2);border:1px solid var(--line);border-radius:9px;padding:7px 11px;
+  display:flex;align-items:baseline;gap:9px}
+.mini .m .n{font-size:17px;font-weight:800;color:var(--navy);line-height:1;font-variant-numeric:tabular-nums;
+  min-width:44px}
+.mini .m .l{font-size:10px;font-weight:700;color:var(--muted)}
 .mini .m.ok .n{color:var(--ok)}.mini .m.warn .n{color:var(--warn)}.mini .m.dang .n{color:var(--dang)}
 
 .cb-note{font-size:10px;color:var(--muted);font-weight:600;margin-bottom:8px;line-height:1.5}
@@ -522,7 +554,16 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .donut-ctr .v{font-size:23px;font-weight:800;color:var(--navy);line-height:1;font-variant-numeric:tabular-nums}
 .donut-ctr .l{font-size:8.5px;font-weight:700;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-top:3px}
 .statgrid.single .donut-ctr .v{font-size:28px}
-.pie-legend{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:9px;padding-top:9px;border-top:1px dashed var(--line2)}
+.ptip{position:fixed;z-index:300;pointer-events:none;opacity:0;transform:translateY(4px);
+  transition:opacity .13s,transform .13s;background:#0B2545;color:#fff;border-radius:9px;
+  padding:8px 11px;font-size:11px;font-weight:700;box-shadow:0 8px 26px rgba(11,37,69,.32);max-width:280px}
+.ptip.on{opacity:1;transform:translateY(0)}
+.ptip .t1{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800}
+.ptip .dot{width:9px;height:9px;border-radius:3px}
+.ptip .t2{font-size:10.5px;font-weight:600;color:rgba(255,255,255,.78);margin-top:3px}
+.ptip b{font-variant-numeric:tabular-nums}
+.pie-legend{display:none}
+.pie-legend-x{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:9px;padding-top:9px;border-top:1px dashed var(--line2)}
 .pie-legend .li{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:600;color:var(--ink)}
 .pie-legend .dot{width:9px;height:9px;border-radius:3px;flex:0 0 auto}
 .pie-legend b{font-weight:800;font-variant-numeric:tabular-nums}
@@ -571,6 +612,45 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .trow .pv.zero{color:var(--muted)}
 .half-empty{padding:28px 14px;text-align:center;color:var(--muted);font-size:12px;font-weight:600;line-height:1.6}
 
+/* ── motion ─────────────────────────────────────────────────────────────
+   Every entrance animates only from a start state, never to opacity:0, so a
+   card rendered while its tab is hidden still shows at full opacity. */
+@keyframes sliceIn{from{opacity:0;transform:scale(.86) rotate(-6deg)}}
+.dw .sl{transform-origin:center;transform-box:fill-box;animation:sliceIn .5s var(--ease) backwards}
+@keyframes cardIn{from{opacity:0;transform:translateY(12px)}}
+.ccard{animation:cardIn .42s var(--ease) backwards}
+.statgrid .ccard:nth-child(2){animation-delay:.06s}
+.statgrid .ccard:nth-child(3){animation-delay:.12s}
+.statgrid .ccard:nth-child(4){animation-delay:.18s}
+@keyframes screenIn{from{opacity:0;transform:translateY(8px)}}
+.screen.on{animation:screenIn .32s var(--ease)}
+@keyframes rowIn{from{opacity:0;transform:translateX(-8px)}}
+.ccard.open .trow{animation:rowIn .34s var(--ease) backwards}
+@keyframes heroBar{from{transform:scaleX(0)}}
+.ac-hero .sbar{transform-origin:left;animation:heroBar .6s var(--spring) backwards}
+.ac-sum .m{animation:cardIn .38s var(--ease) backwards}
+.ac-sum .m:nth-child(2){animation-delay:.05s}.ac-sum .m:nth-child(3){animation-delay:.1s}
+.ac-sum .m:nth-child(4){animation-delay:.15s}.ac-sum .m:nth-child(5){animation-delay:.2s}
+.actbtn{transition:all .15s var(--ease)}
+.actbtn:active{transform:scale(.95)}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+
+/* the bar that flies from the list to the action page */
+.flybar{position:fixed;z-index:400;border-radius:6px;overflow:hidden;pointer-events:none;
+  box-shadow:0 10px 30px rgba(11,37,69,.28);
+  transition:left .55s cubic-bezier(.4,0,.2,1),top .55s cubic-bezier(.4,0,.2,1),
+             width .55s cubic-bezier(.4,0,.2,1),height .55s cubic-bezier(.4,0,.2,1)}
+
+/* the progress bar for whatever is being actioned, at the top of that page */
+.ac-hero{background:var(--sf);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh1);
+  padding:15px 18px;margin-top:14px}
+.ac-hero-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:9px}
+.ac-hero-t{font-size:12.5px;font-weight:800;color:var(--navy)}
+.ac-hero-t small{display:block;font-size:10.5px;font-weight:600;color:var(--muted);margin-top:3px}
+.ac-hero-v{font-size:26px;font-weight:800;color:var(--ok);line-height:1;font-variant-numeric:tabular-nums}
+.ac-hero-v small{font-size:11px;font-weight:700;color:var(--muted);margin-left:6px}
+.ac-hero .sbar{height:26px}
+
 /* print */
 #printarea{display:none}
 @media print{
@@ -602,7 +682,7 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
   <div class="nav-sep"></div>
   <div class="crumbs" id="crumbs"></div>
   <div class="sp"></div>
-  <div class="pill" id="navinfo" style="display:none"></div>
+  <div class="projchip" id="navinfo" style="display:none"></div>
   <button class="btn btn-g btn-s navbtn" id="btn-basket" style="display:none" onclick="openBasket()">
     Consolidated report<span class="badge" id="bk-n">0</span></button>
   <button class="btn btn-g btn-s" id="btn-reset" style="display:none" onclick="resetAll()">Load another file</button>
@@ -665,13 +745,6 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
     <button class="btn btn-g btn-s" onclick="go('filter')">Change scope</button>
   </div>
 
-  <div class="sheetbar">
-    <button class="sheet act on" data-s="action">⚑ Action View <span class="cnt2" id="shCount">0</span></button>
-    <button class="sheet ovw" data-s="overview">▦ Overview</button>
-  </div>
-  <div class="sheetwrap">
-  <div class="sheetnote" id="sheetnote"></div>
-
   <div class="tabcard">
     <div class="tabbar" id="tabbar">
       <button class="tabb on" data-v="all">All</button>
@@ -689,14 +762,17 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
         <div class="cc-tools"><div id="fcA"></div>
           <button class="chip" onclick="event.stopPropagation();exportCodeReport('A')">⤓ Report</button></div>
       </div>
-      <div class="cc-sub" id="subA"></div>
-      <div class="mini" id="miniA"></div>
-      <div class="cb-note" id="exA"></div>
-      <div class="chartbox" id="boxA" onclick="toggleBlock('A','codes')">
-        <span class="cue">click for progress by type →</span>
-        <div class="dw" id="dwA"></div>
+      <div class="cc-top">
+        <div class="cc-sub" id="subA"></div>
+        <div class="cb-note" id="exA"></div>
       </div>
-      <div class="pie-legend" id="lgA"></div>
+      <div class="cc-body">
+        <div class="chartbox" id="boxA" onclick="toggleBlock('A','codes')">
+          <span class="cue">click for progress by type →</span>
+          <div class="dw" id="dwA"></div>
+        </div>
+        <div class="mini" id="miniA"></div>
+      </div>
       <div class="pblock" id="ovA"></div>
       <div class="bytype" id="btA"></div>
     </article>
@@ -707,15 +783,18 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
         <div class="cc-tools"><div id="fcB"></div>
           <button class="chip" onclick="event.stopPropagation();exportCodeReport('B')">⤓ Report</button></div>
       </div>
-      <div class="cc-sub" id="subB"></div>
-      <div class="cb-note info2" id="rnB" style="display:none"></div>
-      <div class="mini" id="miniB"></div>
-      <div class="cb-note" id="exB"></div>
-      <div class="chartbox" id="boxB" onclick="toggleBlock('B','codes')">
-        <span class="cue">click for progress by type →</span>
-        <div class="dw" id="dwB"></div>
+      <div class="cc-top">
+        <div class="cc-sub" id="subB"></div>
+        <div class="cb-note info2" id="rnB" style="display:none"></div>
+        <div class="cb-note" id="exB"></div>
       </div>
-      <div class="pie-legend" id="lgB"></div>
+      <div class="cc-body">
+        <div class="chartbox" id="boxB" onclick="toggleBlock('B','codes')">
+          <span class="cue">click for progress by type →</span>
+          <div class="dw" id="dwB"></div>
+        </div>
+        <div class="mini" id="miniB"></div>
+      </div>
       <div class="pblock" id="ovB"></div>
       <div class="bytype" id="btB"></div>
     </article>
@@ -726,13 +805,15 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
         <div class="cc-tools">
           <button class="chip" onclick="event.stopPropagation();exportDiscReport('A')">⤓ Report</button></div>
       </div>
-      <div class="cc-sub">From columns AC–CT. A discipline marked <b>FOR REVIEW</b> with no date in its
-        closed-date column is still pending; N/A and for-information entries are ignored.</div>
-      <div class="chartbox" id="dboxA" onclick="toggleBlock('A','disc')">
-        <span class="cue">click for progress by discipline →</span>
+      <div class="cc-top"><div class="cc-sub">From columns AC–CT. A discipline marked <b>FOR REVIEW</b> with no
+        date in its closed-date column is still pending; N/A and for-information entries are ignored.</div></div>
+      <div class="cc-body">
+        <div class="chartbox" id="dboxA" onclick="toggleBlock('A','disc')">
+          <span class="cue">click for progress by discipline →</span>
         <div class="dw" id="ddwA"></div>
+        </div>
+        <div class="mini" id="dminA"></div>
       </div>
-      <div class="pie-legend" id="dlgA"></div>
       <div class="pblock" id="dovA"></div>
       <div class="bytype" id="dbtA"></div>
     </article>
@@ -743,17 +824,18 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
         <div class="cc-tools">
           <button class="chip" onclick="event.stopPropagation();exportDiscReport('B')">⤓ Report</button></div>
       </div>
-      <div class="cc-sub">From columns AC–CT. A discipline marked <b>FOR REVIEW</b> with no date in its
-        closed-date column is still pending; N/A and for-information entries are ignored.</div>
-      <div class="chartbox" id="dboxB" onclick="toggleBlock('B','disc')">
-        <span class="cue">click for progress by discipline →</span>
+      <div class="cc-top"><div class="cc-sub">From columns AC–CT. A discipline marked <b>FOR REVIEW</b> with no
+        date in its closed-date column is still pending; N/A and for-information entries are ignored.</div></div>
+      <div class="cc-body">
+        <div class="chartbox" id="dboxB" onclick="toggleBlock('B','disc')">
+          <span class="cue">click for progress by discipline →</span>
         <div class="dw" id="ddwB"></div>
+        </div>
+        <div class="mini" id="dminB"></div>
       </div>
-      <div class="pie-legend" id="dlgB"></div>
       <div class="pblock" id="dovB"></div>
       <div class="bytype" id="dbtB"></div>
     </article>
-  </div>
   </div>
 
   <div class="foot" id="foot1"></div>
@@ -767,6 +849,7 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
     <div class="pb-scope" id="acScope"></div>
     <button class="btn btn-g btn-s" onclick="go('dash')">← Back to status</button>
   </div>
+  <div class="ac-hero" id="acHero"></div>
   <div class="ac-sum" id="acSum"></div>
   <div class="dt-wrap" style="border-radius:14px;border:1px solid var(--line)">
     <div class="ac-tools">
@@ -863,6 +946,12 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
   </div>
   <div class="foot"></div>
 </div></div>
+
+<div class="sheettabs" id="sheettabs">
+  <button class="sh on" data-s="action">⚑ Action View <span class="cnt2" id="shCount">0</span></button>
+  <button class="sh" data-s="overview">▦ Overview</button>
+</div>
+<div class="ptip" id="ptip"></div>
 
 <div id="printarea"></div>
 
@@ -1127,7 +1216,9 @@ function buildFilters(){
   }
   $('dep-hint').textContent=deps.length+' originator departments in this file · '+S.rows.length.toLocaleString()+' document rows';
   $('navinfo').style.display='';
-  $('navinfo').innerHTML='Project <b>'+esc(S.meta.project)+'</b> · as of '+esc(S.meta.asOf);
+  $('navinfo').innerHTML=`<div><div class="k">Project</div><div class="pn">${esc(S.meta.project||'—')}</div></div>
+    <span class="bar"></span>
+    <div><div class="k">Status as of</div><div class="pd">${esc(S.meta.asOf||'—')}</div></div>`;
 }
 
 /* ── "My discipline" — the value in the chosen AC–CT column for a document ──
@@ -1434,7 +1525,8 @@ function renderDash(){
     `<span class="s">/</span><span class="c">${esc(S.disc||'')}</span>`+
     `<span class="s">/</span><span class="c on">${esc(S.po)}</span>`;
   $('pbTitle').textContent=S.po+' · '+S.dep;
-  $('pbScope').innerHTML=(S.poDesc?`<span class="v">${esc(S.poDesc)}</span>`:'')+
+  $('pbScope').innerHTML=`<span class="mode-chip ${S.sheet==='action'?'':'ovw'}" id="pbMode"></span>`+
+    (S.poDesc?`<span class="v">${esc(S.poDesc)}</span>`:'')+
     `<span class="v">Reviewing as ${esc(S.disc||'—')}</span>`+
     `<span>latest revision of every document</span>`;
 
@@ -1497,14 +1589,14 @@ function renderHalf(id){
     ['', st.byCode.length, 'document types'],
     ['ok', st.totals.without, 'closed'],
     ['warn', st.totals.circ, 'circulating']
-  ].map(([c,n,l])=>`<div class="m ${c}"><div class="n">${n.toLocaleString()}</div><div class="l">${l}</div></div>`).join('');
+  ].map(([c,n,l])=>`<div class="m ${c}"><span class="n">${n.toLocaleString()}</span><span class="l">${l}</span></div>`).join('');
 
   /* ── chart 1: documents per document type ───────────────────────────── */
   if(!st.total){
     $('dw'+id).innerHTML='<div class="half-empty">'+(base.length
       ? 'Every document type is hidden.<br>Tick one in <b>Document types</b> to bring the chart back.'
       : 'No document in this purchase order is marked<br>FOR REVIEW - ORIGINATOR for this discipline.')+'</div>';
-    $('lg'+id).innerHTML=''; $('ov'+id).innerHTML=''; $('bt'+id).innerHTML='';
+    $('mini'+id).innerHTML=''; $('ov'+id).innerHTML=''; $('bt'+id).innerHTML='';
     $('box'+id).style.pointerEvents='none';
   } else {
     $('box'+id).style.pointerEvents='';
@@ -1515,9 +1607,7 @@ function renderHalf(id){
     $('dw'+id).innerHTML=
       `<svg viewBox="0 0 220 220" width="220" height="220" role="img">${donutSVG(slices,220,.56)}</svg>
        <div class="donut-ctr"><div class="v">${st.total.toLocaleString()}</div><div class="l">documents</div></div>`;
-    $('lg'+id).innerHTML=slices.map(d=>`<div class="li"><span class="dot" style="background:${d.col}"></span>
-        <span>${esc(d.key||d.label)}</span> <b>${d.value.toLocaleString()}</b>
-        <span class="p">${Math.round(d.value/st.total*100)}%</span></div>`).join('');
+    wireDonut('dw'+id, st.total.toLocaleString(), 'documents');
     $('ov'+id).innerHTML=`
       <div class="pblock-h"><span class="t">Overall progress</span>
         <span class="v">${st.progress}% <small>${st.totals.without.toLocaleString()} of ${st.total.toLocaleString()} closed</small></span></div>
@@ -1535,7 +1625,7 @@ function renderHalf(id){
           <div class="c2" title="${esc(c.desc)}">${esc(c.desc||'')} · ${c.total} doc${c.total>1?'s':''}</div></div>
         ${sbar(c.bands, c.total)}
         <div class="pv ${c.pct?'':'zero'}">${c.pct}%</div>
-        ${act?`<button class="actbtn" onclick="event.stopPropagation();openAction('${id}','code','${esc(c.code).replace(/'/g,"\\'")}')">Take action</button>`:''}
+        ${act?`<button class="actbtn" onclick="event.stopPropagation();openAction('${id}','code','${esc(c.code).replace(/'/g,"\\'")}',event)">Take action</button>`:''}
       </div>`).join('')
       : '<div class="done-note">Every document type here is fully closed.</div>')+
       (act && doneCodes? `<div class="done-note">${doneCodes} document type${doneCodes>1?'s are':' is'} 100% closed and hidden.</div>`:'')+
@@ -1546,23 +1636,27 @@ function renderHalf(id){
   /* ── chart 2: disciplines that still owe a review ────────────────────── */
   if(!ds.total){
     $('ddw'+id).innerHTML='<div class="half-empty">No discipline is marked FOR REVIEW<br>on these documents.</div>';
-    $('dlg'+id).innerHTML=''; $('dov'+id).innerHTML=''; $('dbt'+id).innerHTML='';
+    $('dmin'+id).innerHTML=''; $('dov'+id).innerHTML=''; $('dbt'+id).innerHTML='';
     $('dbox'+id).style.pointerEvents='none';
     return;
   }
   $('dbox'+id).style.pointerEvents='';
   const dtop=ds.list.slice(0,10);
   const drest=ds.list.slice(10).reduce((n,e)=>n+e.total,0);
-  const dsl=dtop.map(e=>({key:e.name, label:e.name+' — '+e.total+' to review, '+e.pending+' pending',
-                          value:e.total, col:e.col}));
-  if(drest) dsl.push({key:'', label:(ds.list.length-10)+' more disciplines', value:drest, col:'#B8C4D0'});
+  const dsl=dtop.map(e=>({key:e.name, label:e.name+(e.name===S.disc?'  (you)':''),
+                          value:e.total, col:e.col, unit:'documents to review · '+e.pending+' pending'}));
+  if(drest) dsl.push({key:'More', label:(ds.list.length-10)+' more disciplines', value:drest,
+                      col:'#B8C4D0', unit:'documents to review'});
   $('ddw'+id).innerHTML=
     `<svg viewBox="0 0 220 220" width="220" height="220" role="img">${donutSVG(dsl,220,.56)}</svg>
      <div class="donut-ctr"><div class="v">${ds.list.length}</div><div class="l">disciplines</div></div>`;
-  $('dlg'+id).innerHTML=dsl.map(d=>`<div class="li"><span class="dot" style="background:${d.col}"></span>
-      <span>${esc(d.key||d.label)}${d.key&&d.key===S.disc?'<span class="you">YOU</span>':''}</span>
-      <b>${d.value.toLocaleString()}</b>
-      <span class="p">${Math.round(d.value/ds.total*100)}%</span></div>`).join('');
+  wireDonut('ddw'+id, String(ds.list.length), 'disciplines');
+  $('dmin'+id).innerHTML=[
+    ['', ds.list.length, 'disciplines involved'],
+    ['', ds.total, 'reviews to close'],
+    ['ok', ds.closed, 'reviews closed'],
+    ['dang', ds.pending, 'still pending']
+  ].map(([c,n,l])=>`<div class="m ${c}"><span class="n">${n.toLocaleString()}</span><span class="l">${l}</span></div>`).join('');
   $('dov'+id).innerHTML=`
     <div class="pblock-h"><span class="t">Reviews closed</span>
       <span class="v">${ds.progress}% <small>${ds.closed.toLocaleString()} of ${ds.total.toLocaleString()} reviews · ${ds.pending.toLocaleString()} pending</small></span></div>
@@ -1581,7 +1675,7 @@ function renderHalf(id){
         <div class="c2">${e.total} to review · ${e.pending} pending</div></div>
       ${dbar(e.closed, e.pending)}
       <div class="pv ${e.pct?'':'zero'}">${e.pct}%</div>
-      ${actD?`<button class="actbtn" onclick="event.stopPropagation();openAction('${id}','disc','${esc(e.name).replace(/'/g,"\\'")}')">Take action</button>`:''}
+      ${actD?`<button class="actbtn" onclick="event.stopPropagation();openAction('${id}','disc','${esc(e.name).replace(/'/g,"\\'")}',event)">Take action</button>`:''}
     </div>`).join('')
     : '<div class="done-note">Every discipline has closed its review.</div>')+
     (actD && doneDisc? `<div class="done-note">${doneDisc} discipline${doneDisc>1?'s have':' has'} closed everything and ${doneDisc>1?'are':'is'} hidden.</div>`:'')+
@@ -1609,18 +1703,47 @@ function dbar(closed, pending){
 }
 
 /* flat donut, drawn as SVG arcs so slices stay crisp and hoverable */
+/* One floating tooltip for every donut on the page. */
+const TIP=()=>$('ptip');
+function wireDonut(hostId, defV, defL){
+  const host=$(hostId); if(!host) return;
+  const ctrV=host.querySelector('.donut-ctr .v'), ctrL=host.querySelector('.donut-ctr .l');
+  host.querySelectorAll('path.sl, circle.sl').forEach(el=>{
+    el.onmouseenter=()=>{
+      const t=TIP();
+      t.innerHTML=`<div class="t1"><span class="dot" style="background:${el.getAttribute('fill')||el.getAttribute('stroke')}"></span>
+          ${esc(el.dataset.lab)}</div>
+        <div class="t2"><b>${(+el.dataset.v).toLocaleString()}</b> ${esc(el.dataset.unit||'documents')}
+          · <b>${el.dataset.pct}%</b></div>`;
+      t.classList.add('on');
+      if(ctrV){ ctrV.textContent=(+el.dataset.v).toLocaleString(); ctrL.textContent=el.dataset.short||''; }
+      el.style.opacity='1'; el.style.filter='brightness(1.08)';
+    };
+    el.onmousemove=e=>{ const t=TIP(); const r=t.getBoundingClientRect();
+      let x=e.clientX+14, y=e.clientY-10;
+      if(x+r.width>window.innerWidth-8) x=e.clientX-r.width-14;
+      if(y+r.height>window.innerHeight-8) y=window.innerHeight-r.height-8;
+      t.style.left=x+'px'; t.style.top=Math.max(8,y)+'px'; };
+    el.onmouseleave=()=>{ TIP().classList.remove('on'); el.style.filter='';
+      if(ctrV){ ctrV.textContent=defV; ctrL.textContent=defL; } };
+  });
+  host.onmouseleave=()=>TIP().classList.remove('on');
+}
+
 function donutSVG(data, size, innerRatio){
   const R=size/2-4, r=R*innerRatio, cx=size/2, cy=size/2;
   const tot=data.reduce((n,d)=>n+d.value,0)||1;
+  const at=d=>`data-lab="${esc(d.label)}" data-short="${esc(d.key||d.label)}" data-v="${d.value}" `+
+    `data-pct="${Math.round(d.value/tot*100)}" data-unit="${esc(d.unit||'documents')}"`;
   if(data.length===1)
-    return `<circle cx="${cx}" cy="${cy}" r="${(R+r)/2}" fill="none"
-      stroke="${data[0].col}" stroke-width="${R-r}"><title>${esc(data[0].label)}: ${data[0].value}</title></circle>`;
-  let a=-90, out='';
+    return `<circle class="sl" cx="${cx}" cy="${cy}" r="${(R+r)/2}" fill="none"
+      stroke="${data[0].col}" stroke-width="${R-r}" ${at(data[0])}></circle>`;
+  let a=-90, out='', i=0;
   data.forEach(d=>{
     const sweep=d.value/tot*360; if(sweep<=0) return;
     const a0=a, a1=Math.min(a+sweep, a+359.99); a+=sweep;
-    out+=`<path class="sl" d="${arcPath(cx,cy,R,r,a0,a1)}" fill="${d.col}" stroke="#fff" stroke-width="1.6"
-      stroke-linejoin="round"><title>${esc(d.label)}: ${d.value} (${Math.round(d.value/tot*100)}%)</title></path>`;
+    out+=`<path class="sl" style="animation-delay:${(i++)*45}ms" d="${arcPath(cx,cy,R,r,a0,a1)}"
+      fill="${d.col}" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" ${at(d)}></path>`;
   });
   return out;
 }
@@ -1633,27 +1756,43 @@ function arcPath(cx,cy,R,r,a0,a1){
   return `M${x1} ${y1}A${R} ${R} 0 ${big} 1 ${x2} ${y2}L${x3} ${y3}A${r} ${r} 0 ${big} 0 ${x4} ${y4}Z`;
 }
 
-function toggleBlock(id, which){ $('card'+id+'-'+which).classList.toggle('open'); }
+function toggleBlock(id, which){ $('card'+id+'-'+which).classList.toggle('open'); requestAnimationFrame(alignCards); }
+
+/* The two cards in a row carry different amounts of explanatory text, which
+   would otherwise leave their donuts at different heights.  Match the header
+   zones so both charts, and everything under them, sit on the same line. */
+function alignCards(){
+  ['codes','disc'].forEach(kind=>{
+    const tops=['A','B'].map(i=>{ const c=$('card'+i+'-'+kind);
+      return (c && c.style.display!=='none') ? c.querySelector('.cc-top') : null; }).filter(Boolean);
+    tops.forEach(t=>t.style.minHeight='');
+    if(tops.length<2) return;
+    const h=Math.max(...tops.map(t=>t.offsetHeight));
+    tops.forEach(t=>t.style.minHeight=h+'px');
+  });
+}
+window.alignCards=alignCards;
+window.addEventListener('resize',()=>requestAnimationFrame(alignCards));
 
 /* Two fixed sheets over the same data.  Action View drops everything already
    finished so only outstanding work is on screen; Overview keeps the full
    picture. */
 function setSheet(v){
   S.sheet=v;
-  document.querySelectorAll('.sheetbar .sheet').forEach(b=>b.classList.toggle('on',b.dataset.s===v));
+  document.querySelectorAll('#sheettabs .sh').forEach(b=>b.classList.toggle('on',b.dataset.s===v));
   renderHalf('A'); renderHalf('B');
   const pend=(STAT.A&&STAT.A.pendCodes||0)+(STAT.A&&STAT.A.pendDisc||0);
   $('shCount').textContent=pend;
-  $('sheetnote').innerHTML = v==='action'
-    ? `Showing only what is still outstanding — document types and disciplines that are 100% closed are hidden,
-       and every incomplete bar carries a <b>Take action</b> button.`
-    : `The full picture, finished work included. Switch to <b>Action View</b> for the outstanding items only.`;
+  $('shCount').style.display = v==='action'&&pend ? '' : 'none';
+  const pm=$('pbMode');
+  if(pm){ pm.textContent = v==='action'?'Action view':'Overview';
+          pm.className = 'mode-chip'+(v==='action'?'':' ovw'); }
   ['A','B'].forEach(i=>['codes','disc'].forEach(w=>{
     /* in Action View the point is the list, so open it straight away */
     $('card'+i+'-'+w).classList.toggle('open', v==='action'); }));
   setTab(S.tab||'all');
 }
-document.addEventListener('click',e=>{ const b=e.target.closest('.sheetbar .sheet');
+document.addEventListener('click',e=>{ const b=e.target.closest('#sheettabs .sh');
   if(b) setSheet(b.dataset.s); });
 window.setSheet=setSheet;
 
@@ -1665,6 +1804,7 @@ function setTab(v){
   document.querySelectorAll('.ccard').forEach(c=>{
     c.style.display = (v==='all' || c.dataset.h===v) ? '' : 'none'; });
   $('statgrid').classList.toggle('single', v!=='all');
+  requestAnimationFrame(alignCards);
   const A=(STAT.A||{}).st, B=(STAT.B||{}).st;
   $('tabnote').innerHTML =
     v==='all' ? `Side by side: the whole purchase order (<b>${A?A.total.toLocaleString():0}</b> documents)
@@ -1690,12 +1830,34 @@ function isCriticalCode(c){
 }
 function isCriticalDoc(d){ return isCriticalCode({code:d.code, desc:d.codeDesc}); }
 
-function openAction(half, kind, key){
+function openAction(half, kind, key, ev){
   AC.half=half; AC.kind=kind; AC.key=key;
   AC.crit=true; AC.rev=false; AC.circ=false;
   ['acCrit','acRev','acCirc'].forEach(id=>$(id).onclick=()=>toggleAc(id));
-  renderAction();
-  go('action');
+  /* take the bar the reader just pressed and carry it to the top of the next
+     page, so it is obvious which progress they are acting on */
+  const src=(ev&&ev.target.closest('.trow')||document).querySelector? 
+    (ev&&ev.target.closest('.trow')? ev.target.closest('.trow').querySelector('.sbar') : null) : null;
+  flyBar(src, ()=>{ renderAction(); go('action'); });
+}
+function flyBar(src, run){
+  if(!src || window.matchMedia('(prefers-reduced-motion:reduce)').matches){ run(); return; }
+  const r=src.getBoundingClientRect();
+  const clone=src.cloneNode(true);
+  clone.className='sbar flybar';
+  clone.style.left=r.left+'px'; clone.style.top=r.top+'px';
+  clone.style.width=r.width+'px'; clone.style.height=r.height+'px';
+  document.body.appendChild(clone);
+  run();
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    const t=document.querySelector('#acHero .sbar');
+    if(!t){ clone.remove(); return; }
+    const tr=t.getBoundingClientRect();
+    t.style.visibility='hidden';
+    clone.style.left=tr.left+'px'; clone.style.top=tr.top+'px';
+    clone.style.width=tr.width+'px'; clone.style.height=tr.height+'px';
+    setTimeout(()=>{ t.style.visibility=''; clone.remove(); }, 580);
+  }));
 }
 function toggleAc(id){
   if(id==='acCrit') AC.crit=!AC.crit;
@@ -1747,6 +1909,32 @@ function renderAction(){
   $('acRev').classList.toggle('on',AC.rev);
   $('acCirc').classList.toggle('on',AC.circ);
 
+  /* the progress bar of exactly what is being actioned */
+  const stats=STAT[AC.half]||{};
+  let hero=null;
+  if(AC.kind==='code'){
+    const c=(stats.st&&stats.st.byCode||[]).find(x=>x.code===AC.key);
+    if(c) hero={title:c.code, sub:c.desc, pct:c.pct, bar:sbar(c.bands,c.total),
+                v:c.bands.without, tot:c.total, unit:'closed'};
+  } else if(AC.kind==='allcodes' && stats.st){
+    hero={title:'All document types', sub:stats.st.byCode.length+' types in this scope',
+          pct:stats.st.progress, bar:sbar(stats.st.totals,stats.st.total),
+          v:stats.st.totals.without, tot:stats.st.total, unit:'closed'};
+  } else if(AC.kind==='disc'){
+    const e=(stats.ds&&stats.ds.list||[]).find(x=>x.name===AC.key);
+    if(e) hero={title:e.name, sub:e.total+' documents to review', pct:e.pct,
+                bar:dbar(e.closed,e.pending), v:e.closed, tot:e.total, unit:'reviews closed'};
+  } else if(stats.ds){
+    hero={title:'All disciplines', sub:stats.ds.list.length+' disciplines involved', pct:stats.ds.progress,
+          bar:dbar(stats.ds.closed,stats.ds.pending), v:stats.ds.closed, tot:stats.ds.total, unit:'reviews closed'};
+  }
+  $('acHero').innerHTML = hero? `
+    <div class="ac-hero-h">
+      <div class="ac-hero-t">${esc(hero.title)}<small>${esc(hero.sub||'')}</small></div>
+      <div class="ac-hero-v">${hero.pct}%<small>${hero.v.toLocaleString()} of ${hero.tot.toLocaleString()} ${esc(hero.unit)}</small></div>
+    </div>${hero.bar}` : '';
+  $('acHero').style.display = hero? '' : 'none';
+
   const uniq=new Set(rows.map(r=>r.d.tr)).size;
   const circN=rows.filter(r=>r.d.circulating).length;
   const critN=rows.filter(r=>isCriticalDoc(r.d)).length;
@@ -1793,8 +1981,10 @@ function actionTitle(){
 }
 function actionAoa(){
   const byDisc = AC.kind==='disc' || AC.kind==='alldisc';
+  /* the revision count is a working aid on screen; it does not belong in
+     something sent to a supplier or another discipline */
   const head=['DOCUMENT NUMBER','DOCUMENT TITLE','EQUIPMENT','EQUIPMENT NAME','CODE','CODE DESCRIPTION',
-    'CRITICAL','REV','REVISIONS','DOCUMENT STATUS','CIRCULATED','DAYS','OVERDUE BY',
+    'CRITICAL','REV','DOCUMENT STATUS','CIRCULATED','DAYS','OVERDUE BY',
     byDisc?'WAITING ON':'STILL TO CLOSE'];
   const aoa=[['ACTION LIST — '+actionTitle()],
     [S.po+'  ·  '+S.dep+(S.disc?'  ·  reviewing as '+S.disc:'')],
@@ -1805,7 +1995,7 @@ function actionAoa(){
   AC.rows.forEach(r=>{ const d=r.d;
     const owing=d.latest.depts.filter(x=>x.review&&!x.closed).map(x=>x.name).join('; ');
     aoa.push([d.label,d.title||'',d.xref||'',d.equip||'',d.code||'',d.codeDesc||'',
-      isCriticalDoc(d)?'Y':'N',d.rev||'',d.nRev,d.status,fmt(d.circDate),
+      isCriticalDoc(d)?'Y':'N',d.rev||'',d.status,fmt(d.circDate),
       d.days==null?'':d.days, (d.circulating&&d.over>0)?d.over:'', r.disc||owing]);
   });
   return {aoa, head};
@@ -1815,7 +2005,7 @@ function exportActionXlsx(){
   if(!AC.rows.length) return alert('There is nothing in this list to export.');
   const {aoa,head}=actionAoa();
   const ws=XLSX.utils.aoa_to_sheet(aoa);
-  styleReport(ws,aoa,head,4,[38,44,15,26,12,34,9,7,10,28,13,7,10,38]);
+  styleReport(ws,aoa,head,4,[38,44,15,26,12,34,9,7,28,13,7,10,38]);
   const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Action list');
   const name='Action_'+String(S.po)+'_'+actionTitle().replace(/[^\w]+/g,'_').slice(0,40)+'.xlsx';
   XLSX.writeFile(wb,name,{cellStyles:true});
@@ -1828,30 +2018,63 @@ function emailAction(){
   const uniq=new Set(AC.rows.map(r=>r.d.tr)).size;
   const circN=AC.rows.filter(r=>r.d.circulating).length;
   const subj=`[${S.po}] ${actionTitle()} — ${AC.rows.length} outstanding`;
-  const LIM=35;
-  let body=`Purchase order : ${S.po} — ${S.poDesc||''}\n`+
+  const LIM=40;
+  const shown=AC.rows.slice(0,LIM);
+
+  /* a fixed-width table, so the body still reads as a table in plain-text mail */
+  const cols=[
+    {h:'#',        w:4,  get:(r,i)=>String(i+1)},
+    {h:'DOCUMENT', w:40, get:r=>r.d.label},
+    {h:'EQUIPMENT',w:12, get:r=>r.d.xref||''},
+    {h:'CODE',     w:10, get:r=>r.d.code||''},
+    {h:'REV',      w:4,  get:r=>r.d.rev||''},
+    {h:'STATUS',   w:30, get:r=>r.d.status||''},
+    {h:'DAYS',     w:5,  get:r=>r.d.days==null?'':String(r.d.days)},
+    {h:byDisc?'WAITING ON':'STILL TO CLOSE', w:26,
+     get:r=>r.disc || r.d.latest.depts.filter(x=>x.review&&!x.closed).map(x=>x.name).join(', ')}
+  ];
+  const pad=(t,w)=>{ t=String(t==null?'':t); return t.length>w? t.slice(0,w-1)+'…' : t.padEnd(w); };
+  const line=cols.map(c=>'-'.repeat(c.w)).join('-+-');
+  let table=cols.map(c=>pad(c.h,c.w)).join(' | ')+'\n'+line+'\n';
+  shown.forEach((r,i)=>{ table+=cols.map(c=>pad(c.get(r,i),c.w)).join(' | ')+'\n'; });
+
+  let body=`Purchase order : ${S.po}${S.poDesc?' — '+S.poDesc:''}\n`+
     `Originator     : ${S.dep}\n`+
     `Scope          : ${AC.half==='A'?'Full purchase order':'For review — '+(S.disc||'')}\n`+
-    `As of          : ${S.meta.asOf}\n\n`+
+    `Status as of   : ${S.meta.asOf}\n\n`+
     `${AC.rows.length} ${byDisc?'reviews':'documents'} outstanding across ${uniq} documents, `+
     `${circN} circulating now.\n\n`+
-    (byDisc?'Documents awaiting your review:':'Documents still to close:')+'\n';
-  AC.rows.slice(0,LIM).forEach((r,i)=>{ const d=r.d;
-    body+=`${String(i+1).padStart(3)}. ${d.label}  [${d.code}]  rev ${d.rev||'—'}`+
-      `  ${d.status}${d.days!=null?'  '+d.days+'d':''}`+
-      `${isCriticalDoc(d)?'  (CRITICAL)':''}${r.disc?'  — '+r.disc:''}\n`;
-  });
-  if(AC.rows.length>LIM) body+=`   … and ${AC.rows.length-LIM} more — see the attached spreadsheet.\n`;
-  body+=`\nThe full list has been downloaded as "${file}" — please attach it to this mail before sending.\n`;
+    (byDisc?'Documents awaiting review:':'Documents still to close:')+'\n\n'+table;
+  if(AC.rows.length>LIM) body+=`\n… and ${AC.rows.length-LIM} more — see the attached spreadsheet.\n`;
+  body+=`\nThe full list has been downloaded as "${file}" — please attach it before sending.\n`;
+
+  /* the same table as real HTML, so it can be pasted into Outlook as a table */
+  const esc2=t=>String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const html=`<table style="border-collapse:collapse;font-family:Segoe UI,Arial,sans-serif;font-size:11px">
+    <thead><tr>${cols.map(c=>`<th style="background:#0B2545;color:#fff;padding:5px 8px;border:1px solid #9AA7B4;
+      text-align:left;white-space:nowrap">${esc2(c.h)}</th>`).join('')}</tr></thead>
+    <tbody>${shown.map((r,i)=>`<tr>${cols.map(c=>`<td style="padding:4px 8px;border:1px solid #C9D3DD;
+      background:${i%2?'#F6F9FC':'#fff'}">${esc2(c.get(r,i))}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  copyRich(html, body);
+
   const href='mailto:?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
   const note=$('acMailNote');
   note.style.display='';
-  note.innerHTML=`Your mail client is opening with the summary already written. The full list was downloaded as
-    <b>${esc(file)}</b> — a web page cannot attach a file to a draft for you, so please attach it before sending.
-    <span class="lnk" style="cursor:pointer;text-decoration:underline;font-weight:800"
-      onclick="navigator.clipboard&&navigator.clipboard.writeText(document.getElementById('acMailBody').value)">Copy the text instead</span>
-    <textarea id="acMailBody" style="position:absolute;left:-9999px">${esc(body)}</textarea>`;
+  note.innerHTML=`Your mail client is opening with the table already written in the body. The full list was
+    downloaded as <b>${esc(file)}</b> — a web page cannot attach a file to a draft, so please attach it before
+    sending. The same table is on your clipboard as a formatted table: press <b>Ctrl+V</b> in Outlook to paste it.`;
   window.location.href=href;
+}
+/* put HTML on the clipboard where the browser allows it, plain text otherwise */
+function copyRich(html, text){
+  try{
+    if(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write){
+      navigator.clipboard.write([new ClipboardItem({
+        'text/html': new Blob([html],{type:'text/html'}),
+        'text/plain': new Blob([text],{type:'text/plain'})
+      })]).catch(()=>{ navigator.clipboard.writeText(text).catch(()=>{}); });
+    } else if(navigator.clipboard) navigator.clipboard.writeText(text).catch(()=>{});
+  }catch(e){}
 }
 
 window.openAction=openAction; window.exportActionXlsx=exportActionXlsx; window.emailAction=emailAction;
@@ -2770,6 +2993,8 @@ function go(s){
   ['upload','filter','dash','action','doc','report','basket','vdr'].forEach(x=>$('sc-'+x).classList.toggle('on',x===s));
   window.scrollTo(0,0);
   if(s==='filter') $('crumbs').innerHTML='';
+  /* the sheet strip belongs to the status page only */
+  $('sheettabs').classList.toggle('on', s==='dash');
 }
 function resetAll(){
   S.rows=[];S.docs=[];S.cur=null;S.po=null;S.dep=null;S.disc=null;S.discIdx=null;S.discCidx=null;
