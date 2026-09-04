@@ -392,91 +392,121 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .foot{padding:24px 0 40px;text-align:center;font-size:11px;color:var(--muted);font-weight:600;
   border-top:1px solid var(--line);margin-top:24px}
 
-/* ── Status overview: two halves, flat donuts, progress bars ───────────── */
-.stat-hero{display:flex;flex-wrap:wrap;gap:14px 26px;align-items:baseline;margin:14px 0 4px}
-.stat-hero .big{font-size:28px;font-weight:800;color:var(--navy);letter-spacing:-.6px;font-variant-numeric:tabular-nums}
-.stat-hero .lab{font-size:12.5px;font-weight:700;color:var(--muted)}
+/* ── Status overview: tab bar + grid of chart cards ────────────────────── */
+.stat-hero{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:baseline;margin:12px 0 2px}
+.stat-hero .big{font-size:26px;font-weight:800;color:var(--navy);letter-spacing:-.6px;font-variant-numeric:tabular-nums}
+.stat-hero .lab{font-size:12px;font-weight:700;color:var(--muted)}
 .stat-hero .pct{color:var(--ok)}
 
-.split{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:10px;align-items:start}
-@media(max-width:1060px){.split{grid-template-columns:1fr}}
-.half{background:var(--sf);border:1px solid var(--line);border-radius:16px;box-shadow:var(--sh1);
-  padding:18px 20px 20px;display:flex;flex-direction:column;min-width:0}
-.half.all{border-top:3px solid var(--blue)}
-.half.rev{border-top:3px solid var(--dang)}
-.half-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.half-h h3{font-size:15.5px;font-weight:800;color:var(--navy);padding:0;border:none}
-.tagx{font-size:9.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:3px 9px;border-radius:20px}
-.half-sub{font-size:11.5px;color:var(--muted);font-weight:600;margin:6px 0 12px;line-height:1.55}
-.mini{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
-.mini .m{flex:1 1 90px;background:var(--sf2);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
-.mini .m .n{font-size:19px;font-weight:800;color:var(--navy);line-height:1;font-variant-numeric:tabular-nums}
-.mini .m .l{font-size:9.5px;font-weight:700;color:var(--muted);margin-top:4px;letter-spacing:.02em}
+/* tab bar, in the shape of the eGesDoc dashboard */
+.tabcard{background:var(--sf);border:1px solid var(--line);border-radius:14px 14px 0 0;box-shadow:var(--sh1);
+  margin-top:12px;overflow:hidden}
+.tabbar{display:flex;flex-wrap:wrap;border-bottom:1px solid var(--line);background:var(--sf2)}
+.tabb{position:relative;border:none;background:transparent;cursor:pointer;padding:14px 26px;
+  font-size:13.5px;font-weight:700;color:var(--muted);border-right:1px solid var(--line);
+  transition:all .18s var(--ease);white-space:nowrap}
+.tabb:hover{color:var(--navy);background:#fff}
+.tabb.on{background:var(--sf);color:var(--navy);font-weight:800}
+.tabb.on::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:3px;background:var(--blue)}
+.tabb[data-v="B"].on::after{background:var(--dang)}
+.tabnote{padding:11px 20px;font-size:11.5px;font-weight:600;color:var(--muted);line-height:1.55}
+.tabnote b{color:var(--navy)}
+
+/* the cards */
+.statgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;align-items:start}
+@media(max-width:1060px){.statgrid{grid-template-columns:1fr}}
+.ccard{background:var(--sf);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh1);
+  padding:14px 16px 16px;min-width:0}
+.ccard[data-h="A"]{border-top:3px solid var(--blue)}
+.ccard[data-h="B"]{border-top:3px solid var(--dang)}
+.cc-h{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:7px}
+.cc-badge{font-size:8.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:3px 8px;border-radius:20px}
+.cc-badge.all{background:#E8F0FE;color:#1A4FBF}
+.cc-badge.rev{background:var(--dang-bg);color:#9C2C24}
+.cc-t{font-size:13px;font-weight:800;color:var(--navy);flex:1 1 120px;min-width:0}
+.cc-tools{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.cc-tools .ms-btn{padding:5px 8px;font-size:10px;max-width:160px}
+.cc-tools .chip{padding:5px 10px;font-size:10px}
+.cc-sub{font-size:10.5px;color:var(--muted);font-weight:600;margin-bottom:9px;line-height:1.5}
+.cc-sub b{color:var(--ink)}
+
+.mini{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px}
+.mini .m{flex:1 1 76px;background:var(--sf2);border:1px solid var(--line);border-radius:9px;padding:7px 9px}
+.mini .m .n{font-size:17px;font-weight:800;color:var(--navy);line-height:1;font-variant-numeric:tabular-nums}
+.mini .m .l{font-size:9px;font-weight:700;color:var(--muted);margin-top:3px}
 .mini .m.ok .n{color:var(--ok)}.mini .m.warn .n{color:var(--warn)}.mini .m.dang .n{color:var(--dang)}
 
+.cb-note{font-size:10px;color:var(--muted);font-weight:600;margin-bottom:8px;line-height:1.5}
+.cb-note b{color:var(--ink)}
+.cb-note .lnk{color:var(--blue);cursor:pointer;font-weight:800;text-decoration:underline}
+.cb-note.warn2{color:#9A6414;background:var(--warn-bg);border:1px solid #F0DCB6;border-radius:8px;padding:5px 9px}
+.you{font-size:8px;font-weight:800;background:var(--navy);color:#fff;border-radius:20px;padding:1px 5px;margin-left:4px}
+
 /* flat donut */
-.chartbox{position:relative;cursor:pointer;border-radius:12px;padding:8px 0 2px;transition:background .15s}
+.chartbox{position:relative;cursor:pointer;border-radius:10px;padding:4px 0 0;transition:background .15s}
 .chartbox:hover{background:var(--sf2)}
-.chartbox .cue{position:absolute;right:8px;top:8px;font-size:10px;font-weight:800;color:var(--blue);
+.chartbox .cue{position:absolute;right:6px;top:4px;font-size:9.5px;font-weight:800;color:var(--blue);
   opacity:.85;pointer-events:none}
-.cblock.open .chartbox .cue{opacity:0}
+.ccard.open .chartbox .cue{opacity:0}
 .dw{position:relative;width:100%;display:flex;justify-content:center}
-.dw svg{display:block;overflow:visible}
+.dw svg{display:block;width:100%;max-width:174px;height:auto;overflow:visible}
+.statgrid.single .dw svg{max-width:224px}
 .dw .sl{cursor:pointer;transition:opacity .15s}
 .dw:hover .sl{opacity:.82}
 .dw .sl:hover{opacity:1}
 .donut-ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
   pointer-events:none}
-.donut-ctr .v{font-size:27px;font-weight:800;color:var(--navy);line-height:1;font-variant-numeric:tabular-nums}
-.donut-ctr .l{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px}
-.pie-legend{display:flex;flex-wrap:wrap;gap:5px 14px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line2)}
-.pie-legend .li{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:600;color:var(--ink)}
-.pie-legend .dot{width:10px;height:10px;border-radius:3px;flex:0 0 auto}
+.donut-ctr .v{font-size:23px;font-weight:800;color:var(--navy);line-height:1;font-variant-numeric:tabular-nums}
+.donut-ctr .l{font-size:8.5px;font-weight:700;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-top:3px}
+.statgrid.single .donut-ctr .v{font-size:28px}
+.pie-legend{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:9px;padding-top:9px;border-top:1px dashed var(--line2)}
+.pie-legend .li{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:600;color:var(--ink)}
+.pie-legend .dot{width:9px;height:9px;border-radius:3px;flex:0 0 auto}
 .pie-legend b{font-weight:800;font-variant-numeric:tabular-nums}
 .pie-legend .p{color:var(--muted);font-weight:600}
 
 /* progress bars */
-.pblock{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line2)}
-.pblock-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:7px}
-.pblock-h .t{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.pblock-h .v{font-size:22px;font-weight:800;color:var(--ok);line-height:1;font-variant-numeric:tabular-nums}
-.pblock-h .v small{font-size:11px;font-weight:700;color:var(--muted);margin-left:5px}
-.sbar{display:flex;height:22px;border-radius:6px;overflow:hidden;border:1px solid var(--line);background:var(--sf2)}
+.pblock{margin-top:11px;padding-top:10px;border-top:1px dashed var(--line2)}
+.pblock-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:6px}
+.pblock-h .t{font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.pblock-h .v{font-size:20px;font-weight:800;color:var(--ok);line-height:1;font-variant-numeric:tabular-nums}
+.pblock-h .v small{font-size:10px;font-weight:700;color:var(--muted);margin-left:5px}
+.sbar{display:flex;height:20px;border-radius:6px;overflow:hidden;border:1px solid var(--line);background:var(--sf2)}
 .sbar i{display:block;height:100%;transition:width .8s var(--ease)}
-.sbar-lab{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:9px}
-.sbar-lab .li{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:600;color:var(--ink)}
-.sbar-lab .dot{width:9px;height:9px;border-radius:2px}
+.sbar-lab{display:flex;flex-wrap:wrap;gap:3px 12px;margin-top:8px}
+.sbar-lab .li{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:600;color:var(--ink)}
+.sbar-lab .dot{width:8px;height:8px;border-radius:2px}
 .sbar-lab b{font-weight:800;font-variant-numeric:tabular-nums}
+/* In the combined view all four charts have to be on screen at once, so the
+   explanatory text, the status labels under the bar and some of the donut
+   size give way; open a single tab to get them back. */
+.statgrid:not(.single) .sbar-lab{display:none}
+.statgrid:not(.single) .cc-sub{display:none}
+.statgrid:not(.single) .cb-note:not(.warn2){display:none}
+.statgrid:not(.single) .dw svg{max-width:150px}
+.statgrid:not(.single) .donut-ctr .v{font-size:20px}
+.statgrid:not(.single) .pie-legend{max-height:46px;overflow:auto;gap:3px 10px;font-size:10px}
+.statgrid:not(.single) .ccard{padding:12px 14px 13px}
+.statgrid:not(.single) .mini .m{padding:6px 8px}
+.statgrid:not(.single) .mini .m .n{font-size:15px}
+.statgrid:not(.single) .pblock{margin-top:9px;padding-top:8px}
+.statgrid:not(.single) .sbar{height:17px}
 
-/* per-document-type progress, revealed by clicking the chart */
+/* per-type / per-discipline progress, revealed by clicking the chart */
 .bytype{max-height:0;overflow:hidden;opacity:0;transition:max-height .5s var(--ease),opacity .35s var(--ease)}
-.cblock.open .bytype{max-height:4000px;opacity:1;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line2)}
-.bt-h{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
-.trow{display:grid;grid-template-columns:120px 1fr 44px;gap:10px;align-items:center;padding:5px 0}
-.trow.wide{grid-template-columns:158px 1fr 44px}
-.trow .c1.nm{font-family:var(--font);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ccard.open .bytype{max-height:4000px;opacity:1;margin-top:12px;padding-top:10px;border-top:1px dashed var(--line2)}
+.bt-h{font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.trow{display:grid;grid-template-columns:112px 1fr 42px;gap:9px;align-items:center;padding:5px 0}
+.trow.wide{grid-template-columns:150px 1fr 42px}
 .trow+.trow{border-top:1px solid var(--line)}
 .trow .tc{min-width:0}
-.trow .tc .c1{font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--navy)}
-.trow .tc .c2{font-size:9.5px;color:var(--muted);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.trow .sbar{height:15px;border-radius:4px}
-.trow .pv{text-align:right;font-size:11.5px;font-weight:800;color:var(--ok);font-variant-numeric:tabular-nums}
+.trow .tc .c1{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--navy)}
+.trow .c1.nm{font-family:var(--font);font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trow .tc .c2{font-size:9px;color:var(--muted);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trow .sbar{height:14px;border-radius:4px}
+.trow .pv{text-align:right;font-size:11px;font-weight:800;color:var(--ok);font-variant-numeric:tabular-nums}
 .trow .pv.zero{color:var(--muted)}
-/* one chart block: header + controls, donut, overall bar, expandable detail */
-.cblock{margin-top:18px;padding-top:15px;border-top:1px solid var(--line)}
-.cblock.first{border-top:none;padding-top:6px;margin-top:10px}
-.cb-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:7px}
-.cb-t{font-size:12.5px;font-weight:800;color:var(--navy);flex:1 1 130px;min-width:0}
-.cb-tools{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-.cb-tools .ms-btn{padding:6px 9px;font-size:10.5px;max-width:180px}
-.cb-tools .chip{padding:6px 11px;font-size:10.5px}
-.cb-note{font-size:10.5px;color:var(--muted);font-weight:600;margin-bottom:9px;line-height:1.55}
-.cb-note b{color:var(--ink)}
-.cb-note .lnk{color:var(--blue);cursor:pointer;font-weight:800;text-decoration:underline}
-.cb-note.warn2{color:#9A6414;background:var(--warn-bg);border:1px solid #F0DCB6;border-radius:8px;padding:6px 10px}
-.you{font-size:8.5px;font-weight:800;background:var(--navy);color:#fff;border-radius:20px;padding:1px 6px;margin-left:5px}
-
-.half-empty{padding:34px 16px;text-align:center;color:var(--muted);font-size:12.5px;font-weight:600;line-height:1.6}
+.half-empty{padding:28px 14px;text-align:center;color:var(--muted);font-size:12px;font-weight:600;line-height:1.6}
 
 /* print */
 #printarea{display:none}
@@ -568,84 +598,86 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
   <button class="back" onclick="go('filter')">← Change scope</button>
   <div id="stat-head"></div>
 
-  <div class="split">
-    <!-- LEFT — the whole purchase order -->
-    <section class="half all" id="halfA">
-      <div class="half-h"><h3 id="titleA">Full purchase order</h3>
-        <span class="tagx" style="background:#E8F0FE;color:#1A4FBF">ALL DOCUMENTS</span></div>
-      <div class="half-sub" id="subA"></div>
+  <div class="tabcard">
+    <div class="tabbar" id="tabbar">
+      <button class="tabb on" data-v="all">All</button>
+      <button class="tabb" data-v="A">Full Purchase Order</button>
+      <button class="tabb" data-v="B" id="tabB">For Review &amp; Originator</button>
+    </div>
+    <div class="tabnote" id="tabnote"></div>
+  </div>
+
+  <div class="statgrid" id="statgrid">
+    <article class="ccard" data-h="A" data-c="codes" id="cardA-codes">
+      <div class="cc-h">
+        <span class="cc-badge all">FULL PO</span>
+        <div class="cc-t">Documents by type</div>
+        <div class="cc-tools"><div id="fcA"></div>
+          <button class="chip" onclick="event.stopPropagation();exportCodeReport('A')">⤓ Report</button></div>
+      </div>
+      <div class="cc-sub" id="subA"></div>
       <div class="mini" id="miniA"></div>
-
-      <!-- chart 1 — documents per document type -->
-      <div class="cblock" id="cbA-codes">
-        <div class="cb-h"><div class="cb-t">Documents by type</div>
-          <div class="cb-tools"><div id="fcA"></div>
-            <button class="chip" onclick="event.stopPropagation();exportCodeReport('A')">⤓ Report</button></div></div>
-        <div class="cb-note" id="exA"></div>
-        <div class="chartbox" id="boxA" onclick="toggleBlock('A','codes')">
-          <span class="cue">click for progress by type →</span>
-          <div class="dw" id="dwA"></div>
-        </div>
-        <div class="pie-legend" id="lgA"></div>
-        <div class="pblock" id="ovA"></div>
-        <div class="bytype" id="btA"></div>
+      <div class="cb-note" id="exA"></div>
+      <div class="chartbox" id="boxA" onclick="toggleBlock('A','codes')">
+        <span class="cue">click for progress by type →</span>
+        <div class="dw" id="dwA"></div>
       </div>
-
-      <!-- chart 2 — which disciplines still have to review them -->
-      <div class="cblock" id="cbA-disc">
-        <div class="cb-h"><div class="cb-t">Disciplines that must review</div>
-          <div class="cb-tools">
-            <button class="chip" onclick="event.stopPropagation();exportDiscReport('A')">⤓ Report</button></div></div>
-        <div class="cb-note">From columns AC–CT. A discipline marked <b>FOR REVIEW</b> with no date in its closed-date
-          column is still pending; N/A and for-information entries are ignored.</div>
-        <div class="chartbox" id="dboxA" onclick="toggleBlock('A','disc')">
-          <span class="cue">click for progress by discipline →</span>
-          <div class="dw" id="ddwA"></div>
-        </div>
-        <div class="pie-legend" id="dlgA"></div>
-        <div class="pblock" id="dovA"></div>
-        <div class="bytype" id="dbtA"></div>
+      <div class="pie-legend" id="lgA"></div>
+      <div class="pblock" id="ovA"></div>
+      <div class="bytype" id="btA"></div>
+    </article>
+    <article class="ccard" data-h="B" data-c="codes" id="cardB-codes">
+      <div class="cc-h">
+        <span class="cc-badge rev">FOR REVIEW - ORIGINATOR</span>
+        <div class="cc-t">Documents by type</div>
+        <div class="cc-tools"><div id="fcB"></div>
+          <button class="chip" onclick="event.stopPropagation();exportCodeReport('B')">⤓ Report</button></div>
       </div>
-    </section>
-
-    <!-- RIGHT — only what the chosen discipline has to review -->
-    <section class="half rev" id="halfB">
-      <div class="half-h"><h3 id="titleB">For review</h3>
-        <span class="tagx" style="background:var(--dang-bg);color:#9C2C24">FOR REVIEW ONLY</span></div>
-      <div class="half-sub" id="subB"></div>
+      <div class="cc-sub" id="subB"></div>
       <div class="mini" id="miniB"></div>
-
-      <!-- chart 1 — documents per document type -->
-      <div class="cblock" id="cbB-codes">
-        <div class="cb-h"><div class="cb-t">Documents by type</div>
-          <div class="cb-tools"><div id="fcB"></div>
-            <button class="chip" onclick="event.stopPropagation();exportCodeReport('B')">⤓ Report</button></div></div>
-        <div class="cb-note" id="exB"></div>
-        <div class="chartbox" id="boxB" onclick="toggleBlock('B','codes')">
-          <span class="cue">click for progress by type →</span>
-          <div class="dw" id="dwB"></div>
-        </div>
-        <div class="pie-legend" id="lgB"></div>
-        <div class="pblock" id="ovB"></div>
-        <div class="bytype" id="btB"></div>
+      <div class="cb-note" id="exB"></div>
+      <div class="chartbox" id="boxB" onclick="toggleBlock('B','codes')">
+        <span class="cue">click for progress by type →</span>
+        <div class="dw" id="dwB"></div>
       </div>
-
-      <!-- chart 2 — which disciplines still have to review them -->
-      <div class="cblock" id="cbB-disc">
-        <div class="cb-h"><div class="cb-t">Disciplines that must review</div>
-          <div class="cb-tools">
-            <button class="chip" onclick="event.stopPropagation();exportDiscReport('B')">⤓ Report</button></div></div>
-        <div class="cb-note">From columns AC–CT. A discipline marked <b>FOR REVIEW</b> with no date in its closed-date
-          column is still pending; N/A and for-information entries are ignored.</div>
-        <div class="chartbox" id="dboxB" onclick="toggleBlock('B','disc')">
-          <span class="cue">click for progress by discipline →</span>
-          <div class="dw" id="ddwB"></div>
-        </div>
-        <div class="pie-legend" id="dlgB"></div>
-        <div class="pblock" id="dovB"></div>
-        <div class="bytype" id="dbtB"></div>
+      <div class="pie-legend" id="lgB"></div>
+      <div class="pblock" id="ovB"></div>
+      <div class="bytype" id="btB"></div>
+    </article>
+    <article class="ccard" data-h="A" data-c="disc" id="cardA-disc">
+      <div class="cc-h">
+        <span class="cc-badge all">FULL PO</span>
+        <div class="cc-t">Disciplines that must review</div>
+        <div class="cc-tools">
+          <button class="chip" onclick="event.stopPropagation();exportDiscReport('A')">⤓ Report</button></div>
       </div>
-    </section>
+      <div class="cc-sub">From columns AC–CT. A discipline marked <b>FOR REVIEW</b> with no date in its
+        closed-date column is still pending; N/A and for-information entries are ignored.</div>
+      <div class="chartbox" id="dboxA" onclick="toggleBlock('A','disc')">
+        <span class="cue">click for progress by discipline →</span>
+        <div class="dw" id="ddwA"></div>
+      </div>
+      <div class="pie-legend" id="dlgA"></div>
+      <div class="pblock" id="dovA"></div>
+      <div class="bytype" id="dbtA"></div>
+    </article>
+    <article class="ccard" data-h="B" data-c="disc" id="cardB-disc">
+      <div class="cc-h">
+        <span class="cc-badge rev">FOR REVIEW - ORIGINATOR</span>
+        <div class="cc-t">Disciplines that must review</div>
+        <div class="cc-tools">
+          <button class="chip" onclick="event.stopPropagation();exportDiscReport('B')">⤓ Report</button></div>
+      </div>
+      <div class="cc-sub">From columns AC–CT. A discipline marked <b>FOR REVIEW</b> with no date in its
+        closed-date column is still pending; N/A and for-information entries are ignored.</div>
+      <div class="chartbox" id="dboxB" onclick="toggleBlock('B','disc')">
+        <span class="cue">click for progress by discipline →</span>
+        <div class="dw" id="ddwB"></div>
+      </div>
+      <div class="pie-legend" id="dlgB"></div>
+      <div class="pblock" id="dovB"></div>
+      <div class="bytype" id="dbtB"></div>
+    </article>
   </div>
 
   <div class="foot" id="foot1"></div>
@@ -745,7 +777,7 @@ const THINGS = [
 const DEADLINE_DAYS = 15;   // days allowed from CIRCULATE DATE to close
 
 const S = { rows:[], hdr:{}, depts:[], meta:{}, po:null, dep:null, disc:null, discIdx:null, discCidx:null,
-            sub:[], docs:[], cur:null, basket:[], inc:{A:null,B:null} };
+            sub:[], docs:[], cur:null, basket:[], inc:{A:null,B:null}, tab:'all' };
 const $ = id => document.getElementById(id);
 const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
@@ -1042,10 +1074,14 @@ function buildDash(){
   /* group revisions by TR NUMBER (fall back to client number) */
   const byDoc={}; let anon=0;
   sub.forEach(a=>{
-    /* Rows with no TR number are documents that were planned in the vendor
-       document list but have never actually been received, so they cannot be
-       merged with anything — each one is its own (stable) group. */
-    const tr=sv(a,'TR NUMBER')||sv(a,'CLIENT NUMBER')||('#UNRECEIVED#'+(++anon));
+    /* Rows with no TR number were planned in the vendor document list but
+       never received.  They still identify a document — the supplier's own
+       number for that code and equipment — so key on that rather than giving
+       every row its own group, which used to count one document twice. */
+    const tr = sv(a,'TR NUMBER') || sv(a,'CLIENT NUMBER') ||
+      (sv(a,'SUPPLIER NUMBER')
+        ? '#UNRECEIVED#'+sv(a,'SUPPLIER NUMBER')+'~'+sv(a,'CODE')+'~'+sv(a,'CROSS REFERENCE')
+        : '#UNRECEIVED#'+(++anon));
     (byDoc[tr]=byDoc[tr]||[]).push(a);
   });
   const docs=Object.keys(byDoc).map(tr=>{
@@ -1267,7 +1303,10 @@ function discStatsFor(docs){
 
 /* the documents behind one half, after any document types the reader hid */
 function halfBase(id){
-  return id==='A' ? S.docs : S.docs.filter(d=>d.myRole==='review'||d.myRole==='review-org');
+  /* Only documents this discipline originates and must review — the column
+     reads FOR REVIEW - ORIGINATOR.  A plain FOR REVIEW is somebody else's
+     document that we are asked to comment on, and is not counted here. */
+  return id==='A' ? S.docs : S.docs.filter(d=>d.myRole==='review-org');
 }
 function halfDocs(id){
   const inc=S.inc[id], base=halfBase(id);
@@ -1283,11 +1322,10 @@ function renderDash(){
       <span class="cnt">${S.poDesc?esc(S.poDesc)+' &nbsp;·&nbsp; ':''}latest revision of every document</span>
       <div class="rule"></div></div>`;
 
-  $('titleA').textContent='Full purchase order';
-  $('titleB').textContent='For review — '+(S.disc||'your discipline');
+  $('tabB').textContent='For Review & Originator';
   $('subA').textContent='Everything raised by '+S.dep+' under this purchase order.';
   $('subB').innerHTML='Documents whose <b>'+esc(S.disc||'')+'</b> column reads '+
-    '<b>FOR REVIEW</b> or <b>FOR REVIEW - ORIGINATOR</b>.';
+    '<b>FOR REVIEW - ORIGINATOR</b> — the ones this discipline owns and must review.';
 
   /* one "document types" picker per half — everything on, unticking hides a type */
   ['A','B'].forEach(id=>{
@@ -1299,14 +1337,17 @@ function renderDash(){
     dropdown($('fc'+id),{ placeholder:'Document types',
       options:list.map(c=>({v:c,t:c,s:desc[c],n:codes[c]})), multi:true, selected:S.inc[id],
       onChange:()=>renderHalf(id) });
-    $('cb'+id+'-codes').classList.add('first');
-    $('cb'+id+'-codes').classList.remove('open');
-    $('cb'+id+'-disc').classList.remove('open');
+    $('card'+id+'-codes').classList.remove('open');
+    $('card'+id+'-disc').classList.remove('open');
   });
 
   renderHalf('A'); renderHalf('B');
+  setTab(S.tab||'all');
   $('foot1').textContent='Source: '+S.meta.title+' · Project '+S.meta.project+' · as of '+S.meta.asOf;
 }
+
+document.addEventListener('click',e=>{ const b=e.target.closest('#tabbar .tabb');
+  if(b) setTab(b.dataset.v); });
 
 function renderHalf(id){
   const docs=halfDocs(id), base=halfBase(id);
@@ -1332,7 +1373,7 @@ function renderHalf(id){
   if(!st.total){
     $('dw'+id).innerHTML='<div class="half-empty">'+(base.length
       ? 'Every document type is hidden.<br>Tick one in <b>Document types</b> to bring the chart back.'
-      : 'No document in this purchase order is marked<br>FOR REVIEW for this discipline.')+'</div>';
+      : 'No document in this purchase order is marked<br>FOR REVIEW - ORIGINATOR for this discipline.')+'</div>';
     $('lg'+id).innerHTML=''; $('ov'+id).innerHTML=''; $('bt'+id).innerHTML='';
     $('box'+id).style.pointerEvents='none';
   } else {
@@ -1443,7 +1484,25 @@ function arcPath(cx,cy,R,r,a0,a1){
   return `M${x1} ${y1}A${R} ${R} 0 ${big} 1 ${x2} ${y2}L${x3} ${y3}A${r} ${r} 0 ${big} 0 ${x4} ${y4}Z`;
 }
 
-function toggleBlock(id, which){ $('cb'+id+'-'+which).classList.toggle('open'); }
+function toggleBlock(id, which){ $('card'+id+'-'+which).classList.toggle('open'); }
+
+/* Tabs decide which of the four cards are on screen, so nothing needs scrolling
+   past to be compared. */
+function setTab(v){
+  S.tab=v;
+  document.querySelectorAll('#tabbar .tabb').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  document.querySelectorAll('.ccard').forEach(c=>{
+    c.style.display = (v==='all' || c.dataset.h===v) ? '' : 'none'; });
+  $('statgrid').classList.toggle('single', v!=='all');
+  const A=(STAT.A||{}).st, B=(STAT.B||{}).st;
+  $('tabnote').innerHTML =
+    v==='all' ? `Side by side: the whole purchase order (<b>${A?A.total.toLocaleString():0}</b> documents)
+                 against what <b>${esc(S.disc||'')}</b> owns and must review
+                 (<b>${B?B.total.toLocaleString():0}</b>).`
+  : v==='A'  ? `Every document raised by <b>${esc(S.dep)}</b> under this purchase order.`
+             : `Only documents marked <b>FOR REVIEW - ORIGINATOR</b> in the <b>${esc(S.disc||'')}</b> column.`;
+}
+window.setTab=setTab;
 
 /* ── reports behind each chart ─────────────────────────────────────────── */
 function halfName(id){ return id==='A' ? 'Full purchase order' : 'For review — '+(S.disc||''); }
