@@ -35,19 +35,24 @@ body::before{content:'';position:fixed;inset:-20% -10%;z-index:-2;pointer-events
 button,input,select,textarea{font-family:inherit;color:inherit}
 
 /* top bar */
-.nav{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.9);backdrop-filter:blur(14px);
-  border-bottom:1px solid var(--line)}
+.nav{position:sticky;top:0;z-index:60;background:linear-gradient(90deg,#17558A 0%,#2E86B8 55%,#3E9BC9 100%);
+  box-shadow:0 2px 12px rgba(11,37,69,.22)}
 .nav-in{max-width:1400px;margin:0 auto;padding:11px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.brand{font-size:15px;font-weight:800;color:var(--navy);white-space:nowrap}
-.brand b{color:var(--cyan)}
-.brand small{display:block;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
-.nav-sep{width:1px;height:26px;background:var(--line)}
-.crumbs{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--muted);flex-wrap:wrap}
-.crumbs .c{cursor:pointer}.crumbs .c:hover{color:var(--blue)}.crumbs .c.on{color:var(--navy);cursor:default}
-.crumbs .s{color:var(--line2)}
+.brand{font-size:15px;font-weight:800;color:#fff;white-space:nowrap}
+.brand b{color:#9BE4F7}
+.brand small{display:block;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(255,255,255,.7)}
+.nav-sep{width:1px;height:26px;background:rgba(255,255,255,.28)}
+.crumbs{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;
+  color:rgba(255,255,255,.82);flex-wrap:wrap}
+.crumbs .c{cursor:pointer}.crumbs .c:hover{color:#fff}.crumbs .c.on{color:#fff;cursor:default}
+.crumbs .s{color:rgba(255,255,255,.45)}
 .sp{flex:1}
-.pill{font-size:11px;font-weight:700;color:var(--navy);background:var(--sf2);border:1px solid var(--line);
-  padding:5px 11px;border-radius:20px;white-space:nowrap}
+.pill{font-size:11px;font-weight:700;color:#fff;background:rgba(255,255,255,.16);
+  border:1px solid rgba(255,255,255,.28);padding:5px 11px;border-radius:20px;white-space:nowrap}
+.nav .btn-g{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.34);color:#fff}
+.nav .btn-g:hover{background:#fff;border-color:#fff;color:#17558A}
+.nav .navbtn .badge{background:#fff;color:#17558A}
 .wrap{max-width:1400px;margin:0 auto;padding:0 24px}
 .screen{display:none}.screen.on{display:block}
 
@@ -392,6 +397,62 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .foot{padding:24px 0 40px;text-align:center;font-size:11px;color:var(--muted);font-weight:600;
   border-top:1px solid var(--line);margin-top:24px}
 
+/* ── page bar: title on the left, scope on the right (eGesDoc shape) ────── */
+.pagebar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--sf);
+  border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh1);padding:12px 18px;margin:16px 0 0}
+.pb-t{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:800;color:var(--navy);min-width:0}
+.pb-ic{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#2E86B8,#17558A);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:14px;flex:0 0 auto}
+.pb-sp{flex:1}
+.pb-scope{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:11.5px;font-weight:700;color:var(--muted)}
+.pb-scope .v{background:var(--sf2);border:1px solid var(--line);border-radius:8px;padding:6px 11px;color:var(--navy)}
+
+/* ── sheet tabs, in the spirit of Excel's sheet strip ───────────────────── */
+.sheetbar{display:flex;align-items:flex-end;gap:4px;margin:14px 0 0;padding:0 4px}
+.sheet{border:1px solid var(--line);border-bottom:none;background:var(--sf2);color:var(--muted);
+  border-radius:10px 10px 0 0;padding:10px 20px;font-size:12.5px;font-weight:800;cursor:pointer;
+  display:flex;align-items:center;gap:8px;transition:all .16s var(--ease)}
+.sheet:hover{color:var(--navy);background:#fff}
+.sheet.on{background:var(--sf);color:var(--navy);box-shadow:0 -2px 8px rgba(11,37,69,.06)}
+.sheet.on.act{border-top:3px solid var(--dang);padding-top:8px}
+.sheet.on.ovw{border-top:3px solid var(--blue);padding-top:8px}
+.sheet .cnt2{font-size:9.5px;font-weight:800;background:var(--dang);color:#fff;border-radius:20px;padding:1px 7px}
+.sheet.ovw .cnt2{background:var(--line2);color:var(--navy)}
+.sheetwrap{background:var(--sf);border:1px solid var(--line);border-radius:0 14px 14px 14px;
+  box-shadow:var(--sh1);padding:14px 16px 16px;margin-top:-1px}
+.sheetnote{font-size:11.5px;font-weight:600;color:var(--muted);line-height:1.55;margin-bottom:10px}
+.sheetnote b{color:var(--navy)}
+
+/* ── the take-action button that sits after a bar ───────────────────────── */
+.actbtn{border:1px solid var(--dang);background:var(--dang-bg);color:#9C2C24;font-size:9.5px;font-weight:800;
+  border-radius:7px;padding:4px 9px;cursor:pointer;white-space:nowrap;transition:all .15s var(--ease)}
+.actbtn:hover{background:var(--dang);color:#fff}
+.actbtn.big{padding:8px 14px;font-size:11px;border-radius:9px}
+.trow.act{grid-template-columns:112px 1fr 42px 78px}
+.trow.act.wide{grid-template-columns:150px 1fr 42px 78px}
+.allact{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:11px;padding-top:10px;
+  border-top:1px dashed var(--line2)}
+.allact .lbl2{font-size:10.5px;font-weight:700;color:var(--muted);flex:1;min-width:80px}
+.done-note{font-size:10.5px;font-weight:700;color:var(--ok);background:var(--ok-bg);border:1px solid #C4E7D4;
+  border-radius:8px;padding:6px 10px;margin-top:8px}
+
+/* ── action detail screen ───────────────────────────────────────────────── */
+.ac-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 14px;background:var(--sf2);
+  border-bottom:1px solid var(--line)}
+.ac-tools .fill{flex:1}
+.ac-tools .res{font-size:11.5px;font-weight:700;color:var(--muted);white-space:nowrap}
+.ac-tools .res b{color:var(--navy)}
+.ac-sum{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+.ac-sum .m{flex:1 1 120px;background:var(--sf);border:1px solid var(--line);border-radius:12px;padding:11px 14px;
+  box-shadow:var(--sh1)}
+.ac-sum .m .n{font-size:22px;font-weight:800;color:var(--navy);line-height:1;font-variant-numeric:tabular-nums}
+.ac-sum .m .l{font-size:10px;font-weight:700;color:var(--muted);margin-top:5px}
+.ac-sum .m.dang .n{color:var(--dang)}.ac-sum .m.warn .n{color:var(--warn)}.ac-sum .m.ok .n{color:var(--ok)}
+.crit-tag{font-size:8.5px;font-weight:800;background:#FDECEA;color:#9C2C24;border-radius:5px;padding:2px 6px;
+  margin-left:5px}
+.mailnote{font-size:11px;font-weight:600;color:#9A6414;background:var(--warn-bg);border:1px solid #F0DCB6;
+  border-radius:9px;padding:9px 12px;margin-top:12px;line-height:1.55}
+
 /* ── Status overview: tab bar + grid of chart cards ────────────────────── */
 .stat-hero{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:baseline;margin:12px 0 2px}
 .stat-hero .big{font-size:26px;font-weight:800;color:var(--navy);letter-spacing:-.6px;font-variant-numeric:tabular-nums}
@@ -597,8 +658,19 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 
 <!-- 3 ── STATUS OVERVIEW ────────────────────────────────────────────────── -->
 <div class="screen" id="sc-dash"><div class="wrap">
-  <button class="back" onclick="go('filter')">← Change scope</button>
-  <div id="stat-head"></div>
+  <div class="pagebar">
+    <div class="pb-t"><span class="pb-ic">▦</span><span id="pbTitle">Status</span></div>
+    <div class="pb-sp"></div>
+    <div class="pb-scope" id="pbScope"></div>
+    <button class="btn btn-g btn-s" onclick="go('filter')">Change scope</button>
+  </div>
+
+  <div class="sheetbar">
+    <button class="sheet act on" data-s="action">⚑ Action View <span class="cnt2" id="shCount">0</span></button>
+    <button class="sheet ovw" data-s="overview">▦ Overview</button>
+  </div>
+  <div class="sheetwrap">
+  <div class="sheetnote" id="sheetnote"></div>
 
   <div class="tabcard">
     <div class="tabbar" id="tabbar">
@@ -682,8 +754,43 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
       <div class="bytype" id="dbtB"></div>
     </article>
   </div>
+  </div>
 
   <div class="foot" id="foot1"></div>
+</div></div>
+
+<!-- 3b ── TAKE ACTION ───────────────────────────────────────────────────── -->
+<div class="screen" id="sc-action"><div class="wrap">
+  <div class="pagebar">
+    <div class="pb-t"><span class="pb-ic">⚑</span><span id="acTitle">Take action</span></div>
+    <div class="pb-sp"></div>
+    <div class="pb-scope" id="acScope"></div>
+    <button class="btn btn-g btn-s" onclick="go('dash')">← Back to status</button>
+  </div>
+  <div class="ac-sum" id="acSum"></div>
+  <div class="dt-wrap" style="border-radius:14px;border:1px solid var(--line)">
+    <div class="ac-tools">
+      <span class="lbl">Order by</span>
+      <button class="chip on" id="acCrit">★ Critical first</button>
+      <button class="chip" id="acRev">↕ Most revisions first</button>
+      <span class="nav-sep" style="background:var(--line2);height:18px"></span>
+      <button class="chip" id="acCirc">Circulating only</button>
+      <div class="fill"></div>
+      <span class="res" id="acCount"></span>
+      <button class="chip" onclick="exportActionXlsx()">⤓ Download as Excel</button>
+      <button class="chip on" onclick="emailAction()">✉ Email this report</button>
+    </div>
+    <div class="dt-scroll" style="max-height:58vh">
+      <table class="dt" id="acTable">
+        <colgroup>
+          <col style="width:auto"><col style="width:148px"><col style="width:150px"><col style="width:58px">
+          <col style="width:78px"><col style="width:132px"><col style="width:82px"><col style="width:158px">
+        </colgroup>
+        <thead id="acHead"></thead><tbody id="acBody"></tbody></table>
+    </div>
+  </div>
+  <div class="mailnote" id="acMailNote" style="display:none"></div>
+  <div class="foot"></div>
 </div></div>
 
 <!-- 4 ── DOCUMENT ───────────────────────────────────────────────────────── -->
@@ -780,7 +887,7 @@ const THINGS = [
 const DEADLINE_DAYS = 15;   // days allowed from CIRCULATE DATE to close
 
 const S = { rows:[], hdr:{}, depts:[], meta:{}, po:null, dep:null, disc:null, discIdx:null, discCidx:null,
-            sub:[], docs:[], cur:null, basket:[], inc:{A:null,B:null}, tab:'all' };
+            sub:[], docs:[], cur:null, basket:[], inc:{A:null,B:null}, tab:'all', sheet:'action' };
 const $ = id => document.getElementById(id);
 const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
@@ -1326,10 +1433,10 @@ function renderDash(){
   $('crumbs').innerHTML=`<span class="c" onclick="go('filter')">${esc(S.dep)}</span>`+
     `<span class="s">/</span><span class="c">${esc(S.disc||'')}</span>`+
     `<span class="s">/</span><span class="c on">${esc(S.po)}</span>`;
-  $('stat-head').innerHTML=`
-    <div class="sec" style="margin-top:6px"><h2>${esc(S.po)} · ${esc(S.dep)}</h2>
-      <span class="cnt">${S.poDesc?esc(S.poDesc)+' &nbsp;·&nbsp; ':''}latest revision of every document</span>
-      <div class="rule"></div></div>`;
+  $('pbTitle').textContent=S.po+' · '+S.dep;
+  $('pbScope').innerHTML=(S.poDesc?`<span class="v">${esc(S.poDesc)}</span>`:'')+
+    `<span class="v">Reviewing as ${esc(S.disc||'—')}</span>`+
+    `<span>latest revision of every document</span>`;
 
   $('tabB').textContent='For Review & Originator';
   $('subA').textContent='Everything raised by '+S.dep+' under this purchase order.';
@@ -1365,6 +1472,7 @@ function renderDash(){
 
   renderHalf('A'); renderHalf('B');
   setTab(S.tab||'all');
+  setSheet(S.sheet||'action');
   $('foot1').textContent='Source: '+S.meta.title+' · Project '+S.meta.project+' · as of '+S.meta.asOf;
 }
 
@@ -1416,13 +1524,23 @@ function renderHalf(id){
       ${sbar(st.totals, st.total)}
       <div class="sbar-lab">${BANDS.filter(b=>st.totals[b.key]).map(b=>
         `<span class="li"><span class="dot" style="background:${b.col}"></span>${esc(b.label)} <b>${st.totals[b.key].toLocaleString()}</b></span>`).join('')}</div>`;
-    $('bt'+id).innerHTML=`<div class="bt-h">Progress by document type</div>`+
-      st.byCode.map(c=>`<div class="trow">
-        <div class="tc"><div class="c1">${esc(c.code)}</div>
+    const act=S.sheet==='action';
+    const codeRows = act ? st.byCode.filter(c=>c.bands.without<c.total) : st.byCode;
+    STAT[id].pendCodes=st.byCode.filter(c=>c.bands.without<c.total).length;
+    const doneCodes=st.byCode.length-STAT[id].pendCodes;
+    $('bt'+id).innerHTML=`<div class="bt-h">Progress by document type${
+        act?' — outstanding only':''}</div>`+
+      (codeRows.length? codeRows.map(c=>`<div class="trow${act?' act':''}">
+        <div class="tc"><div class="c1">${esc(c.code)}${isCriticalCode(c)?'<span class="crit-tag">CRIT</span>':''}</div>
           <div class="c2" title="${esc(c.desc)}">${esc(c.desc||'')} · ${c.total} doc${c.total>1?'s':''}</div></div>
         ${sbar(c.bands, c.total)}
         <div class="pv ${c.pct?'':'zero'}">${c.pct}%</div>
-      </div>`).join('');
+        ${act?`<button class="actbtn" onclick="event.stopPropagation();openAction('${id}','code','${esc(c.code).replace(/'/g,"\\'")}')">Take action</button>`:''}
+      </div>`).join('')
+      : '<div class="done-note">Every document type here is fully closed.</div>')+
+      (act && doneCodes? `<div class="done-note">${doneCodes} document type${doneCodes>1?'s are':' is'} 100% closed and hidden.</div>`:'')+
+      (act && codeRows.length? `<div class="allact"><span class="lbl2">Everything outstanding across these ${codeRows.length} types</span>
+        <button class="actbtn big" onclick="event.stopPropagation();openAction('${id}','allcodes','')">⚑ Take action on all</button></div>`:'');
   }
 
   /* ── chart 2: disciplines that still owe a review ────────────────────── */
@@ -1453,13 +1571,22 @@ function renderHalf(id){
       <span class="li"><span class="dot" style="background:#2E9E6B"></span>Review closed <b>${ds.closed.toLocaleString()}</b></span>
       <span class="li"><span class="dot" style="background:#D4574E"></span>Still pending <b>${ds.pending.toLocaleString()}</b></span>
       <span class="li" style="color:var(--muted)">across ${ds.docs.toLocaleString()} documents</span></div>`;
-  $('dbt'+id).innerHTML=`<div class="bt-h">Progress by discipline</div>`+
-    ds.list.map(e=>`<div class="trow wide">
+  const actD=S.sheet==='action';
+  const discRows = actD ? ds.list.filter(e=>e.pending>0) : ds.list;
+  STAT[id].pendDisc=ds.list.filter(e=>e.pending>0).length;
+  const doneDisc=ds.list.length-STAT[id].pendDisc;
+  $('dbt'+id).innerHTML=`<div class="bt-h">Progress by discipline${actD?' — outstanding only':''}</div>`+
+    (discRows.length? discRows.map(e=>`<div class="trow wide${actD?' act':''}">
       <div class="tc"><div class="c1 nm">${esc(e.name)}${e.name===S.disc?'<span class="you">YOU</span>':''}</div>
         <div class="c2">${e.total} to review · ${e.pending} pending</div></div>
       ${dbar(e.closed, e.pending)}
       <div class="pv ${e.pct?'':'zero'}">${e.pct}%</div>
-    </div>`).join('');
+      ${actD?`<button class="actbtn" onclick="event.stopPropagation();openAction('${id}','disc','${esc(e.name).replace(/'/g,"\\'")}')">Take action</button>`:''}
+    </div>`).join('')
+    : '<div class="done-note">Every discipline has closed its review.</div>')+
+    (actD && doneDisc? `<div class="done-note">${doneDisc} discipline${doneDisc>1?'s have':' has'} closed everything and ${doneDisc>1?'are':'is'} hidden.</div>`:'')+
+    (actD && discRows.length? `<div class="allact"><span class="lbl2">Everything outstanding across these ${discRows.length} disciplines</span>
+      <button class="actbtn big" onclick="event.stopPropagation();openAction('${id}','alldisc','')">⚑ Take action on all</button></div>`:'');
 }
 function resetCodes(id){
   halfBase(id).forEach(d=>S.inc[id].add(d.code||'(no code)'));
@@ -1508,6 +1635,28 @@ function arcPath(cx,cy,R,r,a0,a1){
 
 function toggleBlock(id, which){ $('card'+id+'-'+which).classList.toggle('open'); }
 
+/* Two fixed sheets over the same data.  Action View drops everything already
+   finished so only outstanding work is on screen; Overview keeps the full
+   picture. */
+function setSheet(v){
+  S.sheet=v;
+  document.querySelectorAll('.sheetbar .sheet').forEach(b=>b.classList.toggle('on',b.dataset.s===v));
+  renderHalf('A'); renderHalf('B');
+  const pend=(STAT.A&&STAT.A.pendCodes||0)+(STAT.A&&STAT.A.pendDisc||0);
+  $('shCount').textContent=pend;
+  $('sheetnote').innerHTML = v==='action'
+    ? `Showing only what is still outstanding — document types and disciplines that are 100% closed are hidden,
+       and every incomplete bar carries a <b>Take action</b> button.`
+    : `The full picture, finished work included. Switch to <b>Action View</b> for the outstanding items only.`;
+  ['A','B'].forEach(i=>['codes','disc'].forEach(w=>{
+    /* in Action View the point is the list, so open it straight away */
+    $('card'+i+'-'+w).classList.toggle('open', v==='action'); }));
+  setTab(S.tab||'all');
+}
+document.addEventListener('click',e=>{ const b=e.target.closest('.sheetbar .sheet');
+  if(b) setSheet(b.dataset.s); });
+window.setSheet=setSheet;
+
 /* Tabs decide which of the four cards are on screen, so nothing needs scrolling
    past to be compared. */
 function setTab(v){
@@ -1525,6 +1674,187 @@ function setTab(v){
              : `Only documents marked <b>FOR REVIEW - ORIGINATOR</b> in the <b>${esc(S.disc||'')}</b> column.`;
 }
 window.setTab=setTab;
+
+/* ── Take action ───────────────────────────────────────────────────────────
+   Clicking a pending bar opens the documents behind it.  Ordered by the two
+   switches the engineer asked for: critical documents first (calculations and
+   general-arrangement drawings), and/or the most-revised documents first —
+   with both on, critical documents lead, most-revised among them at the top.
+   ────────────────────────────────────────────────────────────────────────── */
+const AC = { half:'A', kind:'code', key:'', crit:true, rev:false, circ:false, rows:[] };
+
+/* the critical types: calculations and general arrangement drawings */
+function isCriticalCode(c){
+  const code=String(c.code||'').toUpperCase(), t=String(c.desc||'').toUpperCase();
+  return /^(CAL|PLG|GEA)/.test(code) || /CALCULATION/.test(t) || /GENERAL ARRANGEMENT/.test(t);
+}
+function isCriticalDoc(d){ return isCriticalCode({code:d.code, desc:d.codeDesc}); }
+
+function openAction(half, kind, key){
+  AC.half=half; AC.kind=kind; AC.key=key;
+  AC.crit=true; AC.rev=false; AC.circ=false;
+  ['acCrit','acRev','acCirc'].forEach(id=>$(id).onclick=()=>toggleAc(id));
+  renderAction();
+  go('action');
+}
+function toggleAc(id){
+  if(id==='acCrit') AC.crit=!AC.crit;
+  if(id==='acRev')  AC.rev =!AC.rev;
+  if(id==='acCirc') AC.circ=!AC.circ;
+  renderAction();
+}
+const NOT_CLOSED = d => String(d.status).toUpperCase()!=='REVIEWED WITHOUT COMMENTS';
+
+/* Build the list behind whichever bar was clicked. */
+function actionRows(){
+  const docs=halfDocs(AC.half);
+  if(AC.kind==='code' || AC.kind==='allcodes'){
+    let l=docs.filter(NOT_CLOSED);
+    if(AC.kind==='code') l=l.filter(d=>(d.code||'(no code)')===AC.key);
+    return l.map(d=>({d, disc:null}));
+  }
+  /* discipline: the documents that discipline still owes a review on */
+  const out=[];
+  docs.forEach(d=>d.latest.depts.forEach(x=>{
+    if(!x.review || x.closed) return;
+    if(AC.kind==='disc' && x.name!==AC.key) return;
+    out.push({d, disc:x.name});
+  }));
+  return out;
+}
+function renderAction(){
+  const byDisc = AC.kind==='disc' || AC.kind==='alldisc';
+  let rows=actionRows();
+  if(AC.circ) rows=rows.filter(r=>r.d.circulating);
+  rows.sort((p,q)=>{
+    const a=p.d, b=q.d;
+    if(AC.crit){ const ca=isCriticalDoc(a)?0:1, cb=isCriticalDoc(b)?0:1; if(ca!==cb) return ca-cb; }
+    if(AC.rev && b.nRev!==a.nRev) return b.nRev-a.nRev;
+    const da=a.days==null?-1:a.days, db=b.days==null?-1:b.days;
+    if(db!==da) return db-da;
+    return String(a.label).localeCompare(String(b.label));
+  });
+  AC.rows=rows;
+
+  const scopeName = AC.half==='A' ? 'Full purchase order' : 'For review — '+(S.disc||'');
+  const what = AC.kind==='code'     ? 'Document type '+AC.key
+             : AC.kind==='allcodes' ? 'All outstanding document types'
+             : AC.kind==='disc'     ? AC.key+' — reviews still open'
+                                    : 'All disciplines with reviews still open';
+  $('acTitle').textContent=what;
+  $('acScope').innerHTML=`<span class="v">${esc(S.po)}</span><span class="v">${esc(scopeName)}</span>`;
+  $('acCrit').classList.toggle('on',AC.crit);
+  $('acRev').classList.toggle('on',AC.rev);
+  $('acCirc').classList.toggle('on',AC.circ);
+
+  const uniq=new Set(rows.map(r=>r.d.tr)).size;
+  const circN=rows.filter(r=>r.d.circulating).length;
+  const critN=rows.filter(r=>isCriticalDoc(r.d)).length;
+  const over =rows.filter(r=>r.d.circulating && r.d.over>0).length;
+  $('acSum').innerHTML=[
+    ['dang', byDisc?rows.length:uniq, byDisc?'reviews outstanding':'documents outstanding'],
+    ['', uniq, 'distinct documents'],
+    ['warn', circN, 'circulating now'],
+    ['dang', over, 'past the '+DEADLINE_DAYS+'-day deadline'],
+    ['', critN, 'critical (calculations / GA)']
+  ].map(([c,n,l])=>`<div class="m ${c}"><div class="n">${n.toLocaleString()}</div><div class="l">${l}</div></div>`).join('');
+  $('acCount').innerHTML=`<b>${rows.length.toLocaleString()}</b> row${rows.length===1?'':'s'}`;
+
+  const head=['Document','Equipment','Code','Rev','Revisions','Status','Days']
+    .concat(byDisc?['Waiting on']:['Still to close']);
+  $('acHead').innerHTML='<tr>'+head.map((t,i)=>
+    `<th${i===6?' style="text-align:right"':''}>${esc(t)}</th>`).join('')+'</tr>';
+  $('acBody').innerHTML = rows.length? rows.map(r=>{
+    const d=r.d, m=stMeta(d.status);
+    const ageCls=!d.circulating?'info':(d.over>0?'dang':(d.days>=8?'warn':'ok'));
+    const owing=d.latest.depts.filter(x=>x.review&&!x.closed).map(x=>x.name);
+    return `<tr>
+      <td><div class="docno">${esc(d.label)}${isCriticalDoc(d)?'<span class="crit-tag">CRIT</span>':''}</div>
+        <div class="doctitle" title="${esc(d.title||'')}">${esc(d.title||'—')}</div></td>
+      <td><div class="s1">${esc(d.xref||'—')}</div><div class="s2" title="${esc(d.equip||'')}">${esc(d.equip||'')}</div></td>
+      <td><div class="s1 mono">${esc(d.code||'—')}</div><div class="s2" title="${esc(d.codeDesc||'')}">${esc(d.codeDesc||'')}</div></td>
+      <td><div class="revbig">${esc(d.rev||'—')}</div></td>
+      <td><div class="s1 num">${d.nRev}</div></td>
+      <td><span class="tag ${m.cls}" title="${esc(d.status)}">${esc(stShort(d.status))}</span></td>
+      <td style="text-align:right">${d.days!=null?`<span class="tag ${ageCls} num">${d.days}d</span>`:'<span class="s2">—</span>'}
+        <div class="s2 num">${d.circulating&&d.over>0?'+'+d.over+' late':''}</div></td>
+      <td><div class="s2">${esc(r.disc || (owing.length?owing.join(', '):'—'))}</div></td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="8" class="empty">Nothing outstanding here${AC.circ?' that is circulating':''}.</td></tr>`;
+  $('acMailNote').style.display='none';
+}
+
+/* ── the list as a spreadsheet, and as an Outlook draft ─────────────────── */
+function actionTitle(){
+  return (AC.kind==='code' ? 'Document type '+AC.key
+        : AC.kind==='allcodes' ? 'All outstanding document types'
+        : AC.kind==='disc' ? AC.key+' — reviews still open'
+        : 'All disciplines with reviews still open');
+}
+function actionAoa(){
+  const byDisc = AC.kind==='disc' || AC.kind==='alldisc';
+  const head=['DOCUMENT NUMBER','DOCUMENT TITLE','EQUIPMENT','EQUIPMENT NAME','CODE','CODE DESCRIPTION',
+    'CRITICAL','REV','REVISIONS','DOCUMENT STATUS','CIRCULATED','DAYS','OVERDUE BY',
+    byDisc?'WAITING ON':'STILL TO CLOSE'];
+  const aoa=[['ACTION LIST — '+actionTitle()],
+    [S.po+'  ·  '+S.dep+(S.disc?'  ·  reviewing as '+S.disc:'')],
+    [(AC.half==='A'?'Full purchase order':'For review — '+(S.disc||''))+
+     '  ·  as of '+S.meta.asOf+'  ·  '+AC.rows.length+' rows'+
+     (AC.crit?'  ·  critical first':'')+(AC.rev?'  ·  most revisions first':'')+
+     (AC.circ?'  ·  circulating only':'')],[],head];
+  AC.rows.forEach(r=>{ const d=r.d;
+    const owing=d.latest.depts.filter(x=>x.review&&!x.closed).map(x=>x.name).join('; ');
+    aoa.push([d.label,d.title||'',d.xref||'',d.equip||'',d.code||'',d.codeDesc||'',
+      isCriticalDoc(d)?'Y':'N',d.rev||'',d.nRev,d.status,fmt(d.circDate),
+      d.days==null?'':d.days, (d.circulating&&d.over>0)?d.over:'', r.disc||owing]);
+  });
+  return {aoa, head};
+}
+function exportActionXlsx(){
+  if(typeof XLSX==='undefined') return alert('Spreadsheet engine not loaded.');
+  if(!AC.rows.length) return alert('There is nothing in this list to export.');
+  const {aoa,head}=actionAoa();
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  styleReport(ws,aoa,head,4,[38,44,15,26,12,34,9,7,10,28,13,7,10,38]);
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Action list');
+  const name='Action_'+String(S.po)+'_'+actionTitle().replace(/[^\w]+/g,'_').slice(0,40)+'.xlsx';
+  XLSX.writeFile(wb,name,{cellStyles:true});
+  return name;
+}
+function emailAction(){
+  if(!AC.rows.length) return alert('There is nothing in this list to send.');
+  const file=exportActionXlsx();            // downloaded so it can be attached
+  const byDisc = AC.kind==='disc' || AC.kind==='alldisc';
+  const uniq=new Set(AC.rows.map(r=>r.d.tr)).size;
+  const circN=AC.rows.filter(r=>r.d.circulating).length;
+  const subj=`[${S.po}] ${actionTitle()} — ${AC.rows.length} outstanding`;
+  const LIM=35;
+  let body=`Purchase order : ${S.po} — ${S.poDesc||''}\n`+
+    `Originator     : ${S.dep}\n`+
+    `Scope          : ${AC.half==='A'?'Full purchase order':'For review — '+(S.disc||'')}\n`+
+    `As of          : ${S.meta.asOf}\n\n`+
+    `${AC.rows.length} ${byDisc?'reviews':'documents'} outstanding across ${uniq} documents, `+
+    `${circN} circulating now.\n\n`+
+    (byDisc?'Documents awaiting your review:':'Documents still to close:')+'\n';
+  AC.rows.slice(0,LIM).forEach((r,i)=>{ const d=r.d;
+    body+=`${String(i+1).padStart(3)}. ${d.label}  [${d.code}]  rev ${d.rev||'—'}`+
+      `  ${d.status}${d.days!=null?'  '+d.days+'d':''}`+
+      `${isCriticalDoc(d)?'  (CRITICAL)':''}${r.disc?'  — '+r.disc:''}\n`;
+  });
+  if(AC.rows.length>LIM) body+=`   … and ${AC.rows.length-LIM} more — see the attached spreadsheet.\n`;
+  body+=`\nThe full list has been downloaded as "${file}" — please attach it to this mail before sending.\n`;
+  const href='mailto:?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
+  const note=$('acMailNote');
+  note.style.display='';
+  note.innerHTML=`Your mail client is opening with the summary already written. The full list was downloaded as
+    <b>${esc(file)}</b> — a web page cannot attach a file to a draft for you, so please attach it before sending.
+    <span class="lnk" style="cursor:pointer;text-decoration:underline;font-weight:800"
+      onclick="navigator.clipboard&&navigator.clipboard.writeText(document.getElementById('acMailBody').value)">Copy the text instead</span>
+    <textarea id="acMailBody" style="position:absolute;left:-9999px">${esc(body)}</textarea>`;
+  window.location.href=href;
+}
+
+window.openAction=openAction; window.exportActionXlsx=exportActionXlsx; window.emailAction=emailAction;
 
 /* ── reports behind each chart ─────────────────────────────────────────── */
 function halfName(id){ return id==='A' ? 'Full purchase order' : 'For review — '+(S.disc||''); }
@@ -2437,7 +2767,7 @@ function exportVdrXlsx(){
 
 /* ── nav ───────────────────────────────────────────────────────────────── */
 function go(s){
-  ['upload','filter','dash','doc','report','basket','vdr'].forEach(x=>$('sc-'+x).classList.toggle('on',x===s));
+  ['upload','filter','dash','action','doc','report','basket','vdr'].forEach(x=>$('sc-'+x).classList.toggle('on',x===s));
   window.scrollTo(0,0);
   if(s==='filter') $('crumbs').innerHTML='';
 }
