@@ -440,6 +440,8 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .cb-note b{color:var(--ink)}
 .cb-note .lnk{color:var(--blue);cursor:pointer;font-weight:800;text-decoration:underline}
 .cb-note.warn2{color:#9A6414;background:var(--warn-bg);border:1px solid #F0DCB6;border-radius:8px;padding:5px 9px}
+.cb-note.info2{color:#1A4FBF;background:#EEF4FE;border:1px solid #CFE0FA;border-radius:8px;padding:6px 10px}
+.cb-note.info2 b{color:#123A8F}
 .you{font-size:8px;font-weight:800;background:var(--navy);color:#fff;border-radius:20px;padding:1px 5px;margin-left:4px}
 
 /* flat donut */
@@ -482,7 +484,7 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
    size give way; open a single tab to get them back. */
 .statgrid:not(.single) .sbar-lab{display:none}
 .statgrid:not(.single) .cc-sub{display:none}
-.statgrid:not(.single) .cb-note:not(.warn2){display:none}
+.statgrid:not(.single) .cb-note:not(.warn2):not(.info2){display:none}
 .statgrid:not(.single) .dw svg{max-width:150px}
 .statgrid:not(.single) .donut-ctr .v{font-size:20px}
 .statgrid:not(.single) .pie-legend{max-height:46px;overflow:auto;gap:3px 10px;font-size:10px}
@@ -634,6 +636,7 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
           <button class="chip" onclick="event.stopPropagation();exportCodeReport('B')">⤓ Report</button></div>
       </div>
       <div class="cc-sub" id="subB"></div>
+      <div class="cb-note info2" id="rnB" style="display:none"></div>
       <div class="mini" id="miniB"></div>
       <div class="cb-note" id="exB"></div>
       <div class="chartbox" id="boxB" onclick="toggleBlock('B','codes')">
@@ -1152,6 +1155,12 @@ function buildDash(){
     d.myRoleRaw = S.discIdx!=null ? (a0[S.discIdx]==null?'':String(a0[S.discIdx]).trim()) : '';
     d.myRole    = myRoleKey(d.myRoleRaw);
     d.myClosed  = S.discCidx!=null ? xdate(a0[S.discCidx]) : null;
+    /* A document can be routed differently from one revision to the next.  We
+       always read the latest, so remember when an earlier revision carried the
+       originator mark — that is what makes a raw Excel filter over every row
+       count more documents than this screen does. */
+    d.everReviewOrg = S.discIdx!=null &&
+      d.revs.some(r=>myRoleKey(r.row[S.discIdx])==='review-org');
     /* actionable = my column asks me to review it and I have not closed it */
     d.myAction  = MYROLE[d.myRole].act && !d.myClosed;
     d.myRoleLabel = MYROLE[d.myRole].t;
@@ -1326,6 +1335,19 @@ function renderDash(){
   $('subA').textContent='Everything raised by '+S.dep+' under this purchase order.';
   $('subB').innerHTML='Documents whose <b>'+esc(S.disc||'')+'</b> column reads '+
     '<b>FOR REVIEW - ORIGINATOR</b> — the ones this discipline owns and must review.';
+
+  /* Routing can change between revisions, so say plainly when reading the
+     latest revision gives a different count from filtering every row. */
+  const moved=S.docs.filter(d=>d.everReviewOrg && d.myRole!=='review-org').length;
+  const rn=$('rnB');
+  if(moved){
+    const onLatest=S.docs.filter(d=>d.myRole==='review-org').length;
+    rn.style.display='';
+    rn.innerHTML=`<b>${moved}</b> document${moved===1?' was':'s were'} <b>FOR REVIEW - ORIGINATOR</b>
+      on an earlier revision but not on the latest, so ${moved===1?'it is':'they are'} not counted here.
+      Filtering every row in Excel would show <b>${(onLatest+moved).toLocaleString()}</b> instead of
+      <b>${onLatest.toLocaleString()}</b>.`;
+  } else rn.style.display='none';
 
   /* one "document types" picker per half — everything on, unticking hides a type */
   ['A','B'].forEach(id=>{
