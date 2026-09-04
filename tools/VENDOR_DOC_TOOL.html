@@ -538,12 +538,14 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .you{font-size:8px;font-weight:800;background:var(--navy);color:#fff;border-radius:20px;padding:1px 5px;margin-left:4px}
 
 /* flat donut */
-.chartbox{position:relative;cursor:pointer;border-radius:10px;padding:4px 0 0;transition:background .15s}
+.chartbox{position:relative;cursor:pointer;border-radius:10px;padding:4px 0 2px;
+  transition:background .15s;display:flex;flex-direction:column}
 .chartbox:hover{background:var(--sf2)}
-.chartbox .cue{position:absolute;right:6px;top:4px;font-size:9.5px;font-weight:800;color:var(--blue);
-  opacity:.85;pointer-events:none}
+.chartbox{text-align:center}
+.chartbox .cue{display:block;position:static;order:2;margin:7px auto 0;font-size:9.5px;font-weight:800;
+  color:var(--blue);opacity:.9;pointer-events:none;transition:opacity .2s}
 .ccard.open .chartbox .cue{opacity:0}
-.dw{position:relative;width:100%;display:flex;justify-content:center}
+.dw{position:relative;width:100%;display:flex;justify-content:center;order:1}
 .dw svg{display:block;width:100%;max-width:174px;height:auto;overflow:visible}
 .statgrid.single .dw svg{max-width:224px}
 .dw .sl{cursor:pointer;transition:opacity .15s}
@@ -624,22 +626,15 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .statgrid .ccard:nth-child(4){animation-delay:.18s}
 @keyframes screenIn{from{opacity:0;transform:translateY(8px)}}
 .screen.on{animation:screenIn .32s var(--ease)}
-@keyframes rowIn{from{opacity:0;transform:translateX(-8px)}}
-.ccard.open .trow{animation:rowIn .34s var(--ease) backwards}
-@keyframes heroBar{from{transform:scaleX(0)}}
-.ac-hero .sbar{transform-origin:left;animation:heroBar .6s var(--spring) backwards}
-.ac-sum .m{animation:cardIn .38s var(--ease) backwards}
-.ac-sum .m:nth-child(2){animation-delay:.05s}.ac-sum .m:nth-child(3){animation-delay:.1s}
-.ac-sum .m:nth-child(4){animation-delay:.15s}.ac-sum .m:nth-child(5){animation-delay:.2s}
+/* Nothing re-animates on a filter change, and the hero bar never animates
+   itself: the bar flying across from the list is the entrance, so it has to be
+   measurable at its true size the moment it is rendered. */
 .actbtn{transition:all .15s var(--ease)}
 .actbtn:active{transform:scale(.95)}
 @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
 
 /* the bar that flies from the list to the action page */
-.flybar{position:fixed;z-index:400;border-radius:6px;overflow:hidden;pointer-events:none;
-  box-shadow:0 10px 30px rgba(11,37,69,.28);
-  transition:left .55s cubic-bezier(.4,0,.2,1),top .55s cubic-bezier(.4,0,.2,1),
-             width .55s cubic-bezier(.4,0,.2,1),height .55s cubic-bezier(.4,0,.2,1)}
+/* the hero bar carries the move itself, so no floating clone is needed */
 
 /* the progress bar for whatever is being actioned, at the top of that page */
 .ac-hero{background:var(--sf);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh1);
@@ -742,6 +737,7 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
     <div class="pb-t"><span class="pb-ic">▦</span><span id="pbTitle">Status</span></div>
     <div class="pb-sp"></div>
     <div class="pb-scope" id="pbScope"></div>
+    <button class="btn btn-p btn-s" onclick="openVdr()">📊 VDR Status Report</button>
     <button class="btn btn-g btn-s" onclick="go('filter')">Change scope</button>
   </div>
 
@@ -785,7 +781,6 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
       </div>
       <div class="cc-top">
         <div class="cc-sub" id="subB"></div>
-        <div class="cb-note info2" id="rnB" style="display:none"></div>
         <div class="cb-note" id="exB"></div>
       </div>
       <div class="cc-body">
@@ -796,6 +791,7 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
         <div class="mini" id="miniB"></div>
       </div>
       <div class="pblock" id="ovB"></div>
+      <div class="cb-note info2" id="rnB" style="display:none;margin-top:10px"></div>
       <div class="bytype" id="btB"></div>
     </article>
     <article class="ccard" data-h="A" data-c="disc" id="cardA-disc">
@@ -1787,9 +1783,8 @@ function setSheet(v){
   const pm=$('pbMode');
   if(pm){ pm.textContent = v==='action'?'Action view':'Overview';
           pm.className = 'mode-chip'+(v==='action'?'':' ovw'); }
-  ['A','B'].forEach(i=>['codes','disc'].forEach(w=>{
-    /* in Action View the point is the list, so open it straight away */
-    $('card'+i+'-'+w).classList.toggle('open', v==='action'); }));
+  /* the lists stay closed until their chart is clicked, in either sheet */
+  ['A','B'].forEach(i=>['codes','disc'].forEach(w=>$('card'+i+'-'+w).classList.remove('open')));
   setTab(S.tab||'all');
 }
 document.addEventListener('click',e=>{ const b=e.target.closest('#sheettabs .sh');
@@ -1843,22 +1838,24 @@ function openAction(half, kind, key, ev){
 function flyBar(src, run){
   if(!src || window.matchMedia('(prefers-reduced-motion:reduce)').matches){ run(); return; }
   const r=src.getBoundingClientRect();
-  const clone=src.cloneNode(true);
-  clone.className='sbar flybar';
-  clone.style.left=r.left+'px'; clone.style.top=r.top+'px';
-  clone.style.width=r.width+'px'; clone.style.height=r.height+'px';
-  document.body.appendChild(clone);
-  run();
+  run();                                   // render the action page underneath
+  const t=document.querySelector('#acHero .sbar');
+  if(!t) return;
+  const tr=t.getBoundingClientRect();
+  /* Grow the real bar from where it was to where it now is — one continuous
+     move, no shrink to a point and no pop at the end. */
+  const dx=r.left-tr.left, dy=r.top-tr.top;
+  const sx=r.width/(tr.width||1), sy=r.height/(tr.height||1);
+  t.style.transformOrigin='top left';
+  t.style.transition='none';
+  t.style.transform=`translate(${dx}px,${dy}px) scale(${sx},${sy})`;
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    const t=document.querySelector('#acHero .sbar');
-    if(!t){ clone.remove(); return; }
-    const tr=t.getBoundingClientRect();
-    t.style.visibility='hidden';
-    clone.style.left=tr.left+'px'; clone.style.top=tr.top+'px';
-    clone.style.width=tr.width+'px'; clone.style.height=tr.height+'px';
-    setTimeout(()=>{ t.style.visibility=''; clone.remove(); }, 580);
+    t.style.transition='transform .5s cubic-bezier(.32,.72,.35,1)';
+    t.style.transform='none';
+    setTimeout(()=>{ t.style.transition=''; t.style.transformOrigin=''; }, 540);
   }));
 }
+
 function toggleAc(id){
   if(id==='acCrit') AC.crit=!AC.crit;
   if(id==='acRev')  AC.rev =!AC.rev;
@@ -2814,14 +2811,16 @@ const DOSSIER_PREFIX = ['DOS','VDB','CER','QAC','MDR','PLN','PRC'];
 const V = { cls:{}, strict:true };
 
 function openVdr(){
-  const rows=S.view||S.docs;
+  const rows=S.docs;
   if(!rows.length) return alert('The filtered list is empty — there is nothing to report on.');
   const codes=[...new Set(rows.map(d=>d.code||'(no code)'))].sort();
   codes.forEach(c=>{ if(!V.cls[c]) V.cls[c]=defaultClass(c,rows); });
   Object.keys(V.cls).forEach(c=>{ if(!codes.includes(c)) delete V.cls[c]; });
 
   const d0=rows[0];
-  if(!$('v-proj').value)   $('v-proj').value   = S.meta.title ? S.meta.project+' — '+S.meta.title : String(S.meta.project||'');
+  /* the project's trade name is not in the consolidated export, so seed the
+     field with its number and let the reader type the name they use */
+  if(!$('v-proj').value)   $('v-proj').value   = String(S.meta.project||'');
   if(!$('v-month').value)  $('v-month').value  = new Date().toLocaleString('en',{month:'long',year:'numeric'});
   if(!$('v-week').value)   $('v-week').value   = 'Week '+isoWeek(new Date());
   if(!$('v-vendor').value) $('v-vendor').value = vendorName(rows);
@@ -2849,7 +2848,7 @@ function defaultClass(code,rows){
   return mine.length && mine.every(d=>d.critical) ? 'crit' : 'other';
 }
 function vdrPreset(kind){
-  const rows=S.view||S.docs;
+  const rows=S.docs;
   Object.keys(V.cls).forEach(c=>{
     if(kind==='critflag') V.cls[c]=defaultClass(c,rows);
     else { /* GA drawings + calculations only */
@@ -2859,7 +2858,7 @@ function vdrPreset(kind){
   renderVdr();
 }
 function vdrCounts(){
-  const rows=S.view||S.docs;
+  const rows=S.docs;
   const pick=k=>rows.filter(d=>V.cls[d.code||'(no code)']===k);
   const block=list=>{
     const o={rows:VDR_ROWS.map(([label,st])=>
@@ -2876,7 +2875,7 @@ function vdrCounts(){
            dropped: V.strict ? c.unlisted+o.unlisted : 0, all:rows.length };
 }
 function renderVdr(){
-  const rows=S.view||S.docs;
+  const rows=S.docs;
   $('vdr-scope').textContent = rows.length.toLocaleString()+' document'+(rows.length===1?'':'s')+
     (rows.length!==S.docs.length? ' after filtering (of '+S.docs.length.toLocaleString()+')' : ' in this scope');
 
@@ -2934,11 +2933,11 @@ function exportVdrXlsx(){
   const A=(r,c)=>XLSX.utils.encode_cell({r,c});
   const aoa=[];
   const push=(a,b,cc,d)=>aoa.push([a===undefined?'':a,b===undefined?'':b,cc===undefined?'':cc,d===undefined?'':d]);
-  push($('v-proj').value);                                   // 1
-  push('Month','',$('v-month').value);                       // 2
-  push('Week','',$('v-week').value);                         // 3
-  push();                                                    // 4
-  push('VENDOR','PO NUMBER','VENDOR DOCUMENT STATUS');       // 5
+  push($('v-proj').value);                                   // 1  project name
+  push('Month','',$('v-month').value);                       // 2  month (a date)
+  push('Week','',$('v-week').value);                         // 3  week (a number)
+  push();                                                    // 4  spacer
+  push('VENDOR','PO NUMBER','VENDOR DOCUMENT STATUS');       // 5  headings
   const body=[];
   body.push(['Total No.Critical Documents',C.crit.total,'tot']);
   C.crit.rows.forEach(([l,v])=>body.push([l,v,'']));
@@ -2947,20 +2946,27 @@ function exportVdrXlsx(){
   body.push(['Total Other Documents (Excluding quality docs / Dossiers)',C.other.total,'tot']);
   C.other.rows.forEach(([l,v])=>body.push([l,v,'']));
   body.push(['Approval Pending',C.other.pending,'pend']);
-  body.forEach((b,i)=>push(i===0?$('v-vendor').value:'', i===0?($('v-po').value+'\n'+$('v-podesc').value):'',
+  body.forEach((b,i)=>push(i===0?$('v-vendor').value:'',
+                           i===0?($('v-po').value+'\n'+$('v-podesc').value):'',
                            b[0], b[2]==='gap'?'':b[1]));
-  push();
 
   const ws=XLSX.utils.aoa_to_sheet(aoa);
-  const last=aoa.length-1, firstBody=5, lastBody=5+body.length-1, gap=5+body.findIndex(b=>b[2]==='gap');
+  const last=aoa.length-1, firstBody=5, lastBody=aoa.length-1, gap=5+body.findIndex(b=>b[2]==='gap');
   ws['!cols']=[{wch:15},{wch:36},{wch:58},{wch:10}];
   ws['!rows']=aoa.map((r,i)=> i===0?{hpt:24} : (i===firstBody?{hpt:30}:{hpt:16}));
   ws['!merges']=[
     {s:{r:0,c:0},e:{r:0,c:3}}, {s:{r:1,c:0},e:{r:1,c:1}}, {s:{r:1,c:2},e:{r:1,c:3}},
     {s:{r:2,c:0},e:{r:2,c:1}}, {s:{r:2,c:2},e:{r:2,c:3}}, {s:{r:3,c:0},e:{r:3,c:3}},
     {s:{r:firstBody,c:0},e:{r:lastBody,c:0}}, {s:{r:firstBody,c:1},e:{r:lastBody,c:1}},
-    {s:{r:gap,c:2},e:{r:gap,c:3}}, {s:{r:last,c:0},e:{r:last,c:3}}
+    {s:{r:gap,c:2},e:{r:gap,c:3}}
   ];
+  /* Month goes in as a real date and Week as a number, so the sheet sorts and
+     formats the way the original does rather than holding text. */
+  const md=parseMonth($('v-month').value);
+  if(md){ const k=A(1,2); ws[k]={t:'n', v:Math.round((md-new Date(Date.UTC(1899,11,30)))/86400000), z:'mmmm yyyy'}; }
+  const wk=parseInt(String($('v-week').value).replace(/\D+/g,''),10);
+  if(!isNaN(wk)) ws[A(2,2)]={t:'n', v:wk};
+
   const B={style:'thin',color:{rgb:'000000'}};
   const bord={top:B,bottom:B,left:B,right:B};
   const put=(r,c,st)=>{ const k=A(r,c); if(!ws[k]) ws[k]={t:'s',v:''}; ws[k].s=st; };
@@ -2981,11 +2987,20 @@ function exportVdrXlsx(){
     }
     if(i>0){ for(let c=0;c<2;c++) put(r,c,{border:bord}); }
   });
-  for(let c=0;c<4;c++) put(last,c,{border:bord});
 
   const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,($('v-week').value||'Status').slice(0,28).replace(/[\\\/\?\*\[\]:]/g,' '));
-  XLSX.writeFile(wb,'VDR_Status_'+String(S.po).replace(/[^\w.-]+/g,'_')+'.xlsx',{cellStyles:true});
+  const sheet=(wk?('Week '+wk):'Status');
+  XLSX.utils.book_append_sheet(wb,ws,sheet.slice(0,28).replace(/[\\\/\?\*\[\]:]/g,' '));
+  XLSX.writeFile(wb, `${S.meta.project||'PROJECT'}_${S.po}_VDR_Status.xlsx`, {cellStyles:true});
+}
+/* "September 2026", "Sep 2026", "2026-09" — whatever was typed */
+function parseMonth(t){
+  t=String(t||'').trim(); if(!t) return null;
+  const d=new Date(t+(/\d{4}$/.test(t)?' 1':''));
+  if(!isNaN(d)) return new Date(Date.UTC(d.getFullYear(),d.getMonth(),1));
+  const m=t.match(/(\d{4})[-\/](\d{1,2})/);
+  if(m) return new Date(Date.UTC(+m[1],+m[2]-1,1));
+  return null;
 }
 
 /* ── nav ───────────────────────────────────────────────────────────────── */
@@ -3001,7 +3016,7 @@ function resetAll(){
   $('file').value='';$('btn-reset').style.display='none';$('navinfo').style.display='none';
   $('crumbs').innerHTML='';go('upload');
 }
-window.openDoc=openDoc;window.buildDash=buildDash;window.go=go;window.resetAll=resetAll;
+window.go=go; window.resetAll=resetAll;
 window.clearFilters=clearFilters;window.dropFilter=dropFilter;
 window.openVdr=openVdr;window.renderVdr=renderVdr;window.vdrPreset=vdrPreset;window.exportVdrXlsx=exportVdrXlsx;window.exportTableXlsx=exportTableXlsx;
 window.openReport=openReport;window.backToDoc=backToDoc;window.printReport=printReport;
