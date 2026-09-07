@@ -537,6 +537,8 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .cb-note.warn2{color:#9A6414;background:var(--warn-bg);border:1px solid #F0DCB6;border-radius:8px;padding:5px 9px}
 .cb-note.info2{color:#1A4FBF;background:#EEF4FE;border:1px solid #CFE0FA;border-radius:8px;padding:6px 10px}
 .cb-note.info2 b{color:#123A8F}
+.cb-note.void2{color:#5B6B7C;background:#F2F4F7;border:1px solid #DDE3EA;border-radius:8px;padding:6px 10px}
+.cb-note.void2 b{color:var(--navy)}
 .you{font-size:8px;font-weight:800;background:var(--navy);color:#fff;border-radius:20px;padding:1px 5px;margin-left:4px}
 
 /* flat donut */
@@ -590,7 +592,7 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
    size give way; open a single tab to get them back. */
 .statgrid:not(.single) .sbar-lab{display:none}
 .statgrid:not(.single) .cc-sub{display:none}
-.statgrid:not(.single) .cb-note:not(.warn2):not(.info2){display:none}
+.statgrid:not(.single) .cb-note:not(.warn2):not(.info2):not(.void2){display:none}
 .statgrid:not(.single) .dw svg{max-width:150px}
 .statgrid:not(.single) .donut-ctr .v{font-size:20px}
 .statgrid:not(.single) .pie-legend{max-height:46px;overflow:auto;gap:3px 10px;font-size:10px}
@@ -919,6 +921,7 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
         <div class="mini" id="miniA"></div>
       </div>
       <div class="pblock" id="ovA"></div>
+      <div class="cb-note void2" id="vnA" style="display:none;margin-top:10px"></div>
       <div class="bytype" id="btA"></div>
     </article>
     <article class="ccard" data-h="B" data-c="codes" id="cardB-codes">
@@ -941,6 +944,7 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
       </div>
       <div class="pblock" id="ovB"></div>
       <div class="cb-note info2" id="rnB" style="display:none;margin-top:10px"></div>
+      <div class="cb-note void2" id="vnB" style="display:none;margin-top:10px"></div>
       <div class="bytype" id="btB"></div>
     </article>
     <article class="ccard" data-h="A" data-c="disc" id="cardA-disc">
@@ -1713,7 +1717,15 @@ const CODE_PALETTE = ['#2563EB','#0EA5A4','#7C3AED','#DB2777','#D9922E','#2E9E6B
 
 let STAT={};
 
-function statsFor(docs){
+/* A void document has been cancelled: nobody owes a review on it, so it is
+   left out of every progress figure and out of the action lists.  It is still
+   reported — set aside, never silently dropped. */
+const isVoid = d => String(d.status).toUpperCase()==='VOID';
+
+function statsFor(allDocs){
+  const voided=allDocs.filter(isVoid), docs=allDocs.filter(d=>!isVoid(d));
+  const voidCodes=[...new Set(voided.map(d=>d.code||'(no code)'))]
+    .filter(c=>!docs.some(d=>(d.code||'(no code)')===c));
   const by={};
   docs.forEach(d=>{ const c=d.code||'(no code)';
     (by[c]=by[c]||{code:c,desc:d.codeDesc||'',total:0,bands:{without:0,minor:0,major:0,circ:0,other:0}});
@@ -1723,7 +1735,10 @@ function statsFor(docs){
                           c.pct=Math.round(c.bands.without/c.total*100); });
   const totals={without:0,minor:0,major:0,circ:0,other:0};
   docs.forEach(d=>totals[statusBand(d.status)]++);
-  return { byCode, totals, total:docs.length,
+  /* how many void documents each surviving code carries, for disclosure */
+  const vByCode={}; voided.forEach(d=>{ const c=d.code||'(no code)'; vByCode[c]=(vByCode[c]||0)+1; });
+  byCode.forEach(c=>c.voidN=vByCode[c.code]||0);
+  return { byCode, totals, total:docs.length, voided, voidN:voided.length, voidCodes,
            progress: docs.length? Math.round(totals.without/docs.length*100) : 0 };
 }
 
@@ -1732,8 +1747,9 @@ function statsFor(docs){
    review this discipline owes; its paired closed-date column says whether it is
    done.  N/A and for-information entries are not a review, so they are ignored.
    One document can appear against several disciplines — that is the point. */
-function discStatsFor(docs){
+function discStatsFor(allDocs){
   const by={};
+  const docs=allDocs.filter(d=>!isVoid(d));
   docs.forEach(d=>d.latest.depts.forEach(x=>{
     if(!x.review) return;
     const e=(by[x.name]=by[x.name]||{name:x.name,total:0,closed:0,pending:0,ownDocs:0});
@@ -1818,12 +1834,27 @@ function renderHalf(id){
   STAT[id]={ st, ds, docs };
 
   const hidden=base.length-docs.length;
-  const allCodes=new Set(base.map(d=>d.code||'(no code)')).size;
+  const allCodes=new Set(base.filter(d=>!isVoid(d)).map(d=>d.code||'(no code)')).size;
   $('ex'+id).innerHTML = hidden
     ? `<span class="lnk" onclick="event.stopPropagation();resetCodes('${id}')">Show all</span>
        — ${st.byCode.length} of ${allCodes} document types shown, ${hidden.toLocaleString()} document${hidden===1?'':'s'} hidden.`
     : `All ${allCodes} document types included — untick any in <b>Document types</b> to take it out of the chart.`;
   $('ex'+id).className = hidden? 'cb-note warn2' : 'cb-note';
+
+  /* void documents are set aside from every figure — say so, and say where */
+  const vn=$('vn'+id);
+  if(st.voidN){
+    vn.style.display='';
+    const list=Object.entries(st.byCode.reduce((m,c)=>{ if(c.voidN) m[c.code]=c.voidN; return m; },{}))
+      .concat(st.voidCodes.map(c=>[c, st.voided.filter(d=>(d.code||'(no code)')===c).length]))
+      .sort((a,b)=>b[1]-a[1]);
+    vn.innerHTML=`<b>${st.voidN}</b> document${st.voidN===1?' is':'s are'} <b>VOID</b> and left out of the
+      progress and the action lists — a cancelled document owes nobody a review.
+      ${list.length? '<br>'+list.map(([c,n])=>esc(c)+' ('+n+')').join(' · ') : ''}
+      ${st.voidCodes.length? '<br><b>'+st.voidCodes.map(esc).join(', ')+
+        '</b> '+(st.voidCodes.length===1?'is':'are')+' entirely void, so '+
+        (st.voidCodes.length===1?'it does':'they do')+' not appear in the chart.' : ''}`;
+  } else vn.style.display='none';
 
   $('mini'+id).innerHTML=[
     ['', st.total, 'documents'],
@@ -1863,7 +1894,8 @@ function renderHalf(id){
         act?' — outstanding only':''}</div>`+
       (codeRows.length? codeRows.map(c=>`<div class="trow${act?' act':''}">
         <div class="tc"><div class="c1">${esc(c.code)}${isCriticalCode(c)?'<span class="crit-tag">CRIT</span>':''}</div>
-          <div class="c2" title="${esc(c.desc)}">${esc(c.desc||'')} · ${c.total} doc${c.total>1?'s':''}</div></div>
+          <div class="c2" title="${esc(c.desc)}">${esc(c.desc||'')} · ${c.total} doc${c.total>1?'s':''}${
+            c.voidN?' · '+c.voidN+' void set aside':''}</div></div>
         ${sbar(c.bands, c.total)}
         <div class="pv ${c.pct?'':'zero'}">${c.pct}%</div>
         ${act?`<button class="actbtn" onclick="event.stopPropagation();openAction('${id}','code','${esc(c.code).replace(/'/g,"\\'")}',event)">Take action</button>`:''}
@@ -2082,8 +2114,9 @@ const DAY = 86400000;
    closed date — the same clock, measured per signature. */
 function cyclesFor(docs, mode){
   const out=[];
-  docs.forEach(d=>d.revs.forEach(r=>{
+  docs.filter(d=>!isVoid(d)).forEach(d=>d.revs.forEach(r=>{
     if(!r.circ) return;
+    if(String(r.status).toUpperCase()==='VOID') return;   // cancelled revision
     if(mode==='tr'){
       out.push({d, rev:r.trRev, start:r.circ, end:r.returned||null, code:d.code||'(no code)',
                 codeDesc:d.codeDesc||'', disc:null, status:r.status});
@@ -2458,7 +2491,8 @@ function readPrev(f){
 const CLOSED_ST = d => String(d.status).toUpperCase()==='REVIEWED WITHOUT COMMENTS';
 
 /* Compare the two document sets for one half of the screen. */
-function compareHalf(nowDocs, prevDocs){
+function compareHalf(nowAll, prevAll){
+  const nowDocs=nowAll.filter(d=>!isVoid(d)), prevDocs=prevAll.filter(d=>!isVoid(d));
   const pm={}; prevDocs.forEach(d=>pm[d.tr]=d);
   const nm={}; nowDocs.forEach(d=>nm[d.tr]=d);
   const moved=[], groups={closed:[],advanced:[],regressed:[],added:[],newrev:[],gone:[],still:[]};
@@ -2687,7 +2721,8 @@ function toggleAc(id){
   if(id==='acCirc') AC.circ=!AC.circ;
   renderAction();
 }
-const NOT_CLOSED = d => String(d.status).toUpperCase()!=='REVIEWED WITHOUT COMMENTS';
+/* outstanding = still to be closed, and not cancelled */
+const NOT_CLOSED = d => !isVoid(d) && String(d.status).toUpperCase()!=='REVIEWED WITHOUT COMMENTS';
 
 /* Build the list behind whichever bar was clicked. */
 function actionRows(){
@@ -2702,6 +2737,7 @@ function actionRows(){
   docs.forEach(d=>d.latest.depts.forEach(x=>{
     if(!x.review || x.closed) return;
     if(AC.kind==='disc' && x.name!==AC.key) return;
+    if(isVoid(d)) return;                       // cancelled, nothing to review
     out.push({d, disc:x.name});
   }));
   return out;
