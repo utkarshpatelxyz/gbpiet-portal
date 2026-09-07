@@ -1702,7 +1702,7 @@ const BANDS = [
   {key:'minor',   label:'Reviewed with minor comments',     col:'#8FBF4E'},
   {key:'major',   label:'Reviewed with major comments',     col:'#E07A3C'},
   {key:'circ',    label:'Circulating — action required',    col:'#D9922E'},
-  {key:'other',   label:'Never received / rejected / void', col:'#9CA9B7'}
+  {key:'other',   label:'Never received / rejected',        col:'#9CA9B7'}
 ];
 function statusBand(st){
   const t=String(st||'').toUpperCase();
@@ -1717,14 +1717,17 @@ const CODE_PALETTE = ['#2563EB','#0EA5A4','#7C3AED','#DB2777','#D9922E','#2E9E6B
 
 let STAT={};
 
-/* A void document has been cancelled: nobody owes a review on it, so it is
-   left out of every progress figure and out of the action lists.  It is still
-   reported — set aside, never silently dropped. */
-const isVoid = d => String(d.status).toUpperCase()==='VOID';
+/* Some documents ask nobody for anything.  VOID has been cancelled, FOR
+   INFORMATION is issued to be read rather than reviewed, and AS BUILT records
+   what was finally built.  None of them is a review still owed, so all three
+   are left out of every progress figure and out of the action lists.  They are
+   still reported — set aside and counted, never silently dropped. */
+const NO_ACTION = ['VOID','FOR INFORMATION','AS BUILT'];
+const noAction  = st => NO_ACTION.indexOf(String((st&&st.status!==undefined?st.status:st)||'').toUpperCase())>=0;
 
 function statsFor(allDocs){
-  const voided=allDocs.filter(isVoid), docs=allDocs.filter(d=>!isVoid(d));
-  const voidCodes=[...new Set(voided.map(d=>d.code||'(no code)'))]
+  const aside=allDocs.filter(noAction), docs=allDocs.filter(d=>!noAction(d));
+  const asideCodes=[...new Set(aside.map(d=>d.code||'(no code)'))]
     .filter(c=>!docs.some(d=>(d.code||'(no code)')===c));
   const by={};
   docs.forEach(d=>{ const c=d.code||'(no code)';
@@ -1735,10 +1738,12 @@ function statsFor(allDocs){
                           c.pct=Math.round(c.bands.without/c.total*100); });
   const totals={without:0,minor:0,major:0,circ:0,other:0};
   docs.forEach(d=>totals[statusBand(d.status)]++);
-  /* how many void documents each surviving code carries, for disclosure */
-  const vByCode={}; voided.forEach(d=>{ const c=d.code||'(no code)'; vByCode[c]=(vByCode[c]||0)+1; });
-  byCode.forEach(c=>c.voidN=vByCode[c.code]||0);
-  return { byCode, totals, total:docs.length, voided, voidN:voided.length, voidCodes,
+  /* how many set-aside documents each surviving code carries, for disclosure */
+  const vByCode={}; aside.forEach(d=>{ const c=d.code||'(no code)'; vByCode[c]=(vByCode[c]||0)+1; });
+  byCode.forEach(c=>c.asideN=vByCode[c.code]||0);
+  const byStatus={}; aside.forEach(d=>{ const t=String(d.status||'').toUpperCase();
+    byStatus[t]=(byStatus[t]||0)+1; });
+  return { byCode, totals, total:docs.length, aside, asideN:aside.length, asideCodes, asideStatus:byStatus,
            progress: docs.length? Math.round(totals.without/docs.length*100) : 0 };
 }
 
@@ -1749,7 +1754,7 @@ function statsFor(allDocs){
    One document can appear against several disciplines — that is the point. */
 function discStatsFor(allDocs){
   const by={};
-  const docs=allDocs.filter(d=>!isVoid(d));
+  const docs=allDocs.filter(d=>!noAction(d));
   docs.forEach(d=>d.latest.depts.forEach(x=>{
     if(!x.review) return;
     const e=(by[x.name]=by[x.name]||{name:x.name,total:0,closed:0,pending:0,ownDocs:0});
@@ -1834,26 +1839,28 @@ function renderHalf(id){
   STAT[id]={ st, ds, docs };
 
   const hidden=base.length-docs.length;
-  const allCodes=new Set(base.filter(d=>!isVoid(d)).map(d=>d.code||'(no code)')).size;
+  const allCodes=new Set(base.filter(d=>!noAction(d)).map(d=>d.code||'(no code)')).size;
   $('ex'+id).innerHTML = hidden
     ? `<span class="lnk" onclick="event.stopPropagation();resetCodes('${id}')">Show all</span>
        — ${st.byCode.length} of ${allCodes} document types shown, ${hidden.toLocaleString()} document${hidden===1?'':'s'} hidden.`
     : `All ${allCodes} document types included — untick any in <b>Document types</b> to take it out of the chart.`;
   $('ex'+id).className = hidden? 'cb-note warn2' : 'cb-note';
 
-  /* void documents are set aside from every figure — say so, and say where */
+  /* documents that need no review are set aside — say so, and say where */
   const vn=$('vn'+id);
-  if(st.voidN){
+  if(st.asideN){
     vn.style.display='';
-    const list=Object.entries(st.byCode.reduce((m,c)=>{ if(c.voidN) m[c.code]=c.voidN; return m; },{}))
-      .concat(st.voidCodes.map(c=>[c, st.voided.filter(d=>(d.code||'(no code)')===c).length]))
+    const list=Object.entries(st.byCode.reduce((m,c)=>{ if(c.asideN) m[c.code]=c.asideN; return m; },{}))
+      .concat(st.asideCodes.map(c=>[c, st.aside.filter(d=>(d.code||'(no code)')===c).length]))
       .sort((a,b)=>b[1]-a[1]);
-    vn.innerHTML=`<b>${st.voidN}</b> document${st.voidN===1?' is':'s are'} <b>VOID</b> and left out of the
-      progress and the action lists — a cancelled document owes nobody a review.
+    const mix=Object.entries(st.asideStatus).sort((a,b)=>b[1]-a[1])
+      .map(([t,n])=>n+' <b>'+esc(t)+'</b>').join(', ');
+    vn.innerHTML=`<b>${st.asideN}</b> document${st.asideN===1?'':'s'} need no review — ${mix} — so ${
+        st.asideN===1?'it is':'they are'} left out of the progress and the action lists.
       ${list.length? '<br>'+list.map(([c,n])=>esc(c)+' ('+n+')').join(' · ') : ''}
-      ${st.voidCodes.length? '<br><b>'+st.voidCodes.map(esc).join(', ')+
-        '</b> '+(st.voidCodes.length===1?'is':'are')+' entirely void, so '+
-        (st.voidCodes.length===1?'it does':'they do')+' not appear in the chart.' : ''}`;
+      ${st.asideCodes.length? '<br><b>'+st.asideCodes.map(esc).join(', ')+
+        '</b> '+(st.asideCodes.length===1?'has':'have')+' nothing left to review, so '+
+        (st.asideCodes.length===1?'it does':'they do')+' not appear in the chart.' : ''}`;
   } else vn.style.display='none';
 
   $('mini'+id).innerHTML=[
@@ -1895,7 +1902,7 @@ function renderHalf(id){
       (codeRows.length? codeRows.map(c=>`<div class="trow${act?' act':''}">
         <div class="tc"><div class="c1">${esc(c.code)}${isCriticalCode(c)?'<span class="crit-tag">CRIT</span>':''}</div>
           <div class="c2" title="${esc(c.desc)}">${esc(c.desc||'')} · ${c.total} doc${c.total>1?'s':''}${
-            c.voidN?' · '+c.voidN+' void set aside':''}</div></div>
+            c.asideN?' · '+c.asideN+' set aside':''}</div></div>
         ${sbar(c.bands, c.total)}
         <div class="pv ${c.pct?'':'zero'}">${c.pct}%</div>
         ${act?`<button class="actbtn" onclick="event.stopPropagation();openAction('${id}','code','${esc(c.code).replace(/'/g,"\\'")}',event)">Take action</button>`:''}
@@ -2114,9 +2121,9 @@ const DAY = 86400000;
    closed date — the same clock, measured per signature. */
 function cyclesFor(docs, mode){
   const out=[];
-  docs.filter(d=>!isVoid(d)).forEach(d=>d.revs.forEach(r=>{
+  docs.filter(d=>!noAction(d)).forEach(d=>d.revs.forEach(r=>{
     if(!r.circ) return;
-    if(String(r.status).toUpperCase()==='VOID') return;   // cancelled revision
+    if(noAction(r)) return;      // cancelled, or issued for information only
     if(mode==='tr'){
       out.push({d, rev:r.trRev, start:r.circ, end:r.returned||null, code:d.code||'(no code)',
                 codeDesc:d.codeDesc||'', disc:null, status:r.status});
@@ -2492,7 +2499,7 @@ const CLOSED_ST = d => String(d.status).toUpperCase()==='REVIEWED WITHOUT COMMEN
 
 /* Compare the two document sets for one half of the screen. */
 function compareHalf(nowAll, prevAll){
-  const nowDocs=nowAll.filter(d=>!isVoid(d)), prevDocs=prevAll.filter(d=>!isVoid(d));
+  const nowDocs=nowAll.filter(d=>!noAction(d)), prevDocs=prevAll.filter(d=>!noAction(d));
   const pm={}; prevDocs.forEach(d=>pm[d.tr]=d);
   const nm={}; nowDocs.forEach(d=>nm[d.tr]=d);
   const moved=[], groups={closed:[],advanced:[],regressed:[],added:[],newrev:[],gone:[],still:[]};
@@ -2721,8 +2728,8 @@ function toggleAc(id){
   if(id==='acCirc') AC.circ=!AC.circ;
   renderAction();
 }
-/* outstanding = still to be closed, and not cancelled */
-const NOT_CLOSED = d => !isVoid(d) && String(d.status).toUpperCase()!=='REVIEWED WITHOUT COMMENTS';
+/* outstanding = still to be closed, and somebody's review to close */
+const NOT_CLOSED = d => !noAction(d) && String(d.status).toUpperCase()!=='REVIEWED WITHOUT COMMENTS';
 
 /* Build the list behind whichever bar was clicked. */
 function actionRows(){
@@ -2737,7 +2744,7 @@ function actionRows(){
   docs.forEach(d=>d.latest.depts.forEach(x=>{
     if(!x.review || x.closed) return;
     if(AC.kind==='disc' && x.name!==AC.key) return;
-    if(isVoid(d)) return;                       // cancelled, nothing to review
+    if(noAction(d)) return;                     // nothing to review on it
     out.push({d, disc:x.name});
   }));
   return out;
@@ -2969,17 +2976,20 @@ function exportCodeReport(id){
   if(!st || !st.total) return alert('There is nothing in this chart to report on.');
   const hidden=halfBase(id).length-st.total;
   const head=['CODE','DESCRIPTION','DOCUMENTS','REVIEWED WITHOUT COMMENTS','REVIEWED WITH MINOR COMMENTS',
-    'REVIEWED WITH MAJOR COMMENTS','CIRCULATING','NEVER RECEIVED / REJECTED / VOID','% CLOSED'];
+    'REVIEWED WITH MAJOR COMMENTS','CIRCULATING','NEVER RECEIVED / REJECTED',
+    'NO ACTION (VOID / FOR INFORMATION / AS BUILT)','% CLOSED'];
   const aoa=reportHead(id,'DOCUMENTS BY TYPE',
-    st.total.toLocaleString()+' documents · '+st.byCode.length+' types'+(hidden?' · '+hidden+' documents hidden by the type filter':''));
+    st.total.toLocaleString()+' documents · '+st.byCode.length+' types'+
+    (st.asideN?' · '+st.asideN+' set aside, no review owed':'')+
+    (hidden?' · '+hidden+' documents hidden by the type filter':''));
   aoa.push(head);
   st.byCode.forEach(c=>aoa.push([c.code,c.desc,c.total,c.bands.without,c.bands.minor,c.bands.major,
-    c.bands.circ,c.bands.other,c.pct/100]));
+    c.bands.circ,c.bands.other,c.asideN||0,c.pct/100]));
   aoa.push(['TOTAL','',st.total,st.totals.without,st.totals.minor,st.totals.major,st.totals.circ,
-            st.totals.other,st.progress/100]);
+            st.totals.other,st.asideN,st.progress/100]);
   const ws=XLSX.utils.aoa_to_sheet(aoa);
-  styleReport(ws,aoa,head,4,[14,42,12,14,14,14,12,16,10]);
-  for(let r=5;r<aoa.length;r++){ const k=XLSX.utils.encode_cell({r,c:8});
+  styleReport(ws,aoa,head,4,[14,42,12,14,14,14,12,16,18,10]);
+  for(let r=5;r<aoa.length;r++){ const k=XLSX.utils.encode_cell({r,c:9});
     if(ws[k]){ ws[k].t='n'; ws[k].z='0%'; } }
   const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Documents by type');
   XLSX.writeFile(wb,'Documents_by_type_'+String(S.po)+'_'+(id==='A'?'PO':'FOR_REVIEW')+'.xlsx',{cellStyles:true});
