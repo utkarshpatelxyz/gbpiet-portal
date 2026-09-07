@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>VENDOR DOC TOOL — Document Status Dashboard</title>
+<title>Vendor Document Management — Powered by MERIDIAM</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -646,6 +646,75 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .ac-hero-v small{font-size:11px;font-weight:700;color:var(--muted);margin-left:6px}
 .ac-hero .sbar{height:26px}
 
+/* ── check progress ────────────────────────────────────────────────────── */
+.period{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:linear-gradient(90deg,#17558A,#2E86B8);
+  color:#fff;border-radius:14px;padding:15px 20px;box-shadow:var(--sh2);margin-top:14px}
+.period .leg2{display:flex;align-items:center;gap:9px}
+.period .k2{font-size:9px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;opacity:.72}
+.period .v2{font-size:15px;font-weight:800;letter-spacing:-.2px}
+.period .arrow{font-size:19px;opacity:.7}
+.period .span2{margin-left:auto;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);
+  border-radius:20px;padding:6px 14px;font-size:12px;font-weight:800;white-space:nowrap}
+.pgcols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;align-items:start}
+@media(max-width:1000px){.pgcols{grid-template-columns:1fr}}
+.mv{display:grid;grid-template-columns:1fr 54px;gap:10px;align-items:center;padding:8px 0}
+.mv+.mv{border-top:1px solid var(--line)}
+.mv .t{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:700;color:var(--ink);min-width:0}
+.mv .t .dot{width:10px;height:10px;border-radius:3px;flex:0 0 auto}
+.mv .t small{display:block;font-size:10px;font-weight:600;color:var(--muted);margin-top:2px}
+.mv .n2{text-align:right;font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--navy)}
+.mv .n2.up{color:var(--ok)} .mv .n2.dn{color:var(--dang)}
+.cmp{display:grid;grid-template-columns:112px 1fr 116px;gap:10px;align-items:center;padding:6px 0}
+.cmp+.cmp{border-top:1px solid var(--line)}
+.cmp .c1{font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--navy);overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.cmp .c1.nm{font-family:var(--font);font-size:11px}
+.cmp .track{position:relative;height:16px;border-radius:5px;background:#EDF1F6;border:1px solid var(--line);overflow:hidden}
+.cmp .track .was{position:absolute;left:0;top:0;bottom:0;background:#BFD8C8}
+.cmp .track .now{position:absolute;left:0;top:0;bottom:0;background:var(--ok);transition:width .8s var(--ease)}
+.cmp .d2{text-align:right;font-size:10.5px;font-weight:800;font-variant-numeric:tabular-nums;
+  color:var(--muted);white-space:nowrap}
+.cmp .d2 b{color:var(--ok)} .cmp .d2 .z{color:var(--muted)}
+.delta{font-size:10px;font-weight:800;border-radius:5px;padding:2px 6px;white-space:nowrap}
+.delta.up{background:var(--ok-bg);color:#1B7A4E}
+.delta.dn{background:var(--dang-bg);color:#9C2C24}
+.delta.z{background:var(--info-bg);color:#49586A}
+#pgfile{display:none}
+
+/* ── module splash, matching the one MERIDIAM opens every module with ──── */
+#mrd-module-splash{position:fixed;inset:0;z-index:13000;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(120% 120% at 50% 0%,#1B3550 0%,#10233A 55%,#0A1622 100%);
+  opacity:0;visibility:hidden;pointer-events:none;overflow:hidden;font-family:var(--font)}
+#mrd-module-splash.open{opacity:1;visibility:visible;pointer-events:auto;transition:opacity .34s ease}
+#mrd-module-splash.closing{opacity:0;pointer-events:none;transition:opacity .46s cubic-bezier(.4,0,.2,1)}
+#mrd-module-splash::before{content:'';position:absolute;width:760px;height:760px;border-radius:50%;
+  background:radial-gradient(circle,rgba(69,192,206,.16) 0%,transparent 68%);animation:mmsGlow 3s ease-in-out infinite}
+@keyframes mmsGlow{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.14);opacity:1}}
+#mrd-module-splash .mms-topline{position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,#2F97AA,#45C0CE,transparent)}
+.mms-inner{position:relative;z-index:2;text-align:center;padding:0 30px;max-width:900px}
+.mms-eyebrow{font-size:11px;font-weight:700;letter-spacing:.42em;text-transform:uppercase;color:#5E9DB0;
+  opacity:0;transform:translateY(10px)}
+.mms-name{margin-top:16px;font-size:clamp(28px,5.4vw,62px);font-weight:800;letter-spacing:-.01em;color:#fff;
+  line-height:1.12;opacity:0;transform:translateY(22px);text-shadow:0 0 44px rgba(69,192,206,.4)}
+.mms-rule{height:2px;width:0;margin:26px auto 0;border-radius:2px;
+  background:linear-gradient(90deg,#2F97AA,#45C0CE);box-shadow:0 0 14px rgba(69,192,206,.7)}
+.mms-powered{margin-top:24px;opacity:0;transform:translateY(10px);display:flex;align-items:center;
+  justify-content:center;gap:10px}
+.mms-powered-by{font-size:12px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.42)}
+.mms-brand{font-size:16px;font-weight:800;letter-spacing:.28em;background:linear-gradient(90deg,#45C0CE,#2F97AA);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+#mrd-module-splash.open .mms-eyebrow{animation:mmsFadeUp .55s ease forwards .18s}
+#mrd-module-splash.open .mms-name{animation:mmsFadeUp .7s cubic-bezier(.22,1,.36,1) forwards .32s}
+#mrd-module-splash.open .mms-rule{animation:mmsRule .6s cubic-bezier(.22,1,.36,1) forwards .62s}
+#mrd-module-splash.open .mms-powered{animation:mmsFadeUp .6s ease forwards .82s}
+@keyframes mmsFadeUp{to{opacity:1;transform:translateY(0)}}
+@keyframes mmsRule{to{width:min(360px,60%)}}
+@media (prefers-reduced-motion:reduce){
+  #mrd-module-splash::before{animation:none}
+  #mrd-module-splash.open .mms-eyebrow,#mrd-module-splash.open .mms-name,
+  #mrd-module-splash.open .mms-powered,#mrd-module-splash.open .mms-rule{animation-duration:.01s;animation-delay:0s}}
+
 /* print */
 #printarea{display:none}
 @media print{
@@ -672,8 +741,21 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 </head>
 <body>
 
+<div id="mrd-module-splash" aria-hidden="true">
+  <div class="mms-topline"></div>
+  <div class="mms-inner">
+    <div class="mms-eyebrow">Module</div>
+    <div class="mms-name" id="mms-name">Vendor Document Management</div>
+    <div class="mms-rule"></div>
+    <div class="mms-powered">
+      <span class="mms-powered-by">Powered by</span>
+      <span class="mms-brand">MERIDIAM</span>
+    </div>
+  </div>
+</div>
+
 <div class="nav"><div class="nav-in">
-  <div class="brand">VENDOR <b>DOC TOOL</b><small>Document Status Dashboard</small></div>
+  <div class="brand">VENDOR <b>DOCUMENT MANAGEMENT</b><small>Powered by MERIDIAM</small></div>
   <div class="nav-sep"></div>
   <div class="crumbs" id="crumbs"></div>
   <div class="sp"></div>
@@ -737,6 +819,7 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
     <div class="pb-t"><span class="pb-ic">▦</span><span id="pbTitle">Status</span></div>
     <div class="pb-sp"></div>
     <div class="pb-scope" id="pbScope"></div>
+    <button class="btn btn-g btn-s" onclick="openProgress()">📈 Check Progress</button>
     <button class="btn btn-p btn-s" onclick="openVdr()">📊 VDR Status Report</button>
     <button class="btn btn-g btn-s" onclick="go('filter')">Change scope</button>
   </div>
@@ -835,6 +918,73 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
   </div>
 
   <div class="foot" id="foot1"></div>
+</div></div>
+
+<!-- 3c ── CHECK PROGRESS ─────────────────────────────────────────────────── -->
+<div class="screen" id="sc-progress"><div class="wrap">
+  <div class="pagebar">
+    <div class="pb-t"><span class="pb-ic">📈</span><span>Check progress</span></div>
+    <div class="pb-sp"></div>
+    <div class="pb-scope" id="pgScope"></div>
+    <button class="btn btn-g btn-s" onclick="go('dash')">← Back to status</button>
+  </div>
+
+  <!-- before a file is chosen -->
+  <div id="pg-pick">
+    <div class="card fl-wrap" style="max-width:720px">
+      <div class="fl-head">
+        <h2>Compare against an earlier report</h2>
+        <p>Drop in a Consolidated Status export from an earlier date. The scope you already chose —
+           purchase order, originator department and discipline — is kept, so there is nothing to pick again.</p>
+      </div>
+      <div class="fl-body">
+        <div class="drop" id="pgdrop" onclick="document.getElementById('pgfile').click()">
+          <div class="ic">🗓</div>
+          <div class="t">Drop the earlier Consolidated Status .xlsx here</div>
+          <div class="s">or click to browse</div>
+        </div>
+        <input type="file" id="pgfile" accept=".xlsx,.xlsm,.xls">
+        <div class="loadbox" id="pgload">
+          <div class="lb-t">Reading the earlier report…</div>
+          <div class="lb-s">Comparing it against the file already open.</div>
+          <div class="prog"><i></i></div>
+        </div>
+        <div class="err" id="pgerr"></div>
+        <div class="cb-note" style="margin-top:14px">Current file: <b id="pgNow"></b></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- the comparison -->
+  <div id="pg-out" style="display:none">
+    <div class="period" id="pgPeriod"></div>
+    <div class="tabbar" id="pgTabs" style="border-radius:12px;border:1px solid var(--line);margin-top:14px">
+      <button class="tabb on" data-p="A">Full Purchase Order</button>
+      <button class="tabb" data-p="B" id="pgTabB">For Review &amp; Originator</button>
+    </div>
+    <div class="ac-sum" id="pgKpi"></div>
+    <div class="pgcols">
+      <div class="panel"><h3>Where it moved</h3><div class="bd" id="pgMove"></div></div>
+      <div class="panel"><h3>Progress by document type</h3><div class="bd" id="pgCode"></div></div>
+    </div>
+    <div class="panel" style="margin-top:16px"><h3>Reviews closed by discipline</h3><div class="bd" id="pgDisc"></div></div>
+    <div class="dt-wrap" style="border-radius:14px;border:1px solid var(--line);margin-top:16px">
+      <div class="ac-tools">
+        <span class="lbl">Documents that moved</span>
+        <span class="res" id="pgCount"></span>
+        <div class="fill"></div>
+        <button class="chip" onclick="exportProgressXlsx()">⤓ Download the comparison</button>
+        <button class="chip" onclick="resetProgress()">↺ Compare another file</button>
+      </div>
+      <div class="dt-scroll" style="max-height:52vh">
+        <table class="dt" id="pgTable">
+          <colgroup><col style="width:auto"><col style="width:140px"><col style="width:130px"><col style="width:70px">
+            <col style="width:172px"><col style="width:172px"><col style="width:146px"></colgroup>
+          <thead id="pgHead"></thead><tbody id="pgBody"></tbody></table>
+      </div>
+    </div>
+  </div>
+  <div class="foot"></div>
 </div></div>
 
 <!-- 3b ── TAKE ACTION ───────────────────────────────────────────────────── -->
@@ -996,6 +1146,23 @@ function fmtS(d){   // compact form for the secondary line in the table
 }
 const daysBetween=(a,b)=> (!a||!b)?null:Math.round((b-a)/86400000);
 
+/* ── Module splash ─────────────────────────────────────────────────────── */
+(function(){
+  const splash=document.getElementById('mrd-module-splash');
+  if(!splash) return;
+  let t1=null,t2=null;
+  window.showModuleSplash=function(name){
+    if(name) document.getElementById('mms-name').textContent=name;
+    clearTimeout(t1); clearTimeout(t2);
+    splash.classList.remove('open','closing');
+    void splash.offsetWidth;                 // restart the reveal every time
+    splash.classList.add('open');
+    t1=setTimeout(()=>{ splash.classList.add('closing');
+      t2=setTimeout(()=>splash.classList.remove('open','closing'),480); },1650);
+  };
+  showModuleSplash('Vendor Document Management');
+})();
+
 /* ── Load ──────────────────────────────────────────────────────────────── */
 $('file').addEventListener('change',e=>{ const f=e.target.files[0]; if(f) readFile(f); });
 const drop=$('drop');
@@ -1016,21 +1183,24 @@ function readFile(f){
 }
 function fail(m){ $('loadbox').classList.remove('on'); const e=$('err'); e.textContent=m; e.classList.add('on'); }
 
-function parseBook(bytes){
-  if(typeof XLSX==='undefined') return fail('Spreadsheet engine did not load — check your connection and reload.');
+/* Read a Consolidated Status workbook into a plain context object.  Returns
+   {meta, hdr, headArr, depts, rows} or throws with a readable reason, so the
+   same reader serves the file loaded at startup and any older file compared
+   against it. */
+function readBook(bytes){
+  if(typeof XLSX==='undefined') throw new Error('Spreadsheet engine did not load — check your connection and reload.');
   const wb = XLSX.read(bytes,{type:'array',cellStyles:false,cellNF:false,cellHTML:false});
   const ws = wb.Sheets[wb.SheetNames[0]];
-  if(!ws) return fail('The workbook has no sheets.');
+  if(!ws) throw new Error('The workbook has no sheets.');
   const aoa = XLSX.utils.sheet_to_json(ws,{header:1,blankrows:false,defval:''});
-  if(aoa.length<5) return fail('This file does not look like a Consolidated Status export.');
+  if(aoa.length<5) throw new Error('This file does not look like a Consolidated Status export.');
 
-  /* rows 1-3 = title/project/date ; row 4 = headers */
-  S.meta = { title:String(aoa[0][1]||''), project:String(aoa[1][1]||''), asOf:String(aoa[2][1]||'') };
+  /* rows 1-3 = title / project / date ; row 4 = the column headings */
+  const meta = { title:String(aoa[0][1]||''), project:String(aoa[1][1]||''), asOf:String(aoa[2][1]||'') };
   const head = aoa[3].map(h=>String(h||'').trim());
-  if(!head.some(h=>/PURCHASE ORDER/i.test(h))) return fail('Row 4 does not contain the expected column headings.');
+  if(!head.some(h=>/PURCHASE ORDER/i.test(h))) throw new Error('Row 4 does not contain the expected column headings.');
 
   const H={}; head.forEach((h,i)=>{ if(h && !(h in H)) H[h]=i; });
-  S.hdr=H; S.headArr=head;
 
   /* Discipline pairs: a column X immediately followed by "X Closed Date" */
   const depts=[];
@@ -1038,28 +1208,39 @@ function parseBook(bytes){
     const a=head[i], b=head[i+1];
     if(a && b && b.toLowerCase()===(a+' closed date').toLowerCase()) depts.push({name:a,i:i,ci:i+1});
   }
-  S.depts=depts;
-
-  const col=n=>H[n];
   const need=['PURCHASE ORDER','ORIGINATOR DEPARTMENT','CROSS REFERENCE','TR NUMBER','CODE','DOCUMENT STATUS'];
-  const miss=need.filter(n=>col(n)===undefined);
-  if(miss.length) return fail('Missing expected columns: '+miss.join(', '));
+  const miss=need.filter(n=>H[n]===undefined);
+  if(miss.length) throw new Error('Missing expected columns: '+miss.join(', '));
 
   const rows=[];
+  const poCol=H['PURCHASE ORDER'];
   for(let r=4;r<aoa.length;r++){
     const a=aoa[r]; if(!a || !a.length) continue;
-    const po=String(a[col('PURCHASE ORDER')]||'').trim();
-    if(!po) continue;
+    if(!String(a[poCol]||'').trim()) continue;
     rows.push(a);
   }
-  S.rows=rows;
-  if(!rows.length) return fail('No data rows found under the headings.');
+  if(!rows.length) throw new Error('No data rows found under the headings.');
+  return { meta, hdr:H, headArr:head, depts, rows };
+}
 
+function parseBook(bytes){
+  let ctx;
+  try{ ctx=readBook(bytes); } catch(e){ return fail(e.message); }
+  S.meta=ctx.meta; S.hdr=ctx.hdr; S.headArr=ctx.headArr; S.depts=ctx.depts; S.rows=ctx.rows;
+  S.asOfDate=parseAsOf(ctx.meta.asOf);
   $('loadbox').classList.remove('on');
   buildFilters();
   loadBasket();
   $('btn-reset').style.display='';
   go('filter');
+}
+/* "9/3/2026 12:24 AM" and friends */
+function parseAsOf(t){
+  t=String(t||'').trim(); if(!t) return null;
+  const d=new Date(t);
+  if(!isNaN(d)) return d;
+  const m=t.match(/(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
+  return m? new Date(+m[3], +m[1]-1, +m[2]) : null;
 }
 
 /* ── A dropdown you can type into ───────────────────────────────────────────
@@ -1262,39 +1443,54 @@ function rowDepts(a){
   return out;
 }
 
-function buildDash(){
-  const po=S.po, dep=S.dep;
-  const sub=S.rows.filter(a=>sv(a,'PURCHASE ORDER')===po && (sv(a,'ORIGINATOR DEPARTMENT')||'(blank)')===dep);
-  S.sub=sub;
-  S.poDesc = sub.length? sv(sub[0],'PURCHASE ORDER DESCRIPTION') : '';
+/* Build the document model for one scope out of any workbook context.
+   Everything downstream — the charts, the action lists, the progress check —
+   reads this shape, so the current file and an older one are directly
+   comparable. */
+function buildDocs(ctx, po, dep, discName){
+  const H=ctx.hdr;
+  const cel=(a,n)=>{ const i=H[n]; return i===undefined?'':a[i]; };
+  const val=(a,n)=>{ const v=cel(a,n); return v==null?'':String(v).trim(); };
+  const disc = discName ? ctx.depts.find(d=>d.name===discName) : null;
 
-  /* group revisions by TR NUMBER (fall back to client number) */
+  const rowDeptsOf=a=>{
+    const out=[];
+    ctx.depts.forEach(d=>{
+      const raw=a[d.i]==null?'':String(a[d.i]).trim();
+      const role=classifyRole(raw);
+      if(!role) return;
+      const cd=xdate(a[d.ci]);
+      out.push({name:d.name, raw, review:role.review, originator:role.originator, closed:cd,
+                pending:!cd, blocking: role.review && !cd});
+    });
+    return out;
+  };
+
+  const sub=ctx.rows.filter(a=>val(a,'PURCHASE ORDER')===po &&
+                               (val(a,'ORIGINATOR DEPARTMENT')||'(blank)')===dep);
   const byDoc={}; let anon=0;
   sub.forEach(a=>{
-    /* Rows with no TR number were planned in the vendor document list but
-       never received.  They still identify a document — the supplier's own
-       number for that code and equipment — so key on that rather than giving
-       every row its own group, which used to count one document twice. */
-    const tr = sv(a,'TR NUMBER') || sv(a,'CLIENT NUMBER') ||
-      (sv(a,'SUPPLIER NUMBER')
-        ? '#UNRECEIVED#'+sv(a,'SUPPLIER NUMBER')+'~'+sv(a,'CODE')+'~'+sv(a,'CROSS REFERENCE')
+    const tr = val(a,'TR NUMBER') || val(a,'CLIENT NUMBER') ||
+      (val(a,'SUPPLIER NUMBER')
+        ? '#UNRECEIVED#'+val(a,'SUPPLIER NUMBER')+'~'+val(a,'CODE')+'~'+val(a,'CROSS REFERENCE')
         : '#UNRECEIVED#'+(++anon));
     (byDoc[tr]=byDoc[tr]||[]).push(a);
   });
+
   const docs=Object.keys(byDoc).map(tr=>{
     const revs=byDoc[tr].map(a=>({
       row:a,
-      trRev:sv(a,'TR REV.'), supRev:sv(a,'SUPPLIER REV.'), cliRev:sv(a,'CLIENT REV'),
-      status:sv(a,'DOCUMENT STATUS'), ret:sv(a,'RETURN STATUS FOR THE SUPPLIER'),
-      overall:sv(a,'STATUS'),
-      received:xdate(cell(a,'RECEIVED DATE')), circ:xdate(cell(a,'CIRCULATE DATE')),
-      official:xdate(cell(a,'OFFICIAL DATE')), delay:sv(a,'DELAY SINCE OFFICIAL DATE'),
-      reviewCode:sv(a,'REVIEW CODE'), returned:xdate(cell(a,'RETURNED DATE')),
-      comment:sv(a,'STATUS COMMENT'),
-      days:parseInt(sv(a,'TOTAL DAYS IN CIRCULATION'))||null,
-      depts:rowDepts(a)
+      trRev:val(a,'TR REV.'), supRev:val(a,'SUPPLIER REV.'), cliRev:val(a,'CLIENT REV'),
+      status:val(a,'DOCUMENT STATUS'), ret:val(a,'RETURN STATUS FOR THE SUPPLIER'),
+      overall:val(a,'STATUS'),
+      received:xdate(cel(a,'RECEIVED DATE')), circ:xdate(cel(a,'CIRCULATE DATE')),
+      official:xdate(cel(a,'OFFICIAL DATE')), delay:val(a,'DELAY SINCE OFFICIAL DATE'),
+      reviewCode:val(a,'REVIEW CODE'), returned:xdate(cel(a,'RETURNED DATE')),
+      comment:val(a,'STATUS COMMENT'),
+      days:parseInt(val(a,'TOTAL DAYS IN CIRCULATION'))||null,
+      depts:rowDeptsOf(a)
     }));
-    /* latest revision = the one circulated last (revision labels mix A/B/00/01) */
+    /* latest revision = the one circulated last (labels mix A/B with 00/01) */
     revs.sort((x,y)=>{
       const dx=x.circ?x.circ.getTime():(x.received?x.received.getTime():-1);
       const dy=y.circ?y.circ.getTime():(y.received?y.received.getTime():-1);
@@ -1304,22 +1500,21 @@ function buildDash(){
     return {
       tr,
       unrec: tr.indexOf('#UNRECEIVED#')===0,
-      /* A document that was never received has no TR number, so it is shown
-         under the supplier's own number instead of an internal key. */
       label: tr.indexOf('#UNRECEIVED#')===0
-               ? (sv(a,'SUPPLIER NUMBER') || sv(a,'CLIENT NUMBER') || '(not yet received)')
+               ? (val(a,'SUPPLIER NUMBER') || val(a,'CLIENT NUMBER') || '(not yet received)')
                : tr,
-      xref:sv(a,'CROSS REFERENCE'), equip:sv(a,'EQUIPMENT NAME'),
-      code:sv(a,'CODE'), codeDesc:sv(a,'CODE DESCRIPTION'),
-      title:sv(a,'DOCUMENT TITTLE')||sv(a,'DOCUMENT TITLE'),
-      client:sv(a,'CLIENT NUMBER'), supplier:sv(a,'SUPPLIER NUMBER'),
-      vendor:sv(a,'SUPPLIER'),
-      critical:sv(a,'CRITICAL-CRIT')==='Y', keydrw:sv(a,'KEY DRW')==='Y',
-      category:sv(a,'CATEGORY'),
+      xref:val(a,'CROSS REFERENCE'), equip:val(a,'EQUIPMENT NAME'),
+      code:val(a,'CODE'), codeDesc:val(a,'CODE DESCRIPTION'),
+      title:val(a,'DOCUMENT TITTLE')||val(a,'DOCUMENT TITLE'),
+      client:val(a,'CLIENT NUMBER'), supplier:val(a,'SUPPLIER NUMBER'),
+      vendor:val(a,'SUPPLIER'),
+      critical:val(a,'CRITICAL-CRIT')==='Y', keydrw:val(a,'KEY DRW')==='Y',
+      category:val(a,'CATEGORY'),
       latest, revs,
       circulating: latest.status.toUpperCase()==='CIRCULATING'
     };
   });
+
   docs.forEach(d=>{
     const L=d.latest;
     d.pendingDepts = L.depts.filter(x=>x.pending);
@@ -1328,44 +1523,43 @@ function buildDash(){
     d.days = L.days!=null ? L.days : daysBetween(L.circ,new Date());
     d.due  = L.circ ? new Date(L.circ.getTime()+DEADLINE_DAYS*86400000) : null;
     d.over = d.days!=null ? d.days-DEADLINE_DAYS : null;
-    /* glimpse figures shown straight in the list */
     d.status   = L.status || 'NEVER RECEIVED';
     d.ret      = L.ret;
-    d.overall  = L.overall;              // OPEN / CLOSE
+    d.overall  = L.overall;
     d.circDate = L.circ;
     d.rev      = L.trRev;
     d.nRev     = d.revs.length;
-    d.depAll   = L.depts.length;         // disciplines marked applicable
+    d.depAll   = L.depts.length;
     d.depDone  = L.depts.filter(x=>x.closed).length;
     d.depOpen  = d.depAll - d.depDone;
     d.depRevOpen = L.depts.filter(x=>x.review && !x.closed).length;
-    /* the first issue carries the contractual date */
     const first = d.revs[d.revs.length-1];
     d.official = d.revs.map(r=>r.official).find(Boolean) || (first?first.official:null);
     d.searchKey = [d.tr,d.title,d.xref,d.equip,d.code,d.codeDesc,d.vendor,d.client,d.supplier,d.status]
                     .join(' ').toUpperCase();
-    /* the reviewer's own column, read straight from the latest revision */
     const a0=L.row;
-    d.myRoleRaw = S.discIdx!=null ? (a0[S.discIdx]==null?'':String(a0[S.discIdx]).trim()) : '';
+    d.myRoleRaw = disc ? (a0[disc.i]==null?'':String(a0[disc.i]).trim()) : '';
     d.myRole    = myRoleKey(d.myRoleRaw);
-    d.myClosed  = S.discCidx!=null ? xdate(a0[S.discCidx]) : null;
-    /* A document can be routed differently from one revision to the next.  We
-       always read the latest, so remember when an earlier revision carried the
-       originator mark — that is what makes a raw Excel filter over every row
-       count more documents than this screen does. */
-    d.everReviewOrg = S.discIdx!=null &&
-      d.revs.some(r=>myRoleKey(r.row[S.discIdx])==='review-org');
-    /* actionable = my column asks me to review it and I have not closed it */
+    d.myClosed  = disc ? xdate(a0[disc.ci]) : null;
     d.myAction  = MYROLE[d.myRole].act && !d.myClosed;
     d.myRoleLabel = MYROLE[d.myRole].t;
+    d.everReviewOrg = !!disc && d.revs.some(r=>myRoleKey(r.row[disc.i])==='review-org');
   });
-  S.docs=docs;
+  return docs;
+}
+
+function buildDash(){
+  const sub=S.rows.filter(a=>sv(a,'PURCHASE ORDER')===S.po &&
+                             (sv(a,'ORIGINATOR DEPARTMENT')||'(blank)')===S.dep);
+  S.sub=sub;
+  S.poDesc = sub.length? sv(sub[0],'PURCHASE ORDER DESCRIPTION') : '';
+  S.docs = buildDocs(S, S.po, S.dep, S.disc);
+  S.prev = null;                      // any earlier file compared against this one
   renderDash();
   go('dash');
 }
 
-/* ── Dashboard ─────────────────────────────────────────────────────────── */
-/* Colour + ordering for the DOCUMENT STATUS values that appear in the file. */
+/* Colour, ordering and a short label for each DOCUMENT STATUS value. */
 const STATUS_META = {
   'CIRCULATING'                  :{cls:'warn', col:'#D9922E', o:1},
   'NEVER RECEIVED'               :{cls:'ghost',col:'#98A6B5', o:2},
@@ -1385,53 +1579,6 @@ const STATUS_SHORT = {
   'REVIEWED WITHOUT COMMENTS'   :'NO COMMENTS'
 };
 const stShort = st => STATUS_SHORT[String(st||'').toUpperCase()] || String(st||'—');
-
-function ageBucket(d){
-  if(d==null) return null;
-  if(d<=7)  return '0–7 days';
-  if(d<=15) return '8–15 days';
-  if(d<=30) return '16–30 days';
-  if(d<=60) return '31–60 days';
-  return '60+ days';
-}
-const AGES=['0–7 days','8–15 days','16–30 days','31–60 days','60+ days'];
-const AGECOL={'0–7 days':'#2E9E6B','8–15 days':'#8FBF4E','16–30 days':'#D9922E',
-              '31–60 days':'#E07A3C','60+ days':'#D4574E'};
-
-/* Nothing is pre-filtered: the list opens complete and the user narrows it.
-   Every filter is additive — statuses, codes, equipment, suppliers,
-   departments and the quick chips all combine. */
-const F = { q:'', myrole:new Set(), status:new Set(), code:new Set(), equip:new Set(), vendor:new Set(),
-            dept:new Set(), quick:new Set(), group:'', sort:'doc', dir:1 };
-
-const COLS = [
-  {k:'doc',   t:'Document number & title', get:d=>(d.unrec?'￿':'')+(d.unrec?(d.xref+' '+d.code):d.tr)},
-  {k:'equip', t:'Equipment',               get:d=>d.xref},
-  {k:'code',  t:'Code',                    get:d=>d.code},
-  {k:'rev',   t:'Rev',                     get:d=>d.rev},
-  {k:'status',t:'Document status',         get:d=>stMeta(d.status).o},
-  {k:'circ',  t:'Circulated',              get:d=>d.circDate?d.circDate.getTime():-1},
-  {k:'age',   t:'Days',                    get:d=>d.days==null?-1:d.days},
-  {k:'dep',   t:'Disciplines',             get:d=>d.depOpen}
-];
-
-/* Quick filters shown as chips. They stack, so "Circulating" + "Critical"
-   narrows to documents that are both. */
-const QUICK = [
-  {k:'myact',  t:'Awaiting your review', cls:'dg', f:d=>d.myAction},
-  {k:'circ',   t:'Circulating',    cls:'wr', f:d=>d.circulating},
-  {k:'over',   t:'Past deadline',  cls:'dg', f:d=>d.circulating&&d.over>0},
-  {k:'blocked',t:'Held by others', cls:'dg', f:d=>d.blockers.length>0},
-  {k:'ownerp', t:'On my department',cls:'wr',f:d=>d.ownerPending.length>0},
-  {k:'open',   t:'Status OPEN',    cls:'wr', f:d=>String(d.overall).toUpperCase()==='OPEN'},
-  {k:'closed', t:'Status CLOSE',   cls:'gr', f:d=>String(d.overall).toUpperCase()==='CLOSE'},
-  {k:'never',  t:'Never received', cls:'',   f:d=>String(d.status).toUpperCase()==='NEVER RECEIVED'},
-  {k:'crit',   t:'Critical',       cls:'dg', f:d=>d.critical},
-  {k:'key',    t:'Key drawing',    cls:'',   f:d=>d.keydrw},
-  {k:'multi',  t:'Multi-revision', cls:'',   f:d=>d.nRev>1},
-  {k:'ifr',    t:'IFR',            cls:'',   f:d=>String(d.category).toUpperCase()==='IFR'},
-  {k:'ifi',    t:'IFI',            cls:'',   f:d=>String(d.category).toUpperCase()==='IFI'}
-];
 
 /* ── Status overview ───────────────────────────────────────────────────────
    The screen behind "Check Status", split down the middle:
@@ -1809,6 +1956,236 @@ function setTab(v){
              : `Only documents marked <b>FOR REVIEW - ORIGINATOR</b> in the <b>${esc(S.disc||'')}</b> column.`;
 }
 window.setTab=setTab;
+
+/* ── Check progress ────────────────────────────────────────────────────────
+   Compare the file that is open against an earlier Consolidated Status export
+   of the same purchase order.  The scope already chosen is reused, so nothing
+   is asked twice; row 3 of each workbook carries the date, which gives the
+   period the comparison covers.
+   ────────────────────────────────────────────────────────────────────────── */
+const PG = { half:'A', prev:null, cmp:null };
+
+function openProgress(){
+  $('pgScope').innerHTML=`<span class="v">${esc(S.po)}</span><span class="v">${esc(S.dep)}</span>`+
+    `<span class="v">Reviewing as ${esc(S.disc||'—')}</span>`;
+  $('pgNow').textContent=S.meta.asOf||'(no date in the file)';
+  $('pgTabB').textContent='For Review & Originator'+(S.disc?' — '+S.disc:'');
+  go('progress');
+}
+function resetProgress(){
+  PG.prev=null; PG.cmp=null;
+  $('pg-out').style.display='none'; $('pg-pick').style.display='';
+  $('pgfile').value=''; $('pgerr').classList.remove('on');
+}
+(function(){
+  const inp=$('pgfile'), drop=$('pgdrop');
+  if(!inp) return;
+  inp.addEventListener('change',e=>{ const f=e.target.files[0]; if(f) readPrev(f); });
+  ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over');}));
+  ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over');}));
+  drop.addEventListener('drop',e=>{ const f=e.dataTransfer.files[0]; if(f) readPrev(f); });
+})();
+function pgFail(m){ $('pgload').classList.remove('on'); const e=$('pgerr'); e.textContent=m; e.classList.add('on'); }
+function readPrev(f){
+  $('pgerr').classList.remove('on'); $('pgload').classList.add('on');
+  const fr=new FileReader();
+  fr.onerror=()=>pgFail('Could not read that file.');
+  fr.onload=ev=>setTimeout(()=>{
+    let ctx;
+    try{ ctx=readBook(new Uint8Array(ev.target.result)); }
+    catch(err){ return pgFail('Could not read that workbook: '+err.message); }
+    const docs=buildDocs(ctx, S.po, S.dep, S.disc);
+    if(!docs.length) return pgFail('That report holds no documents for '+S.po+' under '+S.dep+
+      ' — it is probably a different project or a different purchase order.');
+    ctx.asOfDate=parseAsOf(ctx.meta.asOf);
+    PG.prev={ctx, docs};
+    buildCompare();
+    $('pgload').classList.remove('on');
+    $('pg-pick').style.display='none'; $('pg-out').style.display='';
+    renderProgress();
+  },40);
+  fr.readAsArrayBuffer(f);
+}
+
+const CLOSED_ST = d => String(d.status).toUpperCase()==='REVIEWED WITHOUT COMMENTS';
+
+/* Compare the two document sets for one half of the screen. */
+function compareHalf(nowDocs, prevDocs){
+  const pm={}; prevDocs.forEach(d=>pm[d.tr]=d);
+  const nm={}; nowDocs.forEach(d=>nm[d.tr]=d);
+  const moved=[], groups={closed:[],advanced:[],regressed:[],added:[],newrev:[],gone:[],still:[]};
+
+  nowDocs.forEach(d=>{
+    const p=pm[d.tr];
+    if(!p){ groups.added.push({d, was:null}); moved.push({d,p:null,kind:'added'}); return; }
+    const wasClosed=CLOSED_ST(p), isClosed=CLOSED_ST(d);
+    const stChanged=String(p.status).toUpperCase()!==String(d.status).toUpperCase();
+    const revUp=d.nRev>p.nRev;
+    if(!wasClosed && isClosed){ groups.closed.push({d,was:p}); moved.push({d,p,kind:'closed'}); }
+    else if(wasClosed && !isClosed){ groups.regressed.push({d,was:p}); moved.push({d,p,kind:'regressed'}); }
+    else if(stChanged){
+      const better=stMeta(d.status).o>stMeta(p.status).o;
+      (better?groups.advanced:groups.regressed).push({d,was:p});
+      moved.push({d,p,kind:better?'advanced':'regressed'});
+    }
+    else if(revUp){ groups.newrev.push({d,was:p}); moved.push({d,p,kind:'newrev'}); }
+    else groups.still.push({d,was:p});
+  });
+  prevDocs.forEach(p=>{ if(!nm[p.tr]) groups.gone.push({d:null,was:p}); });
+
+  const stat=(docs)=>{ const closed=docs.filter(CLOSED_ST).length;
+    return {n:docs.length, closed, circ:docs.filter(d=>d.circulating).length,
+            pct: docs.length? Math.round(closed/docs.length*100):0}; };
+
+  /* per document code, then and now */
+  const codes={};
+  const add=(map,d,key)=>{ const c=d.code||'(no code)';
+    (map[c]=map[c]||{code:c,desc:d.codeDesc||'',nowN:0,nowC:0,prevN:0,prevC:0})[key]++; };
+  nowDocs.forEach(d=>{ add(codes,d,'nowN'); if(CLOSED_ST(d)) codes[d.code||'(no code)'].nowC++; });
+  prevDocs.forEach(d=>{ add(codes,d,'prevN'); if(CLOSED_ST(d)) codes[d.code||'(no code)'].prevC++; });
+  const codeList=Object.values(codes).map(c=>({...c,
+    nowPct:c.nowN?Math.round(c.nowC/c.nowN*100):0, prevPct:c.prevN?Math.round(c.prevC/c.prevN*100):0,
+    gain:c.nowC-c.prevC})).sort((a,b)=> b.gain-a.gain || b.nowN-a.nowN);
+
+  /* per discipline: reviews still owed, then and now */
+  const owed=docs=>{ const m={};
+    docs.forEach(d=>d.latest.depts.forEach(x=>{ if(!x.review) return;
+      const e=(m[x.name]=m[x.name]||{name:x.name,total:0,closed:0}); e.total++; if(x.closed) e.closed++; }));
+    return m; };
+  const on=owed(nowDocs), op=owed(prevDocs);
+  const discList=Object.keys({...on,...op}).map(n=>{
+    const a=on[n]||{total:0,closed:0}, b=op[n]||{total:0,closed:0};
+    return {name:n, nowTot:a.total, nowClosed:a.closed, prevTot:b.total, prevClosed:b.closed,
+            nowPend:a.total-a.closed, prevPend:b.total-b.closed, gain:a.closed-b.closed,
+            nowPct:a.total?Math.round(a.closed/a.total*100):0,
+            prevPct:b.total?Math.round(b.closed/b.total*100):0};
+  }).sort((a,b)=> b.gain-a.gain || b.nowTot-a.nowTot);
+
+  return { now:stat(nowDocs), prev:stat(prevDocs), groups, moved, codeList, discList };
+}
+function buildCompare(){
+  const nowA=S.docs, prevA=PG.prev.docs;
+  const revOnly=l=>l.filter(d=>d.myRole==='review-org');
+  PG.cmp={ A:compareHalf(nowA, prevA), B:compareHalf(revOnly(nowA), revOnly(prevA)) };
+}
+
+const MOVE_META = {
+  closed   :{t:'Closed since then',   short:'CLOSED',       s:'now reviewed without comments', col:'#2E9E6B', up:true},
+  advanced :{t:'Moved forward',       short:'FORWARD',      s:'a better review status than before', col:'#8FBF4E', up:true},
+  newrev   :{t:'New revision issued', short:'NEW REVISION', s:'a further revision has been received', col:'#3B82F6'},
+  added    :{t:'New documents',       short:'NEW',          s:'not in the earlier report at all', col:'#6B3FA0'},
+  regressed:{t:'Moved back',          short:'MOVED BACK',   s:'re-issued or returned with comments', col:'#D4574E', dn:true},
+  gone     :{t:'No longer listed',    short:'DELISTED',     s:'in the earlier report but not this one', col:'#9CA9B7'}
+};
+
+function renderProgress(){
+  const c=PG.cmp[PG.half];
+  const oldD=PG.prev.ctx.asOfDate, newD=S.asOfDate;
+  const days=(oldD&&newD)? Math.max(0,Math.round((newD-oldD)/86400000)) : null;
+  const swapped = oldD && newD && oldD>newD;
+
+  $('pgPeriod').innerHTML=`
+    <div class="leg2"><div><div class="k2">Earlier report</div>
+      <div class="v2">${esc(PG.prev.ctx.meta.asOf||'—')}</div></div></div>
+    <div class="arrow">→</div>
+    <div class="leg2"><div><div class="k2">Report now open</div>
+      <div class="v2">${esc(S.meta.asOf||'—')}</div></div></div>
+    <div class="span2">${swapped? 'the file you loaded is the older one'
+      : days==null? 'period unknown' : days+' day'+(days===1?'':'s')+' of progress'}</div>`;
+
+  const g=c.groups, gain=c.now.closed-c.prev.closed;
+  $('pgKpi').innerHTML=[
+    ['ok', gain, 'documents closed in the period', gain>=0],
+    ['', c.prev.pct+'% → '+c.now.pct+'%', 'progress then and now'],
+    ['warn', c.now.circ-c.prev.circ, 'change in circulating', null],
+    ['', g.added.length, 'documents added'],
+    ['dang', c.now.n-c.now.closed, 'still outstanding now']
+  ].map(([cls,n,l])=>`<div class="m ${cls}"><div class="n">${typeof n==='number'&&n>0&&cls!=='dang'?'+':''}${
+      typeof n==='number'? n.toLocaleString():n}</div><div class="l">${l}</div></div>`).join('');
+
+  /* where it moved */
+  $('pgMove').innerHTML=Object.keys(MOVE_META).map(k=>{
+    const n=(g[k]||[]).length, m=MOVE_META[k];
+    return `<div class="mv"><div class="t"><span class="dot" style="background:${m.col}"></span>
+        <span>${m.t}<small>${m.s}</small></span></div>
+      <div class="n2 ${n&&m.up?'up':''}${n&&m.dn?'dn':''}">${n.toLocaleString()}</div></div>`;
+  }).join('')+`<div class="chart-note">${g.still.length.toLocaleString()} documents are unchanged since the earlier report.</div>`;
+
+  /* by document type */
+  const cl=c.codeList.filter(x=>x.nowN||x.prevN).slice(0,14);
+  $('pgCode').innerHTML= cl.length? cl.map(x=>`
+    <div class="cmp"><div class="c1" title="${esc(x.desc)}">${esc(x.code)}</div>
+      <div class="track" title="${x.prevPct}% → ${x.nowPct}%">
+        <i class="was" style="width:${x.prevPct}%"></i><i class="now" style="width:${x.nowPct}%"></i></div>
+      <div class="d2">${x.prevPct}%→<b>${x.nowPct}%</b>
+        <span class="delta ${x.gain>0?'up':x.gain<0?'dn':'z'}">${x.gain>0?'+':''}${x.gain}</span></div></div>`).join('')
+    +`<div class="chart-note">Pale bar is where it stood in the earlier report, solid green is now.
+       The figure on the right is documents newly closed.</div>`
+    : '<div class="empty">No document types in this scope.</div>';
+
+  /* by discipline */
+  const dl=c.discList.filter(x=>x.nowTot||x.prevTot);
+  $('pgDisc').innerHTML= dl.length? dl.map(x=>`
+    <div class="cmp"><div class="c1 nm" title="${esc(x.name)}">${esc(x.name)}${x.name===S.disc?'<span class="you">YOU</span>':''}</div>
+      <div class="track" title="${x.prevPct}% → ${x.nowPct}%">
+        <i class="was" style="width:${x.prevPct}%"></i><i class="now" style="width:${x.nowPct}%"></i></div>
+      <div class="d2">${x.nowPend} left
+        <span class="delta ${x.gain>0?'up':x.gain<0?'dn':'z'}">${x.gain>0?'+':''}${x.gain}</span></div></div>`).join('')
+    +`<div class="chart-note">Reviews closed by each discipline, then and now. The figure on the right is how many
+       reviews that discipline still owes today.</div>`
+    : '<div class="empty">No discipline is marked FOR REVIEW in this scope.</div>';
+
+  /* the documents that moved */
+  const rows=c.moved.slice().sort((a,b)=>{
+    const o={closed:0,advanced:1,newrev:2,added:3,regressed:4};
+    return (o[a.kind]-o[b.kind]) || String((a.d||a.p).label).localeCompare(String((b.d||b.p).label));
+  });
+  $('pgCount').innerHTML=`<b>${rows.length.toLocaleString()}</b> of ${c.now.n.toLocaleString()} documents moved`;
+  $('pgHead').innerHTML='<tr>'+['Document','Equipment','Code','Rev','Was','Now','Movement']
+    .map(t=>`<th>${esc(t)}</th>`).join('')+'</tr>';
+  $('pgBody').innerHTML= rows.length? rows.map(r=>{
+    const d=r.d, p=r.p, m=MOVE_META[r.kind];
+    return `<tr>
+      <td><div class="docno">${esc(d.label)}</div>
+        <div class="doctitle" title="${esc(d.title||'')}">${esc(d.title||'—')}</div></td>
+      <td><div class="s1">${esc(d.xref||'—')}</div><div class="s2">${esc(d.equip||'')}</div></td>
+      <td><div class="s1 mono">${esc(d.code||'—')}</div></td>
+      <td><div class="revbig">${esc(d.rev||'—')}</div>
+        <div class="s2">${p&&p.rev&&p.rev!==d.rev?'was '+esc(p.rev):''}</div></td>
+      <td>${p?`<span class="tag ${stMeta(p.status).cls}">${esc(stShort(p.status))}</span>`:'<span class="s2">not listed</span>'}</td>
+      <td><span class="tag ${stMeta(d.status).cls}">${esc(stShort(d.status))}</span></td>
+      <td><span class="delta ${m.up?'up':m.dn?'dn':'z'}" title="${esc(m.s)}">${esc(m.short)}</span></td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="7" class="empty">Nothing changed between the two reports.</td></tr>';
+}
+document.addEventListener('click',e=>{ const b=e.target.closest('#pgTabs .tabb');
+  if(!b) return;
+  PG.half=b.dataset.p;
+  document.querySelectorAll('#pgTabs .tabb').forEach(x=>x.classList.toggle('on',x===b));
+  renderProgress();
+});
+
+function exportProgressXlsx(){
+  if(typeof XLSX==='undefined') return alert('Spreadsheet engine not loaded.');
+  if(!PG.cmp) return alert('Load an earlier report first.');
+  const c=PG.cmp[PG.half];
+  const head=['DOCUMENT NUMBER','DOCUMENT TITLE','EQUIPMENT','EQUIPMENT NAME','CODE','REV',
+    'STATUS IN EARLIER REPORT','STATUS NOW','MOVEMENT'];
+  const aoa=[['PROGRESS BETWEEN TWO CONSOLIDATED STATUS REPORTS'],
+    [S.po+'  ·  '+S.dep+(S.disc?'  ·  reviewing as '+S.disc:'')],
+    [(PG.half==='A'?'Full purchase order':'For review & originator')+
+     '  ·  from '+(PG.prev.ctx.meta.asOf||'?')+'  to  '+(S.meta.asOf||'?')+
+     '  ·  '+c.prev.pct+'% → '+c.now.pct+'% closed'],[],head];
+  c.moved.forEach(r=>{ const d=r.d,p=r.p;
+    aoa.push([d.label,d.title||'',d.xref||'',d.equip||'',d.code||'',d.rev||'',
+      p?p.status:'(not listed)', d.status, MOVE_META[r.kind].t]); });
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  styleReport(ws,aoa,head,4,[40,46,15,26,12,7,30,30,22]);
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Progress');
+  XLSX.writeFile(wb,`Progress_${S.po}_${PG.half==='A'?'PO':'FOR_REVIEW'}.xlsx`,{cellStyles:true});
+}
+window.openProgress=openProgress; window.resetProgress=resetProgress;
+window.exportProgressXlsx=exportProgressXlsx;
 
 /* ── Take action ───────────────────────────────────────────────────────────
    Clicking a pending bar opens the documents behind it.  Ordered by the two
@@ -3005,7 +3382,7 @@ function parseMonth(t){
 
 /* ── nav ───────────────────────────────────────────────────────────────── */
 function go(s){
-  ['upload','filter','dash','action','doc','report','basket','vdr'].forEach(x=>$('sc-'+x).classList.toggle('on',x===s));
+  ['upload','filter','dash','progress','action','doc','report','basket','vdr'].forEach(x=>$('sc-'+x).classList.toggle('on',x===s));
   window.scrollTo(0,0);
   if(s==='filter') $('crumbs').innerHTML='';
   /* the sheet strip belongs to the status page only */
