@@ -430,6 +430,8 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .mode-chip{font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;
   border-radius:20px;background:var(--dang-bg);color:#9C2C24}
 .mode-chip.ovw{background:#E8F0FE;color:#1A4FBF}
+.mode-chip.perf{background:#F3EDFB;color:#6B3FA0}
+.sheettabs .sh.on[data-s="perf"]{border-top:2px solid #6B3FA0}
 
 /* ── legacy sheet strip (kept for the note only) ────────────────────────── */
 .sheetbar{display:flex;align-items:flex-end;gap:4px;margin:14px 0 0;padding:0 4px}
@@ -645,6 +647,70 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .ac-hero-v{font-size:26px;font-weight:800;color:var(--ok);line-height:1;font-variant-numeric:tabular-nums}
 .ac-hero-v small{font-size:11px;font-weight:700;color:var(--muted);margin-left:6px}
 .ac-hero .sbar{height:26px}
+
+/* ── performance sheet ─────────────────────────────────────────────────── */
+.perf-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--sf);border:1px solid var(--line);
+  border-radius:14px;box-shadow:var(--sh1);padding:11px 16px;margin-top:14px}
+.perf-tools .fill{flex:1}
+.seg2{display:inline-flex;border:1px solid var(--line2);border-radius:9px;overflow:hidden}
+.seg2 button{border:none;background:var(--sf2);color:var(--muted);font-size:11px;font-weight:800;
+  padding:7px 13px;cursor:pointer;border-right:1px solid var(--line2);text-align:left;line-height:1.25}
+.seg2 button:last-child{border-right:none}
+.seg2 button small{display:block;font-size:9.5px;font-weight:600;opacity:.8;margin-top:2px}
+.seg2 button.on{background:var(--navy);color:#fff}
+.h3note{display:block;font-size:10.5px;font-weight:600;color:var(--muted);margin-top:4px;line-height:1.5;
+  text-transform:none;letter-spacing:0}
+.panel h3{display:block}
+
+/* line chart */
+.lc{position:relative;width:100%}
+.lc svg{display:block;width:100%;height:auto;overflow:visible}
+.lc .gl{stroke:var(--line);stroke-width:1}
+.lc .ax{stroke:var(--line2);stroke-width:1}
+.lc .lbl9{font-size:9px;font-weight:700;fill:var(--muted)}
+.lc .today{stroke:#D4574E;stroke-width:1.2;stroke-dasharray:4 3}
+.lc .guide{stroke:var(--navy);stroke-width:1;opacity:0;pointer-events:none}
+.lc .hit{fill:transparent;cursor:crosshair}
+.lc-leg{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line2)}
+.lc-leg .li{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:var(--ink)}
+.lc-leg .sw{width:16px;height:3px;border-radius:2px}
+.lc-leg .sw.gap{height:10px;border-radius:3px;opacity:.5}
+
+/* histogram */
+.hb{display:grid;grid-template-columns:64px 1fr 76px;gap:10px;align-items:center;padding:4px 0}
+.hb .k{font-size:10.5px;font-weight:700;color:var(--ink);text-align:right}
+.hb .t{height:15px;border-radius:4px;background:#EDF1F6;border:1px solid var(--line);overflow:hidden}
+.hb .t i{display:block;height:100%;transition:width .7s var(--ease)}
+.hb .v{font-size:10.5px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums}
+.hb .v small{font-weight:700;color:var(--muted)}
+.hb.late .k{color:#9C2C24}
+
+/* performance rows */
+.pfrow{display:grid;grid-template-columns:118px 62px 1fr 54px 62px 82px 88px;gap:9px;align-items:center;padding:7px 0}
+.pfrow.hd{padding-bottom:5px;border-bottom:1px solid var(--line2)}
+.pfrow.hd div{font-size:8.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.pfrow+.pfrow{border-top:1px solid var(--line)}
+.pfrow .c1{font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--navy);overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.pfrow .c1.nm{font-family:var(--font);font-size:11px}
+.pfrow .num2{font-size:11px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;text-align:right}
+.pfrow .num2.mut{color:var(--muted);font-weight:700}
+.pfrow .bar2{height:14px;border-radius:4px;overflow:hidden;display:flex;border:1px solid var(--line)}
+.pfrow .bar2 i{display:block;height:100%}
+.pfbtn{border:1px solid var(--line2);background:var(--sf2);color:var(--navy);font-size:9.5px;font-weight:800;
+  border-radius:7px;padding:4px 8px;cursor:pointer;white-space:nowrap}
+.pfbtn:hover{border-color:var(--blue);color:var(--blue)}
+.pfbtn.hot{border-color:var(--dang);background:var(--dang-bg);color:#9C2C24}
+.pfbtn.hot:hover{background:var(--dang);color:#fff}
+.grade{font-size:9px;font-weight:800;border-radius:5px;padding:2px 6px;white-space:nowrap}
+.grade.a{background:var(--ok-bg);color:#1B7A4E}
+.grade.b{background:#EDF7E4;color:#4A7A22}
+.grade.c{background:var(--warn-bg);color:#9A6414}
+.grade.d{background:var(--dang-bg);color:#9C2C24}
+.imp{background:#EEF4FE;border:1px solid #CFE0FA;border-radius:10px;padding:11px 14px;margin-top:12px;
+  font-size:11.5px;font-weight:600;color:#1A4FBF;line-height:1.6}
+.imp b{color:#123A8F}
+.imp .big2{font-size:19px;font-weight:800;color:#123A8F;font-variant-numeric:tabular-nums}
 
 /* ── check progress ────────────────────────────────────────────────────── */
 .period{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:linear-gradient(90deg,#17558A,#2E86B8);
@@ -917,6 +983,37 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
     </article>
   </div>
 
+  <div id="perfwrap" style="display:none">
+    <div class="perf-tools">
+      <span class="lbl">15-day clock measured on</span>
+      <div class="seg2" id="pfMode">
+        <button class="on" data-m="tr">Full TR cycle <small>circulate → returned to supplier</small></button>
+        <button data-m="disc">Discipline sign-off <small>circulate → that discipline closed</small></button>
+      </div>
+      <div class="fill"></div>
+      <button class="chip" onclick="exportPerfXlsx()">⤓ Download performance report</button>
+    </div>
+
+    <div class="ac-sum" id="pfKpi"></div>
+
+    <div class="panel" style="margin-top:4px">
+      <h3>Planned against actual
+        <span class="h3note">the pale line is where the 15-day rule says reviews should have finished; the solid
+          line is when they actually did. The gap between them is the backlog on that date.</span></h3>
+      <div class="bd"><div id="pfCurve"></div></div>
+    </div>
+
+    <div class="pgcols">
+      <div class="panel"><h3>How long a review actually takes</h3><div class="bd" id="pfDist"></div></div>
+      <div class="panel"><h3>Where the time is lost</h3><div class="bd" id="pfGap"></div></div>
+    </div>
+
+    <div class="panel" style="margin-top:16px"><h3>Performance by document type</h3>
+      <div class="bd" id="pfCode"></div></div>
+    <div class="panel" style="margin-top:16px"><h3>Performance by discipline</h3>
+      <div class="bd" id="pfDisc"></div></div>
+  </div>
+
   <div class="foot" id="foot1"></div>
 </div></div>
 
@@ -1096,6 +1193,7 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 <div class="sheettabs" id="sheettabs">
   <button class="sh on" data-s="action">⚑ Action View <span class="cnt2" id="shCount">0</span></button>
   <button class="sh" data-s="overview">▦ Overview</button>
+  <button class="sh" data-s="perf">📉 Performance</button>
 </div>
 <div class="ptip" id="ptip"></div>
 
@@ -1928,8 +2026,19 @@ function setSheet(v){
   $('shCount').textContent=pend;
   $('shCount').style.display = v==='action'&&pend ? '' : 'none';
   const pm=$('pbMode');
-  if(pm){ pm.textContent = v==='action'?'Action view':'Overview';
-          pm.className = 'mode-chip'+(v==='action'?'':' ovw'); }
+  if(pm){ pm.textContent = v==='action'?'Action view':v==='overview'?'Overview':'Performance';
+          pm.className = 'mode-chip'+(v==='action'?'':v==='overview'?' ovw':' perf'); }
+  /* Performance replaces the chart grid; the scope tabs still apply, but only
+     one half can be measured at a time, so All falls back to the whole PO. */
+  const perf = v==='perf';
+  $('statgrid').style.display = perf? 'none':'';
+  $('perfwrap').style.display = perf? '':'none';
+  document.querySelectorAll('#tabbar .tabb').forEach(b=>{
+    const off = perf && b.dataset.v==='all';
+    b.style.opacity = off? '.45':''; b.style.pointerEvents = off? 'none':''; });
+  if(perf && S.tab==='all'){ S.tab='A';
+    document.querySelectorAll('#tabbar .tabb').forEach(b=>b.classList.toggle('on',b.dataset.v==='A')); }
+  if(perf){ renderPerf(); return; }
   /* the lists stay closed until their chart is clicked, in either sheet */
   ['A','B'].forEach(i=>['codes','disc'].forEach(w=>$('card'+i+'-'+w).classList.remove('open')));
   setTab(S.tab||'all');
@@ -1947,6 +2056,7 @@ function setTab(v){
     c.style.display = (v==='all' || c.dataset.h===v) ? '' : 'none'; });
   $('statgrid').classList.toggle('single', v!=='all');
   requestAnimationFrame(alignCards);
+  if(S.sheet==='perf' && typeof renderPerf==='function') renderPerf();
   const A=(STAT.A||{}).st, B=(STAT.B||{}).st;
   $('tabnote').innerHTML =
     v==='all' ? `Side by side: the whole purchase order (<b>${A?A.total.toLocaleString():0}</b> documents)
@@ -1956,6 +2066,344 @@ function setTab(v){
              : `Only documents marked <b>FOR REVIEW - ORIGINATOR</b> in the <b>${esc(S.disc||'')}</b> column.`;
 }
 window.setTab=setTab;
+
+/* ── Performance ───────────────────────────────────────────────────────────
+   Every circulation starts a 15-day clock.  The file records when it started
+   and when it finished, so the whole history can be replayed: what the rule
+   promised against what actually happened, where the time went, and what
+   closing the worst gaps would be worth.
+   ────────────────────────────────────────────────────────────────────────── */
+const PF = { mode:'tr', half:'A', cyc:[], st:null };
+const DAY = 86400000;
+
+/* One row per review cycle.  In 'tr' mode a cycle is a whole circulation of a
+   revision, ending when it goes back to the supplier.  In 'disc' mode each
+   discipline asked to review that revision is its own cycle, ending on its own
+   closed date — the same clock, measured per signature. */
+function cyclesFor(docs, mode){
+  const out=[];
+  docs.forEach(d=>d.revs.forEach(r=>{
+    if(!r.circ) return;
+    if(mode==='tr'){
+      out.push({d, rev:r.trRev, start:r.circ, end:r.returned||null, code:d.code||'(no code)',
+                codeDesc:d.codeDesc||'', disc:null, status:r.status});
+    } else {
+      r.depts.forEach(x=>{ if(!x.review) return;
+        out.push({d, rev:r.trRev, start:r.circ, end:x.closed||null, code:d.code||'(no code)',
+                  codeDesc:d.codeDesc||'', disc:x.name, status:r.status}); });
+    }
+  }));
+  const now = S.asOfDate || new Date();
+  out.forEach(c=>{
+    c.due  = new Date(c.start.getTime()+DEADLINE_DAYS*DAY);
+    c.open = !c.end;
+    c.days = c.end ? Math.round((c.end-c.start)/DAY) : Math.round((now-c.start)/DAY);
+    c.late = c.days>DEADLINE_DAYS;
+    c.lost = Math.max(0, c.days-DEADLINE_DAYS);     // days beyond the promise
+  });
+  return out;
+}
+
+function median(a){ if(!a.length) return 0; const b=a.slice().sort((x,y)=>x-y);
+  return b.length%2 ? b[(b.length-1)/2] : Math.round((b[b.length/2-1]+b[b.length/2])/2); }
+function pct(n,d){ return d? Math.round(n/d*100) : 0; }
+function grade(p){ return p>=85?'a':p>=60?'b':p>=35?'c':'d'; }
+
+function perfAgg(list){
+  const closed=list.filter(c=>!c.open), open=list.filter(c=>c.open);
+  const onTime=closed.filter(c=>!c.late).length;
+  const days=closed.map(c=>c.days);
+  return {
+    n:list.length, closed:closed.length, open:open.length,
+    onTime, late:closed.length-onTime, pct:pct(onTime,closed.length),
+    med:median(days), p90:days.length? days.slice().sort((a,b)=>a-b)[Math.floor(days.length*.9)] : 0,
+    lost:list.reduce((n,c)=>n+c.lost,0),
+    overdueNow:open.filter(c=>c.late).length
+  };
+}
+function groupPerf(list, keyFn, described){
+  const m={};
+  list.forEach(c=>{ const k=keyFn(c); if(!k) return; (m[k]=m[k]||[]).push(c); });
+  /* only a document-code group has a description; a discipline is its own name */
+  return Object.keys(m).map(k=>({key:k, desc: described? (m[k][0].codeDesc||'') : '',
+                                 ...perfAgg(m[k]), rows:m[k]}))
+           .sort((a,b)=> b.lost-a.lost || b.n-a.n);
+}
+
+/* ── the planned-against-actual curve ──────────────────────────────────── */
+function buildCurve(list){
+  if(!list.length) return null;
+  const now = S.asOfDate || new Date();
+  let lo=Infinity, hi=-Infinity;
+  list.forEach(c=>{ lo=Math.min(lo,c.start.getTime());
+    hi=Math.max(hi, c.due.getTime(), c.end?c.end.getTime():0); });
+  hi=Math.min(hi, now.getTime());                 // never plot past the report date
+  if(!(hi>lo)) return null;
+  const weeks=Math.max(2, Math.ceil((hi-lo)/(7*DAY)));
+  const step=(hi-lo)/weeks;
+  const xs=[], exp=[], act=[];
+  const dueT=list.map(c=>c.due.getTime()).sort((a,b)=>a-b);
+  const endT=list.filter(c=>c.end).map(c=>c.end.getTime()).sort((a,b)=>a-b);
+  let i=0,j=0;
+  for(let k=0;k<=weeks;k++){
+    const t=lo+step*k;
+    while(i<dueT.length && dueT[i]<=t) i++;
+    while(j<endT.length && endT[j]<=t) j++;
+    xs.push(t); exp.push(i); act.push(j);
+  }
+  return {xs, exp, act, lo, hi, max:Math.max(exp[exp.length-1], act[act.length-1], 1)};
+}
+
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function fmtShort(t){ const d=new Date(t); return MON[d.getUTCMonth()]+" '"+String(d.getUTCFullYear()).slice(2); }
+
+function drawCurve(host, cv){
+  if(!cv){ host.innerHTML='<div class="empty">No circulation history in this scope.</div>'; return; }
+  const W=1000, H=300, L=52, R=14, T=14, B=34;
+  const iw=W-L-R, ih=H-T-B;
+  const X=k=>L+iw*k/(cv.xs.length-1);
+  const Y=v=>T+ih-(ih*v/cv.max);
+  const path=arr=>arr.map((v,k)=>(k?'L':'M')+X(k).toFixed(1)+' '+Y(v).toFixed(1)).join('');
+  const area=()=>{
+    let d='M'+X(0).toFixed(1)+' '+Y(cv.exp[0]).toFixed(1);
+    cv.exp.forEach((v,k)=>{ if(k) d+='L'+X(k).toFixed(1)+' '+Y(v).toFixed(1); });
+    for(let k=cv.act.length-1;k>=0;k--) d+='L'+X(k).toFixed(1)+' '+Y(cv.act[k]).toFixed(1);
+    return d+'Z';
+  };
+  /* y gridlines at round numbers */
+  const stepY=Math.max(1, Math.ceil(cv.max/5/50)*50 || Math.ceil(cv.max/5));
+  let grid='', ylab='';
+  for(let v=0; v<=cv.max; v+=stepY){
+    grid+=`<line class="gl" x1="${L}" y1="${Y(v).toFixed(1)}" x2="${W-R}" y2="${Y(v).toFixed(1)}"/>`;
+    ylab+=`<text class="lbl9" x="${L-8}" y="${(Y(v)+3).toFixed(1)}" text-anchor="end">${v}</text>`;
+  }
+  /* x labels at month starts */
+  let xlab='', seen='';
+  cv.xs.forEach((t,k)=>{ const d=new Date(t), tag=d.getUTCFullYear()+'-'+d.getUTCMonth();
+    if(tag!==seen && k){ seen=tag;
+      xlab+=`<text class="lbl9" x="${X(k).toFixed(1)}" y="${H-B+16}" text-anchor="middle">${fmtShort(t)}</text>`
+          + `<line class="gl" x1="${X(k).toFixed(1)}" y1="${T}" x2="${X(k).toFixed(1)}" y2="${T+ih}"/>`; } });
+
+  const lastGap=cv.exp[cv.exp.length-1]-cv.act[cv.act.length-1];
+  host.innerHTML=`<div class="lc">
+    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="height:300px">
+      ${grid}${xlab}
+      <path d="${area()}" fill="#D4574E" opacity=".13"/>
+      <path d="${path(cv.exp)}" fill="none" stroke="#9CB3C9" stroke-width="2" stroke-dasharray="6 4"/>
+      <path d="${path(cv.act)}" fill="none" stroke="#2E9E6B" stroke-width="2.6" stroke-linejoin="round"/>
+      <line class="ax" x1="${L}" y1="${T}" x2="${L}" y2="${T+ih}"/>
+      <line class="ax" x1="${L}" y1="${T+ih}" x2="${W-R}" y2="${T+ih}"/>
+      ${ylab}
+      <line class="guide" id="pfGuide" x1="0" y1="${T}" x2="0" y2="${T+ih}"/>
+      <rect class="hit" id="pfHit" x="${L}" y="${T}" width="${iw}" height="${ih}"/>
+    </svg>
+    <div class="lc-leg">
+      <span class="li"><span class="sw" style="background:#9CB3C9"></span>Should have finished (circulated + ${DEADLINE_DAYS} days)</span>
+      <span class="li"><span class="sw" style="background:#2E9E6B"></span>Actually finished</span>
+      <span class="li"><span class="sw gap" style="background:#D4574E"></span>The gap — reviews owed but not done</span>
+      <span class="li" style="margin-left:auto;color:var(--dang)">Behind by <b>${lastGap.toLocaleString()}</b> reviews today</span>
+    </div></div>`;
+
+  /* hover read-out */
+  const svg=host.querySelector('svg'), hit=host.querySelector('#pfHit'), gl=host.querySelector('#pfGuide');
+  hit.onmousemove=e=>{
+    const r=svg.getBoundingClientRect();
+    const k=Math.round(((e.clientX-r.left)/r.width*W - L)/iw*(cv.xs.length-1));
+    if(k<0||k>=cv.xs.length) return;
+    gl.setAttribute('x1',X(k)); gl.setAttribute('x2',X(k)); gl.style.opacity='.35';
+    const t=TIP();
+    t.innerHTML=`<div class="t1">${fmt(new Date(cv.xs[k]))}</div>
+      <div class="t2">Should have finished <b>${cv.exp[k].toLocaleString()}</b></div>
+      <div class="t2">Actually finished <b>${cv.act[k].toLocaleString()}</b></div>
+      <div class="t2" style="color:#FFC9C4">Behind by <b>${(cv.exp[k]-cv.act[k]).toLocaleString()}</b></div>`;
+    t.classList.add('on');
+    let x=e.clientX+14, y=e.clientY-10; const tr=t.getBoundingClientRect();
+    if(x+tr.width>window.innerWidth-8) x=e.clientX-tr.width-14;
+    t.style.left=x+'px'; t.style.top=Math.max(8,y)+'px';
+  };
+  hit.onmouseleave=()=>{ gl.style.opacity='0'; TIP().classList.remove('on'); };
+}
+
+/* ── the sheet ─────────────────────────────────────────────────────────── */
+function renderPerf(){
+  const half = S.tab==='B' ? 'B' : 'A';
+  PF.half=half;
+  const docs = half==='A' ? halfDocs('A') : halfDocs('B');
+  const list = cyclesFor(docs, PF.mode);
+  PF.cyc=list;
+  const A=perfAgg(list); PF.st=A;
+
+  document.querySelectorAll('#pfMode button').forEach(b=>b.classList.toggle('on',b.dataset.m===PF.mode));
+
+  const unit = PF.mode==='tr' ? 'review cycles' : 'discipline reviews';
+  $('pfKpi').innerHTML=[
+    [grade(A.pct)==='a'?'ok':grade(A.pct)==='d'?'dang':'warn', A.pct+'%', 'closed within '+DEADLINE_DAYS+' days'],
+    ['', A.med+'d', 'typical turnaround (median)'],
+    ['warn', A.p90+'d', 'slowest one in ten (p90)'],
+    ['dang', A.lost.toLocaleString(), 'days lost beyond the promise'],
+    ['dang', A.overdueNow.toLocaleString(), 'open right now and already late'],
+    ['', A.closed.toLocaleString(), unit+' completed']
+  ].map(([c,n,l])=>`<div class="m ${c}"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('');
+
+  drawCurve($('pfCurve'), buildCurve(list));
+
+  /* distribution */
+  const buckets=[['0–5 days',0,5],['6–10',6,10],['11–15',11,15],['16–20',16,20],
+                 ['21–30',21,30],['31–45',31,45],['46–60',46,60],['over 60',61,1e9]];
+  const closed=list.filter(c=>!c.open);
+  const counts=buckets.map(([,lo,hi])=>closed.filter(c=>c.days>=lo&&c.days<=hi).length);
+  const mx=Math.max(1,...counts);
+  $('pfDist').innerHTML=buckets.map(([lab,lo],i)=>{
+    const late=lo>DEADLINE_DAYS;
+    return `<div class="hb ${late?'late':''}"><div class="k">${lab}</div>
+      <div class="t"><i style="width:${counts[i]/mx*100}%;background:${late?'#D4574E':'#2E9E6B'}"></i></div>
+      <div class="v">${counts[i].toLocaleString()} <small>${pct(counts[i],closed.length)}%</small></div></div>`;
+  }).join('')+`<div class="chart-note">The line falls between 11–15 and 16–20 days: everything below it met the
+     ${DEADLINE_DAYS}-day rule, everything above it did not. ${A.onTime.toLocaleString()} of
+     ${A.closed.toLocaleString()} made it.</div>`;
+
+  /* where the time is lost + what closing it is worth */
+  const byCode=groupPerf(list, c=>c.code, true);
+  const worst=byCode.filter(g=>g.lost>0).slice(0,8);
+  const lmax=Math.max(1,...worst.map(g=>g.lost));
+  const top3=byCode.slice(0,3);
+  const recoverable=top3.reduce((n,g)=>n+g.lost,0);
+  const wouldBe=(()=>{ const keys=new Set(top3.map(g=>g.key));
+    const fixed=list.filter(c=>!c.open).map(c=>keys.has(c.code)? Math.min(c.days,DEADLINE_DAYS) : c.days);
+    return pct(fixed.filter(d=>d<=DEADLINE_DAYS).length, fixed.length); })();
+  $('pfGap').innerHTML= worst.length? worst.map(g=>`
+    <div class="hb"><div class="k" title="${esc(g.desc)}" style="font-family:var(--mono);font-size:10px">${esc(g.key)}</div>
+      <div class="t"><i style="width:${g.lost/lmax*100}%;background:#E07A3C"></i></div>
+      <div class="v">${g.lost.toLocaleString()}<small> d</small></div></div>`).join('')
+    + `<div class="imp">
+        <div><span class="big2">${A.lost.toLocaleString()}</span> days have been lost beyond the ${DEADLINE_DAYS}-day
+          promise across ${A.n.toLocaleString()} ${unit}.</div>
+        <div style="margin-top:7px">Of that, <b>${recoverable.toLocaleString()} days</b>
+          (<b>${pct(recoverable,A.lost)}%</b>) sit in just three document types —
+          <b>${top3.map(g=>esc(g.key)).join(', ')}</b>. Holding those three to ${DEADLINE_DAYS} days would lift
+          on-time delivery from <b>${A.pct}%</b> to <b>${wouldBe}%</b>.</div>
+      </div>`
+    : '<div class="empty">Nothing has run past the deadline in this scope.</div>';
+
+  /* by document type */
+  $('pfCode').innerHTML=perfTable(byCode,'code','Document type');
+  /* by discipline — always measured on the discipline's own sign-off */
+  const dl=groupPerf(cyclesFor(docs,'disc'), c=>c.disc);
+  $('pfDisc').innerHTML=perfTable(dl,'disc','Discipline')+
+    `<div class="chart-note">Always measured from the circulate date to that discipline's own closed date,
+      whichever clock is selected above.</div>`;
+}
+
+function perfTable(groups, kind, label){
+  if(!groups.length) return '<div class="empty">Nothing to measure here.</div>';
+  const head=`<div class="pfrow hd"><div>${esc(label)}</div><div style="text-align:right">Cycles</div>
+    <div>On time / late</div><div style="text-align:right">On time</div><div style="text-align:right">Median</div>
+    <div style="text-align:right">Days lost</div><div></div></div>`;
+  return head+groups.map(g=>{
+    const gd=grade(g.pct), bad=gd==='c'||gd==='d';
+    const on=pct(g.onTime,Math.max(1,g.closed)), la=100-on;
+    return `<div class="pfrow">
+      <div class="c1 ${kind==='disc'?'nm':''}" title="${esc(g.desc||g.key)}">${esc(g.key)}${
+        kind==='disc'&&g.key===S.disc?'<span class="you">YOU</span>':''}</div>
+      <div class="num2 mut">${g.n.toLocaleString()}</div>
+      <div class="bar2" title="${g.onTime} on time, ${g.late} late">
+        <i style="width:${on}%;background:#2E9E6B"></i><i style="width:${la}%;background:#D4574E"></i></div>
+      <div class="num2"><span class="grade ${gd}">${g.pct}%</span></div>
+      <div class="num2">${g.med}d</div>
+      <div class="num2" style="color:${g.lost?'var(--dang)':'var(--muted)'}">${g.lost.toLocaleString()}</div>
+      <div><button class="pfbtn ${bad?'hot':''}" onclick="emailPerf('${kind}','${esc(g.key).replace(/'/g,"\\'")}')">✉ Raise gap</button></div>
+    </div>`;
+  }).join('');
+}
+
+/* ── an email about one gap ────────────────────────────────────────────── */
+function emailPerf(kind, key){
+  const list = kind==='disc' ? cyclesFor(halfDocs(PF.half),'disc').filter(c=>c.disc===key)
+                             : PF.cyc.filter(c=>c.code===key);
+  if(!list.length) return alert('Nothing to report for '+key+'.');
+  const g=perfAgg(list);
+  const openLate=list.filter(c=>c.open&&c.late).sort((a,b)=>b.days-a.days);
+  const subj=`[${S.po}] ${key} — ${g.pct}% of reviews met the ${DEADLINE_DAYS}-day target`;
+
+  const cols=[
+    {h:'#',w:4,get:(c,i)=>String(i+1)},
+    {h:'DOCUMENT',w:40,get:c=>c.d.label},
+    {h:'REV',w:4,get:c=>c.rev||''},
+    {h:'CIRCULATED',w:12,get:c=>fmtS(c.start)},
+    {h:'DAYS OPEN',w:9,get:c=>String(c.days)},
+    {h:'OVER BY',w:8,get:c=>String(c.lost)}
+  ];
+  const pad=(t,w)=>{ t=String(t==null?'':t); return t.length>w? t.slice(0,w-1)+'…':t.padEnd(w); };
+  const rule=cols.map(c=>'-'.repeat(c.w)).join('-+-');
+  const shown=openLate.slice(0,30);
+  let table=cols.map(c=>pad(c.h,c.w)).join(' | ')+'\n'+rule+'\n';
+  shown.forEach((c,i)=>{ table+=cols.map(x=>pad(x.get(c,i),x.w)).join(' | ')+'\n'; });
+
+  let body=`Purchase order : ${S.po}${S.poDesc?' — '+S.poDesc:''}\n`+
+    `Originator     : ${S.dep}\n`+
+    `${kind==='disc'?'Discipline     ':'Document type  '}: ${key}\n`+
+    `Status as of   : ${S.meta.asOf}\n\n`+
+    `Against a ${DEADLINE_DAYS}-day review target:\n\n`+
+    `  Reviews completed        ${g.closed}\n`+
+    `  Met the target           ${g.onTime}  (${g.pct}%)\n`+
+    `  Missed the target        ${g.late}\n`+
+    `  Typical turnaround       ${g.med} days\n`+
+    `  Slowest one in ten       ${g.p90} days\n`+
+    `  Days lost beyond target  ${g.lost}\n`+
+    `  Still open and late      ${g.overdueNow}\n\n`;
+  if(shown.length){
+    body+=`Open past the ${DEADLINE_DAYS}-day target${openLate.length>shown.length?' (first '+shown.length+')':''}:\n\n`+table;
+    if(openLate.length>shown.length) body+=`\n… and ${openLate.length-shown.length} more.\n`;
+  } else body+='Nothing is currently open past the target.\n';
+  body+=`\nSent from Vendor Document Management — Powered by MERIDIAM.\n`;
+
+  const e2=t=>String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const html=`<table style="border-collapse:collapse;font-family:Segoe UI,Arial,sans-serif;font-size:11px">
+    <thead><tr>${cols.map(c=>`<th style="background:#0B2545;color:#fff;padding:5px 8px;border:1px solid #9AA7B4;
+      text-align:left">${e2(c.h)}</th>`).join('')}</tr></thead>
+    <tbody>${shown.map((c,i)=>`<tr>${cols.map(x=>`<td style="padding:4px 8px;border:1px solid #C9D3DD;
+      background:${i%2?'#F6F9FC':'#fff'}">${e2(x.get(c,i))}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  copyRich(html, body);
+  window.location.href='mailto:?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
+}
+
+function exportPerfXlsx(){
+  if(typeof XLSX==='undefined') return alert('Spreadsheet engine not loaded.');
+  if(!PF.cyc.length) return alert('No circulation history in this scope.');
+  const A=PF.st;
+  const wb=XLSX.utils.book_new();
+  const mk=(name, head, rows, widths, title)=>{
+    const aoa=[[title],
+      [S.po+'  ·  '+S.dep+(S.disc?'  ·  reviewing as '+S.disc:'')],
+      [(PF.half==='A'?'Full purchase order':'For review & originator')+'  ·  as of '+S.meta.asOf+
+       '  ·  clock: '+(PF.mode==='tr'?'circulate → returned':'circulate → discipline closed')],[],head];
+    rows.forEach(r=>aoa.push(r));
+    const ws=XLSX.utils.aoa_to_sheet(aoa);
+    styleReport(ws,aoa,head,4,widths);
+    XLSX.utils.book_append_sheet(wb,ws,name);
+  };
+  mk('Summary',['MEASURE','VALUE'],[
+      ['Review cycles in scope',A.n],['Completed',A.closed],['Still open',A.open],
+      ['Met the '+DEADLINE_DAYS+'-day target',A.onTime],['Missed the target',A.late],
+      ['On-time percentage',A.pct/100],['Median turnaround (days)',A.med],
+      ['Slowest one in ten (days)',A.p90],['Days lost beyond target',A.lost],
+      ['Open now and already late',A.overdueNow]],[42,16],
+      'REVIEW TURNAROUND PERFORMANCE');
+  const cols=['NAME','DESCRIPTION','CYCLES','COMPLETED','ON TIME','LATE','ON-TIME %','MEDIAN DAYS','P90 DAYS','DAYS LOST','OPEN AND LATE'];
+  const g2r=g=>[g.key,g.desc||'',g.n,g.closed,g.onTime,g.late,g.pct/100,g.med,g.p90,g.lost,g.overdueNow];
+  mk('By document type',cols,groupPerf(PF.cyc,c=>c.code,true).map(g2r),[14,40,9,11,9,8,10,12,10,10,13],
+     'PERFORMANCE BY DOCUMENT TYPE');
+  mk('By discipline',cols,groupPerf(cyclesFor(halfDocs(PF.half),'disc'),c=>c.disc).map(g2r),
+     [34,20,9,11,9,8,10,12,10,10,13],'PERFORMANCE BY DISCIPLINE');
+  mk('Every cycle',['DOCUMENT','TITLE','CODE','REV','DISCIPLINE','CIRCULATED','FINISHED','DAYS','TARGET MET','DAYS OVER'],
+     PF.cyc.map(c=>[c.d.label,c.d.title||'',c.code,c.rev||'',c.disc||'',fmt(c.start),
+                    c.end?fmt(c.end):'(still open)',c.days,c.open?'':(c.late?'No':'Yes'),c.lost]),
+     [40,44,12,7,26,13,13,8,11,10],'EVERY REVIEW CYCLE');
+  XLSX.writeFile(wb,`Performance_${S.po}_${PF.half==='A'?'PO':'FOR_REVIEW'}.xlsx`,{cellStyles:true});
+}
+document.addEventListener('click',e=>{ const b=e.target.closest('#pfMode button');
+  if(b){ PF.mode=b.dataset.m; renderPerf(); } });
+window.emailPerf=emailPerf; window.exportPerfXlsx=exportPerfXlsx; window.renderPerf=renderPerf;
 
 /* ── Check progress ────────────────────────────────────────────────────────
    Compare the file that is open against an earlier Consolidated Status export
