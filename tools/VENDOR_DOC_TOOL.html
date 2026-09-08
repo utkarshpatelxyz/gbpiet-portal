@@ -541,6 +541,28 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .cb-note.void2 b{color:var(--navy)}
 .cb-note.act2{color:#1D6B4B;background:#EDF8F2;border:1px solid #C6E7D6;border-radius:8px;padding:6px 10px}
 .cb-note.act2 b{color:#12563A}
+
+/* where the circulating documents are actually stuck */
+.stuck{margin-top:12px;border-top:1px solid var(--line);padding-top:11px}
+.stuck .sk-h{font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:9px}
+.stuck .sk-h b{color:var(--ink)}
+.sk-t{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--line);
+  border-left:4px solid var(--c);border-radius:9px;margin-bottom:7px;background:#fff;
+  transition:box-shadow .18s ease,transform .18s ease}
+.sk-t:hover{box-shadow:0 3px 12px rgba(11,37,69,.09);transform:translateY(-1px)}
+.sk-t.you{--c:#D9922E;background:#FEFAF3}
+.sk-t.others{--c:#2563EB;background:#F5F8FE}
+.sk-t.release{--c:#2E9E6B;background:#F1FAF5}
+.sk-ic{font-size:15px;line-height:1;width:20px;text-align:center}
+.sk-n{font-size:19px;font-weight:800;color:var(--c);line-height:1.05;min-width:34px}
+.sk-b{flex:1;min-width:0}
+.sk-l{font-size:11.5px;font-weight:800;color:var(--ink)}
+.sk-s{font-size:10px;font-weight:600;color:var(--muted);margin-top:2px;line-height:1.45}
+.sk-s b{color:var(--ink)}
+.sk-t .actbtn{flex:none}
+.stuck .sk-sum{font-size:10px;font-weight:700;color:var(--muted);margin-top:2px}
+.stuck .sk-sum b{color:var(--ink)}
 .you{font-size:8px;font-weight:800;background:var(--navy);color:#fff;border-radius:20px;padding:1px 5px;margin-left:4px}
 
 /* flat donut */
@@ -595,6 +617,7 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .statgrid:not(.single) .sbar-lab{display:none}
 .statgrid:not(.single) .cc-sub{display:none}
 .statgrid:not(.single) .cb-note:not(.warn2):not(.info2):not(.void2):not(.act2){display:none}
+.statgrid:not(.single) .sk-s{display:none}
 .statgrid:not(.single) .dw svg{max-width:150px}
 .statgrid:not(.single) .donut-ctr .v{font-size:20px}
 .statgrid:not(.single) .pie-legend{max-height:46px;overflow:auto;gap:3px 10px;font-size:10px}
@@ -925,6 +948,7 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
       <div class="pblock" id="ovA"></div>
       <div class="cb-note void2" id="vnA" style="display:none;margin-top:10px"></div>
       <div class="cb-note act2" id="anA" style="display:none;margin-top:10px"></div>
+      <div class="stuck" id="skA" style="display:none"></div>
       <div class="bytype" id="btA"></div>
     </article>
     <article class="ccard" data-h="B" data-c="codes" id="cardB-codes">
@@ -949,6 +973,7 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
       <div class="cb-note info2" id="rnB" style="display:none;margin-top:10px"></div>
       <div class="cb-note void2" id="vnB" style="display:none;margin-top:10px"></div>
       <div class="cb-note act2" id="anB" style="display:none;margin-top:10px"></div>
+      <div class="stuck" id="skB" style="display:none"></div>
       <div class="bytype" id="btB"></div>
     </article>
     <article class="ccard" data-h="A" data-c="disc" id="cardA-disc">
@@ -1674,6 +1699,17 @@ function buildDocs(ctx, po, dep, discName){
     d.myAction  = MYROLE[d.myRole].act && !d.myClosed;
     d.myRoleLabel = MYROLE[d.myRole].t;
     d.everReviewOrg = !!disc && d.revs.some(r=>myRoleKey(r.row[disc.i])==='review-org');
+    /* A circulating document carries two separate jobs: this discipline has to
+       review it, and once every discipline has signed off it has to be released
+       back to the vendor.  Which of the two is outstanding is the whole
+       question, so it is decided here, once, per document. */
+    d.myOpen     = !!d.myAction;                     // we still owe the review
+    d.othersOpen = L.depts.filter(x=>x.review && !x.closed && x.name!==discName)
+                          .map(x=>x.name);
+    d.stuck = !d.circulating ? null
+            : d.myOpen        ? 'you'
+            : d.othersOpen.length ? 'others'
+                                  : 'release';
   });
   return docs;
 }
@@ -1780,6 +1816,27 @@ function statsFor(allDocs){
            progress: docs.length? Math.round(totals.without/docs.length*100) : 0 };
 }
 
+/* ── Circulating: where exactly is it stuck? ───────────────────────────────
+   One "circulating" number hides two very different situations, so it is split
+   three ways:
+
+     you     — your discipline has not closed its review yet;
+     others  — you are done, another discipline still owes a review;
+     release — every discipline has signed off, so nothing is blocking it going
+               back to the vendor; it is simply still sitting in the circuit.
+
+   The last one is the valuable case — work already finished that nobody has
+   noticed is finished. */
+function stuckFor(docs){
+  const out={you:0, others:0, release:0, total:0, blockers:{}};
+  docs.forEach(d=>{
+    const k=d.circulating ? d.stuck : null; if(!k) return;
+    out[k]++; out.total++;
+    if(k==='others') d.othersOpen.forEach(n=>out.blockers[n]=(out.blockers[n]||0)+1);
+  });
+  return out;
+}
+
 /* Which disciplines still owe a review on these documents.
    Columns AC–CT: a column reading FOR REVIEW (or FOR REVIEW - ORIGINATOR) is a
    review this discipline owes; its paired closed-date column says whether it is
@@ -1790,9 +1847,12 @@ function discStatsFor(allDocs){
   const docs=allDocs.filter(d=>!noAction(d));
   docs.forEach(d=>d.latest.depts.forEach(x=>{
     if(!x.review) return;
-    const e=(by[x.name]=by[x.name]||{name:x.name,total:0,closed:0,pending:0,ownDocs:0});
+    const e=(by[x.name]=by[x.name]||{name:x.name,total:0,closed:0,pending:0,ownDocs:0,mineDone:0});
     e.total++; if(x.closed) e.closed++; else e.pending++;
     if(x.originator) e.ownDocs++;
+    /* of what this discipline still owes, how much is already cleared our side —
+       i.e. how many documents are waiting on them and nobody else */
+    if(!x.closed && x.name!==S.disc && !d.myOpen) e.mineDone++;
   }));
   const list=Object.values(by).sort((a,b)=>b.total-a.total);
   list.forEach((e,i)=>{ e.col=CODE_PALETTE[i%CODE_PALETTE.length];
@@ -1908,6 +1968,8 @@ function renderHalf(id){
       circulating.`;
   } else an.style.display='none';
 
+  renderStuck(id);
+
   $('mini'+id).innerHTML=[
     ['', st.total, 'documents'],
     ['', st.byCode.length, 'document types'],
@@ -1997,7 +2059,9 @@ function renderHalf(id){
   $('dbt'+id).innerHTML=`<div class="bt-h">Progress by discipline${actD?' — outstanding only':''}</div>`+
     (discRows.length? discRows.map(e=>`<div class="trow wide${actD?' act':''}">
       <div class="tc"><div class="c1 nm">${esc(e.name)}${e.name===S.disc?'<span class="you">YOU</span>':''}</div>
-        <div class="c2">${e.total} to review · ${e.pending} pending</div></div>
+        <div class="c2">${e.total} to review · ${e.pending} pending${
+          e.mineDone?' · <b>'+e.mineDone+'</b> already cleared by '+esc(S.disc||'you')+
+            ', waiting only on them':''}</div></div>
       ${dbar(e.closed, e.pending)}
       <div class="pv ${e.pct?'':'zero'}">${e.pct}%</div>
       ${actD?`<button class="actbtn" onclick="event.stopPropagation();openAction('${id}','disc','${esc(e.name).replace(/'/g,"\\'")}',event)">Take action</button>`:''}
@@ -2007,6 +2071,36 @@ function renderHalf(id){
     (actD && discRows.length? `<div class="allact"><span class="lbl2">Everything outstanding across these ${discRows.length} disciplines</span>
       <button class="actbtn big" onclick="event.stopPropagation();openAction('${id}','alldisc','')">⚑ Take action on all</button></div>`:'');
 }
+/* The three-way split of the circulating documents, told plainly. */
+function renderStuck(id){
+  const sk=$('sk'+id); if(!sk) return;
+  const sq=stuckFor(halfDocs(id));
+  STAT[id].sq=sq;
+  if(!sq.total){ sk.style.display='none'; sk.innerHTML=''; return; }
+  sk.style.display='';
+  const act=S.sheet==='action', me=S.disc||'your discipline';
+  const who=Object.entries(sq.blockers).sort((a,b)=>b[1]-a[1])
+    .map(([n,c])=>esc(n)+' <b>('+c+')</b>').join(' · ');
+  const tile=(k,cls,ic,n,label,sub)=> n? `<div class="sk-t ${cls}">
+      <div class="sk-ic">${ic}</div><div class="sk-n">${n}</div>
+      <div class="sk-b"><div class="sk-l">${label}</div><div class="sk-s">${sub}</div></div>
+      ${act?`<button class="actbtn" onclick="event.stopPropagation();openAction('${id}','stuck','${k}',event)">Take action</button>`:''}
+    </div>` : '';
+  sk.innerHTML=
+    `<div class="sk-h">Circulating — where is it stuck?
+       <b>${sq.total}</b> document${sq.total===1?'':'s'} out for review</div>`+
+    tile('you','you','⏳',sq.you, 'Waiting on '+esc(me),
+      'Your review is not closed yet — this is the queue on your own desk.')+
+    tile('others','others','⇄',sq.others, 'Reviewed by '+esc(me)+', waiting on others',
+      'You are done. Still open with: '+(who||'—')+
+      '. Chase them and these can be released.')+
+    tile('release','release','✅',sq.release, 'Ready to release to the vendor',
+      'Every discipline has closed its review and nothing is blocking these — '+
+      'they are only still sitting in the circuit.')+
+    `<div class="sk-sum"><b>${sq.total}</b> circulating = <b>${sq.you}</b> with ${esc(me)} + `+
+    `<b>${sq.others}</b> with other disciplines + <b>${sq.release}</b> ready to release</div>`;
+}
+
 function resetCodes(id){
   halfBase(id).forEach(d=>S.inc[id].add(d.code||'(no code)'));
   const el=$('fc'+id); if(el && el.setSel) el.setSel(S.inc[id]);
@@ -2736,6 +2830,11 @@ function isCriticalCode(c){
 }
 function isCriticalDoc(d){ return isCriticalCode({code:d.code, desc:d.codeDesc}); }
 
+const STUCK_T = {
+  you    : d => 'Circulating — waiting on '+(d||'you'),
+  others : d => 'Circulating — reviewed by '+(d||'you')+', waiting on other disciplines',
+  release: () => 'Reviewed by every discipline — ready to release to the vendor'
+};
 function openAction(half, kind, key, ev){
   AC.half=half; AC.kind=kind; AC.key=key;
   AC.crit=true; AC.rev=false; AC.circ=false;
@@ -2779,6 +2878,8 @@ const NOT_CLOSED = d => !noAction(d) && String(d.status).toUpperCase()!=='REVIEW
 /* Build the list behind whichever bar was clicked. */
 function actionRows(){
   const docs=halfDocs(AC.half);
+  if(AC.kind==='stuck')
+    return docs.filter(d=>d.circulating && d.stuck===AC.key).map(d=>({d, disc:null}));
   if(AC.kind==='code' || AC.kind==='allcodes'){
     let l=docs.filter(NOT_CLOSED);
     if(AC.kind==='code') l=l.filter(d=>(d.code||'(no code)')===AC.key);
@@ -2809,7 +2910,8 @@ function renderAction(){
   AC.rows=rows;
 
   const scopeName = AC.half==='A' ? 'Full purchase order' : 'For review — '+(S.disc||'');
-  const what = AC.kind==='code'     ? 'Document type '+AC.key
+  const what = AC.kind==='stuck'    ? STUCK_T[AC.key](S.disc)
+             : AC.kind==='code'     ? 'Document type '+AC.key
              : AC.kind==='allcodes' ? 'All outstanding document types'
              : AC.kind==='disc'     ? AC.key+' — reviews still open'
                                     : 'All disciplines with reviews still open';
@@ -2830,6 +2932,15 @@ function renderAction(){
     hero={title:'All document types', sub:stats.st.byCode.length+' types in this scope',
           pct:stats.st.progress, bar:sbar(stats.st.totals,stats.st.total),
           v:stats.st.totals.without, tot:stats.st.total, unit:'closed'};
+  } else if(AC.kind==='stuck' && stats.sq){
+    const q=stats.sq, n=q[AC.key];
+    hero={title:STUCK_T[AC.key](S.disc), sub:q.total+' documents circulating in this scope',
+          pct:Math.round(n/(q.total||1)*100),
+          bar:`<div class="sbar">
+            <i style="width:${q.you/(q.total||1)*100}%;background:#D9922E" title="Waiting on you: ${q.you}"></i>
+            <i style="width:${q.others/(q.total||1)*100}%;background:#2563EB" title="Waiting on other disciplines: ${q.others}"></i>
+            <i style="width:${q.release/(q.total||1)*100}%;background:#2E9E6B" title="Ready to release: ${q.release}"></i></div>`,
+          v:n, tot:q.total, unit:'of the circulating documents'};
   } else if(AC.kind==='disc'){
     const e=(stats.ds&&stats.ds.list||[]).find(x=>x.name===AC.key);
     if(e) hero={title:e.name, sub:e.total+' documents to review', pct:e.pct,
@@ -2876,7 +2987,9 @@ function renderAction(){
       <td><span class="tag ${m.cls}" title="${esc(d.status)}">${esc(stShort(d.status))}</span></td>
       <td style="text-align:right">${d.days!=null?`<span class="tag ${ageCls} num">${d.days}d</span>`:'<span class="s2">—</span>'}
         <div class="s2 num">${d.circulating&&d.over>0?'+'+d.over+' late':''}</div></td>
-      <td><div class="s2">${esc(r.disc || (owing.length?owing.join(', '):'—'))}</div></td>
+      <td><div class="s2">${AC.kind==='stuck'&&AC.key==='release'
+            ? '<b style="color:var(--ok)">all reviews closed — release it</b>'
+            : esc(r.disc || (owing.length?owing.join(', '):'—'))}</div></td>
     </tr>`;
   }).join('') : `<tr><td colspan="8" class="empty">Nothing outstanding here${AC.circ?' that is circulating':''}.</td></tr>`;
   $('acMailNote').style.display='none';
@@ -2884,7 +2997,8 @@ function renderAction(){
 
 /* ── the list as a spreadsheet, and as an Outlook draft ─────────────────── */
 function actionTitle(){
-  return (AC.kind==='code' ? 'Document type '+AC.key
+  return (AC.kind==='stuck' ? STUCK_T[AC.key](S.disc)
+        : AC.kind==='code' ? 'Document type '+AC.key
         : AC.kind==='allcodes' ? 'All outstanding document types'
         : AC.kind==='disc' ? AC.key+' — reviews still open'
         : 'All disciplines with reviews still open');
@@ -2906,7 +3020,9 @@ function actionAoa(){
     const owing=d.latest.depts.filter(x=>x.review&&!x.closed).map(x=>x.name).join('; ');
     aoa.push([d.label,d.title||'',d.xref||'',d.equip||'',d.code||'',d.codeDesc||'',
       isCriticalDoc(d)?'Y':'N',d.rev||'',d.status,fmt(d.circDate),
-      d.days==null?'':d.days, (d.circulating&&d.over>0)?d.over:'', r.disc||owing]);
+      d.days==null?'':d.days, (d.circulating&&d.over>0)?d.over:'',
+      (AC.kind==='stuck'&&AC.key==='release') ? 'ALL REVIEWS CLOSED — RELEASE'
+                                              : (r.disc||owing)]);
   });
   return {aoa, head};
 }
@@ -2952,9 +3068,17 @@ function emailAction(){
     `Originator     : ${S.dep}\n`+
     `Scope          : ${AC.half==='A'?'Full purchase order':'For review — '+(S.disc||'')}\n`+
     `Status as of   : ${S.meta.asOf}\n\n`+
-    `${AC.rows.length} ${byDisc?'reviews':'documents'} outstanding across ${uniq} documents, `+
-    `${circN} circulating now.\n\n`+
-    (byDisc?'Documents awaiting review:':'Documents still to close:')+'\n\n'+table;
+    (AC.kind==='stuck'&&AC.key==='release'
+      ? `${AC.rows.length} document${AC.rows.length===1?'':'s'} have every discipline's review closed and `+
+        `nothing outstanding against them — they can be returned to the vendor.\n\n`+
+        'Ready to release:\n\n'
+      : AC.kind==='stuck'&&AC.key==='others'
+      ? `${AC.rows.length} document${AC.rows.length===1?'':'s'} reviewed by ${S.disc||'us'} are held only by `+
+        `other disciplines. Closing those reviews releases them.\n\n`+
+        'Awaiting other disciplines:\n\n'
+      : `${AC.rows.length} ${byDisc?'reviews':'documents'} outstanding across ${uniq} documents, `+
+        `${circN} circulating now.\n\n`+
+        (byDisc?'Documents awaiting review:':'Documents still to close:')+'\n\n')+table;
   if(AC.rows.length>LIM) body+=`\n… and ${AC.rows.length-LIM} more — see the attached spreadsheet.\n`;
   body+=`\nThe full list has been downloaded as "${file}" — please attach it before sending.\n`;
 
