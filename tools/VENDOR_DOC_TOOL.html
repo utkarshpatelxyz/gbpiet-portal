@@ -539,6 +539,8 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .cb-note.info2 b{color:#123A8F}
 .cb-note.void2{color:#5B6B7C;background:#F2F4F7;border:1px solid #DDE3EA;border-radius:8px;padding:6px 10px}
 .cb-note.void2 b{color:var(--navy)}
+.cb-note.act2{color:#1D6B4B;background:#EDF8F2;border:1px solid #C6E7D6;border-radius:8px;padding:6px 10px}
+.cb-note.act2 b{color:#12563A}
 .you{font-size:8px;font-weight:800;background:var(--navy);color:#fff;border-radius:20px;padding:1px 5px;margin-left:4px}
 
 /* flat donut */
@@ -592,7 +594,7 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
    size give way; open a single tab to get them back. */
 .statgrid:not(.single) .sbar-lab{display:none}
 .statgrid:not(.single) .cc-sub{display:none}
-.statgrid:not(.single) .cb-note:not(.warn2):not(.info2):not(.void2){display:none}
+.statgrid:not(.single) .cb-note:not(.warn2):not(.info2):not(.void2):not(.act2){display:none}
 .statgrid:not(.single) .dw svg{max-width:150px}
 .statgrid:not(.single) .donut-ctr .v{font-size:20px}
 .statgrid:not(.single) .pie-legend{max-height:46px;overflow:auto;gap:3px 10px;font-size:10px}
@@ -922,6 +924,7 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
       </div>
       <div class="pblock" id="ovA"></div>
       <div class="cb-note void2" id="vnA" style="display:none;margin-top:10px"></div>
+      <div class="cb-note act2" id="anA" style="display:none;margin-top:10px"></div>
       <div class="bytype" id="btA"></div>
     </article>
     <article class="ccard" data-h="B" data-c="codes" id="cardB-codes">
@@ -945,6 +948,7 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
       <div class="pblock" id="ovB"></div>
       <div class="cb-note info2" id="rnB" style="display:none;margin-top:10px"></div>
       <div class="cb-note void2" id="vnB" style="display:none;margin-top:10px"></div>
+      <div class="cb-note act2" id="anB" style="display:none;margin-top:10px"></div>
       <div class="bytype" id="btB"></div>
     </article>
     <article class="ccard" data-h="A" data-c="disc" id="cardA-disc">
@@ -1549,6 +1553,25 @@ function rowDepts(a){
    Everything downstream — the charts, the action lists, the progress check —
    reads this shape, so the current file and an older one are directly
    comparable. */
+/* DOCUMENT STATUS (column W) says where a document sits in the circuit, but it
+   lags reality.  An engineer who has recorded a verdict in RETURN STATUS FOR THE
+   SUPPLIER (column X) has already done the review — the row keeps reading
+   CIRCULATING only until the document is formally issued back to the vendor.
+   Left alone, the tool would go on asking for an action that is already taken.
+
+   So when W reads CIRCULATING and X carries a verdict, X wins.  X is written
+   with its review-code prefix ("F - REVIEWED WITHOUT COMMENTS"), which is
+   stripped, and its "REVIEWED AS BUILT" wording is the register's "AS BUILT".
+   A blank X leaves the document circulating, which is exactly what it is. */
+const retVerdict = v => {
+  const t=String(v||'').trim().replace(/^[A-Z]\s*-\s*/i,'').toUpperCase();
+  return t==='REVIEWED AS BUILT' ? 'AS BUILT' : t;
+};
+function effStatus(w, ret){
+  if(String(w||'').trim().toUpperCase()!=='CIRCULATING') return w;
+  return retVerdict(ret) || w;
+}
+
 function buildDocs(ctx, po, dep, discName){
   const H=ctx.hdr;
   const cel=(a,n)=>{ const i=H[n]; return i===undefined?'':a[i]; };
@@ -1583,7 +1606,10 @@ function buildDocs(ctx, po, dep, discName){
     const revs=byDoc[tr].map(a=>({
       row:a,
       trRev:val(a,'TR REV.'), supRev:val(a,'SUPPLIER REV.'), cliRev:val(a,'CLIENT REV'),
-      status:val(a,'DOCUMENT STATUS'), ret:val(a,'RETURN STATUS FOR THE SUPPLIER'),
+      statusRaw:val(a,'DOCUMENT STATUS'), ret:val(a,'RETURN STATUS FOR THE SUPPLIER'),
+      status:effStatus(val(a,'DOCUMENT STATUS'), val(a,'RETURN STATUS FOR THE SUPPLIER')),
+      acted:String(val(a,'DOCUMENT STATUS')).toUpperCase()==='CIRCULATING'
+            && !!retVerdict(val(a,'RETURN STATUS FOR THE SUPPLIER')),
       overall:val(a,'STATUS'),
       received:xdate(cel(a,'RECEIVED DATE')), circ:xdate(cel(a,'CIRCULATE DATE')),
       official:xdate(cel(a,'OFFICIAL DATE')), delay:val(a,'DELAY SINCE OFFICIAL DATE'),
@@ -1625,8 +1651,10 @@ function buildDocs(ctx, po, dep, discName){
     d.days = L.days!=null ? L.days : daysBetween(L.circ,new Date());
     d.due  = L.circ ? new Date(L.circ.getTime()+DEADLINE_DAYS*86400000) : null;
     d.over = d.days!=null ? d.days-DEADLINE_DAYS : null;
-    d.status   = L.status || 'NEVER RECEIVED';
-    d.ret      = L.ret;
+    d.status    = L.status || 'NEVER RECEIVED';
+    d.statusRaw = L.statusRaw || 'NEVER RECEIVED';
+    d.acted     = !!L.acted;      // circulating on paper, already ruled on in column X
+    d.ret       = L.ret;
     d.overall  = L.overall;
     d.circDate = L.circ;
     d.rev      = L.trRev;
@@ -1743,7 +1771,12 @@ function statsFor(allDocs){
   byCode.forEach(c=>c.asideN=vByCode[c.code]||0);
   const byStatus={}; aside.forEach(d=>{ const t=String(d.status||'').toUpperCase();
     byStatus[t]=(byStatus[t]||0)+1; });
+  /* still CIRCULATING in column W, but already ruled on in column X */
+  const acted=allDocs.filter(d=>d.acted), actedStatus={};
+  acted.forEach(d=>{ const t=String(d.status||'').toUpperCase();
+    actedStatus[t]=(actedStatus[t]||0)+1; });
   return { byCode, totals, total:docs.length, aside, asideN:aside.length, asideCodes, asideStatus:byStatus,
+           acted, actedN:acted.length, actedStatus,
            progress: docs.length? Math.round(totals.without/docs.length*100) : 0 };
 }
 
@@ -1862,6 +1895,18 @@ function renderHalf(id){
         '</b> '+(st.asideCodes.length===1?'has':'have')+' nothing left to review, so '+
         (st.asideCodes.length===1?'it does':'they do')+' not appear in the chart.' : ''}`;
   } else vn.style.display='none';
+
+  /* column X overrides a stale CIRCULATING — say how many and to what */
+  const an=$('an'+id);
+  if(st.actedN){
+    an.style.display='';
+    const mix=Object.entries(st.actedStatus).sort((a,b)=>b[1]-a[1])
+      .map(([t,n])=>n+' <b>'+esc(t)+'</b>').join(', ');
+    an.innerHTML=`<b>${st.actedN}</b> document${st.actedN===1?'':'s'} still read <b>CIRCULATING</b> in
+      DOCUMENT STATUS but already carry a verdict in RETURN STATUS FOR THE SUPPLIER — the engineer has
+      acted, so ${st.actedN===1?'it is':'they are'} counted on that verdict (${mix}) and not as
+      circulating.`;
+  } else an.style.display='none';
 
   $('mini'+id).innerHTML=[
     ['', st.total, 'documents'],
@@ -3231,20 +3276,22 @@ function exportTableXlsx(){
   const rows=S.view||[];
   if(!rows.length) return alert('There is nothing in the list to export.');
   const head=['DOCUMENT NUMBER','DOCUMENT TITLE','EQUIPMENT','EQUIPMENT NAME','CODE','CODE DESCRIPTION',
-    'REV','REVISIONS','DOCUMENT STATUS','RETURN STATUS','OVERALL','CATEGORY','CRITICAL','KEY DRW',
+    'REV','REVISIONS','DOCUMENT STATUS (COL W)','RETURN STATUS (COL X)','STATUS COUNTED',
+    'OVERALL','CATEGORY','CRITICAL','KEY DRW',
     'SUPPLIER','CIRCULATED','DUE ('+DEADLINE_DAYS+'D)','DAYS IN CIRCULATION',
     (S.disc||'YOUR')+' COLUMN','DISCIPLINES CLOSED','DISCIPLINES OPEN','AWAITING REVIEW FROM'];
   const aoa=[['CONSOLIDATED STATUS — FILTERED DOCUMENT LIST'],
              [S.dep+'  ·  reviewing as '+(S.disc||'—')+'  ·  '+S.po],
              ['as of '+S.meta.asOf+'  ·  '+rows.length+' of '+S.docs.length+' documents'],[],head];
   rows.forEach(d=>aoa.push([d.label,d.title||'',d.xref||'',d.equip||'',d.code||'',d.codeDesc||'',
-    d.rev||'',d.nRev,d.status,d.ret||'',d.overall||'',d.category||'',d.critical?'Y':'N',d.keydrw?'Y':'N',
+    d.rev||'',d.nRev,d.statusRaw,d.ret||'',d.status,d.overall||'',d.category||'',d.critical?'Y':'N',d.keydrw?'Y':'N',
     d.vendor||'',fmt(d.circDate),d.circulating?fmt(d.due):'',d.days==null?'':d.days,
     d.myRoleRaw||'(blank)',
     d.depDone,d.depOpen,d.latest.depts.filter(x=>!x.closed&&x.review).map(x=>x.name).join('; ')]));
   const ws=XLSX.utils.aoa_to_sheet(aoa);
   ws['!cols']=[{wch:40},{wch:52},{wch:16},{wch:30},{wch:12},{wch:38},{wch:6},{wch:10},{wch:30},{wch:32},
-               {wch:9},{wch:10},{wch:9},{wch:9},{wch:38},{wch:13},{wch:13},{wch:9},{wch:24},{wch:9},{wch:9},{wch:44}];
+               {wch:30},{wch:9},{wch:10},{wch:9},{wch:9},{wch:38},{wch:13},{wch:13},{wch:9},{wch:24},
+               {wch:9},{wch:9},{wch:44}];
   if(ws['A1']) ws['A1'].s={font:{bold:true,sz:14,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'0B2545'}}};
   if(ws['A2']) ws['A2'].s={font:{bold:true,sz:11,color:{rgb:'0B2545'}}};
   head.forEach((_,i)=>{ const k=XLSX.utils.encode_cell({r:4,c:i});
@@ -3252,7 +3299,7 @@ function exportTableXlsx(){
                        alignment:{wrapText:true,vertical:'center'}}; });
   for(let r=5;r<aoa.length;r++) for(let c=0;c<head.length;c++){
     const k=XLSX.utils.encode_cell({r,c}); if(!ws[k]) continue;
-    ws[k].s={font:{sz:9},alignment:{vertical:'top',wrapText:c===1||c===5||c===21},
+    ws[k].s={font:{sz:9},alignment:{vertical:'top',wrapText:c===1||c===5||c===22},
              border:{bottom:{style:'hair',color:{rgb:'D3DBE6'}}}};
   }
   const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Document list');
@@ -3282,6 +3329,7 @@ function openDoc(tr){
       <div style="margin-top:8px">
         <span class="tag ${MYROLE[d.myRole].cls}" title="Your ${esc(S.disc||'')} column reads: ${esc(d.myRoleRaw||'(blank)')}">${d.myAction?'▶ ':''}${esc(S.disc||'You')}: ${MYROLE[d.myRole].short}</span>
         ${d.circulating?'<span class="tag warn" style="margin-left:5px">CIRCULATING</span>':'<span class="tag ok" style="margin-left:5px">'+esc(L.status)+'</span>'}
+        ${d.acted?'<span class="tag blue" style="margin-left:5px" title="DOCUMENT STATUS still reads CIRCULATING; the verdict above comes from RETURN STATUS FOR THE SUPPLIER">◆ RETURNED IN COL X</span>':''}
         ${d.critical?'<span class="tag dang" style="margin-left:5px">CRITICAL</span>':''}
         ${d.keydrw?'<span class="tag blue" style="margin-left:5px">KEY DRAWING</span>':''}
         ${d.category?'<span class="tag info" style="margin-left:5px">'+esc(d.category)+'</span>':''}
@@ -3731,13 +3779,16 @@ function vdrPreset(kind){
 function vdrCounts(){
   const rows=S.docs;
   const pick=k=>rows.filter(d=>V.cls[d.code||'(no code)']===k);
+  /* This report reproduces the weekly VDR sheet, which is written from
+     DOCUMENT STATUS exactly as the register holds it — so it reads column W
+     raw and does not apply the column-X override the dashboard uses. */
   const block=list=>{
     const o={rows:VDR_ROWS.map(([label,st])=>
-      [label, list.filter(d=>String(d.status).toUpperCase()===st).length])};
+      [label, list.filter(d=>String(d.statusRaw).toUpperCase()===st).length])};
     const listed=o.rows.reduce((n,r)=>n+r[1],0);
     o.unlisted = list.length - listed;       // VOID, REJECTED, FOR INFORMATION
     o.total = V.strict ? listed : list.length;
-    const approved=list.filter(d=>String(d.status).toUpperCase()==='REVIEWED WITHOUT COMMENTS').length;
+    const approved=list.filter(d=>String(d.statusRaw).toUpperCase()==='REVIEWED WITHOUT COMMENTS').length;
     o.pending = o.total - approved;          // everything not yet approved clean
     return o;
   };
