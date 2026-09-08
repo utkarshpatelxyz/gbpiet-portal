@@ -542,27 +542,36 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .cb-note.act2{color:#1D6B4B;background:#EDF8F2;border:1px solid #C6E7D6;border-radius:8px;padding:6px 10px}
 .cb-note.act2 b{color:#12563A}
 
-/* where the circulating documents are actually stuck */
-.stuck{margin-top:12px;border-top:1px solid var(--line);padding-top:11px}
-.stuck .sk-h{font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
-  color:var(--muted);margin-bottom:9px}
-.stuck .sk-h b{color:var(--ink)}
-.sk-t{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--line);
-  border-left:4px solid var(--c);border-radius:9px;margin-bottom:7px;background:#fff;
-  transition:box-shadow .18s ease,transform .18s ease}
-.sk-t:hover{box-shadow:0 3px 12px rgba(11,37,69,.09);transform:translateY(-1px)}
-.sk-t.you{--c:#D9922E;background:#FEFAF3}
-.sk-t.others{--c:#2563EB;background:#F5F8FE}
-.sk-t.release{--c:#2E9E6B;background:#F1FAF5}
-.sk-ic{font-size:15px;line-height:1;width:20px;text-align:center}
-.sk-n{font-size:19px;font-weight:800;color:var(--c);line-height:1.05;min-width:34px}
-.sk-b{flex:1;min-width:0}
-.sk-l{font-size:11.5px;font-weight:800;color:var(--ink)}
-.sk-s{font-size:10px;font-weight:600;color:var(--muted);margin-top:2px;line-height:1.45}
-.sk-s b{color:var(--ink)}
-.sk-t .actbtn{flex:none}
-.stuck .sk-sum{font-size:10px;font-weight:700;color:var(--muted);margin-top:2px}
+/* where the circulating documents are actually stuck — same grid as .trow,
+   so the bars and the Take action buttons line up with every other row */
+.stuck{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+.stuck .bt-h{margin-bottom:2px}
+.stuck .trow.sk-r{grid-template-columns:232px 1fr 42px}
+.stuck .trow.sk-r.act{grid-template-columns:232px 1fr 42px 78px}
+.sk-r{border-left:3px solid var(--c);padding-left:9px;margin-left:-1px}
+.sk-r .c1{font-size:11px;color:var(--c)}
+.sk-r .c2{font-size:9.5px}
+.sk-r.sk-you{--c:#D9922E}.sk-r.sk-others{--c:#2563EB}.sk-r.sk-release{--c:#2E9E6B}
+.sk-r .pv{color:var(--c);font-size:13px}
+.sk-bar{display:flex;height:14px;border-radius:4px;overflow:hidden;background:var(--line2)}
+.sk-bar i{display:block;height:100%}
+.stuck .sk-sum{font-size:10px;font-weight:700;color:var(--muted);margin-top:9px;padding-top:8px;
+  border-top:1px dashed var(--line2)}
 .stuck .sk-sum b{color:var(--ink)}
+
+/* the counting notes, folded away until asked for */
+.notes{margin-top:9px}
+.notes-t{display:flex;align-items:center;gap:7px;width:100%;background:var(--sf2);border:1px solid var(--line);
+  border-radius:8px;padding:6px 10px;cursor:pointer;font:inherit;font-size:10px;font-weight:700;
+  color:var(--muted);text-align:left;transition:background .16s ease,border-color .16s ease}
+.notes-t:hover{background:#EEF3F9;border-color:#C6D3E2;color:var(--navy)}
+.notes-t .ic{font-size:11px;color:var(--blue)}
+.notes-t .tx{flex:1}
+.notes-t .ch{transition:transform .2s ease;font-size:9px}
+.notes.open .notes-t .ch{transform:rotate(180deg)}
+.notes.open .notes-t{background:#EEF3F9;border-color:#C6D3E2;color:var(--navy)}
+.notes-b{padding-top:9px}
+.notes-b .cb-note:last-child{margin-bottom:0}
 .you{font-size:8px;font-weight:800;background:var(--navy);color:#fff;border-radius:20px;padding:1px 5px;margin-left:4px}
 
 /* flat donut */
@@ -617,7 +626,6 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .statgrid:not(.single) .sbar-lab{display:none}
 .statgrid:not(.single) .cc-sub{display:none}
 .statgrid:not(.single) .cb-note:not(.warn2):not(.info2):not(.void2):not(.act2){display:none}
-.statgrid:not(.single) .sk-s{display:none}
 .statgrid:not(.single) .dw svg{max-width:150px}
 .statgrid:not(.single) .donut-ctr .v{font-size:20px}
 .statgrid:not(.single) .pie-legend{max-height:46px;overflow:auto;gap:3px 10px;font-size:10px}
@@ -946,8 +954,14 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
         <div class="mini" id="miniA"></div>
       </div>
       <div class="pblock" id="ovA"></div>
-      <div class="cb-note void2" id="vnA" style="display:none;margin-top:10px"></div>
-      <div class="cb-note act2" id="anA" style="display:none;margin-top:10px"></div>
+      <div class="notes" id="ndA" style="display:none">
+        <button class="notes-t" onclick="event.stopPropagation();toggleNotes('A')">
+          <span class="ic">&#9432;</span><span class="tx" id="ntA"></span><span class="ch">&#9660;</span></button>
+        <div class="notes-b" id="nbA" hidden>
+          <div class="cb-note void2" id="vnA" style="display:none"></div>
+          <div class="cb-note act2" id="anA" style="display:none"></div>
+        </div>
+      </div>
       <div class="stuck" id="skA" style="display:none"></div>
       <div class="bytype" id="btA"></div>
     </article>
@@ -970,21 +984,28 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
         <div class="mini" id="miniB"></div>
       </div>
       <div class="pblock" id="ovB"></div>
-      <div class="cb-note info2" id="rnB" style="display:none;margin-top:10px"></div>
-      <div class="cb-note void2" id="vnB" style="display:none;margin-top:10px"></div>
-      <div class="cb-note act2" id="anB" style="display:none;margin-top:10px"></div>
+      <div class="notes" id="ndB" style="display:none">
+        <button class="notes-t" onclick="event.stopPropagation();toggleNotes('B')">
+          <span class="ic">&#9432;</span><span class="tx" id="ntB"></span><span class="ch">&#9660;</span></button>
+        <div class="notes-b" id="nbB" hidden>
+          <div class="cb-note info2" id="rnB" style="display:none"></div>
+          <div class="cb-note void2" id="vnB" style="display:none"></div>
+          <div class="cb-note act2" id="anB" style="display:none"></div>
+        </div>
+      </div>
       <div class="stuck" id="skB" style="display:none"></div>
       <div class="bytype" id="btB"></div>
     </article>
     <article class="ccard" data-h="A" data-c="disc" id="cardA-disc">
       <div class="cc-h">
         <span class="cc-badge all">FULL PO</span>
-        <div class="cc-t">Disciplines that must review</div>
+        <div class="cc-t">Other disciplines that must review</div>
         <div class="cc-tools">
           <button class="chip" onclick="event.stopPropagation();exportDiscReport('A')">⤓ Report</button></div>
       </div>
-      <div class="cc-top"><div class="cc-sub">From columns AC–CT. A discipline marked <b>FOR REVIEW</b> with no
-        date in its closed-date column is still pending; N/A and for-information entries are ignored.</div></div>
+      <div class="cc-top"><div class="cc-sub">From columns AC–CT, excluding your own discipline — its queue is
+        the <b>Waiting on</b> row on the left. A discipline marked <b>FOR REVIEW</b> with no date in its
+        closed-date column is still pending; N/A and for-information entries are ignored.</div></div>
       <div class="cc-body">
         <div class="chartbox" id="dboxA" onclick="toggleBlock('A','disc')">
           <span class="cue">click for progress by discipline →</span>
@@ -998,12 +1019,13 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
     <article class="ccard" data-h="B" data-c="disc" id="cardB-disc">
       <div class="cc-h">
         <span class="cc-badge rev">FOR REVIEW - ORIGINATOR</span>
-        <div class="cc-t">Disciplines that must review</div>
+        <div class="cc-t">Other disciplines that must review</div>
         <div class="cc-tools">
           <button class="chip" onclick="event.stopPropagation();exportDiscReport('B')">⤓ Report</button></div>
       </div>
-      <div class="cc-top"><div class="cc-sub">From columns AC–CT. A discipline marked <b>FOR REVIEW</b> with no
-        date in its closed-date column is still pending; N/A and for-information entries are ignored.</div></div>
+      <div class="cc-top"><div class="cc-sub">From columns AC–CT, excluding your own discipline — its queue is
+        the <b>Waiting on</b> row on the left. A discipline marked <b>FOR REVIEW</b> with no date in its
+        closed-date column is still pending; N/A and for-information entries are ignored.</div></div>
       <div class="cc-body">
         <div class="chartbox" id="dboxB" onclick="toggleBlock('B','disc')">
           <span class="cue">click for progress by discipline →</span>
@@ -1847,12 +1869,16 @@ function discStatsFor(allDocs){
   const docs=allDocs.filter(d=>!noAction(d));
   docs.forEach(d=>d.latest.depts.forEach(x=>{
     if(!x.review) return;
+    /* Our own discipline already has a card of its own on the left, and the
+       stuck strip names what it still owes; repeating it here says the same
+       thing twice.  This chart is about everybody else. */
+    if(x.name===S.disc) return;
     const e=(by[x.name]=by[x.name]||{name:x.name,total:0,closed:0,pending:0,ownDocs:0,mineDone:0});
     e.total++; if(x.closed) e.closed++; else e.pending++;
     if(x.originator) e.ownDocs++;
     /* of what this discipline still owes, how much is already cleared our side —
        i.e. how many documents are waiting on them and nobody else */
-    if(!x.closed && x.name!==S.disc && !d.myOpen) e.mineDone++;
+    if(!x.closed && !d.myOpen) e.mineDone++;
   }));
   const list=Object.values(by).sort((a,b)=>b.total-a.total);
   list.forEach((e,i)=>{ e.col=CODE_PALETTE[i%CODE_PALETTE.length];
@@ -1968,6 +1994,7 @@ function renderHalf(id){
       circulating.`;
   } else an.style.display='none';
 
+  syncNotes(id);
   renderStuck(id);
 
   $('mini'+id).innerHTML=[
@@ -2022,7 +2049,7 @@ function renderHalf(id){
 
   /* ── chart 2: disciplines that still owe a review ────────────────────── */
   if(!ds.total){
-    $('ddw'+id).innerHTML='<div class="half-empty">No discipline is marked FOR REVIEW<br>on these documents.</div>';
+    $('ddw'+id).innerHTML='<div class="half-empty">No other discipline is marked FOR REVIEW<br>on these documents — your discipline<br>is the only reviewer.</div>';
     $('dmin'+id).innerHTML=''; $('dov'+id).innerHTML=''; $('dbt'+id).innerHTML='';
     $('dbox'+id).style.pointerEvents='none';
     return;
@@ -2058,7 +2085,7 @@ function renderHalf(id){
   const doneDisc=ds.list.length-STAT[id].pendDisc;
   $('dbt'+id).innerHTML=`<div class="bt-h">Progress by discipline${actD?' — outstanding only':''}</div>`+
     (discRows.length? discRows.map(e=>`<div class="trow wide${actD?' act':''}">
-      <div class="tc"><div class="c1 nm">${esc(e.name)}${e.name===S.disc?'<span class="you">YOU</span>':''}</div>
+      <div class="tc"><div class="c1 nm">${esc(e.name)}</div>
         <div class="c2">${e.total} to review · ${e.pending} pending${
           e.mineDone?' · <b>'+e.mineDone+'</b> already cleared by '+esc(S.disc||'you')+
             ', waiting only on them':''}</div></div>
@@ -2066,12 +2093,18 @@ function renderHalf(id){
       <div class="pv ${e.pct?'':'zero'}">${e.pct}%</div>
       ${actD?`<button class="actbtn" onclick="event.stopPropagation();openAction('${id}','disc','${esc(e.name).replace(/'/g,"\\'")}',event)">Take action</button>`:''}
     </div>`).join('')
-    : '<div class="done-note">Every discipline has closed its review.</div>')+
+    : '<div class="done-note">Every other discipline has closed its review.</div>')+
     (actD && doneDisc? `<div class="done-note">${doneDisc} discipline${doneDisc>1?'s have':' has'} closed everything and ${doneDisc>1?'are':'is'} hidden.</div>`:'')+
     (actD && discRows.length? `<div class="allact"><span class="lbl2">Everything outstanding across these ${discRows.length} disciplines</span>
       <button class="actbtn big" onclick="event.stopPropagation();openAction('${id}','alldisc','')">⚑ Take action on all</button></div>`:'');
 }
-/* The three-way split of the circulating documents, told plainly. */
+/* The three-way split of the circulating documents, on the same grid as the
+   rest of the card so the bars and the buttons line up. */
+const STUCK_ROWS = [
+  {k:'you',     cls:'sk-you',     col:'#D9922E'},
+  {k:'others',  cls:'sk-others',  col:'#2563EB'},
+  {k:'release', cls:'sk-release', col:'#2E9E6B'}
+];
 function renderStuck(id){
   const sk=$('sk'+id); if(!sk) return;
   const sq=stuckFor(halfDocs(id));
@@ -2080,25 +2113,41 @@ function renderStuck(id){
   sk.style.display='';
   const act=S.sheet==='action', me=S.disc||'your discipline';
   const who=Object.entries(sq.blockers).sort((a,b)=>b[1]-a[1])
-    .map(([n,c])=>esc(n)+' <b>('+c+')</b>').join(' · ');
-  const tile=(k,cls,ic,n,label,sub)=> n? `<div class="sk-t ${cls}">
-      <div class="sk-ic">${ic}</div><div class="sk-n">${n}</div>
-      <div class="sk-b"><div class="sk-l">${label}</div><div class="sk-s">${sub}</div></div>
-      ${act?`<button class="actbtn" onclick="event.stopPropagation();openAction('${id}','stuck','${k}',event)">Take action</button>`:''}
-    </div>` : '';
+    .map(([n,c])=>esc(n)+' ('+c+')').join(', ');
+  const T={
+    you    :{t:'Waiting on '+esc(me),                       s:'your review is not closed yet'},
+    others :{t:'Reviewed by '+esc(me)+' — waiting on others', s:'open with '+(who||'—')},
+    release:{t:'Ready to release to the vendor',            s:'every discipline has signed off — nothing is blocking it'}
+  };
+  const bar=r=>`<div class="sk-bar"><i style="width:${sq[r.k]/sq.total*100}%;background:${r.col}"
+      title="${esc(T[r.k].t)}: ${sq[r.k]} of ${sq.total}"></i></div>`;
   sk.innerHTML=
-    `<div class="sk-h">Circulating — where is it stuck?
-       <b>${sq.total}</b> document${sq.total===1?'':'s'} out for review</div>`+
-    tile('you','you','⏳',sq.you, 'Waiting on '+esc(me),
-      'Your review is not closed yet — this is the queue on your own desk.')+
-    tile('others','others','⇄',sq.others, 'Reviewed by '+esc(me)+', waiting on others',
-      'You are done. Still open with: '+(who||'—')+
-      '. Chase them and these can be released.')+
-    tile('release','release','✅',sq.release, 'Ready to release to the vendor',
-      'Every discipline has closed its review and nothing is blocking these — '+
-      'they are only still sitting in the circuit.')+
-    `<div class="sk-sum"><b>${sq.total}</b> circulating = <b>${sq.you}</b> with ${esc(me)} + `+
-    `<b>${sq.others}</b> with other disciplines + <b>${sq.release}</b> ready to release</div>`;
+    `<div class="bt-h">Circulating — where is it stuck?</div>`+
+    STUCK_ROWS.filter(r=>sq[r.k]).map(r=>`<div class="trow${act?' act':''} sk-r ${r.cls}">
+      <div class="tc" title="${T[r.k].t} — ${sq[r.k]} of ${sq.total} circulating · ${T[r.k].s}">
+        <div class="c1 nm">${T[r.k].t}</div>
+        <div class="c2">${sq[r.k]} of ${sq.total} circulating · ${T[r.k].s}</div></div>
+      ${bar(r)}
+      <div class="pv" title="${sq[r.k]} of ${sq.total} circulating">${sq[r.k]}</div>
+      ${act?`<button class="actbtn" onclick="event.stopPropagation();openAction('${id}','stuck','${r.k}',event)">Take action</button>`:''}
+    </div>`).join('')+
+    `<div class="sk-sum"><b>${sq.total}</b> circulating = <b>${sq.you}</b> with ${esc(me)}
+      + <b>${sq.others}</b> with other disciplines + <b>${sq.release}</b> ready to release</div>`;
+}
+
+/* The counting caveats live behind a disclosure: true, but not the job. */
+function toggleNotes(id){
+  const w=$('nd'+id), b=$('nb'+id);
+  const open=w.classList.toggle('open');
+  b.hidden=!open;
+}
+function syncNotes(id){
+  const w=$('nd'+id), b=$('nb'+id);
+  const n=[...b.querySelectorAll('.cb-note')].filter(e=>e.style.display!=='none').length;
+  w.style.display = n? '' : 'none';
+  if(!n){ w.classList.remove('open'); b.hidden=true; return; }
+  $('nt'+id).textContent = n===1 ? '1 note on how these numbers are counted'
+                                 : n+' notes on how these numbers are counted';
 }
 
 function resetCodes(id){
