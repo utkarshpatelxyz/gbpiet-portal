@@ -546,12 +546,16 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
    so the bars and the Take action buttons line up with every other row */
 .stuck{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
 .stuck .bt-h{margin-bottom:2px}
-.stuck .trow.sk-r{grid-template-columns:232px 1fr 42px}
-.stuck .trow.sk-r.act{grid-template-columns:232px 1fr 42px 78px}
+/* the strip sits under the discipline list, so both use the same first column */
+.ccard[data-c="disc"] .trow.wide{grid-template-columns:250px 1fr 42px}
+.ccard[data-c="disc"] .trow.wide.act{grid-template-columns:250px 1fr 42px 78px}
+.stuck .trow.sk-r{grid-template-columns:250px 1fr 42px}
+.stuck .trow.sk-r.act{grid-template-columns:250px 1fr 42px 78px}
 .sk-r{border-left:3px solid var(--c);padding-left:9px;margin-left:-1px}
 .sk-r .c1{font-size:11px;color:var(--c)}
 .sk-r .c2{font-size:9.5px}
-.sk-r.sk-you{--c:#D9922E}.sk-r.sk-others{--c:#2563EB}.sk-r.sk-release{--c:#2E9E6B}
+.sk-r.sk-others{--c:#2563EB}.sk-r.sk-release{--c:#2E9E6B}
+.trow.sk-mine{background:#F7FAFF;border-radius:7px}
 .sk-r .pv{color:var(--c);font-size:13px}
 .sk-bar{display:flex;height:14px;border-radius:4px;overflow:hidden;background:var(--line2)}
 .sk-bar i{display:block;height:100%}
@@ -962,7 +966,6 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
           <div class="cb-note act2" id="anA" style="display:none"></div>
         </div>
       </div>
-      <div class="stuck" id="skA" style="display:none"></div>
       <div class="bytype" id="btA"></div>
     </article>
     <article class="ccard" data-h="B" data-c="codes" id="cardB-codes">
@@ -993,19 +996,19 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
           <div class="cb-note act2" id="anB" style="display:none"></div>
         </div>
       </div>
-      <div class="stuck" id="skB" style="display:none"></div>
       <div class="bytype" id="btB"></div>
     </article>
     <article class="ccard" data-h="A" data-c="disc" id="cardA-disc">
       <div class="cc-h">
         <span class="cc-badge all">FULL PO</span>
-        <div class="cc-t">Other disciplines that must review</div>
+        <div class="cc-t">Disciplines that must review</div>
         <div class="cc-tools">
           <button class="chip" onclick="event.stopPropagation();exportDiscReport('A')">⤓ Report</button></div>
       </div>
-      <div class="cc-top"><div class="cc-sub">From columns AC–CT, excluding your own discipline — its queue is
-        the <b>Waiting on</b> row on the left. A discipline marked <b>FOR REVIEW</b> with no date in its
-        closed-date column is still pending; N/A and for-information entries are ignored.</div></div>
+      <div class="cc-top"><div class="cc-sub">From columns AC–CT. A discipline marked <b>FOR REVIEW</b> with no
+        date in its closed-date column is still pending; N/A and for-information entries are ignored.
+        <b style="color:#2563EB">Blue</b> in a bar is the part you have already cleared — waiting on them
+        alone.</div></div>
       <div class="cc-body">
         <div class="chartbox" id="dboxA" onclick="toggleBlock('A','disc')">
           <span class="cue">click for progress by discipline →</span>
@@ -1015,17 +1018,19 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
       </div>
       <div class="pblock" id="dovA"></div>
       <div class="bytype" id="dbtA"></div>
+      <div class="stuck" id="skA" style="display:none"></div>
     </article>
     <article class="ccard" data-h="B" data-c="disc" id="cardB-disc">
       <div class="cc-h">
         <span class="cc-badge rev">FOR REVIEW - ORIGINATOR</span>
-        <div class="cc-t">Other disciplines that must review</div>
+        <div class="cc-t">Disciplines that must review</div>
         <div class="cc-tools">
           <button class="chip" onclick="event.stopPropagation();exportDiscReport('B')">⤓ Report</button></div>
       </div>
-      <div class="cc-top"><div class="cc-sub">From columns AC–CT, excluding your own discipline — its queue is
-        the <b>Waiting on</b> row on the left. A discipline marked <b>FOR REVIEW</b> with no date in its
-        closed-date column is still pending; N/A and for-information entries are ignored.</div></div>
+      <div class="cc-top"><div class="cc-sub">From columns AC–CT. A discipline marked <b>FOR REVIEW</b> with no
+        date in its closed-date column is still pending; N/A and for-information entries are ignored.
+        <b style="color:#2563EB">Blue</b> in a bar is the part you have already cleared — waiting on them
+        alone.</div></div>
       <div class="cc-body">
         <div class="chartbox" id="dboxB" onclick="toggleBlock('B','disc')">
           <span class="cue">click for progress by discipline →</span>
@@ -1035,6 +1040,7 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
       </div>
       <div class="pblock" id="dovB"></div>
       <div class="bytype" id="dbtB"></div>
+      <div class="stuck" id="skB" style="display:none"></div>
     </article>
   </div>
 
@@ -1869,16 +1875,14 @@ function discStatsFor(allDocs){
   const docs=allDocs.filter(d=>!noAction(d));
   docs.forEach(d=>d.latest.depts.forEach(x=>{
     if(!x.review) return;
-    /* Our own discipline already has a card of its own on the left, and the
-       stuck strip names what it still owes; repeating it here says the same
-       thing twice.  This chart is about everybody else. */
-    if(x.name===S.disc) return;
-    const e=(by[x.name]=by[x.name]||{name:x.name,total:0,closed:0,pending:0,ownDocs:0,mineDone:0});
+    const e=(by[x.name]=by[x.name]||{name:x.name,total:0,closed:0,pending:0,ownDocs:0,mineDone:0,
+                                      mine:x.name===S.disc});
     e.total++; if(x.closed) e.closed++; else e.pending++;
     if(x.originator) e.ownDocs++;
-    /* of what this discipline still owes, how much is already cleared our side —
-       i.e. how many documents are waiting on them and nobody else */
-    if(!x.closed && !d.myOpen) e.mineDone++;
+    /* Of what this discipline still owes, how much have we already cleared —
+       reviews that are waiting on them and on nobody else.  Meaningless for our
+       own row, where "cleared by us" is the same thing as closed. */
+    if(!x.closed && !d.myOpen && x.name!==S.disc) e.mineDone++;
   }));
   const list=Object.values(by).sort((a,b)=>b.total-a.total);
   list.forEach((e,i)=>{ e.col=CODE_PALETTE[i%CODE_PALETTE.length];
@@ -1995,7 +1999,7 @@ function renderHalf(id){
   } else an.style.display='none';
 
   syncNotes(id);
-  renderStuck(id);
+  renderStuck(id);      // fills STAT[id].sq, which the discipline rows read
 
   $('mini'+id).innerHTML=[
     ['', st.total, 'documents'],
@@ -2049,7 +2053,7 @@ function renderHalf(id){
 
   /* ── chart 2: disciplines that still owe a review ────────────────────── */
   if(!ds.total){
-    $('ddw'+id).innerHTML='<div class="half-empty">No other discipline is marked FOR REVIEW<br>on these documents — your discipline<br>is the only reviewer.</div>';
+    $('ddw'+id).innerHTML='<div class="half-empty">No discipline is marked FOR REVIEW<br>on these documents.</div>';
     $('dmin'+id).innerHTML=''; $('dov'+id).innerHTML=''; $('dbt'+id).innerHTML='';
     $('dbox'+id).style.pointerEvents='none';
     return;
@@ -2080,28 +2084,34 @@ function renderHalf(id){
       <span class="li"><span class="dot" style="background:#D4574E"></span>Still pending <b>${ds.pending.toLocaleString()}</b></span>
       <span class="li" style="color:var(--muted)">across ${ds.docs.toLocaleString()} documents</span></div>`;
   const actD=S.sheet==='action';
+  const sq=(STAT[id]||{}).sq||{you:0,others:0,release:0,total:0};
   const discRows = actD ? ds.list.filter(e=>e.pending>0) : ds.list;
   STAT[id].pendDisc=ds.list.filter(e=>e.pending>0).length;
   const doneDisc=ds.list.length-STAT[id].pendDisc;
   $('dbt'+id).innerHTML=`<div class="bt-h">Progress by discipline${actD?' — outstanding only':''}</div>`+
-    (discRows.length? discRows.map(e=>`<div class="trow wide${actD?' act':''}">
-      <div class="tc"><div class="c1 nm">${esc(e.name)}</div>
+    (discRows.length? discRows.map(e=>`<div class="trow wide${actD?' act':''}${e.mine?' sk-mine':''}">
+      <div class="tc"><div class="c1 nm">${esc(e.name)}${e.mine?'<span class="you">YOU</span>':''}</div>
         <div class="c2">${e.total} to review · ${e.pending} pending${
-          e.mineDone?' · <b>'+e.mineDone+'</b> already cleared by '+esc(S.disc||'you')+
-            ', waiting only on them':''}</div></div>
-      ${dbar(e.closed, e.pending)}
+          e.mine && sq.you ? ' · <b>'+sq.you+'</b> of the '+sq.total+' circulating are waiting on you'
+          : e.mineDone ? ' · <b style="color:#2563EB">'+e.mineDone+'</b> waiting only on them'
+          : ''}</div></div>
+      ${dbar(e.closed, e.pending, e.mineDone)}
       <div class="pv ${e.pct?'':'zero'}">${e.pct}%</div>
       ${actD?`<button class="actbtn" onclick="event.stopPropagation();openAction('${id}','disc','${esc(e.name).replace(/'/g,"\\'")}',event)">Take action</button>`:''}
     </div>`).join('')
-    : '<div class="done-note">Every other discipline has closed its review.</div>')+
+    : '<div class="done-note">Every discipline has closed its review.</div>')+
     (actD && doneDisc? `<div class="done-note">${doneDisc} discipline${doneDisc>1?'s have':' has'} closed everything and ${doneDisc>1?'are':'is'} hidden.</div>`:'')+
     (actD && discRows.length? `<div class="allact"><span class="lbl2">Everything outstanding across these ${discRows.length} disciplines</span>
       <button class="actbtn big" onclick="event.stopPropagation();openAction('${id}','alldisc','')">⚑ Take action on all</button></div>`:'');
 }
-/* The three-way split of the circulating documents, on the same grid as the
-   rest of the card so the bars and the buttons line up. */
+/* What the circulating documents are waiting on, told beside the disciplines
+   that are holding them.
+
+   "Waiting on you" is not repeated here — it is the YOU row in the list above,
+   and its pending count is the same number.  These two states are the ones no
+   discipline row can carry: the work we have finished is spread across several
+   disciplines, and the work that is ready to release is held by nobody at all. */
 const STUCK_ROWS = [
-  {k:'you',     cls:'sk-you',     col:'#D9922E'},
   {k:'others',  cls:'sk-others',  col:'#2563EB'},
   {k:'release', cls:'sk-release', col:'#2E9E6B'}
 ];
@@ -2115,24 +2125,29 @@ function renderStuck(id){
   const who=Object.entries(sq.blockers).sort((a,b)=>b[1]-a[1])
     .map(([n,c])=>esc(n)+' ('+c+')').join(', ');
   const T={
-    you    :{t:'Waiting on '+esc(me),                       s:'your review is not closed yet'},
-    others :{t:'Reviewed by '+esc(me)+' — waiting on others', s:'open with '+(who||'—')},
-    release:{t:'Ready to release to the vendor',            s:'every discipline has signed off — nothing is blocking it'}
+    others :{t:'Reviewed by '+esc(me)+' — waiting on others',
+             s:'the blue above · '+(who||'—')},
+    release:{t:'Ready to release to the vendor',
+             s:'every discipline has signed off — nothing is blocking it'}
   };
   const bar=r=>`<div class="sk-bar"><i style="width:${sq[r.k]/sq.total*100}%;background:${r.col}"
-      title="${esc(T[r.k].t)}: ${sq[r.k]} of ${sq.total}"></i></div>`;
+      title="${esc(T[r.k].t)}: ${sq[r.k]} of ${sq.total} circulating"></i></div>`;
+  const rows=STUCK_ROWS.filter(r=>sq[r.k]);
   sk.innerHTML=
     `<div class="bt-h">Circulating — where is it stuck?</div>`+
-    STUCK_ROWS.filter(r=>sq[r.k]).map(r=>`<div class="trow${act?' act':''} sk-r ${r.cls}">
+    (rows.length? rows.map(r=>`<div class="trow${act?' act':''} sk-r ${r.cls}">
       <div class="tc" title="${T[r.k].t} — ${sq[r.k]} of ${sq.total} circulating · ${T[r.k].s}">
         <div class="c1 nm">${T[r.k].t}</div>
         <div class="c2">${sq[r.k]} of ${sq.total} circulating · ${T[r.k].s}</div></div>
       ${bar(r)}
       <div class="pv" title="${sq[r.k]} of ${sq.total} circulating">${sq[r.k]}</div>
       ${act?`<button class="actbtn" onclick="event.stopPropagation();openAction('${id}','stuck','${r.k}',event)">Take action</button>`:''}
-    </div>`).join('')+
-    `<div class="sk-sum"><b>${sq.total}</b> circulating = <b>${sq.you}</b> with ${esc(me)}
-      + <b>${sq.others}</b> with other disciplines + <b>${sq.release}</b> ready to release</div>`;
+    </div>`).join('')
+    : '<div class="done-note">Everything circulating is waiting on '+esc(me)+'.</div>')+
+    `<div class="sk-sum"><b>${sq.total}</b> circulating =
+      <b>${sq.you}</b> waiting on ${esc(me)} (the <b>YOU</b> row above)
+      + <b>${sq.others}</b> waiting on other disciplines
+      + <b>${sq.release}</b> ready to release</div>`;
 }
 
 /* The counting caveats live behind a disclosure: true, but not the job. */
@@ -2162,12 +2177,17 @@ function sbar(bands, total){
     return `<i style="width:${v/total*100}%;background:${b.col}" title="${esc(b.label)}: ${v}"></i>`;
   }).join('')+`</div>`;
 }
-/* closed vs pending, for the discipline view */
-function dbar(closed, pending){
-  const t=(closed+pending)||1;
+/* closed vs pending, for the discipline view.  `only` is the slice of the
+   pending that we have already cleared our side — it is drawn in the same blue
+   as the "waiting on others" row, because it is literally the same documents. */
+function dbar(closed, pending, only){
+  only=Math.min(only||0, pending);
+  const both=pending-only, t=(closed+pending)||1;
   return `<div class="sbar">
-    <i style="width:${closed/t*100}%;background:#2E9E6B" title="Review closed: ${closed}"></i>
-    <i style="width:${pending/t*100}%;background:#D4574E" title="Still pending: ${pending}"></i></div>`;
+    <i style="width:${closed/t*100}%;background:#2E9E6B" title="Review closed: ${closed}"></i>${
+    only? `<i style="width:${only/t*100}%;background:#2563EB" title="Waiting only on them — ${esc(S.disc||'you')} has closed: ${only}"></i>`:''}${
+    both? `<i style="width:${both/t*100}%;background:#D4574E" title="${
+      only? 'Still pending on both sides' : 'Still pending'}: ${both}"></i>`:''}</div>`;
 }
 
 /* flat donut, drawn as SVG arcs so slices stay crisp and hoverable */
