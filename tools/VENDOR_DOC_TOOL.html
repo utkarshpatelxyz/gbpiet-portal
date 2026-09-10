@@ -504,8 +504,22 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 @media(max-width:1060px){.statgrid{grid-template-columns:1fr}}
 .ccard{background:var(--sf);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh1);
   padding:14px 16px 16px;min-width:0}
-.ccard[data-h="A"]{border-top:3px solid var(--blue)}
-.ccard[data-h="B"]{border-top:3px solid var(--dang)}
+/* Each half carries a wash of its own colour, so the pair that belongs
+   together is one block at a glance and not four cards in a row.  The tint is
+   kept faint enough that the white tiles, notes and rows inside still read as
+   raised on top of it. */
+.ccard[data-h="A"]{border-top:3px solid var(--blue);background:#F7FAFF;border-color:#DCE7F8}
+.ccard[data-h="B"]{border-top:3px solid var(--dang);background:#FFF9F8;border-color:#F4DEDB}
+.ccard[data-h="A"] .mini .m,.ccard[data-h="A"] .notes-t{background:#FFFFFF;border-color:#DCE7F8}
+.ccard[data-h="B"] .mini .m,.ccard[data-h="B"] .notes-t{background:#FFFFFF;border-color:#F4DEDB}
+
+/* In the combined view the four charts read as two rows of a pair each:
+   the whole purchase order on top, what this discipline owns underneath —
+   the same left-right pairing the single tabs use. */
+.statgrid:not(.single) .ccard[data-h="A"][data-c="codes"]{order:1}
+.statgrid:not(.single) .ccard[data-h="A"][data-c="disc"] {order:2}
+.statgrid:not(.single) .ccard[data-h="B"][data-c="codes"]{order:3}
+.statgrid:not(.single) .ccard[data-h="B"][data-c="disc"] {order:4}
 .cc-h{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:7px}
 .cc-badge{font-size:8.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:3px 8px;border-radius:20px}
 .cc-badge.all{background:#E8F0FE;color:#1A4FBF}
@@ -666,6 +680,11 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .statgrid .ccard:nth-child(2){animation-delay:.06s}
 .statgrid .ccard:nth-child(3){animation-delay:.12s}
 .statgrid .ccard:nth-child(4){animation-delay:.18s}
+/* ...and in the combined view the reading order is the ordered one */
+.statgrid:not(.single) .ccard[data-h="A"][data-c="codes"]{animation-delay:0s}
+.statgrid:not(.single) .ccard[data-h="A"][data-c="disc"] {animation-delay:.06s}
+.statgrid:not(.single) .ccard[data-h="B"][data-c="codes"]{animation-delay:.12s}
+.statgrid:not(.single) .ccard[data-h="B"][data-c="disc"] {animation-delay:.18s}
 @keyframes screenIn{from{opacity:0;transform:translateY(8px)}}
 .screen.on{animation:screenIn .32s var(--ease)}
 /* Nothing re-animates on a filter change, and the hero bar never animates
@@ -2317,14 +2336,24 @@ function toggleBlock(id, which){ $('card'+id+'-'+which).classList.toggle('open')
 /* The two cards in a row carry different amounts of explanatory text, which
    would otherwise leave their donuts at different heights.  Match the header
    zones so both charts, and everything under them, sit on the same line. */
+/* The two cards sitting side by side are a half's own pair — documents by type
+   next to the disciplines reviewing them — in the single tabs and, since the
+   combined view is ordered into a row per half, there too.  Level their
+   intro blocks so the two donuts start on the same line. */
 function alignCards(){
-  ['codes','disc'].forEach(kind=>{
-    const tops=['A','B'].map(i=>{ const c=$('card'+i+'-'+kind);
-      return (c && c.style.display!=='none') ? c.querySelector('.cc-top') : null; }).filter(Boolean);
-    tops.forEach(t=>t.style.minHeight='');
-    if(tops.length<2) return;
-    const h=Math.max(...tops.map(t=>t.offsetHeight));
-    tops.forEach(t=>t.style.minHeight=h+'px');
+  ['A','B'].forEach(half=>{
+    const cards=['codes','disc'].map(kind=>$('card'+half+'-'+kind))
+      .filter(c=>c && c.style.display!=='none');
+    /* The pair no longer shares a header shape — one carries the document-type
+       picker — so the title row is levelled as well as the intro block.
+       Every override is cleared before anything is measured: reading a height
+       while a previous minHeight is still applied measures the old layout and
+       leaves the pair a pixel or two apart. */
+    const sels=['.cc-h','.cc-top'];
+    const groups=sels.map(sel=>cards.map(c=>c.querySelector(sel)).filter(Boolean));
+    groups.forEach(els=>els.forEach(e=>e.style.minHeight=''));
+    const want=groups.map(els=>els.length<2 ? null : Math.max(...els.map(e=>e.offsetHeight)));
+    groups.forEach((els,i)=>{ if(want[i]!=null) els.forEach(e=>e.style.minHeight=want[i]+'px'); });
   });
 }
 window.alignCards=alignCards;
@@ -2370,7 +2399,7 @@ function setTab(v){
   document.querySelectorAll('.ccard').forEach(c=>{
     c.style.display = (v==='all' || c.dataset.h===v) ? '' : 'none'; });
   $('statgrid').classList.toggle('single', v!=='all');
-  requestAnimationFrame(alignCards);
+  requestAnimationFrame(()=>{ alignCards(); requestAnimationFrame(alignCards); });
   if(S.sheet==='perf' && typeof renderPerf==='function') renderPerf();
   const A=(STAT.A||{}).st, B=(STAT.B||{}).st;
   $('tabnote').innerHTML =
