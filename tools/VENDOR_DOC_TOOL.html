@@ -530,6 +530,7 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
   min-width:44px}
 .mini .m .l{font-size:10px;font-weight:700;color:var(--muted)}
 .mini .m.ok .n{color:var(--ok)}.mini .m.warn .n{color:var(--warn)}.mini .m.dang .n{color:var(--dang)}
+.mini .m.blue2 .n{color:#2563EB}
 
 .cb-note{font-size:10px;color:var(--muted);font-weight:600;margin-bottom:8px;line-height:1.5}
 .cb-note b{color:var(--ink)}
@@ -966,6 +967,7 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
           <div class="cb-note act2" id="anA" style="display:none"></div>
         </div>
       </div>
+      <div class="stuck" id="scA" style="display:none"></div>
       <div class="bytype" id="btA"></div>
     </article>
     <article class="ccard" data-h="B" data-c="codes" id="cardB-codes">
@@ -996,6 +998,7 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
           <div class="cb-note act2" id="anB" style="display:none"></div>
         </div>
       </div>
+      <div class="stuck" id="scB" style="display:none"></div>
       <div class="bytype" id="btB"></div>
     </article>
     <article class="ccard" data-h="A" data-c="disc" id="cardA-disc">
@@ -1788,20 +1791,31 @@ const stShort = st => STATUS_SHORT[String(st||'').toUpperCase()] || String(st||'
    revision, from DOCUMENT STATUS (column W).
    ────────────────────────────────────────────────────────────────────────── */
 
-/* The statuses the report cares about; "reviewed without comments" is closed. */
+/* The statuses the report cares about; "reviewed without comments" is closed.
+
+   Circulating is two very different things wearing one word.  A document out
+   for review may be sitting on this discipline's desk untouched, or it may have
+   been reviewed and signed off here and be waiting on somebody else.  One amber
+   band for both reads as "all of these need your review", which is the opposite
+   of the truth for half of them — so the band is split, and blue means the ball
+   is in somebody else's court. */
 const BANDS = [
-  {key:'without', label:'Reviewed without comments',        col:'#2E9E6B'},
-  {key:'minor',   label:'Reviewed with minor comments',     col:'#8FBF4E'},
-  {key:'major',   label:'Reviewed with major comments',     col:'#E07A3C'},
-  {key:'circ',    label:'Circulating — action required',    col:'#D9922E'},
-  {key:'other',   label:'Never received / rejected',        col:'#9CA9B7'}
+  {key:'without',  label:'Reviewed without comments',            col:'#2E9E6B'},
+  {key:'minor',    label:'Reviewed with minor comments',         col:'#8FBF4E'},
+  {key:'major',    label:'Reviewed with major comments',         col:'#E07A3C'},
+  {key:'circDone', label:'Circulating — your part is done',       col:'#2563EB'},
+  {key:'circMine', label:'Circulating — awaiting your review',   col:'#D9922E'},
+  {key:'other',    label:'Never received / rejected',            col:'#9CA9B7'}
 ];
-function statusBand(st){
-  const t=String(st||'').toUpperCase();
+const ZERO_BANDS = () => ({without:0,minor:0,major:0,circDone:0,circMine:0,other:0});
+/* Takes the document, not just its status: which half of the circulating band
+   it falls in depends on whether our own review is closed. */
+function statusBand(d){
+  const t=String(d&&d.status!==undefined?d.status:d||'').toUpperCase();
   if(t==='REVIEWED WITHOUT COMMENTS')    return 'without';
   if(t==='REVIEWED WITH MINOR COMMENTS') return 'minor';
   if(t==='REVIEWED WITH MAJOR COMMENTS') return 'major';
-  if(t==='CIRCULATING')                  return 'circ';
+  if(t==='CIRCULATING')                  return (d && d.stuck==='you') ? 'circMine' : 'circDone';
   return 'other';
 }
 const CODE_PALETTE = ['#2563EB','#0EA5A4','#7C3AED','#DB2777','#D9922E','#2E9E6B','#E07A3C','#3B82F6',
@@ -1823,13 +1837,15 @@ function statsFor(allDocs){
     .filter(c=>!docs.some(d=>(d.code||'(no code)')===c));
   const by={};
   docs.forEach(d=>{ const c=d.code||'(no code)';
-    (by[c]=by[c]||{code:c,desc:d.codeDesc||'',total:0,bands:{without:0,minor:0,major:0,circ:0,other:0}});
-    by[c].total++; by[c].bands[statusBand(d.status)]++; });
+    (by[c]=by[c]||{code:c,desc:d.codeDesc||'',total:0,bands:ZERO_BANDS()});
+    by[c].total++; by[c].bands[statusBand(d)]++; });
   const byCode=Object.values(by).sort((a,b)=>b.total-a.total);
   byCode.forEach((c,i)=>{ c.col=CODE_PALETTE[i%CODE_PALETTE.length];
                           c.pct=Math.round(c.bands.without/c.total*100); });
-  const totals={without:0,minor:0,major:0,circ:0,other:0};
-  docs.forEach(d=>totals[statusBand(d.status)]++);
+  const totals=ZERO_BANDS();
+  docs.forEach(d=>totals[statusBand(d)]++);
+  totals.circ = totals.circDone + totals.circMine;      // the two halves together
+  byCode.forEach(c=>c.bands.circ = c.bands.circDone + c.bands.circMine);
   /* how many set-aside documents each surviving code carries, for disclosure */
   const vByCode={}; aside.forEach(d=>{ const c=d.code||'(no code)'; vByCode[c]=(vByCode[c]||0)+1; });
   byCode.forEach(c=>c.asideN=vByCode[c.code]||0);
@@ -1856,13 +1872,22 @@ function statsFor(allDocs){
    The last one is the valuable case — work already finished that nobody has
    noticed is finished. */
 function stuckFor(docs){
-  const out={you:0, others:0, release:0, total:0, blockers:{}};
+  const out={you:0, others:0, release:0, done:0, total:0, blockers:{},
+             codes:{you:{}, others:{}, release:{}}};
   docs.forEach(d=>{
     const k=d.circulating ? d.stuck : null; if(!k) return;
     out[k]++; out.total++;
+    const c=d.code||'(no code)'; out.codes[k][c]=(out.codes[k][c]||0)+1;
+    if(k!=='you') out.done++;              // our part is finished on these
     if(k==='others') d.othersOpen.forEach(n=>out.blockers[n]=(out.blockers[n]||0)+1);
   });
   return out;
+}
+/* "PLD-0001 (8), CAL-0005 (6), +3 more" */
+function topCodes(map, n){
+  const e=Object.entries(map).sort((a,b)=>b[1]-a[1]);
+  const head=e.slice(0,n).map(([c,v])=>esc(c)+' ('+v+')').join(', ');
+  return head + (e.length>n ? ', +'+(e.length-n)+' more' : '');
 }
 
 /* Which disciplines still owe a review on these documents.
@@ -1999,13 +2024,15 @@ function renderHalf(id){
   } else an.style.display='none';
 
   syncNotes(id);
-  renderStuck(id);      // fills STAT[id].sq, which the discipline rows read
+  renderStuck(id);        // fills STAT[id].sq, which the rows below read
+  renderStuckCodes(id);
 
   $('mini'+id).innerHTML=[
     ['', st.total, 'documents'],
     ['', st.byCode.length, 'document types'],
     ['ok', st.totals.without, 'closed'],
-    ['warn', st.totals.circ, 'circulating']
+    ['warn', st.totals.circMine, 'circulating · awaiting your review'],
+    ['blue2', st.totals.circDone, 'circulating · your part is done']
   ].map(([c,n,l])=>`<div class="m ${c}"><span class="n">${n.toLocaleString()}</span><span class="l">${l}</span></div>`).join('');
 
   /* ── chart 1: documents per document type ───────────────────────────── */
@@ -2084,7 +2111,7 @@ function renderHalf(id){
       <span class="li"><span class="dot" style="background:#D4574E"></span>Still pending <b>${ds.pending.toLocaleString()}</b></span>
       <span class="li" style="color:var(--muted)">across ${ds.docs.toLocaleString()} documents</span></div>`;
   const actD=S.sheet==='action';
-  const sq=(STAT[id]||{}).sq||{you:0,others:0,release:0,total:0};
+  const sq=(STAT[id]||{}).sq||{you:0,others:0,release:0,total:0,done:0};
   const discRows = actD ? ds.list.filter(e=>e.pending>0) : ds.list;
   STAT[id].pendDisc=ds.list.filter(e=>e.pending>0).length;
   const doneDisc=ds.list.length-STAT[id].pendDisc;
@@ -2092,10 +2119,10 @@ function renderHalf(id){
     (discRows.length? discRows.map(e=>`<div class="trow wide${actD?' act':''}${e.mine?' sk-mine':''}">
       <div class="tc"><div class="c1 nm">${esc(e.name)}${e.mine?'<span class="you">YOU</span>':''}</div>
         <div class="c2">${e.total} to review · ${e.pending} pending${
-          e.mine && sq.you ? ' · <b>'+sq.you+'</b> of the '+sq.total+' circulating are waiting on you'
+          e.mine ? (sq.done? ' · <b style="color:#2563EB">'+sq.done+'</b> reviewed, still circulating':'')
           : e.mineDone ? ' · <b style="color:#2563EB">'+e.mineDone+'</b> waiting only on them'
           : ''}</div></div>
-      ${dbar(e.closed, e.pending, e.mineDone)}
+      ${dbar(e.closed, e.pending, e.mine? sq.done : e.mineDone, e.mine)}
       <div class="pv ${e.pct?'':'zero'}">${e.pct}%</div>
       ${actD?`<button class="actbtn" onclick="event.stopPropagation();openAction('${id}','disc','${esc(e.name).replace(/'/g,"\\'")}',event)">Take action</button>`:''}
     </div>`).join('')
@@ -2115,6 +2142,41 @@ const STUCK_ROWS = [
   {k:'others',  cls:'sk-others',  col:'#2563EB'},
   {k:'release', cls:'sk-release', col:'#2E9E6B'}
 ];
+/* The same three states, cut by document type instead of by discipline — the
+   left card's currency is what kind of document, not who is holding it. */
+const STUCK_CODE_ROWS = [
+  {k:'you',     cls:'sk-you',     col:'#D9922E', t:'Awaiting your review',
+   s:'never touched on this revision'},
+  {k:'others',  cls:'sk-others',  col:'#2563EB', t:'Reviewed by you — waiting on others',
+   s:'your part is done'},
+  {k:'release', cls:'sk-release', col:'#2E9E6B', t:'Ready to release to the vendor',
+   s:'every discipline has signed off'}
+];
+function renderStuckCodes(id){
+  const sk=$('sc'+id); if(!sk) return;
+  const sq=(STAT[id]||{}).sq;
+  if(!sq || !sq.total){ sk.style.display='none'; sk.innerHTML=''; return; }
+  sk.style.display='';
+  const act=S.sheet==='action';
+  sk.innerHTML=
+    `<div class="bt-h">Circulating — where is it stuck?</div>`+
+    STUCK_CODE_ROWS.filter(r=>sq[r.k]).map(r=>{
+      const codes=topCodes(sq.codes[r.k],3);
+      return `<div class="trow${act?' act':''} sk-r ${r.cls}">
+      <div class="tc" title="${r.t} — ${sq[r.k]} of ${sq.total} circulating · ${r.s}">
+        <div class="c1 nm">${r.t}</div>
+        <div class="c2">${sq[r.k]} of ${sq.total} · ${codes}</div></div>
+      <div class="sk-bar"><i style="width:${sq[r.k]/sq.total*100}%;background:${r.col}"
+        title="${r.t}: ${sq[r.k]} of ${sq.total} circulating"></i></div>
+      <div class="pv" title="${sq[r.k]} of ${sq.total} circulating">${sq[r.k]}</div>
+      ${act?`<button class="actbtn" onclick="event.stopPropagation();openAction('${id}','stuck','${r.k}',event)">Take action</button>`:''}
+    </div>`;}).join('')+
+    `<div class="sk-sum"><b>${sq.total}</b> circulating =
+      <b style="color:#D9922E">${sq.you}</b> awaiting your review
+      + <b style="color:#2563EB">${sq.done}</b> you have already reviewed
+      (${sq.others} with other disciplines, ${sq.release} ready to release)</div>`;
+}
+
 function renderStuck(id){
   const sk=$('sk'+id); if(!sk) return;
   const sq=stuckFor(halfDocs(id));
@@ -2180,14 +2242,20 @@ function sbar(bands, total){
 /* closed vs pending, for the discipline view.  `only` is the slice of the
    pending that we have already cleared our side — it is drawn in the same blue
    as the "waiting on others" row, because it is literally the same documents. */
-function dbar(closed, pending, only){
-  only=Math.min(only||0, pending);
-  const both=pending-only, t=(closed+pending)||1;
-  return `<div class="sbar">
-    <i style="width:${closed/t*100}%;background:#2E9E6B" title="Review closed: ${closed}"></i>${
-    only? `<i style="width:${only/t*100}%;background:#2563EB" title="Waiting only on them — ${esc(S.disc||'you')} has closed: ${only}"></i>`:''}${
-    both? `<i style="width:${both/t*100}%;background:#D4574E" title="${
-      only? 'Still pending on both sides' : 'Still pending'}: ${both}"></i>`:''}</div>`;
+function dbar(closed, pending, only, fromClosed){
+  only=Math.min(only||0, fromClosed? closed : pending);
+  const green = fromClosed ? closed-only : closed;
+  const red   = fromClosed ? pending      : pending-only;
+  const t=(closed+pending)||1;
+  const blueTip = fromClosed
+    ? 'Reviewed by '+esc(S.disc||'you')+', document still circulating'
+    : 'Waiting only on them — '+esc(S.disc||'you')+' has closed';
+  return `<div class="sbar">${
+    green? `<i style="width:${green/t*100}%;background:#2E9E6B" title="Review closed${
+      fromClosed?' and out of the circuit':''}: ${green}"></i>`:''}${
+    only? `<i style="width:${only/t*100}%;background:#2563EB" title="${blueTip}: ${only}"></i>`:''}${
+    red? `<i style="width:${red/t*100}%;background:#D4574E" title="${
+      (only&&!fromClosed)? 'Still pending on both sides' : 'Still pending'}: ${red}"></i>`:''}</div>`;
 }
 
 /* flat donut, drawn as SVG arcs so slices stay crisp and hoverable */
@@ -3214,7 +3282,8 @@ function exportCodeReport(id){
   if(!st || !st.total) return alert('There is nothing in this chart to report on.');
   const hidden=halfBase(id).length-st.total;
   const head=['CODE','DESCRIPTION','DOCUMENTS','REVIEWED WITHOUT COMMENTS','REVIEWED WITH MINOR COMMENTS',
-    'REVIEWED WITH MAJOR COMMENTS','CIRCULATING','NEVER RECEIVED / REJECTED',
+    'REVIEWED WITH MAJOR COMMENTS','CIRCULATING - AWAITING YOUR REVIEW',
+    'CIRCULATING - YOU HAVE REVIEWED','NEVER RECEIVED / REJECTED',
     'NO ACTION (VOID / FOR INFORMATION / AS BUILT)','% CLOSED'];
   const aoa=reportHead(id,'DOCUMENTS BY TYPE',
     st.total.toLocaleString()+' documents · '+st.byCode.length+' types'+
@@ -3222,12 +3291,12 @@ function exportCodeReport(id){
     (hidden?' · '+hidden+' documents hidden by the type filter':''));
   aoa.push(head);
   st.byCode.forEach(c=>aoa.push([c.code,c.desc,c.total,c.bands.without,c.bands.minor,c.bands.major,
-    c.bands.circ,c.bands.other,c.asideN||0,c.pct/100]));
-  aoa.push(['TOTAL','',st.total,st.totals.without,st.totals.minor,st.totals.major,st.totals.circ,
-            st.totals.other,st.asideN,st.progress/100]);
+    c.bands.circMine,c.bands.circDone,c.bands.other,c.asideN||0,c.pct/100]));
+  aoa.push(['TOTAL','',st.total,st.totals.without,st.totals.minor,st.totals.major,st.totals.circMine,
+            st.totals.circDone,st.totals.other,st.asideN,st.progress/100]);
   const ws=XLSX.utils.aoa_to_sheet(aoa);
-  styleReport(ws,aoa,head,4,[14,42,12,14,14,14,12,16,18,10]);
-  for(let r=5;r<aoa.length;r++){ const k=XLSX.utils.encode_cell({r,c:9});
+  styleReport(ws,aoa,head,4,[14,42,12,14,14,14,16,16,16,18,10]);
+  for(let r=5;r<aoa.length;r++){ const k=XLSX.utils.encode_cell({r,c:10});
     if(ws[k]){ ws[k].t='n'; ws[k].z='0%'; } }
   const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Documents by type');
   XLSX.writeFile(wb,'Documents_by_type_'+String(S.po)+'_'+(id==='A'?'PO':'FOR_REVIEW')+'.xlsx',{cellStyles:true});
