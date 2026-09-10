@@ -666,6 +666,11 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .trow .c1.nm{font-family:var(--font);font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .trow .tc .c2{font-size:9px;color:var(--muted);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .trow .sbar{height:14px;border-radius:4px}
+/* a bar whose segments open the documents behind them */
+.sbar.live i{cursor:pointer;transition:filter .15s ease,transform .15s ease}
+.sbar.live:hover i{filter:saturate(.55) opacity(.78)}
+.sbar.live i:hover{filter:none;transform:scaleY(1.34)}
+.sbar.live{overflow:visible}
 .trow .pv{text-align:right;font-size:11px;font-weight:800;color:var(--ok);font-variant-numeric:tabular-nums}
 .trow .pv.zero{color:var(--muted)}
 .half-empty{padding:28px 14px;text-align:center;color:var(--muted);font-size:12px;font-weight:600;line-height:1.6}
@@ -1181,6 +1186,7 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
     <div class="ac-tools">
       <span class="lbl">Order by</span>
       <button class="chip on" id="acCrit">★ Critical first</button>
+      <button class="chip" id="acOver">⏰ Deadline crossed</button>
       <button class="chip" id="acRev">↕ Most revisions first</button>
       <span class="nav-sep" style="background:var(--line2);height:18px"></span>
       <button class="chip" id="acCirc">Circulating only</button>
@@ -2074,7 +2080,7 @@ function renderHalf(id){
     $('ov'+id).innerHTML=`
       <div class="pblock-h"><span class="t">Overall progress</span>
         <span class="v">${st.progress}% <small>${st.totals.without.toLocaleString()} of ${st.total.toLocaleString()} closed</small></span></div>
-      ${sbar(st.totals, st.total)}
+      ${sbar(st.totals, st.total, id, null)}
       <div class="sbar-lab">${BANDS.filter(b=>st.totals[b.key]).map(b=>
         `<span class="li"><span class="dot" style="background:${b.col}"></span>${esc(b.label)} <b>${st.totals[b.key].toLocaleString()}</b></span>`).join('')}</div>`;
     const act=S.sheet==='action';
@@ -2087,7 +2093,7 @@ function renderHalf(id){
         <div class="tc"><div class="c1">${esc(c.code)}${isCriticalCode(c)?'<span class="crit-tag">CRIT</span>':''}</div>
           <div class="c2" title="${esc(c.desc)}">${esc(c.desc||'')} · ${c.total} doc${c.total>1?'s':''}${
             c.asideN?' · '+c.asideN+' set aside':''}</div></div>
-        ${sbar(c.bands, c.total)}
+        ${sbar(c.bands, c.total, id, c.code)}
         <div class="pv ${c.pct?'':'zero'}">${c.pct}%</div>
         ${act?`<button class="actbtn" onclick="event.stopPropagation();openAction('${id}','code','${esc(c.code).replace(/'/g,"\\'")}',event)">Take action</button>`:''}
       </div>`).join('')
@@ -2253,9 +2259,15 @@ function resetCodes(id){
 }
 
 /* a stacked status bar: green closed first, circulating and unreceived last */
-function sbar(bands, total){
-  return `<div class="sbar">`+BANDS.map(b=>{ const v=bands[b.key]; if(!v) return '';
-    return `<i style="width:${v/total*100}%;background:${b.col}" title="${esc(b.label)}: ${v}"></i>`;
+/* Pass a half id to make the segments live: each one opens the documents it
+   represents.  The hero bar on the action page itself is drawn without one,
+   because it is already showing that list. */
+function sbar(bands, total, id, code){
+  return `<div class="sbar${id?' live':''}">`+BANDS.map(b=>{ const v=bands[b.key]; if(!v) return '';
+    const arg = code==null ? 'null' : "'"+String(code).replace(/'/g,"\\'")+"'";
+    return `<i style="width:${v/total*100}%;background:${b.col}"
+      title="${esc(b.label)}: ${v}${id?' — click to list them':''}"${
+      id? ` onclick="event.stopPropagation();openBand('${id}','${b.key}',${arg},event)"`:''}></i>`;
   }).join('')+`</div>`;
 }
 /* closed vs pending, for the discipline view.  `only` is the slice of the
@@ -2987,7 +2999,8 @@ window.exportProgressXlsx=exportProgressXlsx;
    general-arrangement drawings), and/or the most-revised documents first —
    with both on, critical documents lead, most-revised among them at the top.
    ────────────────────────────────────────────────────────────────────────── */
-const AC = { half:'A', kind:'code', key:'', crit:true, rev:false, circ:false, rows:[] };
+const AC = { half:'A', kind:'code', key:'', bandCode:null,
+             crit:true, over:false, rev:false, circ:false, rows:[] };
 
 /* the critical types: calculations and general arrangement drawings */
 function isCriticalCode(c){
@@ -2996,19 +3009,32 @@ function isCriticalCode(c){
 }
 function isCriticalDoc(d){ return isCriticalCode({code:d.code, desc:d.codeDesc}); }
 
+const bandMeta = k => BANDS.find(b=>b.key===k) || {label:k, col:'#8895A5'};
+function bandTitle(){
+  return bandMeta(AC.key).label + (AC.bandCode ? ' — '+AC.bandCode : '');
+}
 const STUCK_T = {
   you    : d => 'Circulating — waiting on '+(d||'you'),
   others : d => 'Circulating — reviewed by '+(d||'you')+', waiting on other disciplines',
   release: () => 'Reviewed by every discipline — ready to release to the vendor'
 };
+/* One band of one progress bar — the whole bar when code is null. */
+function openBand(half, key, code, ev){
+  AC.bandCode = code || null;
+  openAction(half, 'band', key, ev);
+}
 function openAction(half, kind, key, ev){
   AC.half=half; AC.kind=kind; AC.key=key;
-  AC.crit=true; AC.rev=false; AC.circ=false;
-  ['acCrit','acRev','acCirc'].forEach(id=>$(id).onclick=()=>toggleAc(id));
+  if(kind!=='band') AC.bandCode=null;
+  AC.crit=true; AC.over=false; AC.rev=false; AC.circ=false;
+  ['acCrit','acOver','acRev','acCirc'].forEach(id=>$(id).onclick=()=>toggleAc(id));
   /* take the bar the reader just pressed and carry it to the top of the next
      page, so it is obvious which progress they are acting on */
-  const src=(ev&&ev.target.closest('.trow')||document).querySelector? 
-    (ev&&ev.target.closest('.trow')? ev.target.closest('.trow').querySelector('.sbar') : null) : null;
+  const row = ev && ev.target.closest && ev.target.closest('.trow');
+  const src = !ev ? null
+            : (ev.target.closest && ev.target.closest('.sbar'))      // a segment itself
+              || (row && row.querySelector('.sbar'));                // a row's Take action
+
   flyBar(src, ()=>{ renderAction(); go('action'); });
 }
 function flyBar(src, run){
@@ -3034,16 +3060,31 @@ function flyBar(src, run){
 
 function toggleAc(id){
   if(id==='acCrit') AC.crit=!AC.crit;
+  if(id==='acOver') AC.over=!AC.over;
   if(id==='acRev')  AC.rev =!AC.rev;
   if(id==='acCirc') AC.circ=!AC.circ;
   renderAction();
 }
+/* How far past the 15-day promise a document is *right now*.  Only a document
+   still in circulation has a live deadline: one already returned took whatever
+   it took, and that is history, not an action.  Everything else sorts to the
+   bottom rather than mixing into the overdue list. */
+const overdueBy = d => (d.circulating && d.over>0) ? d.over : -1;
+
 /* outstanding = still to be closed, and somebody's review to close */
 const NOT_CLOSED = d => !noAction(d) && String(d.status).toUpperCase()!=='REVIEWED WITHOUT COMMENTS';
 
 /* Build the list behind whichever bar was clicked. */
 function actionRows(){
   const docs=halfDocs(AC.half);
+  if(AC.kind==='band'){
+    /* A band is a slice of the progress bar, so it is drawn from the same
+       documents the bar counts — including the closed ones.  It is not an
+       outstanding-work list, and is not filtered like one. */
+    let l=docs.filter(d=>!noAction(d) && statusBand(d)===AC.key);
+    if(AC.bandCode) l=l.filter(d=>(d.code||'(no code)')===AC.bandCode);
+    return l.map(d=>({d, disc:null}));
+  }
   if(AC.kind==='stuck')
     return docs.filter(d=>d.circulating && d.stuck===AC.key).map(d=>({d, disc:null}));
   if(AC.kind==='code' || AC.kind==='allcodes'){
@@ -3068,6 +3109,7 @@ function renderAction(){
   rows.sort((p,q)=>{
     const a=p.d, b=q.d;
     if(AC.crit){ const ca=isCriticalDoc(a)?0:1, cb=isCriticalDoc(b)?0:1; if(ca!==cb) return ca-cb; }
+    if(AC.over){ const oa=overdueBy(a), ob=overdueBy(b); if(oa!==ob) return ob-oa; }
     if(AC.rev && b.nRev!==a.nRev) return b.nRev-a.nRev;
     const da=a.days==null?-1:a.days, db=b.days==null?-1:b.days;
     if(db!==da) return db-da;
@@ -3076,7 +3118,8 @@ function renderAction(){
   AC.rows=rows;
 
   const scopeName = AC.half==='A' ? 'Full purchase order' : 'For review — '+(S.disc||'');
-  const what = AC.kind==='stuck'    ? STUCK_T[AC.key](S.disc)
+  const what = AC.kind==='band'     ? bandTitle()
+             : AC.kind==='stuck'    ? STUCK_T[AC.key](S.disc)
              : AC.kind==='code'     ? 'Document type '+AC.key
              : AC.kind==='allcodes' ? 'All outstanding document types'
              : AC.kind==='disc'     ? AC.key+' — reviews still open'
@@ -3084,6 +3127,7 @@ function renderAction(){
   $('acTitle').textContent=what;
   $('acScope').innerHTML=`<span class="v">${esc(S.po)}</span><span class="v">${esc(scopeName)}</span>`;
   $('acCrit').classList.toggle('on',AC.crit);
+  $('acOver').classList.toggle('on',AC.over);
   $('acRev').classList.toggle('on',AC.rev);
   $('acCirc').classList.toggle('on',AC.circ);
 
@@ -3098,6 +3142,18 @@ function renderAction(){
     hero={title:'All document types', sub:stats.st.byCode.length+' types in this scope',
           pct:stats.st.progress, bar:sbar(stats.st.totals,stats.st.total),
           v:stats.st.totals.without, tot:stats.st.total, unit:'closed'};
+  } else if(AC.kind==='band' && stats.st){
+    const src = AC.bandCode
+      ? (stats.st.byCode||[]).find(x=>x.code===AC.bandCode)
+      : {bands:stats.st.totals, total:stats.st.total, desc:''};
+    if(src){
+      const n=src.bands[AC.key]||0;
+      hero={title:bandMeta(AC.key).label,
+            sub: AC.bandCode ? AC.bandCode+(src.desc?' — '+src.desc:'')
+                             : 'across all '+stats.st.byCode.length+' document types',
+            pct:Math.round(n/(src.total||1)*100), bar:sbar(src.bands, src.total),
+            v:n, tot:src.total, unit:'documents in this band'};
+    }
   } else if(AC.kind==='stuck' && stats.sq){
     const q=stats.sq, n=q[AC.key];
     hero={title:STUCK_T[AC.key](S.disc), sub:q.total+' documents circulating in this scope',
@@ -3127,7 +3183,8 @@ function renderAction(){
   const critN=rows.filter(r=>isCriticalDoc(r.d)).length;
   const over =rows.filter(r=>r.d.circulating && r.d.over>0).length;
   $('acSum').innerHTML=[
-    ['dang', byDisc?rows.length:uniq, byDisc?'reviews outstanding':'documents outstanding'],
+    [AC.kind==='band'?'':'dang', byDisc?rows.length:uniq,
+      byDisc?'reviews outstanding':(AC.kind==='band'?'documents in this band':'documents outstanding')],
     ['', uniq, 'distinct documents'],
     ['warn', circN, 'circulating now'],
     ['dang', over, 'past the '+DEADLINE_DAYS+'-day deadline'],
@@ -3163,7 +3220,8 @@ function renderAction(){
 
 /* ── the list as a spreadsheet, and as an Outlook draft ─────────────────── */
 function actionTitle(){
-  return (AC.kind==='stuck' ? STUCK_T[AC.key](S.disc)
+  return (AC.kind==='band' ? bandTitle()
+        : AC.kind==='stuck' ? STUCK_T[AC.key](S.disc)
         : AC.kind==='code' ? 'Document type '+AC.key
         : AC.kind==='allcodes' ? 'All outstanding document types'
         : AC.kind==='disc' ? AC.key+' — reviews still open'
@@ -3238,6 +3296,10 @@ function emailAction(){
       ? `${AC.rows.length} document${AC.rows.length===1?'':'s'} have every discipline's review closed and `+
         `nothing outstanding against them — they can be returned to the vendor.\n\n`+
         'Ready to release:\n\n'
+      : AC.kind==='band'
+      ? `${AC.rows.length} document${AC.rows.length===1?'':'s'} are `+
+        `${bandMeta(AC.key).label.toLowerCase()}${AC.bandCode?' under '+AC.bandCode:''}.\n\n`+
+        bandMeta(AC.key).label+':\n\n'
       : AC.kind==='stuck'&&AC.key==='others'
       ? `${AC.rows.length} document${AC.rows.length===1?'':'s'} reviewed by ${S.disc||'us'} are held only by `+
         `other disciplines. Closing those reviews releases them.\n\n`+
