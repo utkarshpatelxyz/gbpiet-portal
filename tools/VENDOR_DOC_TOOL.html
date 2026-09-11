@@ -676,6 +676,26 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .sbar.live i:hover{filter:none;box-shadow:inset 0 0 0 2px rgba(255,255,255,.75)}
 .trow .pv{text-align:right;font-size:11px;font-weight:800;color:var(--ok);font-variant-numeric:tabular-nums}
 .trow .pv.zero{color:var(--muted)}
+/* ── responsible engineers ──────────────────────────────────────────────── */
+.en-req{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.en-req-l{flex:1;min-width:220px}
+.en-req-l .k2{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.en-req-l .s2{font-size:12px;color:var(--muted);margin-top:3px}
+.en-req-l .s2 b{color:var(--navy)}
+.en-src{font-size:10.5px;font-weight:700;color:var(--muted);white-space:nowrap}
+.en-tabs{display:flex;gap:4px;margin:14px 0 10px}
+.en-tabs .tabb{border:1px solid var(--line);background:var(--sf);border-radius:9px;
+  padding:7px 14px;font:inherit;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer}
+.en-tabs .tabb.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.en-pick{min-width:200px}
+.en-un{font-size:11px;font-weight:800;color:var(--dang);background:var(--dang-bg);
+  border-radius:20px;padding:2px 9px;white-space:nowrap}
+.en-load{font-family:var(--mono);font-size:11px;font-weight:700}
+.en-bar{display:flex;height:12px;border-radius:4px;overflow:hidden;border:1px solid var(--line);
+  background:var(--sf2);min-width:90px}
+.en-bar i{display:block;height:100%}
+tr.en-newtag td{background:var(--warn-bg)}
+
 .half-empty{padding:28px 14px;text-align:center;color:var(--muted);font-size:12px;font-weight:600;line-height:1.6}
 
 /* ── motion ─────────────────────────────────────────────────────────────
@@ -952,6 +972,7 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
     <div class="pb-t"><span class="pb-ic">▦</span><span id="pbTitle">Status</span></div>
     <div class="pb-sp"></div>
     <div class="pb-scope" id="pbScope"></div>
+    <button class="btn btn-g btn-s" onclick="openEng()">👷 Responsible Engineers</button>
     <button class="btn btn-g btn-s" onclick="openProgress()">📈 Check Progress</button>
     <button class="btn btn-p btn-s" onclick="openVdr()">📊 VDR Status Report</button>
     <button class="btn btn-g btn-s" onclick="go('filter')">Change scope</button>
@@ -1109,6 +1130,92 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 </div></div>
 
 <!-- 3c ── CHECK PROGRESS ─────────────────────────────────────────────────── -->
+<div class="screen" id="sc-eng"><div class="wrap">
+  <div class="pagebar">
+    <div class="pb-t"><span class="pb-ic">👷</span><span>Responsible engineers</span></div>
+    <div class="pb-sp"></div>
+    <div class="pb-scope" id="enScope"></div>
+    <button class="btn btn-p btn-s" id="enSave" onclick="downloadRegister()">⤓ Download register</button>
+    <button class="btn btn-g btn-s" onclick="go('dash')">← Back to status</button>
+  </div>
+
+  <div class="card" style="padding:16px 18px">
+    <div class="en-req">
+      <div class="en-req-l">
+        <div class="k2">Requisition engineer</div>
+        <div class="s2">One for the whole purchase order. Everything under
+          <b id="enPo"></b> is their requisition.</div>
+      </div>
+      <div id="enReqPick" style="min-width:280px"></div>
+      <div class="en-src" id="enSrc"></div>
+    </div>
+  </div>
+
+  <div class="cb-note warn2" id="enCarry" style="display:none;margin-top:12px"></div>
+  <div class="cb-note info2" id="enNew" style="display:none;margin-top:12px"></div>
+
+  <div class="en-tabs" id="enTabs">
+    <button class="tabb on" data-e="tags">By equipment tag</button>
+    <button class="tabb" data-e="people">By engineer — workload</button>
+  </div>
+
+  <div class="card" id="enTagsCard" style="padding:0;overflow:hidden">
+    <div class="ac-tools">
+      <span class="lbl">Order by</span>
+      <button class="chip on" id="enSortTag">Tag</button>
+      <button class="chip" id="enSortDocs">Most documents</button>
+      <button class="chip" id="enSortProg">Least progress</button>
+      <span class="nav-sep" style="background:var(--line2);height:18px"></span>
+      <button class="chip" id="enOnlyUn">Unassigned only</button>
+      <div class="fill"></div>
+      <span class="res" id="enCount"></span>
+    </div>
+    <div class="dt-scroll" style="max-height:64vh">
+      <table class="dt"><thead id="enHead"></thead><tbody id="enBody"></tbody></table>
+    </div>
+  </div>
+
+  <div class="card" id="enPeopleCard" style="display:none;padding:0;overflow:hidden">
+    <div class="dt-scroll" style="max-height:70vh">
+      <table class="dt"><thead id="enPHead"></thead><tbody id="enPBody"></tbody></table>
+    </div>
+  </div>
+</div></div>
+
+<div class="screen" id="sc-engload"><div class="wrap">
+  <div class="pagebar">
+    <div class="pb-t"><span class="pb-ic">👷</span><span>Carry engineers forward</span></div>
+    <div class="pb-sp"></div>
+    <button class="btn btn-g btn-s" onclick="go('dash')">← Back to status</button>
+  </div>
+  <div class="card fl-wrap" style="max-width:760px">
+    <div class="fl-head">
+      <h2>This register has no engineer assignments yet</h2>
+      <p>A report straight out of eGesDoc carries neither the <b>Engineer List</b> sheet nor the
+         requisition and responsible engineer columns — they are added by this tool. Load the last
+         register you saved and the assignments are carried across, matched on purchase order and
+         equipment tag.</p>
+    </div>
+    <div class="fl-body">
+      <div class="drop" id="egdrop" onclick="document.getElementById('egfile').click()">
+        <div class="ic">👷</div>
+        <div class="t">Drop the register you saved last time</div>
+        <div class="s">or click to browse</div>
+      </div>
+      <input type="file" id="egfile" accept=".xlsx,.xlsm,.xls">
+      <div class="loadbox" id="egload">
+        <div class="lb-t">Reading the earlier register…</div>
+        <div class="lb-s">Matching purchase orders and equipment tags.</div>
+        <div class="prog"><i></i></div>
+      </div>
+      <div class="err" id="egerr"></div>
+      <div class="fl-foot">
+        <button class="btn btn-g" onclick="skipCarry()">Start from scratch instead</button>
+      </div>
+    </div>
+  </div>
+</div></div>
+
 <div class="screen" id="sc-progress"><div class="wrap">
   <div class="pagebar">
     <div class="pb-t"><span class="pb-ic">📈</span><span>Check progress</span></div>
@@ -1377,6 +1484,29 @@ function fail(m){ $('loadbox').classList.remove('on'); const e=$('err'); e.textC
    {meta, hdr, headArr, depts, rows} or throws with a readable reason, so the
    same reader serves the file loaded at startup and any older file compared
    against it. */
+const ENG_REQ = 'REQUISITION ENGINEER';     // one per purchase order
+const ENG_RESP = 'RESPONSIBLE ENGINEER';    // one per equipment tag
+const ENG_SHEET = 'Engineer List';
+/* PO + equipment tag, the pair a responsible engineer is assigned to */
+const tagKey = (po,tag) => String(po).trim()+'\u0001'+String(tag).trim();
+
+/* The Engineer List sheet is one column per discipline, names underneath. */
+function readEngineerSheet(wb){
+  const name = wb.SheetNames.find(n=>n.trim().toLowerCase()===ENG_SHEET.toLowerCase());
+  if(!name) return null;
+  const aoa = XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,blankrows:false,defval:''});
+  if(!aoa.length) return null;
+  const head = aoa[0].map(h=>String(h||'').trim());
+  const out={};
+  head.forEach((h,i)=>{
+    if(!h) return;
+    const seen=new Set();
+    aoa.slice(1).forEach(r=>{ const v=String(r[i]==null?'':r[i]).trim(); if(v) seen.add(v); });
+    if(seen.size) out[h]=[...seen].sort((a,b)=>a.localeCompare(b));
+  });
+  return Object.keys(out).length? out : null;
+}
+
 function readBook(bytes){
   if(typeof XLSX==='undefined') throw new Error('Spreadsheet engine did not load — check your connection and reload.');
   const wb = XLSX.read(bytes,{type:'array',cellStyles:false,cellNF:false,cellHTML:false});
@@ -1410,7 +1540,26 @@ function readBook(bytes){
     rows.push(a);
   }
   if(!rows.length) throw new Error('No data rows found under the headings.');
-  return { meta, hdr:H, headArr:head, depts, rows };
+
+  /* Whatever engineer assignments this workbook already carries.  A register
+     straight out of eGesDoc has neither the sheet nor the columns; one this
+     tool has written before has both. */
+  const engList = readEngineerSheet(wb);
+  const iReq=H[ENG_REQ], iResp=H[ENG_RESP], iPO=H['PURCHASE ORDER'], iXR=H['CROSS REFERENCE'];
+  const req={}, resp={};
+  if(iReq!==undefined || iResp!==undefined){
+    rows.forEach(a=>{
+      const po=String(a[iPO]||'').trim(); if(!po) return;
+      if(iReq!==undefined){ const v=String(a[iReq]||'').trim(); if(v && !req[po]) req[po]=v; }
+      if(iResp!==undefined){
+        const tag=String(a[iXR]||'').trim(); if(!tag) return;
+        const v=String(a[iResp]||'').trim(); const k=tagKey(po,tag);
+        if(v && !resp[k]) resp[k]=v;
+      }
+    });
+  }
+  return { meta, hdr:H, headArr:head, depts, rows, engList, req, resp,
+           hasEngCols: iReq!==undefined && iResp!==undefined };
 }
 
 function parseBook(bytes){
@@ -1418,6 +1567,13 @@ function parseBook(bytes){
   try{ ctx=readBook(bytes); } catch(e){ return fail(e.message); }
   S.meta=ctx.meta; S.hdr=ctx.hdr; S.headArr=ctx.headArr; S.depts=ctx.depts; S.rows=ctx.rows;
   S.asOfDate=parseAsOf(ctx.meta.asOf);
+  /* The bytes are kept so the whole register can be written back out with the
+     assignments in it — re-parsed on demand rather than held open, because the
+     parsed workbook is far heavier than the 18 MB of file it came from. */
+  S.fileBytes=bytes;
+  S.eng={ list:ctx.engList||{}, req:ctx.req||{}, resp:ctx.resp||{},
+          hadCols:ctx.hasEngCols, hadList:!!ctx.engList,
+          carried:0, dirty:false, prevName:'' };
   $('loadbox').classList.remove('on');
   buildFilters();
   loadBasket();
@@ -1968,6 +2124,7 @@ function renderDash(){
     `<span class="v">Reviewing as ${esc(S.disc||'—')}</span>`+
     `<span>latest revision of every document</span>`;
 
+  renderReqChip();
   $('tabB').textContent='For Review & Originator';
   $('subA').textContent='Everything raised by '+S.dep+' under this purchase order.';
   $('subB').innerHTML='Documents whose <b>'+esc(S.disc||'')+'</b> column reads '+
@@ -4282,15 +4439,349 @@ function parseMonth(t){
 }
 
 /* ── nav ───────────────────────────────────────────────────────────────── */
+
+/* The purchase order's requisition engineer, named on the status page itself
+   so it is answered before anybody has to go looking. */
+function renderReqChip(){
+  const host=$('pbScope'); if(!host || !S.eng) return;
+  host.querySelectorAll('.v.reqchip').forEach(e=>e.remove());
+  const who=S.eng.req[S.po]||'';
+  const chip=document.createElement('span');
+  chip.className='v reqchip';
+  chip.style.cursor='pointer';
+  chip.title='Requisition engineer for '+S.po+' — click to open Responsible engineers';
+  chip.innerHTML = who
+    ? '👷 '+esc(who)
+    : '<span style="color:var(--dang)">👷 no requisition engineer</span>';
+  chip.onclick=()=>openEng();
+  host.appendChild(chip);
+}
+window.renderReqChip=renderReqChip;
+
+/* ── Responsible engineers ────────────────────────────────────────────────
+   A purchase order has one requisition engineer; every equipment tag inside
+   it has a responsible engineer, and one engineer may hold several tags.
+   Because each tag carries its own calculations, GA drawing and detail
+   drawings, holding four tags is holding forty-odd documents — which is what
+   makes the workload view worth having.
+
+   eGesDoc does not know any of this, so a fresh export arrives without it and
+   the assignments have to be carried over from the register saved last time.
+   ──────────────────────────────────────────────────────────────────────── */
+const EN = { view:'tags', sort:'tag', unOnly:false };
+
+/* Every name this project knows, the chosen discipline's own list first. */
+function engNames(){
+  const L=S.eng&&S.eng.list||{};
+  const mine=(S.disc && L[S.disc])||[];
+  if(mine.length) return mine;
+  const all=new Set(); Object.values(L).forEach(a=>a.forEach(n=>all.add(n)));
+  return [...all].sort((a,b)=>a.localeCompare(b));
+}
+
+/* A CROSS REFERENCE cell can name several equipments at once — a spare parts
+   list covering forty drums, say — and in this register about a fifth of the
+   rows do.  Those are split, so the list is genuinely one row per equipment
+   tag; a document that spans several is real work on each of them and is
+   counted under each. */
+const splitTags = v => String(v||'').split(/[,;]+/).map(x=>x.trim()).filter(Boolean);
+
+/* The equipment tags of the purchase order in scope, with what sits on each. */
+function engTags(){
+  const by={};
+  (S.docs||[]).forEach(d=>{
+    const tags=splitTags(d.xref); if(!tags.length) tags.push('(no tag)');
+    const alone=tags.length===1;
+    tags.forEach(tag=>{
+      const e=(by[tag]=by[tag]||{tag, equip:'', equipFirm:false, docs:[], codes:new Set(), span:0});
+      e.docs.push(d); if(d.code) e.codes.add(d.code);
+      if(!alone) e.span++;
+      /* the equipment name is only trustworthy from a row naming this tag alone */
+      if(d.equip && (alone ? !e.equipFirm : !e.equip)){ e.equip=d.equip; e.equipFirm=e.equipFirm||alone; }
+    });
+  });
+  return Object.values(by).map(e=>{
+    const live=e.docs.filter(d=>!noAction(d));
+    const closed=live.filter(d=>String(d.status).toUpperCase()==='REVIEWED WITHOUT COMMENTS').length;
+    const circ=live.filter(d=>d.circulating).length;
+    return { ...e, n:live.length, closed, circ, codes:e.codes.size,
+             pct: live.length? Math.round(closed/live.length*100) : 0,
+             who: S.eng.resp[tagKey(S.po,e.tag)]||'' };
+  });
+}
+function engSorted(list){
+  const l=list.slice();
+  if(EN.sort==='docs') l.sort((a,b)=>b.n-a.n || a.tag.localeCompare(b.tag));
+  else if(EN.sort==='prog') l.sort((a,b)=>a.pct-b.pct || b.n-a.n);
+  else l.sort((a,b)=>a.tag.localeCompare(b.tag));
+  return EN.unOnly ? l.filter(t=>!t.who) : l;
+}
+
+function openEng(){
+  if(!S.docs || !S.docs.length) return alert('Choose a purchase order first.');
+  /* Nothing to carry forward from a register that already has the columns. */
+  if(!S.eng.hadCols && !S.eng.carried && !S.eng.skipped){ go('engload'); return; }
+  renderEng();
+  go('eng');
+}
+function skipCarry(){ S.eng.skipped=true; renderEng(); go('eng'); }
+
+function renderEng(){
+  $('enScope').innerHTML=`<span class="v">${esc(S.po)}</span><span class="v">${esc(S.dep)}</span>`;
+  $('enPo').textContent=S.po;
+  const names=engNames();
+
+  /* where the current assignments came from */
+  const src = S.eng.carried ? `carried from ${esc(S.eng.prevName||'an earlier register')}`
+            : S.eng.hadCols ? 'read from this register'
+                            : 'not set in this register';
+  $('enSrc').innerHTML=`<span style="color:${S.eng.dirty?'var(--warn)':'var(--muted)'}">${
+    S.eng.dirty?'● unsaved changes — download before you close':src}</span>`;
+
+  /* requisition engineer — one per purchase order */
+  dropdown($('enReqPick'), {
+    placeholder: names.length? 'Choose the requisition engineer' : 'No names in the Engineer List sheet',
+    options: names.map(n=>({v:n,t:n})),
+    selected: new Set(S.eng.req[S.po]? [S.eng.req[S.po]] : []),
+    disabled: !names.length,
+    onChange: v=>{ const now=[...v][0]||''; setReq(now); }
+  });
+
+  const tags=engTags(), unassigned=tags.filter(t=>!t.who).length;
+  const spanning=new Set();
+  (S.docs||[]).forEach(d=>{ if(splitTags(d.xref).length>1) spanning.add(d.tr); });
+  S.eng.spanN=spanning.size;
+  $('enNew').style.display = unassigned? '' : 'none';
+  if(unassigned) $('enNew').innerHTML=`<b>${unassigned}</b> of ${tags.length} equipment tag${
+    tags.length===1?'':'s'} on this purchase order ${unassigned===1?'has':'have'} no responsible
+    engineer yet${S.eng.carried?' — these are new since the register you carried forward':''}.
+    <span class="lnk" onclick="EN.unOnly=true;renderEng()">Show just those</span>`;
+
+  document.querySelectorAll('#enTabs .tabb').forEach(b=>b.classList.toggle('on',b.dataset.e===EN.view));
+  $('enTagsCard').style.display   = EN.view==='tags'   ? '' : 'none';
+  $('enPeopleCard').style.display = EN.view==='people' ? '' : 'none';
+  ['enSortTag','enSortDocs','enSortProg'].forEach((id,i)=>
+    $(id).classList.toggle('on', EN.sort===['tag','docs','prog'][i]));
+  $('enOnlyUn').classList.toggle('on', EN.unOnly);
+
+  EN.view==='people' ? renderEngPeople(tags) : renderEngTags(tags, names);
+}
+
+function renderEngTags(all, names){
+  const rows=engSorted(all);
+  $('enCount').innerHTML=`<b>${rows.length}</b> tag${rows.length===1?'':'s'}`+
+    (S.eng.spanN? ` <span style="color:var(--muted);font-weight:600">· ${S.eng.spanN} document${
+      S.eng.spanN===1?'':'s'} span several tags and count under each</span>`:'');
+  $('enHead').innerHTML='<tr><th>Equipment tag</th><th>Equipment</th><th style="text-align:right">Docs</th>'+
+    '<th style="text-align:right">Types</th><th>Progress</th><th>Responsible engineer</th></tr>';
+  $('enBody').innerHTML = rows.length? rows.map(t=>`<tr${t.who?'':' class="en-newtag"'}>
+      <td><div class="docno">${esc(t.tag)}</div></td>
+      <td><div class="s2" title="${esc(t.equip)}">${esc(t.equip||'—')}</div></td>
+      <td style="text-align:right"><span class="s1 num">${t.n}</span></td>
+      <td style="text-align:right"><span class="s2 num">${t.codes}</span></td>
+      <td><div style="display:flex;align-items:center;gap:8px">
+        <div class="en-bar"><i style="width:${t.pct}%;background:#2E9E6B"></i>${
+          t.circ? `<i style="width:${Math.round(t.circ/(t.n||1)*100)}%;background:#D9922E"></i>`:''}</div>
+        <span class="en-load" style="color:${t.pct?'var(--ok)':'var(--muted)'}">${t.pct}%</span></div></td>
+      <td>${t.who? `<span class="s1">${esc(t.who)}</span>` : '<span class="en-un">unassigned</span>'}
+        <div class="en-pick" id="ep-${cssId(t.tag)}" style="margin-top:5px"></div></td>
+    </tr>`).join('')
+    : `<tr><td colspan="6" class="empty">${EN.unOnly?'Every tag has a responsible engineer.':'No equipment tags in this scope.'}</td></tr>`;
+
+  rows.forEach(t=>{
+    const host=$('ep-'+cssId(t.tag)); if(!host) return;
+    dropdown(host, {
+      placeholder: t.who? 'Change…' : (names.length?'Assign…':'No names available'),
+      options: names.map(n=>({v:n,t:n})),
+      selected: new Set(t.who?[t.who]:[]),
+      disabled: !names.length,
+      onChange: v=>setResp(t.tag, [...v][0]||'', t.who)
+    });
+  });
+}
+
+function renderEngPeople(tags){
+  const by={};
+  tags.forEach(t=>{ const who=t.who||'(unassigned)';
+    const e=(by[who]=by[who]||{who, tags:[], n:0, closed:0, circ:0});
+    e.tags.push(t); e.n+=t.n; e.closed+=t.closed; e.circ+=t.circ; });
+  const list=Object.values(by).map(e=>({...e, pct:e.n?Math.round(e.closed/e.n*100):0}))
+    .sort((a,b)=> b.tags.length-a.tags.length || b.n-a.n);
+  const maxN=Math.max(1,...list.map(e=>e.n));
+  $('enPHead').innerHTML='<tr><th>Engineer</th><th style="text-align:right">Tags</th>'+
+    '<th style="text-align:right">Documents</th><th>Share of the load</th><th>Progress</th><th>Equipment tags held</th></tr>';
+  $('enPBody').innerHTML = list.length? list.map(e=>`<tr${e.who==='(unassigned)'?' class="en-newtag"':''}>
+      <td><div class="docno">${e.who==='(unassigned)'?'<span class="en-un">unassigned</span>':esc(e.who)}</div></td>
+      <td style="text-align:right"><span class="s1 num">${e.tags.length}</span></td>
+      <td style="text-align:right"><span class="s1 num">${e.n}</span></td>
+      <td><div style="display:flex;align-items:center;gap:8px">
+        <div class="en-bar"><i style="width:${Math.round(e.n/maxN*100)}%;background:#2563EB"></i></div>
+        <span class="en-load" style="color:var(--muted)">${Math.round(e.n/maxN*100)}%</span></div></td>
+      <td><div style="display:flex;align-items:center;gap:8px">
+        <div class="en-bar"><i style="width:${e.pct}%;background:#2E9E6B"></i></div>
+        <span class="en-load" style="color:${e.pct?'var(--ok)':'var(--muted)'}">${e.pct}%</span></div></td>
+      <td><div class="s2">${e.tags.map(t=>esc(t.tag)+' <span style="color:var(--muted)">('+t.n+')</span>').join(' · ')}</div></td>
+    </tr>`).join('')
+    : '<tr><td colspan="6" class="empty">No equipment tags in this scope.</td></tr>';
+}
+
+/* a tag can hold characters an id cannot */
+const cssId = t => String(t).replace(/[^A-Za-z0-9_-]/g,'_');
+
+function setReq(name){
+  const prev=S.eng.req[S.po]||'';
+  if(name===prev) return;
+  if(prev && !confirm(`Do you want to change the requisition engineer for ${S.po} from "${prev}" to "${name}"?`)){
+    renderEng(); return;
+  }
+  if(name) S.eng.req[S.po]=name; else delete S.eng.req[S.po];
+  S.eng.dirty=true; renderEng();
+}
+function setResp(tag, name, prev){
+  prev=prev||'';
+  if(name===prev) return;
+  const q = prev ? `Do you want to change the responsible engineer for ${tag} from "${prev}" to "${name}"?`
+                 : `Assign "${name}" as the responsible engineer for ${tag}?`;
+  if(!confirm(q)){ renderEng(); return; }
+  const k=tagKey(S.po,tag);
+  if(name) S.eng.resp[k]=name; else delete S.eng.resp[k];
+  S.eng.dirty=true; renderEng();
+}
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest('#enTabs .tabb'); if(b){ EN.view=b.dataset.e; renderEng(); return; }
+  const m={enSortTag:'tag',enSortDocs:'docs',enSortProg:'prog'};
+  if(e.target.id in m){ EN.sort=m[e.target.id]; renderEng(); return; }
+  if(e.target.id==='enOnlyUn'){ EN.unOnly=!EN.unOnly; renderEng(); }
+});
+
+/* ── carrying the assignments across from the register saved last time ──── */
+(function(){
+  const inp=$('egfile'), drop=$('egdrop');
+  if(!inp) return;
+  inp.addEventListener('change',e=>{ const f=e.target.files[0]; if(f) readCarry(f); });
+  ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over');}));
+  ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over');}));
+  drop.addEventListener('drop',e=>{ const f=e.dataTransfer.files[0]; if(f) readCarry(f); });
+})();
+function egFail(m){ $('egload').classList.remove('on'); const e=$('egerr'); e.textContent=m; e.classList.add('on'); }
+function readCarry(f){
+  $('egerr').classList.remove('on'); $('egload').classList.add('on');
+  const fr=new FileReader();
+  fr.onerror=()=>egFail('Could not read that file.');
+  fr.onload=ev=>setTimeout(()=>{
+    let ctx;
+    try{ ctx=readBook(new Uint8Array(ev.target.result)); }
+    catch(err){ return egFail('Could not read that register: '+err.message); }
+    if(!ctx.hasEngCols && !ctx.engList)
+      return egFail('That register has no engineer columns and no Engineer List sheet — '+
+                    'it looks like a plain eGesDoc export rather than one saved from here.');
+    let nreq=0, nresp=0;
+    Object.entries(ctx.req||{}).forEach(([po,v])=>{ if(v && !S.eng.req[po]){ S.eng.req[po]=v; nreq++; } });
+    Object.entries(ctx.resp||{}).forEach(([k,v])=>{ if(v && !S.eng.resp[k]){ S.eng.resp[k]=v; nresp++; } });
+    if(ctx.engList) S.eng.list = Object.keys(S.eng.list||{}).length ? S.eng.list : ctx.engList;
+    S.eng.carried = nreq+nresp; S.eng.prevName = f.name; S.eng.dirty = true;
+    $('egload').classList.remove('on'); $('egfile').value='';
+
+    /* the tags this register has that the carried one did not */
+    const tags=engTags(), fresh=tags.filter(t=>!t.who);
+    $('enCarry').style.display='';
+    $('enCarry').innerHTML=`Carried <b>${nresp}</b> tag assignment${nresp===1?'':'s'} and
+      <b>${nreq}</b> requisition engineer${nreq===1?'':'s'} across from <b>${esc(f.name)}</b>.
+      ${fresh.length? `<b>${fresh.length}</b> tag${fresh.length===1?'':'s'} on this purchase order
+        ${fresh.length===1?'is':'are'} new and still need${fresh.length===1?'s':''} an engineer.`
+        : 'Every tag on this purchase order is covered.'}
+      Download the register before you close, or this is lost.`;
+    renderEng(); go('eng');
+  },40);
+  fr.readAsArrayBuffer(f);
+}
+
+/* ── write the whole register back out, assignments included ───────────── */
+function downloadRegister(){
+  if(typeof XLSX==='undefined') return alert('Spreadsheet engine not loaded.');
+  if(!S.fileBytes) return alert('The original file is no longer in memory — reload it first.');
+  const btn=$('enSave'), was=btn.textContent;
+  btn.disabled=true; btn.textContent='Writing…';
+  /* a 47,000-row register takes a while to write; let the button paint first */
+  setTimeout(()=>{
+    try{
+      const wb=XLSX.read(S.fileBytes,{type:'array',cellStyles:false,cellNF:false,cellHTML:false});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rg=XLSX.utils.decode_range(ws['!ref']);
+      const cell=(r,c)=>ws[XLSX.utils.encode_cell({r,c})];
+      const put=(r,c,v)=>{ const k=XLSX.utils.encode_cell({r,c});
+        if(v) ws[k]={t:'s',v:String(v)}; else delete ws[k]; };
+
+      /* reuse the columns if this register already has them */
+      const hdr={}; for(let c=rg.s.c;c<=rg.e.c;c++){ const k=cell(3,c); if(k&&k.v) hdr[String(k.v).trim()]=c; }
+      const cReq = hdr[ENG_REQ]  !== undefined ? hdr[ENG_REQ]  : rg.e.c+1;
+      const cRes = hdr[ENG_RESP] !== undefined ? hdr[ENG_RESP] : Math.max(rg.e.c+2, cReq+1);
+      put(3,cReq,ENG_REQ); put(3,cRes,ENG_RESP);
+
+      const iPO=hdr['PURCHASE ORDER'], iXR=hdr['CROSS REFERENCE'];
+      let nr=0, nt=0, nAmb=0;
+      for(let r=4;r<=rg.e.r;r++){
+        const po=cell(r,iPO); if(!po||!String(po.v).trim()) continue;
+        const p=String(po.v).trim();
+        if(S.eng.req[p]){ put(r,cReq,S.eng.req[p]); nr++; }
+        const xr=cell(r,iXR);
+        const tags=splitTags(xr? xr.v : '');
+        if(tags.length){
+          /* a row naming several equipments belongs to several engineers; it is
+             only written when they agree, rather than asserting one of them */
+          const who=[...new Set(tags.map(t=>S.eng.resp[tagKey(p,t)]).filter(Boolean))];
+          if(who.length===1){ put(r,cRes,who[0]); nt++; }
+          else if(who.length>1) nAmb++;
+        }
+      }
+      rg.e.c=Math.max(rg.e.c,cRes); ws['!ref']=XLSX.utils.encode_range(rg);
+
+      /* keep the Engineer List sheet alive, so the next carry-forward works */
+      const hasList=wb.SheetNames.some(n=>n.trim().toLowerCase()===ENG_SHEET.toLowerCase());
+      if(!hasList && S.eng.list && Object.keys(S.eng.list).length){
+        const cols=Object.keys(S.eng.list);
+        const depth=Math.max(...cols.map(c=>S.eng.list[c].length));
+        const aoa=[cols];
+        for(let i=0;i<depth;i++) aoa.push(cols.map(c=>S.eng.list[c][i]||''));
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), ENG_SHEET);
+      }
+      XLSX.writeFile(wb,'CONSOLIDATED_STATUS_'+String(S.meta.project||'')+'_with_engineers.xlsx',
+                     {compression:true});
+      S.eng.dirty=false;
+      btn.textContent=was; btn.disabled=false;
+      renderEng();
+      alert('Register written: '+nr.toLocaleString()+' rows carry a requisition engineer and '+
+            nt.toLocaleString()+' carry a responsible engineer.'+
+            (nAmb? '\n\n'+nAmb.toLocaleString()+' row'+(nAmb===1?'':'s')+' name several equipment tags '+
+                   'whose engineers differ, so the responsible engineer was left blank rather than '+
+                   'picking one of them.' : '')+
+            '\n\nLoad this file next time — or feed it to the carry-forward — to keep the assignments.');
+    }catch(err){
+      btn.textContent=was; btn.disabled=false;
+      alert('Could not write the register: '+err.message);
+    }
+  },60);
+}
+window.openEng=openEng; window.skipCarry=skipCarry; window.downloadRegister=downloadRegister;
+window.setReq=setReq; window.setResp=setResp;
+
 function go(s){
-  ['upload','filter','dash','progress','action','doc','report','basket','vdr'].forEach(x=>$('sc-'+x).classList.toggle('on',x===s));
+  ['upload','filter','dash','progress','eng','engload','action','doc','report','basket','vdr'].forEach(x=>$('sc-'+x).classList.toggle('on',x===s));
   window.scrollTo(0,0);
   if(s==='filter') $('crumbs').innerHTML='';
   /* the sheet strip belongs to the status page only */
   $('sheettabs').classList.toggle('on', s==='dash');
 }
+/* The assignments are held in the page, not in the file, until the register is
+   written back out.  Closing the tab with unsaved ones loses the work. */
+window.addEventListener('beforeunload',e=>{
+  if(S.eng && S.eng.dirty){ e.preventDefault(); e.returnValue=''; return ''; }
+});
+
 function resetAll(){
   S.rows=[];S.docs=[];S.cur=null;S.po=null;S.dep=null;S.disc=null;S.discIdx=null;S.discCidx=null;
+  S.fileBytes=null; S.eng={list:{},req:{},resp:{},carried:0,dirty:false};
   $('file').value='';$('btn-reset').style.display='none';$('navinfo').style.display='none';
   $('crumbs').innerHTML='';go('upload');
 }
