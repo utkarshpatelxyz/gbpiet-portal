@@ -205,6 +205,9 @@ button,input,select,textarea{font-family:inherit;color:inherit}
 .ms-btn .lab{overflow:hidden;text-overflow:ellipsis}
 .ms-btn .ms-n{background:var(--blue);color:#fff;border-radius:10px;padding:1px 6px;font-size:9.5px;font-weight:800}
 .ms-btn .car{opacity:.5;font-size:9px}
+/* Inside a scrolling table an absolutely positioned popup is clipped away, so
+   that variant is taken out of the flow and placed against the viewport. */
+.ms.float .ms-pop{position:fixed;top:auto;left:auto;z-index:200}
 .ms-pop{display:none;position:absolute;z-index:90;top:calc(100% + 5px);left:0;min-width:290px;max-width:400px;
   background:var(--sf);border:1px solid var(--line2);border-radius:12px;box-shadow:var(--sh3);overflow:hidden}
 .ms.on .ms-pop{display:block}
@@ -677,13 +680,23 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .trow .pv{text-align:right;font-size:11px;font-weight:800;color:var(--ok);font-variant-numeric:tabular-nums}
 .trow .pv.zero{color:var(--muted)}
 /* ── responsible engineers ──────────────────────────────────────────────── */
-.en-sel{width:230px;max-width:100%;font:inherit;font-size:12px;font-weight:700;color:var(--ink);
-  background:var(--sf);border:1px solid var(--line2);border-radius:8px;padding:7px 9px;cursor:pointer;
-  appearance:auto}
-.en-sel:hover{border-color:var(--blue)}
-.en-sel:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
-.en-sel.none{color:var(--dang);border-color:#F0C9C5;background:var(--dang-bg)}
-.en-sel:disabled{color:var(--muted);background:var(--sf2);cursor:not-allowed}
+/* the set diagram */
+/* .dw is a centring row; the set diagram stacks its caption underneath */
+.dw.set{flex-direction:column;align-items:center}
+/* in flow under the circle, not floated over it */
+.set-cap{margin-top:7px;text-align:center;font-size:10.5px;font-weight:700;color:var(--muted);
+  line-height:1.4;max-width:230px}
+.set-cap b{color:var(--navy)}
+.setb circle{transition:fill-opacity .15s ease}
+.setb:hover circle{fill-opacity:1}
+
+.en-pick{width:240px;max-width:100%}
+.en-pick .ms{display:block}
+.en-pick .ms-btn{width:100%;justify-content:space-between}
+tr.en-na td{opacity:.5}
+tr.en-na td:last-child{opacity:1}
+.en-na-tag{font-size:11px;font-weight:800;color:var(--muted);background:var(--info-bg);
+  border-radius:20px;padding:2px 9px}
 .btn.btn-warn{border-color:var(--dang);color:var(--dang)}
 .en-req{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 .en-req-l{flex:1;min-width:220px}
@@ -1065,10 +1078,11 @@ tr.en-newtag td{background:var(--warn-bg)}
         <div class="cc-tools">
           <button class="chip" onclick="event.stopPropagation();exportDiscReport('A')">⤓ Report</button></div>
       </div>
-      <div class="cc-top"><div class="cc-sub">From columns AC–CT. A discipline marked <b>FOR REVIEW</b> with no
-        date in its closed-date column is still pending; N/A and for-information entries are ignored.
-        <b style="color:#2563EB">Blue</b> in a bar is the part you have already cleared — waiting on them
-        alone.</div></div>
+      <div class="cc-top"><div class="cc-sub">The outer circle is the documents in scope; each discipline sits
+        inside it, sized by how many of them it must review — so a document reviewed by three disciplines is
+        still one document. From columns AC–CT; a discipline marked <b>FOR REVIEW</b> with no date in its
+        closed-date column is still pending. <b style="color:#2563EB">Blue</b> in a bar is the part you have
+        already cleared — waiting on them alone.</div></div>
       <div class="cc-body">
         <div class="chartbox" id="dboxA" onclick="toggleBlock('A','disc')">
           <span class="cue">click for progress by discipline →</span>
@@ -1087,10 +1101,11 @@ tr.en-newtag td{background:var(--warn-bg)}
         <div class="cc-tools">
           <button class="chip" onclick="event.stopPropagation();exportDiscReport('B')">⤓ Report</button></div>
       </div>
-      <div class="cc-top"><div class="cc-sub">From columns AC–CT. A discipline marked <b>FOR REVIEW</b> with no
-        date in its closed-date column is still pending; N/A and for-information entries are ignored.
-        <b style="color:#2563EB">Blue</b> in a bar is the part you have already cleared — waiting on them
-        alone.</div></div>
+      <div class="cc-top"><div class="cc-sub">The outer circle is the documents in scope; each discipline sits
+        inside it, sized by how many of them it must review — so a document reviewed by three disciplines is
+        still one document. From columns AC–CT; a discipline marked <b>FOR REVIEW</b> with no date in its
+        closed-date column is still pending. <b style="color:#2563EB">Blue</b> in a bar is the part you have
+        already cleared — waiting on them alone.</div></div>
       <div class="cc-body">
         <div class="chartbox" id="dboxB" onclick="toggleBlock('B','disc')">
           <span class="cue">click for progress by discipline →</span>
@@ -1658,10 +1673,26 @@ function dropdown(el, cfg){
       paint(); draw(); cfg.onChange(el._sel);
     });
   }
+  /* a floating popup has to be told where to be, and told again if the page
+     moves under it */
+  function place(){
+    if(!cfg.float) return;
+    const pop=el.querySelector('.ms-pop'), r=btn.getBoundingClientRect();
+    const w=Math.max(r.width, 290), h=pop.offsetHeight||300;
+    let top=r.bottom+5; if(top+h>innerHeight-8) top=Math.max(8, r.top-5-h);
+    pop.style.width=w+'px';
+    pop.style.left=Math.min(Math.max(8,r.left), innerWidth-w-8)+'px';
+    pop.style.top=top+'px';
+  }
+  if(cfg.float){
+    el.classList.add('float');
+    addEventListener('scroll',()=>{ if(el.classList.contains('on')) place(); }, true);
+    addEventListener('resize',()=>{ if(el.classList.contains('on')) place(); });
+  }
   btn.onclick=()=>{ if(el.classList.contains('disabled')) return;
     const was=el.classList.contains('on');
     OPEN_DD.forEach(x=>x.classList.remove('on'));
-    if(!was){ el.classList.add('on'); q.value=''; draw(); setTimeout(()=>q.focus(),10); } };
+    if(!was){ el.classList.add('on'); q.value=''; draw(); place(); setTimeout(()=>{place();q.focus();},10); } };
   q.oninput=draw;
   q.onkeydown=e=>{ if(e.key==='Enter'){ const f=list.querySelector('input'); if(f){ f.checked=!f.checked; f.onchange(); } e.preventDefault(); } };
   el.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{
@@ -2084,6 +2115,57 @@ function topCodes(map, n){
   return head + (e.length>n ? ', +'+(e.length-n)+' more' : '');
 }
 
+/* How many documents every reviewing discipline has already signed off — a
+   document-level figure, unlike a sum of reviews, so it sits beside the
+   progress percentage without inviting the reader to add them up. */
+function signedOff(allDocs){
+  const docs=allDocs.filter(d=>!noAction(d));
+  let done=0;
+  docs.forEach(d=>{ const rev=d.latest.depts.filter(x=>x.review);
+    if(rev.length && rev.every(x=>x.closed)) done++; });
+  return {docs:docs.length, done, pct: docs.length? Math.round(done/docs.length*100):0};
+}
+
+/* A set diagram rather than a pie: the outer circle is the documents in scope,
+   and each discipline sits inside it, sized by how many of them it must review.
+   A pie of the same numbers reads as a share of one pile, which is what made
+   453 documents look like 512 of something. */
+function setSVG(outerN, parts, size, ownName){
+  const R=size/2-2, cx=size/2, cy=size/2;
+  const host=parts.find(p=>p.n>=outerN*0.98 && p.name===ownName);
+  const inner=parts.filter(p=>p!==host).sort((a,b)=>b.n-a.n);
+  const placed=[];
+  const pad=3;
+  inner.forEach(p=>{
+    const r=Math.max(7, R*Math.sqrt(p.n/Math.max(outerN,1)));
+    /* spiral outwards until it sits inside the ring and clear of the others */
+    let best=null;
+    for(let t=0;t<2600 && !best;t++){
+      const ang=t*0.55, rad=(R-r-pad)*Math.min(1, t/900);
+      const x=cx+Math.cos(ang)*rad, y=cy+Math.sin(ang)*rad;
+      if(Math.hypot(x-cx,y-cy)+r > R-pad) continue;
+      if(placed.some(q=>Math.hypot(x-q.x,y-q.y) < r+q.r+pad)) continue;
+      best={x,y,r};
+    }
+    if(best){ best.p=p; placed.push(best); }
+  });
+  const ring = host
+    ? `<circle cx="${cx}" cy="${cy}" r="${R}" fill="${host.col}" fill-opacity=".16"
+         stroke="${host.col}" stroke-width="2"><title>${esc(host.name)} — ${host.n} documents, all of them</title></circle>`
+    : `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="var(--line2)"
+         stroke-width="2" stroke-dasharray="5 4"></circle>`;
+  const bubbles=placed.map(b=>`
+    <g class="setb" data-k="${esc(b.p.name)}">
+      <circle cx="${b.x}" cy="${b.y}" r="${b.r}" fill="${b.p.col}" fill-opacity=".82" stroke="#fff" stroke-width="1.5">
+        <title>${esc(b.p.name)} — ${b.p.n} of ${outerN} documents · ${b.p.pending} still to sign</title></circle>
+      ${b.r>=15? `<text x="${b.x}" y="${b.y+3.5}" text-anchor="middle" font-size="${
+        Math.min(13, Math.max(8, b.r*0.55))}" font-weight="700" fill="#fff">${b.p.n}</text>`:''}
+    </g>`).join('');
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" role="img"
+    aria-label="${outerN} documents, with each discipline sized by how many it reviews">
+    ${ring}${bubbles}</svg>`;
+}
+
 /* Which disciplines still owe a review on these documents.
    Columns AC–CT: a column reading FOR REVIEW (or FOR REVIEW - ORIGINATOR) is a
    review this discipline owes; its paired closed-date column says whether it is
@@ -2275,6 +2357,7 @@ function renderHalf(id){
 
   /* ── chart 2: disciplines that still owe a review ────────────────────── */
   if(!ds.total){
+    $('ddw'+id).classList.remove('set');
     $('ddw'+id).innerHTML='<div class="half-empty">No discipline is marked FOR REVIEW<br>on these documents.</div>';
     $('dmin'+id).innerHTML=''; $('dov'+id).innerHTML=''; $('dbt'+id).innerHTML='';
     $('dbox'+id).style.pointerEvents='none';
@@ -2287,33 +2370,37 @@ function renderHalf(id){
                           value:e.total, col:e.col, unit:'documents to review · '+e.pending+' pending'}));
   if(drest) dsl.push({key:'More', label:(ds.list.length-10)+' more disciplines', value:drest,
                       col:'#B8C4D0', unit:'documents to review'});
-  $('ddw'+id).innerHTML=
-    `<svg viewBox="0 0 220 220" width="220" height="220" role="img">${donutSVG(dsl,220,.56)}</svg>
-     <div class="donut-ctr"><div class="v">${ds.list.length}</div><div class="l">disciplines</div></div>`;
-  wireDonut('ddw'+id, String(ds.list.length), 'disciplines');
+  const sq=(STAT[id]||{}).sq||{you:0,others:0,release:0,total:0,done:0};
+  const so=signedOff(halfDocs(id));
+  const parts=ds.list.map(e=>({name:e.name, n:e.total, pending:e.pending, col:e.col}));
+  $('ddw'+id).classList.add('set');
+  $('ddw'+id).innerHTML=setSVG(so.docs, parts, 220, S.disc)+
+    `<div class="set-cap"><b>${so.docs.toLocaleString()}</b> documents${
+      parts.some(p=>p.n>=so.docs*0.98 && p.name===S.disc)? ' · all reviewed by '+esc(S.disc):''}</div>`;
   $('dmin'+id).innerHTML=[
     ['', ds.list.length, 'disciplines involved'],
-    ['', ds.total, 'reviews to close'],
-    ['ok', ds.closed, 'reviews closed'],
-    ['dang', ds.pending, 'still pending']
+    ['', so.docs, 'documents in scope'],
+    ['ok', so.done, 'signed off by every discipline'],
+    ['warn', sq.total, 'documents still circulating']
   ].map(([c,n,l])=>`<div class="m ${c}"><span class="n">${n.toLocaleString()}</span><span class="l">${l}</span></div>`).join('');
   $('dov'+id).innerHTML=`
-    <div class="pblock-h"><span class="t">Reviews closed</span>
-      <span class="v">${ds.progress}% <small>${ds.closed.toLocaleString()} of ${ds.total.toLocaleString()} reviews · ${ds.pending.toLocaleString()} pending</small></span></div>
-    ${dbar(ds.closed, ds.pending)}
+    <div class="pblock-h"><span class="t">Signed off by every discipline</span>
+      <span class="v">${so.pct}% <small>${so.done.toLocaleString()} of ${so.docs.toLocaleString()} documents</small></span></div>
+    ${dbar(so.done, so.docs-so.done)}
     <div class="sbar-lab">
-      <span class="li"><span class="dot" style="background:#2E9E6B"></span>Review closed <b>${ds.closed.toLocaleString()}</b></span>
-      <span class="li"><span class="dot" style="background:#D4574E"></span>Still pending <b>${ds.pending.toLocaleString()}</b></span>
-      <span class="li" style="color:var(--muted)">across ${ds.docs.toLocaleString()} documents</span></div>`;
+      <span class="li"><span class="dot" style="background:#2E9E6B"></span>Every discipline has signed <b>${so.done.toLocaleString()}</b></span>
+      <span class="li"><span class="dot" style="background:#D4574E"></span>Somebody still to sign <b>${(so.docs-so.done).toLocaleString()}</b></span>
+      <span class="li"><span class="dot" style="background:#D9922E"></span>Circulating now <b>${sq.total}</b>
+        <span style="color:var(--muted);font-weight:600">— a document can be circulating with every
+        signature already in</span></span></div>`;
   const actD=S.sheet==='action';
-  const sq=(STAT[id]||{}).sq||{you:0,others:0,release:0,total:0,done:0};
   const discRows = actD ? ds.list.filter(e=>e.pending>0) : ds.list;
   STAT[id].pendDisc=ds.list.filter(e=>e.pending>0).length;
   const doneDisc=ds.list.length-STAT[id].pendDisc;
-  $('dbt'+id).innerHTML=`<div class="bt-h">Progress by discipline${actD?' — outstanding only':''}</div>`+
+  $('dbt'+id).innerHTML=`<div class="bt-h">Documents each discipline must review${actD?' — outstanding only':''}</div>`+
     (discRows.length? discRows.map(e=>`<div class="trow wide${actD?' act':''}${e.mine?' sk-mine':''}">
       <div class="tc"><div class="c1 nm">${esc(e.name)}${e.mine?'<span class="you">YOU</span>':''}</div>
-        <div class="c2">${e.total} to review · ${e.pending} pending${
+        <div class="c2">${e.total} document${e.total===1?'':'s'} to review · ${e.pending} pending${
           e.mine ? (sq.done? ' · <b style="color:#2563EB">'+sq.done+'</b> reviewed, still circulating':'')
           : e.mineDone ? ' · <b style="color:#2563EB">'+e.mineDone+'</b> waiting only on them'
           : ''}</div></div>
@@ -4495,6 +4582,12 @@ const splitTags = v => String(v||'').split(/[,;]+/).map(x=>x.trim()).filter(Bool
    the discipline column reading FOR REVIEW - ORIGINATOR, the document types
    ticked in its Document types picker — minus the statuses that ask nobody for
    anything: read from column W, or from column X where X has overruled it. */
+/* A tag can be marked not applicable: it stays on the list and can be given a
+   real engineer later, but it counts towards nobody's workload and is not
+   chased as unassigned.  It is written to the register as plain "N/A". */
+const ENG_NA = 'N/A';
+const isNA = v => String(v||'').trim().toUpperCase()==='N/A';
+
 const ENG_SKIP = ['VOID','FOR INFORMATION','AS BUILT','NEVER RECEIVED'];
 const engCountable = d => ENG_SKIP.indexOf(String(d.status||'').toUpperCase())<0;
 function engDocs(){ return halfDocs('B').filter(engCountable); }
@@ -4557,11 +4650,13 @@ function renderEng(){
 
   /* requisition engineer — one per purchase order */
   const req=S.eng.req[S.po]||'';
-  $('enReqPick').innerHTML=`<select class="en-sel${req?'':' none'}" id="enReqSel" ${names.length?'':'disabled'}>
-    <option value="">— not set —</option>
-    ${names.map(n=>`<option value="${esc(n)}"${n===req?' selected':''}>${esc(n)}</option>`).join('')}
-  </select>`;
-  $('enReqSel').onchange=e=>{ if(!setReq(e.target.value)) e.target.value=req; };
+  dropdown($('enReqPick'), {
+    placeholder: names.length? 'Choose the requisition engineer' : 'No names in the Engineer List sheet',
+    options: names.map(n=>({v:n, t:n})),
+    selected: new Set(req? [req] : []),
+    disabled: !names.length,
+    onChange: v=>{ if(!setReq([...v][0]||'')) $('enReqPick').setSel(new Set(req?[req]:[])); }
+  });
 
   /* measure first, then say it — the note read a render behind otherwise */
   const source=engDocs();
@@ -4584,12 +4679,14 @@ function renderEng(){
     Void, for-information, as-built and never-received documents are left out.`;
   $('enBasis').className = narrowed? 'cb-note warn2' : 'cb-note info2';
 
-  const tags=engTags(), unassigned=tags.filter(t=>!t.who).length;
+  const tags=engTags();
+  const unassigned=tags.filter(t=>!t.who).length, naN=tags.filter(t=>isNA(t.who)).length;
   $('enNew').style.display = unassigned? '' : 'none';
   if(unassigned) $('enNew').innerHTML=`<b>${unassigned}</b> of ${tags.length} equipment tag${
     tags.length===1?'':'s'} on this purchase order ${unassigned===1?'has':'have'} no responsible
     engineer yet${S.eng.carried?' — these are new since the register you carried forward':''}.
-    <span class="lnk" onclick="EN.unOnly=true;renderEng()">Show just those</span>`;
+    <span class="lnk" onclick="EN.unOnly=true;renderEng()">Show just those</span>${
+      naN? ` · <b>${naN}</b> marked N/A and left out of the workload.`:''}`;
 
   document.querySelectorAll('#enTabs .tabb').forEach(b=>b.classList.toggle('on',b.dataset.e===EN.view));
   $('enTagsCard').style.display   = EN.view==='tags'   ? '' : 'none';
@@ -4608,7 +4705,8 @@ function renderEngTags(all, names){
       S.eng.spanN===1?'':'s'} name several tags and are counted separately</span>`:'');
   $('enHead').innerHTML='<tr><th>Equipment tag</th><th>Equipment</th><th style="text-align:right">Docs</th>'+
     '<th style="text-align:right">Types</th><th>Progress</th><th>Responsible engineer</th></tr>';
-  $('enBody').innerHTML = rows.length? rows.map(t=>`<tr${t.who?'':' class="en-newtag"'}>
+  $('enBody').innerHTML = rows.length? rows.map(t=>`<tr class="${
+      isNA(t.who)? 'en-na' : (t.who? '' : 'en-newtag')}">
       <td><div class="docno">${esc(t.tag)}</div></td>
       <td><div class="s2" title="${esc(t.equip)}">${esc(t.equip||'—')}</div></td>
       <td style="text-align:right"><span class="s1 num">${t.n}</span>${
@@ -4618,28 +4716,36 @@ function renderEngTags(all, names){
         <div class="en-bar"><i style="width:${t.pct}%;background:#2E9E6B"></i>${
           t.circ? `<i style="width:${Math.round(t.circ/(t.n||1)*100)}%;background:#D9922E"></i>`:''}</div>
         <span class="en-load" style="color:${t.pct?'var(--ok)':'var(--muted)'}">${t.pct}%</span></div></td>
-      <td>${engSelect(t.tag, t.who, names)}</td>
+      <td><div class="en-pick" id="ep-${cssId(t.tag)}"></div></td>
     </tr>`).join('')
     : `<tr><td colspan="6" class="empty">${EN.unOnly?'Every tag has a responsible engineer.':'No equipment tags in this scope.'}</td></tr>`;
 
+
+  rows.forEach(t=>{
+    const host=$('ep-'+cssId(t.tag)); if(!host) return;
+    engPicker(host, names, t.who, v=>setResp(t.tag, v, t.who), 'Assign…');
+  });
 }
-/* One control, one width, drawn by the browser above everything — a pop-up of
-   our own is clipped by the scrolling table it sits in. */
-function engSelect(tag, who, names){
-  const opts=['<option value="">— unassigned —</option>']
-    .concat(names.map(n=>`<option value="${esc(n)}"${n===who?' selected':''}>${esc(n)}</option>`));
-  return `<select class="en-sel${who?'':' none'}" data-tag="${esc(tag)}" data-prev="${esc(who||'')}"
-    ${names.length?'':'disabled'}>${opts.join('')}</select>`;
+
+/* The engineer picker: type to narrow, scroll to browse, N/A to set the row
+   aside.  It floats, because inside the scrolling table an ordinary popup has
+   nowhere to appear. */
+function engPicker(host, names, current, apply, placeholder){
+  const opts=[{v:ENG_NA, t:'N/A — no engineer needed', s:'counts towards nobody'}]
+    .concat(names.map(n=>({v:n, t:n})));
+  dropdown(host, {
+    placeholder: placeholder,
+    options: opts,
+    selected: new Set(current? [current] : []),
+    disabled: !names.length,
+    float: true,
+    onChange: v=>{ if(!apply([...v][0]||'')) host.setSel(new Set(current?[current]:[])); }
+  });
 }
-document.addEventListener('change',e=>{
-  const sel=e.target.closest('.en-sel'); if(!sel) return;
-  const ok=setResp(sel.dataset.tag, sel.value, sel.dataset.prev);
-  if(!ok) sel.value=sel.dataset.prev||'';        // the reader said no; put it back
-});
 
 function renderEngPeople(tags){
   const by={};
-  tags.forEach(t=>{ const who=t.who||'(unassigned)';
+  tags.filter(t=>!isNA(t.who)).forEach(t=>{ const who=t.who||'(unassigned)';
     const e=(by[who]=by[who]||{who, tags:[], n:0, closed:0, circ:0});
     e.tags.push(t); e.n+=t.n; e.closed+=t.closed; e.circ+=t.circ; });
   const list=Object.values(by).map(e=>({...e, pct:e.n?Math.round(e.closed/e.n*100):0}))
@@ -4677,9 +4783,11 @@ function setReq(name){
 function setResp(tag, name, prev){
   prev=prev||'';
   if(name===prev) return true;
-  const q = !name ? `Remove "${prev}" as the responsible engineer for ${tag}?`
-          : prev  ? `Do you want to change the responsible engineer for ${tag} from "${prev}" to "${name}"?`
-                  : `Assign "${name}" as the responsible engineer for ${tag}?`;
+  const q = !name      ? `Remove "${prev}" as the responsible engineer for ${tag}?`
+          : isNA(name)   ? `Mark ${tag} as N/A? It will count towards nobody, and you can give it an engineer later.`
+          : isNA(prev)   ? `${tag} is marked N/A. Assign "${name}" to it instead?`
+          : prev         ? `Do you want to change the responsible engineer for ${tag} from "${prev}" to "${name}"?`
+                         : `Assign "${name}" as the responsible engineer for ${tag}?`;
   if(!confirm(q)) return false;
   const k=tagKey(S.po,tag);
   if(name) S.eng.resp[k]=name; else delete S.eng.resp[k];
@@ -4807,7 +4915,8 @@ function downloadRegister(after){
         if(tags.length){
           /* a row naming several equipments belongs to several engineers; it is
              only written when they agree, rather than asserting one of them */
-          const who=[...new Set(tags.map(t=>S.eng.resp[tagKey(p,t)]).filter(Boolean))];
+          const who=[...new Set(tags.map(t=>S.eng.resp[tagKey(p,t)]).filter(Boolean))]
+                      .filter(v=>!isNA(v) || tags.every(t=>isNA(S.eng.resp[tagKey(p,t)]||'')));
           if(who.length===1){ put(r,cRes,who[0]); nt++; }
           else if(who.length>1) nAmb++;
         }
