@@ -1160,6 +1160,7 @@ tr.en-newtag td{background:var(--warn-bg)}
     </div>
   </div>
 
+  <div class="cb-note info2" id="enBasis" style="margin-top:12px"></div>
   <div class="cb-note warn2" id="enCarry" style="display:none;margin-top:12px"></div>
   <div class="cb-note info2" id="enNew" style="display:none;margin-top:12px"></div>
 
@@ -4489,10 +4490,19 @@ function engNames(){
    counted under each. */
 const splitTags = v => String(v||'').split(/[,;]+/).map(x=>x.trim()).filter(Boolean);
 
+/* A tag earns a place here only if this discipline actually owns reviewable
+   work on it.  That is the same set the FOR REVIEW - ORIGINATOR chart counts —
+   the discipline column reading FOR REVIEW - ORIGINATOR, the document types
+   ticked in its Document types picker — minus the statuses that ask nobody for
+   anything: read from column W, or from column X where X has overruled it. */
+const ENG_SKIP = ['VOID','FOR INFORMATION','AS BUILT','NEVER RECEIVED'];
+const engCountable = d => ENG_SKIP.indexOf(String(d.status||'').toUpperCase())<0;
+function engDocs(){ return halfDocs('B').filter(engCountable); }
+
 /* The equipment tags of the purchase order in scope, with what sits on each. */
 function engTags(){
   const by={};
-  (S.docs||[]).forEach(d=>{
+  engDocs().forEach(d=>{
     const tags=splitTags(d.xref); if(!tags.length) tags.push('(no tag)');
     const alone=tags.length===1;
     tags.forEach(tag=>{
@@ -4507,11 +4517,11 @@ function engTags(){
     });
   });
   return Object.values(by).map(e=>{
-    const live=e.docs.filter(d=>!noAction(d));
+    const live=e.docs;
     const closed=live.filter(d=>String(d.status).toUpperCase()==='REVIEWED WITHOUT COMMENTS').length;
     const circ=live.filter(d=>d.circulating).length;
     return { ...e, n:live.length, closed, circ, codes:e.codes.size,
-             sharedN:e.shared.filter(d=>!noAction(d)).length,
+             sharedN:e.shared.length,
              pct: live.length? Math.round(closed/live.length*100) : 0,
              who: S.eng.resp[tagKey(S.po,e.tag)]||'' };
   });
@@ -4553,10 +4563,28 @@ function renderEng(){
   </select>`;
   $('enReqSel').onchange=e=>{ if(!setReq(e.target.value)) e.target.value=req; };
 
-  const tags=engTags(), unassigned=tags.filter(t=>!t.who).length;
+  /* measure first, then say it — the note read a render behind otherwise */
+  const source=engDocs();
   const spanning=new Set();
-  (S.docs||[]).forEach(d=>{ if(splitTags(d.xref).length>1) spanning.add(d.tr); });
-  S.eng.spanN=spanning.size;
+  source.forEach(d=>{ if(splitTags(d.xref).length>1) spanning.add(d.tr); });
+  S.eng.spanN=spanning.size; S.eng.srcN=source.length;
+  /* the picker on the status page decides which document types are in play,
+     so say when it is narrowing this list too */
+  const incl=S.inc&&S.inc.B;
+  const allCodes=new Set(halfBase('B').map(d=>d.code||'(no code)')).size;
+  S.eng.codeN = incl? incl.size : allCodes;
+  S.eng.codeAll = allCodes;
+  const narrowed = S.eng.codeN < S.eng.codeAll;
+
+  $('enBasis').innerHTML=`Tags with review work this discipline owns:
+    <b>${S.eng.srcN.toLocaleString()}</b> document${S.eng.srcN===1?'':'s'} marked
+    <b>FOR REVIEW - ORIGINATOR</b> in the <b>${esc(S.disc||'')}</b> column, across
+    <b>${S.eng.codeN}</b>${narrowed?' of '+S.eng.codeAll:''} document type${S.eng.codeN===1?'':'s'}${
+      narrowed?' — the rest are unticked in <b>Document types</b> on the status page':''}.
+    Void, for-information, as-built and never-received documents are left out.`;
+  $('enBasis').className = narrowed? 'cb-note warn2' : 'cb-note info2';
+
+  const tags=engTags(), unassigned=tags.filter(t=>!t.who).length;
   $('enNew').style.display = unassigned? '' : 'none';
   if(unassigned) $('enNew').innerHTML=`<b>${unassigned}</b> of ${tags.length} equipment tag${
     tags.length===1?'':'s'} on this purchase order ${unassigned===1?'has':'have'} no responsible
