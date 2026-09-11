@@ -695,6 +695,15 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .en-pick .ms-btn{width:100%;justify-content:space-between}
 tr.en-na td{opacity:.5}
 tr.en-na td:last-child{opacity:1}
+/* the workload bar is a way in, so it has to look like one */
+.en-prog{display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;padding:4px 6px;
+  margin:-4px -6px;border-radius:8px;font:inherit;cursor:pointer;text-align:left;transition:background .15s ease}
+.en-prog:hover{background:var(--sf2)}
+.en-prog:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+.en-go{font-size:10px;font-weight:800;color:var(--blue);opacity:0;transition:opacity .15s ease;white-space:nowrap}
+.en-prog:hover .en-go{opacity:1}
+.en-multi{font-size:10px;font-weight:800;letter-spacing:.06em;color:#1A4FBF;background:#EEF4FE;
+  border:1px solid #CFE0FA;border-radius:5px;padding:2px 7px}
 .en-na-tag{font-size:11px;font-weight:800;color:var(--muted);background:var(--info-bg);
   border-radius:20px;padding:2px 9px}
 .btn.btn-warn{border-color:var(--dang);color:var(--dang)}
@@ -1501,6 +1510,7 @@ function readFile(f){
   fr.onerror=()=>fail('Could not read that file.');
   fr.onload=ev=>{ setTimeout(()=>{ try{ parseBook(new Uint8Array(ev.target.result)); }
     catch(err){ console.error(err); fail('Could not parse this workbook: '+err.message); } },40); };
+  S.fileName=f.name||'';
   fr.readAsArrayBuffer(f);
 }
 function fail(m){ $('loadbox').classList.remove('on'); const e=$('err'); e.textContent=m; e.classList.add('on'); }
@@ -1512,6 +1522,18 @@ function fail(m){ $('loadbox').classList.remove('on'); const e=$('err'); e.textC
 const ENG_REQ = 'REQUISITION ENGINEER';     // one per purchase order
 const ENG_RESP = 'RESPONSIBLE ENGINEER';    // one per equipment tag
 const ENG_SHEET = 'Engineer List';
+/* The roster used to come from a second sheet the register does not normally
+   carry.  It lives here instead, so a plain eGesDoc export is enough; any name
+   already written into the register's own columns is added to it on load. */
+const ENG_ROSTER = {
+  'Vessels': ['AKENAPELLI SUJAN','ALBERTH ALEXANDER VARGAS','ANANDHAN S','CHAUHAN AAKANSH',
+    'CHOUDARI KAMALAKARA RAO','E GANDHI','HARIHARAN GURUSWAMY','HRITURAJ S','JEEVARATHINAM SELVARAJ',
+    'MAHAMMAD KHASIM','MANDADI SURESH','MANGESH KAMBLE','NAVEENKUMAR PONNUSAMY','PATEL UTKARSH',
+    'PRABU CHINNAIAH','PRAKASH S','PRAVEEN SATHASIVAM','PRAVEENKUMARA T','PRAVIN MANOHAR NAIK',
+    'PULIPATI VENKATA PHANI RAM GOPAL','RAGHAVENDRA V.K.','RAJESH OWAIYAR','RAJESH T',
+    'RAJESWARAN SELVARAJ','RAMESH GUNASEKAR','REDDYVARI RAJESH','SARAVANA KUMAR S','SHAIK DASTAGIRI',
+    'SIVASUBRAMANIAN JEYARAMAN','SURULIMUTHU SATHISHKUMAR','VENKATESH ALAGARSAMY','YASHWANTH C']
+};
 /* PO + equipment tag, the pair a responsible engineer is assigned to */
 const tagKey = (po,tag) => String(po).trim()+'\u0001'+String(tag).trim();
 
@@ -1596,7 +1618,19 @@ function parseBook(bytes){
      assignments in it — re-parsed on demand rather than held open, because the
      parsed workbook is far heavier than the 18 MB of file it came from. */
   S.fileBytes=bytes;
-  S.eng={ list:ctx.engList||{}, req:ctx.req||{}, resp:ctx.resp||{},
+  /* built-in roster, plus the sheet if this workbook still has one, plus every
+     name the register itself already uses — so nothing is ever unpickable */
+  const list={}; Object.keys(ENG_ROSTER).forEach(k=>list[k]=ENG_ROSTER[k].slice());
+  Object.entries(ctx.engList||{}).forEach(([k,v])=>{
+    list[k]=[...new Set((list[k]||[]).concat(v))].sort((a,b)=>a.localeCompare(b)); });
+  const used=new Set(Object.values(ctx.req||{}).concat(Object.values(ctx.resp||{})));
+  if(used.size){
+    const k=Object.keys(list)[0]||'Vessels';
+    used.forEach(n=>{ if(n && !isNA(n) && !Object.values(list).some(a=>a.indexOf(n)>=0))
+      (list[k]=list[k]||[]).push(n); });
+    Object.keys(list).forEach(x=>list[x].sort((a,b)=>a.localeCompare(b)));
+  }
+  S.eng={ list, req:ctx.req||{}, resp:ctx.resp||{},
           hadCols:ctx.hasEngCols, hadList:!!ctx.engList,
           carried:0, dirty:false, prevName:'' };
   $('loadbox').classList.remove('on');
@@ -2131,39 +2165,85 @@ function signedOff(allDocs){
    A pie of the same numbers reads as a share of one pile, which is what made
    453 documents look like 512 of something. */
 function setSVG(outerN, parts, size, ownName){
-  const R=size/2-2, cx=size/2, cy=size/2;
+  const R=size/2-13, cx=size/2, cy=size/2+4;
   const host=parts.find(p=>p.n>=outerN*0.98 && p.name===ownName);
   const inner=parts.filter(p=>p!==host).sort((a,b)=>b.n-a.n);
   const placed=[];
-  const pad=3;
+  const pad=4;
+  /* area is proportional to the document count, but a one-document discipline
+     still has to be a circle somebody can aim at, so there is a floor */
   inner.forEach(p=>{
-    const r=Math.max(7, R*Math.sqrt(p.n/Math.max(outerN,1)));
+    const r=Math.max(17, R*Math.sqrt(p.n/Math.max(outerN,1)));
     /* spiral outwards until it sits inside the ring and clear of the others */
     let best=null;
     for(let t=0;t<2600 && !best;t++){
       const ang=t*0.55, rad=(R-r-pad)*Math.min(1, t/900);
       const x=cx+Math.cos(ang)*rad, y=cy+Math.sin(ang)*rad;
+      /* leave the middle clear: the card's own click lands there, and a bubble
+         sitting on it would swallow "click for progress by discipline" */
+      if(Math.hypot(x-cx,y-cy) < r+10) continue;
       if(Math.hypot(x-cx,y-cy)+r > R-pad) continue;
       if(placed.some(q=>Math.hypot(x-q.x,y-q.y) < r+q.r+pad)) continue;
       best={x,y,r};
     }
     if(best){ best.p=p; placed.push(best); }
   });
+  const tip=p=>`${p.name} — ${p.n} of ${outerN} documents · ${p.n-p.pending} signed, ${p.pending} still to sign`;
   const ring = host
-    ? `<circle cx="${cx}" cy="${cy}" r="${R}" fill="${host.col}" fill-opacity=".16"
-         stroke="${host.col}" stroke-width="2"><title>${esc(host.name)} — ${host.n} documents, all of them</title></circle>`
+    ? `<g class="setb host" data-k="${esc(host.name)}">
+         <circle cx="${cx}" cy="${cy}" r="${R}" fill="${host.col}" fill-opacity=".15"
+           stroke="${host.col}" stroke-width="2.5"></circle>
+         <text x="${cx}" y="11" text-anchor="middle" font-size="11.5" font-weight="800"
+           fill="${host.col}">${esc(host.name)} · ${host.n} documents</text></g>`
     : `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="var(--line2)"
          stroke-width="2" stroke-dasharray="5 4"></circle>`;
   const bubbles=placed.map(b=>`
     <g class="setb" data-k="${esc(b.p.name)}">
-      <circle cx="${b.x}" cy="${b.y}" r="${b.r}" fill="${b.p.col}" fill-opacity=".82" stroke="#fff" stroke-width="1.5">
-        <title>${esc(b.p.name)} — ${b.p.n} of ${outerN} documents · ${b.p.pending} still to sign</title></circle>
-      ${b.r>=15? `<text x="${b.x}" y="${b.y+3.5}" text-anchor="middle" font-size="${
-        Math.min(13, Math.max(8, b.r*0.55))}" font-weight="700" fill="#fff">${b.p.n}</text>`:''}
+      <circle cx="${b.x}" cy="${b.y}" r="${b.r}" fill="${b.p.col}" fill-opacity=".85"
+        stroke="#fff" stroke-width="2"></circle>
+      <text x="${b.x}" y="${b.y+1}" text-anchor="middle" font-size="${
+        Math.min(13, Math.max(9, b.r*0.5))}" font-weight="800" fill="#fff">${b.p.n}</text>
+      <text x="${b.x}" y="${b.y+b.r+9}" text-anchor="middle" font-size="7.5" font-weight="700"
+        fill="var(--muted)">${esc(b.p.name.length>13? b.p.name.slice(0,12)+'…' : b.p.name)}</text>
     </g>`).join('');
+  const data={}; parts.forEach(p=>data[p.name]=tip(p));
   return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" role="img"
+    data-tips='${esc(JSON.stringify(data))}'
     aria-label="${outerN} documents, with each discipline sized by how many it reviews">
     ${ring}${bubbles}</svg>`;
+}
+
+/* The set diagram answers to the same tooltip the donuts use, and a circle is
+   a way into that discipline's own documents. */
+function wireSet(hostId, half){
+  const host=$(hostId); if(!host) return;
+  const svg=host.querySelector('svg'); if(!svg) return;
+  let tips={}; try{ tips=JSON.parse(svg.dataset.tips||'{}'); }catch(e){}
+  svg.querySelectorAll('.setb').forEach(g=>{
+    const name=g.dataset.k, isHost=g.classList.contains('host');
+    g.style.cursor='pointer';
+    const card=()=>g.closest('.ccard');
+    const deployed=()=>{ const c=card(); return c && c.classList.contains('open'); };
+    g.addEventListener('mousemove',e=>{ const t=TIP(); if(!t) return;
+      t.innerHTML=`<b>${esc(name)}</b><br>${esc(tips[name]||'')}<br>
+        <span style="opacity:.7">${(isHost||!deployed())? 'click for progress by discipline'
+                                                        : 'click for its documents'}</span>`;
+      t.style.display='block';
+      t.style.left=Math.min(e.clientX+14, innerWidth-t.offsetWidth-10)+'px';
+      t.style.top=(e.clientY+16)+'px'; });
+    g.addEventListener('mouseleave',()=>{ const t=TIP(); if(t) t.style.display='none'; });
+    /* The first click on the card does what it always did — deploys the list —
+       whichever circle it lands on; the host ring never does anything else.
+       Once the list is open, a circle is a way into that discipline's own
+       documents.  Clicking the middle of a chart therefore cannot surprise
+       somebody who was only after the list. */
+    if(isHost) return;
+    g.addEventListener('click',e=>{
+      if(!deployed()) return;                 // let it bubble and open the card
+      e.stopPropagation();
+      const t=TIP(); if(t) t.style.display='none';
+      openAction(half,'disc',name,e); });
+  });
 }
 
 /* Which disciplines still owe a review on these documents.
@@ -2374,9 +2454,11 @@ function renderHalf(id){
   const so=signedOff(halfDocs(id));
   const parts=ds.list.map(e=>({name:e.name, n:e.total, pending:e.pending, col:e.col}));
   $('ddw'+id).classList.add('set');
+  setTimeout(()=>wireSet('ddw'+id, id), 0);
   $('ddw'+id).innerHTML=setSVG(so.docs, parts, 220, S.disc)+
-    `<div class="set-cap"><b>${so.docs.toLocaleString()}</b> documents${
-      parts.some(p=>p.n>=so.docs*0.98 && p.name===S.disc)? ' · all reviewed by '+esc(S.disc):''}</div>`;
+    (parts.some(p=>p.n>=so.docs*0.98 && p.name===S.disc)
+      ? `<div class="set-cap">every circle is a discipline — hover for its numbers, click for its documents</div>`
+      : `<div class="set-cap"><b>${so.docs.toLocaleString()}</b> documents in scope</div>`);
   $('dmin'+id).innerHTML=[
     ['', ds.list.length, 'disciplines involved'],
     ['', so.docs, 'documents in scope'],
@@ -3334,6 +3416,7 @@ const NOT_CLOSED = d => !noAction(d) && String(d.status).toUpperCase()!=='REVIEW
 /* Build the list behind whichever bar was clicked. */
 function actionRows(){
   const docs=halfDocs(AC.half);
+  if(AC.kind==='engineer') return engineerDocs(AC.key).map(d=>({d, disc:null}));
   if(AC.kind==='band'){
     /* A band is a slice of the progress bar, so it is drawn from the same
        documents the bar counts — including the closed ones.  It is not an
@@ -3375,7 +3458,8 @@ function renderAction(){
   AC.rows=rows;
 
   const scopeName = AC.half==='A' ? 'Full purchase order' : 'For review — '+(S.disc||'');
-  const what = AC.kind==='band'     ? bandTitle()
+  const what = AC.kind==='engineer' ? AC.key+' — every document they hold'
+             : AC.kind==='band'     ? bandTitle()
              : AC.kind==='stuck'    ? STUCK_T[AC.key](S.disc)
              : AC.kind==='code'     ? 'Document type '+AC.key
              : AC.kind==='allcodes' ? 'All outstanding document types'
@@ -3399,6 +3483,16 @@ function renderAction(){
     hero={title:'All document types', sub:stats.st.byCode.length+' types in this scope',
           pct:stats.st.progress, bar:sbar(stats.st.totals,stats.st.total),
           v:stats.st.totals.without, tot:stats.st.total, unit:'closed'};
+  } else if(AC.kind==='engineer'){
+    const mine=engTags().filter(t=>t.who===AC.key);
+    const n=mine.reduce((a,t)=>a+t.n,0), done=mine.reduce((a,t)=>a+t.closed,0),
+          circ=mine.reduce((a,t)=>a+t.circ,0);
+    hero={title:AC.key, sub:mine.length+' equipment tag'+(mine.length===1?'':'s')+' · '+
+            mine.map(t=>tagLabel(t.tag)).slice(0,6).join(', ')+(mine.length>6?' …':''),
+          pct:n?Math.round(done/n*100):0,
+          bar:`<div class="sbar"><i style="width:${n?done/n*100:0}%;background:#2E9E6B"></i>`+
+              `<i style="width:${n?circ/n*100:0}%;background:#D9922E"></i></div>`,
+          v:done, tot:n, unit:'closed'};
   } else if(AC.kind==='band' && stats.st){
     const src = AC.bandCode
       ? (stats.st.byCode||[]).find(x=>x.code===AC.bandCode)
@@ -3439,14 +3533,22 @@ function renderAction(){
   const circN=rows.filter(r=>r.d.circulating).length;
   const critN=rows.filter(r=>isCriticalDoc(r.d)).length;
   const over =rows.filter(r=>r.d.circulating && r.d.over>0).length;
-  $('acSum').innerHTML=[
-    [AC.kind==='band'?'':'dang', byDisc?rows.length:uniq,
-      byDisc?'reviews outstanding':(AC.kind==='band'?'documents in this band':'documents outstanding')],
-    ['', uniq, 'distinct documents'],
-    ['warn', circN, 'circulating now'],
-    ['dang', over, 'past the '+DEADLINE_DAYS+'-day deadline'],
-    ['', critN, 'critical (calculations / GA)']
-  ].map(([c,n,l])=>`<div class="m ${c}"><div class="n">${n.toLocaleString()}</div><div class="l">${l}</div></div>`).join('');
+  /* an engineer's page is a whole workload, not an outstanding list, so it is
+     counted the way somebody would ask about their own desk */
+  const closedN=rows.filter(r=>String(r.d.status).toUpperCase()==='REVIEWED WITHOUT COMMENTS').length;
+  const tiles = AC.kind==='engineer'
+    ? [['', uniq, 'documents held'],
+       ['ok', closedN, 'closed'],
+       ['warn', circN, 'circulating now'],
+       ['dang', uniq-closedN, 'still to close'],
+       ['dang', over, 'past the '+DEADLINE_DAYS+'-day deadline']]
+    : [[AC.kind==='band'?'':'dang', byDisc?rows.length:uniq,
+        byDisc?'reviews outstanding':(AC.kind==='band'?'documents in this band':'documents outstanding')],
+       ['', uniq, 'distinct documents'],
+       ['warn', circN, 'circulating now'],
+       ['dang', over, 'past the '+DEADLINE_DAYS+'-day deadline'],
+       ['', critN, 'critical (calculations / GA)']];
+  $('acSum').innerHTML=tiles.map(([c,n,l])=>`<div class="m ${c}"><div class="n">${n.toLocaleString()}</div><div class="l">${l}</div></div>`).join('');
   $('acCount').innerHTML=`<b>${rows.length.toLocaleString()}</b> row${rows.length===1?'':'s'}`;
 
   const head=['Document','Equipment','Code','Rev','Revisions','Status','Days']
@@ -3477,7 +3579,8 @@ function renderAction(){
 
 /* ── the list as a spreadsheet, and as an Outlook draft ─────────────────── */
 function actionTitle(){
-  return (AC.kind==='band' ? bandTitle()
+  return (AC.kind==='engineer' ? AC.key+' — documents held'
+        : AC.kind==='band' ? bandTitle()
         : AC.kind==='stuck' ? STUCK_T[AC.key](S.disc)
         : AC.kind==='code' ? 'Document type '+AC.key
         : AC.kind==='allcodes' ? 'All outstanding document types'
@@ -4563,10 +4666,11 @@ const EN = { view:'tags', sort:'tag', unOnly:false };
 
 /* Every name this project knows, the chosen discipline's own list first. */
 function engNames(){
-  const L=S.eng&&S.eng.list||{};
+  const L=(S.eng&&S.eng.list)||ENG_ROSTER;
   const mine=(S.disc && L[S.disc])||[];
   if(mine.length) return mine;
   const all=new Set(); Object.values(L).forEach(a=>a.forEach(n=>all.add(n)));
+  if(!all.size) Object.values(ENG_ROSTER).forEach(a=>a.forEach(n=>all.add(n)));
   return [...all].sort((a,b)=>a.localeCompare(b));
 }
 
@@ -4592,23 +4696,47 @@ const ENG_SKIP = ['VOID','FOR INFORMATION','AS BUILT','NEVER RECEIVED'];
 const engCountable = d => ENG_SKIP.indexOf(String(d.status||'').toUpperCase())<0;
 function engDocs(){ return halfDocs('B').filter(engCountable); }
 
-/* The equipment tags of the purchase order in scope, with what sits on each. */
+/* Everything one engineer holds in this scope. */
+function engineerDocs(name){
+  const out=[], seen=new Set();
+  engTags().forEach(t=>{ if(t.who!==name) return;
+    t.docs.forEach(d=>{ if(!seen.has(d.tr)){ seen.add(d.tr); out.push(d); } }); });
+  return out;
+}
+
+/* The key under which the documents naming several equipments at once are
+   held — one row, one owner, so no document is counted twice and the column
+   adds up to the scope it came from. */
+const MULTI_TAG='#SEVERAL#';
+
+/* The equipment tags of the purchase order in scope, with what sits on each.
+   Every document lands in exactly one row: its own tag, or the shared row when
+   it names more than one.  The Docs column therefore totals the documents in
+   scope, which is the pile the engineers actually work through. */
 function engTags(){
   const by={};
+  const multi=(by[MULTI_TAG]={tag:MULTI_TAG, equip:'', equipFirm:true, docs:[], shared:[],
+                              codes:new Set(), span:0, tagSet:new Set()});
   engDocs().forEach(d=>{
     const tags=splitTags(d.xref); if(!tags.length) tags.push('(no tag)');
-    const alone=tags.length===1;
-    tags.forEach(tag=>{
-      const e=(by[tag]=by[tag]||{tag, equip:'', equipFirm:false, docs:[], shared:[], codes:new Set(), span:0});
-      /* Documents naming this tag alone are its own work; one naming forty
-         drums is shared across all of them and is counted apart, or every
-         engineer's load is inflated by the same spare-parts lists. */
-      if(alone){ e.docs.push(d); if(d.code) e.codes.add(d.code); }
-      else { e.shared.push(d); e.span++; }
-      /* the equipment name is only trustworthy from a row naming this tag alone */
-      if(d.equip && (alone ? !e.equipFirm : !e.equip)){ e.equip=d.equip; e.equipFirm=e.equipFirm||alone; }
-    });
+    if(tags.length>1){
+      multi.docs.push(d); if(d.code) multi.codes.add(d.code);
+      tags.forEach(t=>multi.tagSet.add(t));
+      /* still listed against each equipment it names, as context */
+      tags.forEach(tag=>{
+        const e=(by[tag]=by[tag]||{tag, equip:'', equipFirm:false, docs:[], shared:[], codes:new Set(), span:0});
+        e.shared.push(d); e.span++;
+        if(d.equip && !e.equip) e.equip=d.equip;
+      });
+      return;
+    }
+    const tag=tags[0];
+    const e=(by[tag]=by[tag]||{tag, equip:'', equipFirm:false, docs:[], shared:[], codes:new Set(), span:0});
+    e.docs.push(d); if(d.code) e.codes.add(d.code);
+    if(d.equip){ e.equip=d.equip; e.equipFirm=true; }
   });
+  if(!multi.docs.length) delete by[MULTI_TAG];
+  else multi.equip=multi.tagSet.size+' equipment tags named together';
   return Object.values(by).map(e=>{
     const live=e.docs;
     const closed=live.filter(d=>String(d.status).toUpperCase()==='REVIEWED WITHOUT COMMENTS').length;
@@ -4620,12 +4748,19 @@ function engTags(){
   });
 }
 function engSorted(list){
-  const l=list.slice();
-  if(EN.sort==='docs') l.sort((a,b)=>b.n-a.n || a.tag.localeCompare(b.tag));
-  else if(EN.sort==='prog') l.sort((a,b)=>a.pct-b.pct || b.n-a.n);
-  else l.sort((a,b)=>a.tag.localeCompare(b.tag));
+  const l=list.slice(), last=(x)=>x.tag===MULTI_TAG?1:0;
+  if(EN.sort==='docs') l.sort((a,b)=>last(a)-last(b) || b.n-a.n || a.tag.localeCompare(b.tag));
+  else if(EN.sort==='prog') l.sort((a,b)=>last(a)-last(b) || a.pct-b.pct || b.n-a.n);
+  else l.sort((a,b)=>last(a)-last(b) || a.tag.localeCompare(b.tag));
   return EN.unOnly ? l.filter(t=>!t.who) : l;
 }
+const tagLabel = t => t===MULTI_TAG ? 'Documents naming several tags' : t;
+
+function openEngineer(name, ev){
+  AC.half='B';
+  openAction('B','engineer',name,ev);
+}
+window.openEngineer=openEngineer;
 
 function openEng(){
   if(!S.docs || !S.docs.length) return alert('Choose a purchase order first.');
@@ -4700,14 +4835,15 @@ function renderEng(){
 
 function renderEngTags(all, names){
   const rows=engSorted(all);
-  $('enCount').innerHTML=`<b>${rows.length}</b> tag${rows.length===1?'':'s'}`+
-    (S.eng.spanN? ` <span style="color:var(--muted);font-weight:600">· ${S.eng.spanN} document${
-      S.eng.spanN===1?'':'s'} name several tags and are counted separately</span>`:'');
+  const colTotal=all.reduce((n,t)=>n+t.n,0);
+  $('enCount').innerHTML=`<b>${rows.length}</b> row${rows.length===1?'':'s'}`+
+    ` <span style="color:var(--muted);font-weight:600">· Docs adds to <b>${colTotal.toLocaleString()}</b>${
+      colTotal===S.eng.srcN? '' : ' of '+(S.eng.srcN||0).toLocaleString()}, every document counted once</span>`;
   $('enHead').innerHTML='<tr><th>Equipment tag</th><th>Equipment</th><th style="text-align:right">Docs</th>'+
     '<th style="text-align:right">Types</th><th>Progress</th><th>Responsible engineer</th></tr>';
   $('enBody').innerHTML = rows.length? rows.map(t=>`<tr class="${
       isNA(t.who)? 'en-na' : (t.who? '' : 'en-newtag')}">
-      <td><div class="docno">${esc(t.tag)}</div></td>
+      <td><div class="docno">${t.tag===MULTI_TAG?'<span class="en-multi">SEVERAL TAGS</span>':esc(t.tag)}</div></td>
       <td><div class="s2" title="${esc(t.equip)}">${esc(t.equip||'—')}</div></td>
       <td style="text-align:right"><span class="s1 num">${t.n}</span>${
         t.sharedN? `<div class="s2 num" title="documents naming this tag alongside others">+${t.sharedN} shared</div>`:''}</td>
@@ -4760,10 +4896,17 @@ function renderEngPeople(tags){
       <td><div style="display:flex;align-items:center;gap:8px">
         <div class="en-bar"><i style="width:${Math.round(e.n/maxN*100)}%;background:#2563EB"></i></div>
         <span class="en-load" style="color:var(--muted)">${Math.round(e.n/maxN*100)}%</span></div></td>
-      <td><div style="display:flex;align-items:center;gap:8px">
-        <div class="en-bar"><i style="width:${e.pct}%;background:#2E9E6B"></i></div>
-        <span class="en-load" style="color:${e.pct?'var(--ok)':'var(--muted)'}">${e.pct}%</span></div></td>
-      <td><div class="s2">${e.tags.map(t=>esc(t.tag)+' <span style="color:var(--muted)">('+t.n+')</span>').join(' · ')}</div></td>
+      <td>${e.who==='(unassigned)'
+        ? `<div style="display:flex;align-items:center;gap:8px">
+             <div class="en-bar"><i style="width:${e.pct}%;background:#2E9E6B"></i></div>
+             <span class="en-load" style="color:var(--muted)">${e.pct}%</span></div>`
+        : `<button class="en-prog" onclick="openEngineer('${esc(e.who).replace(/'/g,"\\'")}',event)"
+             title="See every document ${esc(e.who)} is working on">
+             <div class="en-bar"><i style="width:${e.pct}%;background:#2E9E6B"></i>${
+               e.circ? `<i style="width:${Math.round(e.circ/(e.n||1)*100)}%;background:#D9922E"></i>`:''}</div>
+             <span class="en-load" style="color:${e.pct?'var(--ok)':'var(--muted)'}">${e.pct}%</span>
+             <span class="en-go">open →</span></button>`}</td>
+      <td><div class="s2">${e.tags.map(t=>esc(tagLabel(t.tag))+' <span style="color:var(--muted)">('+t.n+')</span>').join(' · ')}</div></td>
     </tr>`).join('')
     : '<tr><td colspan="6" class="empty">No equipment tags in this scope.</td></tr>';
 }
@@ -4912,28 +5055,24 @@ function downloadRegister(after){
         if(S.eng.req[p]){ put(r,cReq,S.eng.req[p]); nr++; }
         const xr=cell(r,iXR);
         const tags=splitTags(xr? xr.v : '');
-        if(tags.length){
-          /* a row naming several equipments belongs to several engineers; it is
-             only written when they agree, rather than asserting one of them */
-          const who=[...new Set(tags.map(t=>S.eng.resp[tagKey(p,t)]).filter(Boolean))]
-                      .filter(v=>!isNA(v) || tags.every(t=>isNA(S.eng.resp[tagKey(p,t)]||'')));
-          if(who.length===1){ put(r,cRes,who[0]); nt++; }
-          else if(who.length>1) nAmb++;
+        if(tags.length>1){
+          /* a row naming several equipments is owned by the shared row, so it
+             has exactly one owner like every other document */
+          const who=S.eng.resp[tagKey(p,MULTI_TAG)];
+          if(who){ put(r,cRes,who); nt++; } else nAmb++;
+        } else if(tags.length===1){
+          const who=S.eng.resp[tagKey(p,tags[0])];
+          if(who){ put(r,cRes,who); nt++; }
         }
       }
       rg.e.c=Math.max(rg.e.c,cRes); ws['!ref']=XLSX.utils.encode_range(rg);
 
-      /* keep the Engineer List sheet alive, so the next carry-forward works */
-      const hasList=wb.SheetNames.some(n=>n.trim().toLowerCase()===ENG_SHEET.toLowerCase());
-      if(!hasList && S.eng.list && Object.keys(S.eng.list).length){
-        const cols=Object.keys(S.eng.list);
-        const depth=Math.max(...cols.map(c=>S.eng.list[c].length));
-        const aoa=[cols];
-        for(let i=0;i<depth;i++) aoa.push(cols.map(c=>S.eng.list[c][i]||''));
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), ENG_SHEET);
-      }
-      XLSX.writeFile(wb,'CONSOLIDATED_STATUS_'+String(S.meta.project||'')+'_with_engineers.xlsx',
-                     {compression:true, cellStyles:true});
+      /* No Engineer List sheet is written any more: the roster is in the tool,
+         and the names that matter are in the two columns themselves. */
+      /* the register keeps the name it arrived with, so its date stays on it */
+      const base=String(S.fileName||'CONSOLIDATED_STATUS').replace(/\.[^.]+$/,'')
+                   .replace(/_with_engineers$/i,'');
+      XLSX.writeFile(wb, base+'_with_engineers.xlsx', {compression:true, cellStyles:true});
       S.eng.dirty=false;
       btn.textContent=was; btn.disabled=false;
       renderEng(); renderReqBtn();
@@ -4941,8 +5080,7 @@ function downloadRegister(after){
       alert('Register written: '+nr.toLocaleString()+' rows carry a requisition engineer and '+
             nt.toLocaleString()+' carry a responsible engineer.'+
             (nAmb? '\n\n'+nAmb.toLocaleString()+' row'+(nAmb===1?'':'s')+' name several equipment tags '+
-                   'whose engineers differ, so the responsible engineer was left blank rather than '+
-                   'picking one of them.' : '')+
+                   'and have no owner yet — assign the "Several tags" row to cover them.' : '')+
             '\n\nLoad this file next time — or feed it to the carry-forward — to keep the assignments.');
     }catch(err){
       btn.textContent=was; btn.disabled=false;
