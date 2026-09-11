@@ -409,8 +409,13 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
   border-top:1px solid var(--line);margin-top:24px}
 
 /* ── page bar: title on the left, scope on the right (eGesDoc shape) ────── */
-.pagebar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--sf);
+.pagebar{display:flex;align-items:center;gap:14px 18px;flex-wrap:wrap;background:var(--sf);
   border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh1);padding:12px 18px;margin:16px 0 0}
+/* what you are looking at on the left, what you can do on the right, so the
+   two never interleave when the bar wraps */
+.pb-id{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;min-width:0;flex:1 1 340px}
+.pb-acts{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:0 0 auto;margin-left:auto}
+.pb-div{width:1px;height:20px;background:var(--line2);flex:none}
 .pb-t{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:800;color:var(--navy);min-width:0}
 .pb-ic{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#2E86B8,#17558A);color:#fff;
   display:flex;align-items:center;justify-content:center;font-size:14px;flex:0 0 auto}
@@ -681,11 +686,15 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .trow .pv.zero{color:var(--muted)}
 /* ── responsible engineers ──────────────────────────────────────────────── */
 /* the set diagram */
-/* .dw is a centring row; the set diagram stacks its caption underneath */
+/* .dw is a centring row; the set diagram stacks its key underneath */
 .dw.set{flex-direction:column;align-items:center}
-/* in flow under the circle, not floated over it */
-.set-cap{margin-top:7px;text-align:center;font-size:10.5px;font-weight:700;color:var(--muted);
-  line-height:1.4;max-width:230px}
+/* Names live here, not under the circles, where a long one spills past a small
+   circle and a short one looks lost. */
+.set-key{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 12px;margin-top:10px;
+  max-width:100%;font-size:10px;font-weight:700;color:var(--muted);line-height:1.5}
+.set-key .sk-i{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;cursor:default}
+.set-key .sk-i i{width:8px;height:8px;border-radius:2px;flex:none}
+.set-key .sk-i b{color:var(--navy);font-variant-numeric:tabular-nums}
 .set-cap b{color:var(--navy)}
 .setb circle{transition:fill-opacity .15s ease}
 .setb:hover circle{fill-opacity:1}
@@ -707,6 +716,9 @@ tr.en-na td:last-child{opacity:1}
 .en-na-tag{font-size:11px;font-weight:800;color:var(--muted);background:var(--info-bg);
   border-radius:20px;padding:2px 9px}
 .btn.btn-warn{border-color:var(--dang);color:var(--dang)}
+/* one height and one rhythm for every small button, whichever bar it sits in */
+.btn-s{height:32px;padding:0 13px;display:inline-flex;align-items:center;justify-content:center;
+  white-space:nowrap}
 .en-req{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 .en-req-l{flex:1;min-width:220px}
 .en-req-l .k2{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
@@ -955,7 +967,7 @@ tr.en-newtag td{background:var(--warn-bg)}
     <p>Load the master <b>CONSOLIDATED STATUS</b> workbook. Everything is processed in your browser — the file never leaves this machine.</p>
   </div>
   <div class="drop" id="drop" onclick="document.getElementById('file').click()">
-    <div class="ic">📂</div>
+    <div class="ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 12v5"/><path d="M9.5 14.5 12 12l2.5 2.5"/></svg></div>
     <div class="t">Drop the Consolidated Status .xlsx here</div>
     <div class="s">or click to browse</div>
   </div>
@@ -999,14 +1011,19 @@ tr.en-newtag td{background:var(--warn-bg)}
 <!-- 3 ── STATUS OVERVIEW ────────────────────────────────────────────────── -->
 <div class="screen" id="sc-dash"><div class="wrap">
   <div class="pagebar">
-    <div class="pb-t"><span class="pb-ic">▦</span><span id="pbTitle">Status</span></div>
-    <div class="pb-sp"></div>
-    <div class="pb-scope" id="pbScope"></div>
-    <button class="btn btn-g btn-s" id="reqBtn" onclick="openEng()">👷 Requisition engineer</button>
-    <button class="btn btn-g btn-s" onclick="openEng()">👷 Responsible Engineers</button>
-    <button class="btn btn-g btn-s" onclick="openProgress()">📈 Check Progress</button>
-    <button class="btn btn-p btn-s" onclick="openVdr()">📊 VDR Status Report</button>
-    <button class="btn btn-g btn-s" onclick="go('filter')">Change scope</button>
+    <div class="pb-id">
+      <div class="pb-t"><span id="pbTitle">Status</span></div>
+      <div class="pb-scope" id="pbScope"></div>
+    </div>
+    <div class="pb-acts">
+      <button class="btn btn-g btn-s" id="reqBtn" onclick="openEng()">Requisition engineer</button>
+      <button class="btn btn-g btn-s" onclick="openEng()">Responsible engineers</button>
+      <span class="pb-div"></span>
+      <button class="btn btn-g btn-s" onclick="openProgress()">Check progress</button>
+      <button class="btn btn-g btn-s" onclick="openVdr()">VDR status report</button>
+      <span class="pb-div"></span>
+      <button class="btn btn-g btn-s" onclick="go('filter')">Change scope</button>
+    </div>
   </div>
 
   <div class="tabcard">
@@ -1165,7 +1182,7 @@ tr.en-newtag td{background:var(--warn-bg)}
 <!-- 3c ── CHECK PROGRESS ─────────────────────────────────────────────────── -->
 <div class="screen" id="sc-eng"><div class="wrap">
   <div class="pagebar">
-    <div class="pb-t"><span class="pb-ic">👷</span><span>Responsible engineers</span></div>
+    <div class="pb-t"><span>Responsible engineers</span></div>
     <div class="pb-sp"></div>
     <div class="pb-scope" id="enScope"></div>
     <button class="btn btn-p btn-s" id="enSave" onclick="downloadRegister()">⤓ Download register</button>
@@ -1218,7 +1235,7 @@ tr.en-newtag td{background:var(--warn-bg)}
 
 <div class="screen" id="sc-engload"><div class="wrap">
   <div class="pagebar">
-    <div class="pb-t"><span class="pb-ic">👷</span><span>Carry engineers forward</span></div>
+    <div class="pb-t"><span>Carry engineers forward</span></div>
     <div class="pb-sp"></div>
     <button class="btn btn-g btn-s" onclick="go('dash')">← Back to status</button>
   </div>
@@ -1232,7 +1249,7 @@ tr.en-newtag td{background:var(--warn-bg)}
     </div>
     <div class="fl-body">
       <div class="drop" id="egdrop" onclick="document.getElementById('egfile').click()">
-        <div class="ic">👷</div>
+        <div class="ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 12v5"/><path d="M9.5 14.5 12 12l2.5 2.5"/></svg></div>
         <div class="t">Drop the register you saved last time</div>
         <div class="s">or click to browse</div>
       </div>
@@ -1252,7 +1269,7 @@ tr.en-newtag td{background:var(--warn-bg)}
 
 <div class="screen" id="sc-progress"><div class="wrap">
   <div class="pagebar">
-    <div class="pb-t"><span class="pb-ic">📈</span><span>Check progress</span></div>
+    <div class="pb-t"><span>Check progress</span></div>
     <div class="pb-sp"></div>
     <div class="pb-scope" id="pgScope"></div>
     <button class="btn btn-g btn-s" onclick="go('dash')">← Back to status</button>
@@ -1268,7 +1285,7 @@ tr.en-newtag td{background:var(--warn-bg)}
       </div>
       <div class="fl-body">
         <div class="drop" id="pgdrop" onclick="document.getElementById('pgfile').click()">
-          <div class="ic">🗓</div>
+          <div class="ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 12v5"/><path d="M9.5 14.5 12 12l2.5 2.5"/></svg></div>
           <div class="t">Drop the earlier Consolidated Status .xlsx here</div>
           <div class="s">or click to browse</div>
         </div>
@@ -1303,7 +1320,7 @@ tr.en-newtag td{background:var(--warn-bg)}
         <span class="res" id="pgCount"></span>
         <div class="fill"></div>
         <button class="chip" onclick="exportProgressXlsx()">⤓ Download the comparison</button>
-        <button class="chip" onclick="resetProgress()">↺ Compare another file</button>
+        <button class="chip" onclick="resetProgress()">Compare another file</button>
       </div>
       <div class="dt-scroll" style="max-height:52vh">
         <table class="dt" id="pgTable">
@@ -1319,7 +1336,7 @@ tr.en-newtag td{background:var(--warn-bg)}
 <!-- 3b ── TAKE ACTION ───────────────────────────────────────────────────── -->
 <div class="screen" id="sc-action"><div class="wrap">
   <div class="pagebar">
-    <div class="pb-t"><span class="pb-ic">⚑</span><span id="acTitle">Take action</span></div>
+    <div class="pb-t"><span id="acTitle">Take action</span></div>
     <div class="pb-sp"></div>
     <div class="pb-scope" id="acScope"></div>
     <button class="btn btn-g btn-s" onclick="go('dash')">← Back to status</button>
@@ -1329,15 +1346,15 @@ tr.en-newtag td{background:var(--warn-bg)}
   <div class="dt-wrap" style="border-radius:14px;border:1px solid var(--line)">
     <div class="ac-tools">
       <span class="lbl">Order by</span>
-      <button class="chip on" id="acCrit">★ Critical first</button>
-      <button class="chip" id="acOver">⏰ Deadline crossed</button>
-      <button class="chip" id="acRev">↕ Most revisions first</button>
+      <button class="chip on" id="acCrit">Critical first</button>
+      <button class="chip" id="acOver">Deadline crossed</button>
+      <button class="chip" id="acRev">Most revisions first</button>
       <span class="nav-sep" style="background:var(--line2);height:18px"></span>
       <button class="chip" id="acCirc">Circulating only</button>
       <div class="fill"></div>
       <span class="res" id="acCount"></span>
       <button class="chip" onclick="exportActionXlsx()">⤓ Download as Excel</button>
-      <button class="chip on" onclick="emailAction()">✉ Email this report</button>
+      <button class="chip on" onclick="emailAction()">Email this report</button>
     </div>
     <div class="dt-scroll" style="max-height:58vh">
       <table class="dt" id="acTable">
@@ -1367,7 +1384,7 @@ tr.en-newtag td{background:var(--warn-bg)}
   <div class="acts">
     <button class="btn btn-p" onclick="addToBasket()">＋ Add to consolidated report</button>
     <button class="btn btn-g" onclick="exportOneRow()">⤓ Download this document (1 row)</button>
-    <button class="btn btn-g" onclick="printReport()">🖨 Print / Save as PDF</button>
+    <button class="btn btn-g" onclick="printReport()">Print / save as PDF</button>
     <button class="btn btn-g" onclick="copyReport()">⧉ Copy as text</button>
   </div>
   <div class="foot"></div>
@@ -1424,9 +1441,9 @@ tr.en-newtag td{background:var(--warn-bg)}
 </div></div>
 
 <div class="sheettabs" id="sheettabs">
-  <button class="sh on" data-s="action">⚑ Action View <span class="cnt2" id="shCount">0</span></button>
-  <button class="sh" data-s="overview">▦ Overview</button>
-  <button class="sh" data-s="perf">📉 Performance</button>
+  <button class="sh on" data-s="action">Action view <span class="cnt2" id="shCount">0</span></button>
+  <button class="sh" data-s="overview">Overview</button>
+  <button class="sh" data-s="perf">Performance</button>
 </div>
 <div class="ptip" id="ptip"></div>
 
@@ -2165,7 +2182,7 @@ function signedOff(allDocs){
    A pie of the same numbers reads as a share of one pile, which is what made
    453 documents look like 512 of something. */
 function setSVG(outerN, parts, size, ownName){
-  const R=size/2-13, cx=size/2, cy=size/2+4;
+  const R=size/2-2, cx=size/2, cy=size/2;
   const host=parts.find(p=>p.n>=outerN*0.98 && p.name===ownName);
   const inner=parts.filter(p=>p!==host).sort((a,b)=>b.n-a.n);
   const placed=[];
@@ -2191,10 +2208,8 @@ function setSVG(outerN, parts, size, ownName){
   const tip=p=>`${p.name} — ${p.n} of ${outerN} documents · ${p.n-p.pending} signed, ${p.pending} still to sign`;
   const ring = host
     ? `<g class="setb host" data-k="${esc(host.name)}">
-         <circle cx="${cx}" cy="${cy}" r="${R}" fill="${host.col}" fill-opacity=".15"
-           stroke="${host.col}" stroke-width="2.5"></circle>
-         <text x="${cx}" y="11" text-anchor="middle" font-size="11.5" font-weight="800"
-           fill="${host.col}">${esc(host.name)} · ${host.n} documents</text></g>`
+         <circle cx="${cx}" cy="${cy}" r="${R}" fill="${host.col}" fill-opacity=".13"
+           stroke="${host.col}" stroke-width="2"></circle></g>`
     : `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="var(--line2)"
          stroke-width="2" stroke-dasharray="5 4"></circle>`;
   const bubbles=placed.map(b=>`
@@ -2202,9 +2217,8 @@ function setSVG(outerN, parts, size, ownName){
       <circle cx="${b.x}" cy="${b.y}" r="${b.r}" fill="${b.p.col}" fill-opacity=".85"
         stroke="#fff" stroke-width="2"></circle>
       <text x="${b.x}" y="${b.y+1}" text-anchor="middle" font-size="${
-        Math.min(13, Math.max(9, b.r*0.5))}" font-weight="800" fill="#fff">${b.p.n}</text>
-      <text x="${b.x}" y="${b.y+b.r+9}" text-anchor="middle" font-size="7.5" font-weight="700"
-        fill="var(--muted)">${esc(b.p.name.length>13? b.p.name.slice(0,12)+'…' : b.p.name)}</text>
+        Math.min(13, Math.max(9, b.r*0.5))}" font-weight="700" fill="#fff"
+        dominant-baseline="middle">${b.p.n}</text>
     </g>`).join('');
   const data={}; parts.forEach(p=>data[p.name]=tip(p));
   return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" role="img"
@@ -2432,7 +2446,7 @@ function renderHalf(id){
       : '<div class="done-note">Every document type here is fully closed.</div>')+
       (act && doneCodes? `<div class="done-note">${doneCodes} document type${doneCodes>1?'s are':' is'} 100% closed and hidden.</div>`:'')+
       (act && codeRows.length? `<div class="allact"><span class="lbl2">Everything outstanding across these ${codeRows.length} types</span>
-        <button class="actbtn big" onclick="event.stopPropagation();openAction('${id}','allcodes','')">⚑ Take action on all</button></div>`:'');
+        <button class="actbtn big" onclick="event.stopPropagation();openAction('${id}','allcodes','')">Take action on all</button></div>`:'');
   }
 
   /* ── chart 2: disciplines that still owe a review ────────────────────── */
@@ -2456,9 +2470,11 @@ function renderHalf(id){
   $('ddw'+id).classList.add('set');
   setTimeout(()=>wireSet('ddw'+id, id), 0);
   $('ddw'+id).innerHTML=setSVG(so.docs, parts, 220, S.disc)+
-    (parts.some(p=>p.n>=so.docs*0.98 && p.name===S.disc)
-      ? `<div class="set-cap">every circle is a discipline — hover for its numbers, click for its documents</div>`
-      : `<div class="set-cap"><b>${so.docs.toLocaleString()}</b> documents in scope</div>`);
+    `<div class="set-key">`+
+      parts.slice().sort((a,b)=>b.n-a.n).map(p=>`<span class="sk-i" data-k="${esc(p.name)}">
+        <i style="background:${p.col}"></i>${esc(p.name)}
+        <b>${p.n.toLocaleString()}</b></span>`).join('')+
+    `</div>`;
   $('dmin'+id).innerHTML=[
     ['', ds.list.length, 'disciplines involved'],
     ['', so.docs, 'documents in scope'],
@@ -2493,7 +2509,7 @@ function renderHalf(id){
     : '<div class="done-note">Every discipline has closed its review.</div>')+
     (actD && doneDisc? `<div class="done-note">${doneDisc} discipline${doneDisc>1?'s have':' has'} closed everything and ${doneDisc>1?'are':'is'} hidden.</div>`:'')+
     (actD && discRows.length? `<div class="allact"><span class="lbl2">Everything outstanding across these ${discRows.length} disciplines</span>
-      <button class="actbtn big" onclick="event.stopPropagation();openAction('${id}','alldisc','')">⚑ Take action on all</button></div>`:'');
+      <button class="actbtn big" onclick="event.stopPropagation();openAction('${id}','alldisc','')">Take action on all</button></div>`:'');
 }
 /* What the circulating documents are waiting on, told beside the disciplines
    that are holding them.
@@ -2700,7 +2716,9 @@ function alignCards(){
        Every override is cleared before anything is measured: reading a height
        while a previous minHeight is still applied measures the old layout and
        leaves the pair a pixel or two apart. */
-    const sels=['.cc-h','.cc-top'];
+    /* The chart block is levelled too, or the progress bars below it land at
+       different heights and the pair stops reading as one row. */
+    const sels=['.cc-h','.cc-top','.cc-body'];
     const groups=sels.map(sel=>cards.map(c=>c.querySelector(sel)).filter(Boolean));
     groups.forEach(els=>els.forEach(e=>e.style.minHeight=''));
     const want=groups.map(els=>els.length<2 ? null : Math.max(...els.map(e=>e.offsetHeight)));
@@ -3007,7 +3025,7 @@ function perfTable(groups, kind, label){
       <div class="num2"><span class="grade ${gd}">${g.pct}%</span></div>
       <div class="num2">${g.med}d</div>
       <div class="num2" style="color:${g.lost?'var(--dang)':'var(--muted)'}">${g.lost.toLocaleString()}</div>
-      <div><button class="pfbtn ${bad?'hot':''}" onclick="emailPerf('${kind}','${esc(g.key).replace(/'/g,"\\'")}')">✉ Raise gap</button></div>
+      <div><button class="pfbtn ${bad?'hot':''}" onclick="emailPerf('${kind}','${esc(g.key).replace(/'/g,"\\'")}')">Raise gap</button></div>
     </div>`;
   }).join('');
 }
@@ -4042,7 +4060,7 @@ function openDoc(tr){
       <div style="margin-top:8px">
         <span class="tag ${MYROLE[d.myRole].cls}" title="Your ${esc(S.disc||'')} column reads: ${esc(d.myRoleRaw||'(blank)')}">${d.myAction?'▶ ':''}${esc(S.disc||'You')}: ${MYROLE[d.myRole].short}</span>
         ${d.circulating?'<span class="tag warn" style="margin-left:5px">CIRCULATING</span>':'<span class="tag ok" style="margin-left:5px">'+esc(L.status)+'</span>'}
-        ${d.acted?'<span class="tag blue" style="margin-left:5px" title="DOCUMENT STATUS still reads CIRCULATING; the verdict above comes from RETURN STATUS FOR THE SUPPLIER">◆ RETURNED IN COL X</span>':''}
+        ${d.acted?'<span class="tag blue" style="margin-left:5px" title="DOCUMENT STATUS still reads CIRCULATING; the verdict above comes from RETURN STATUS FOR THE SUPPLIER">RETURNED IN COL X</span>':''}
         ${d.critical?'<span class="tag dang" style="margin-left:5px">CRITICAL</span>':''}
         ${d.keydrw?'<span class="tag blue" style="margin-left:5px">KEY DRAWING</span>':''}
         ${d.category?'<span class="tag info" style="margin-left:5px">'+esc(d.category)+'</span>':''}
@@ -4645,7 +4663,7 @@ function parseMonth(t){
 function renderReqBtn(){
   const b=$('reqBtn'); if(!b || !S.eng) return;
   const who=S.eng.req[S.po]||'';
-  b.innerHTML = who ? '👷 '+esc(who) : '👷 Set requisition engineer';
+  b.textContent = who ? who : 'Set requisition engineer';
   b.classList.toggle('btn-warn', !who);
   b.title = who ? 'Requisition engineer for '+S.po+' — click to change'
                 : 'No requisition engineer set for '+S.po;
@@ -4781,7 +4799,7 @@ function renderEng(){
             : S.eng.hadCols ? 'assignments read from this register'
                             : 'this register has no engineer columns yet — download to add them';
   $('enSrc').innerHTML=`<span style="color:${S.eng.dirty?'var(--warn)':'var(--muted)'}">${
-    S.eng.dirty?'● unsaved changes — download before you close':src}</span>`;
+    S.eng.dirty?'<span class="dirty-dot"></span>unsaved changes — download before you close':src}</span>`;
 
   /* requisition engineer — one per purchase order */
   const req=S.eng.req[S.po]||'';
