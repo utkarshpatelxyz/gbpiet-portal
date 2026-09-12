@@ -420,8 +420,16 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .pb-ic{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#2E86B8,#17558A);color:#fff;
   display:flex;align-items:center;justify-content:center;font-size:14px;flex:0 0 auto}
 .pb-sp{flex:1}
-.pb-scope{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:11.5px;font-weight:700;color:var(--muted)}
-.pb-scope .v{background:var(--sf2);border:1px solid var(--line);border-radius:8px;padding:6px 11px;color:var(--navy)}
+.pb-scope{display:flex;align-items:center;gap:4px 9px;flex-wrap:wrap;font-size:11.5px;font-weight:600;color:var(--muted)}
+/* Scope is a caption, not a control — chips here were being clicked. */
+.pb-scope .v{color:var(--navy);font-weight:700}
+.pb-scope .v+.v::before,.pb-scope .v+span::before,.pb-scope span+span::before{content:'·';margin-right:9px;color:var(--line2)}
+/* Leftmost, square, unlabelled: the way back is in the same place on every page. */
+.pb-back{width:32px;height:32px;flex:none;border-radius:9px;border:1px solid var(--line);
+  background:var(--sf2);color:var(--navy);font-size:14px;font-weight:800;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;padding:0;
+  transition:background .15s ease,color .15s ease,border-color .15s ease}
+.pb-back:hover{background:var(--navy);border-color:var(--navy);color:#fff}
 
 /* ── sheet tabs pinned to the bottom-left corner, as Excel does ─────────── */
 .sheettabs{position:fixed;left:14px;bottom:0;z-index:70;display:none;align-items:flex-end;gap:3px;
@@ -435,10 +443,6 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .sheettabs .sh.on[data-s="action"]{border-top:2px solid var(--dang)}
 .sheettabs .sh.on[data-s="overview"]{border-top:2px solid var(--blue)}
 .sheettabs .cnt2{font-size:9px;font-weight:800;background:var(--dang);color:#fff;border-radius:20px;padding:1px 6px}
-.mode-chip{font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;
-  border-radius:20px;background:var(--dang-bg);color:#9C2C24}
-.mode-chip.ovw{background:#E8F0FE;color:#1A4FBF}
-.mode-chip.perf{background:#F3EDFB;color:#6B3FA0}
 .sheettabs .sh.on[data-s="perf"]{border-top:2px solid #6B3FA0}
 
 /* ── legacy sheet strip (kept for the note only) ────────────────────────── */
@@ -512,22 +516,11 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 @media(max-width:1060px){.statgrid{grid-template-columns:1fr}}
 .ccard{background:var(--sf);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh1);
   padding:14px 16px 16px;min-width:0}
-/* Each half carries a wash of its own colour, so the pair that belongs
-   together is one block at a glance and not four cards in a row.  The tint is
-   kept faint enough that the white tiles, notes and rows inside still read as
-   raised on top of it. */
-.ccard[data-h="A"]{border-top:3px solid var(--blue);background:#F7FAFF;border-color:#DCE7F8}
-.ccard[data-h="B"]{border-top:3px solid var(--dang);background:#FFF9F8;border-color:#F4DEDB}
-.ccard[data-h="A"] .mini .m,.ccard[data-h="A"] .notes-t{background:#FFFFFF;border-color:#DCE7F8}
-.ccard[data-h="B"] .mini .m,.ccard[data-h="B"] .notes-t{background:#FFFFFF;border-color:#F4DEDB}
+/* Each half is named by a rule along its top edge only.  A tinted card body
+   was tried and read as a warning rather than as a label. */
+.ccard[data-h="A"]{border-top:3px solid var(--blue)}
+.ccard[data-h="B"]{border-top:3px solid var(--dang)}
 
-/* In the combined view the four charts read as two rows of a pair each:
-   the whole purchase order on top, what this discipline owns underneath —
-   the same left-right pairing the single tabs use. */
-.statgrid:not(.single) .ccard[data-h="A"][data-c="codes"]{order:1}
-.statgrid:not(.single) .ccard[data-h="A"][data-c="disc"] {order:2}
-.statgrid:not(.single) .ccard[data-h="B"][data-c="codes"]{order:3}
-.statgrid:not(.single) .ccard[data-h="B"][data-c="disc"] {order:4}
 .cc-h{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:7px}
 .cc-badge{font-size:8.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:3px 8px;border-radius:20px}
 .cc-badge.all{background:#E8F0FE;color:#1A4FBF}
@@ -536,8 +529,13 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .cc-tools{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .cc-tools .ms-btn{padding:5px 8px;font-size:10px;max-width:160px}
 .cc-tools .chip{padding:5px 10px;font-size:10px}
-.cc-sub{font-size:10.5px;color:var(--muted);font-weight:600;margin-bottom:9px;line-height:1.5}
-.cc-sub b{color:var(--ink)}
+/* What the chart is, on demand.  Written out in full it ran to two lines on
+   one card and four on its neighbour, and nothing below them could line up. */
+.cc-q{width:19px;height:19px;flex:none;border-radius:50%;border:1px solid var(--line2);
+  background:var(--sf2);color:var(--muted);font-size:10.5px;font-weight:800;line-height:1;
+  display:inline-flex;align-items:center;justify-content:center;cursor:help;padding:0;
+  transition:background .15s ease,color .15s ease,border-color .15s ease}
+.cc-q:hover{background:var(--navy);border-color:var(--navy);color:#fff}
 .cc-top{display:flex;flex-direction:column;justify-content:flex-start}
 
 /* donut on the left, the figures beside it — identical in both cards, so the
@@ -597,6 +595,9 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .notes-t .ch{transition:transform .2s ease;font-size:9px}
 .notes.open .notes-t .ch{transform:rotate(180deg)}
 .notes.open .notes-t{background:#EEF3F9;border-color:#C6D3E2;color:var(--navy)}
+.notes.empty .notes-t{color:var(--muted)}
+.notes.empty .notes-t .ic{color:var(--line2)}
+.notes-none{font-size:10.5px;font-weight:600;color:var(--muted);line-height:1.5;padding:8px 11px}
 .notes-b{padding-top:9px}
 .notes-b .cb-note:last-child{margin-bottom:0}
 .you{font-size:8px;font-weight:800;background:var(--navy);color:#fff;border-radius:20px;padding:1px 5px;margin-left:4px}
@@ -647,20 +648,6 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .sbar-lab .li{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:600;color:var(--ink)}
 .sbar-lab .dot{width:8px;height:8px;border-radius:2px}
 .sbar-lab b{font-weight:800;font-variant-numeric:tabular-nums}
-/* In the combined view all four charts have to be on screen at once, so the
-   explanatory text, the status labels under the bar and some of the donut
-   size give way; open a single tab to get them back. */
-.statgrid:not(.single) .sbar-lab{display:none}
-.statgrid:not(.single) .cc-sub{display:none}
-.statgrid:not(.single) .cb-note:not(.warn2):not(.info2):not(.void2):not(.act2){display:none}
-.statgrid:not(.single) .dw svg{max-width:150px}
-.statgrid:not(.single) .donut-ctr .v{font-size:20px}
-.statgrid:not(.single) .pie-legend{max-height:46px;overflow:auto;gap:3px 10px;font-size:10px}
-.statgrid:not(.single) .ccard{padding:12px 14px 13px}
-.statgrid:not(.single) .mini .m{padding:6px 8px}
-.statgrid:not(.single) .mini .m .n{font-size:15px}
-.statgrid:not(.single) .pblock{margin-top:9px;padding-top:8px}
-.statgrid:not(.single) .sbar{height:17px}
 
 /* per-type / per-discipline progress, revealed by clicking the chart */
 .bytype{max-height:0;overflow:hidden;opacity:0;transition:max-height .5s var(--ease),opacity .35s var(--ease)}
@@ -688,13 +675,8 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 /* the set diagram */
 /* .dw is a centring row; the set diagram stacks its key underneath */
 .dw.set{flex-direction:column;align-items:center}
-/* Names live here, not under the circles, where a long one spills past a small
-   circle and a short one looks lost. */
-.set-key{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 12px;margin-top:10px;
-  max-width:100%;font-size:10px;font-weight:700;color:var(--muted);line-height:1.5}
-.set-key .sk-i{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;cursor:default}
-.set-key .sk-i i{width:8px;height:8px;border-radius:2px;flex:none}
-.set-key .sk-i b{color:var(--navy);font-variant-numeric:tabular-nums}
+/* No legend under the circles: a name long enough to read is a name long
+   enough to unbalance the pair, so the circle answers on hover instead. */
 .set-cap b{color:var(--navy)}
 .setb circle{transition:fill-opacity .15s ease}
 .setb:hover circle{fill-opacity:1}
@@ -751,10 +733,6 @@ tr.en-newtag td{background:var(--warn-bg)}
 .statgrid .ccard:nth-child(3){animation-delay:.12s}
 .statgrid .ccard:nth-child(4){animation-delay:.18s}
 /* ...and in the combined view the reading order is the ordered one */
-.statgrid:not(.single) .ccard[data-h="A"][data-c="codes"]{animation-delay:0s}
-.statgrid:not(.single) .ccard[data-h="A"][data-c="disc"] {animation-delay:.06s}
-.statgrid:not(.single) .ccard[data-h="B"][data-c="codes"]{animation-delay:.12s}
-.statgrid:not(.single) .ccard[data-h="B"][data-c="disc"] {animation-delay:.18s}
 @keyframes screenIn{from{opacity:0;transform:translateY(8px)}}
 .screen.on{animation:screenIn .32s var(--ease)}
 /* Nothing re-animates on a filter change, and the hero bar never animates
@@ -955,9 +933,6 @@ tr.en-newtag td{background:var(--warn-bg)}
   <div class="crumbs" id="crumbs"></div>
   <div class="sp"></div>
   <div class="projchip" id="navinfo" style="display:none"></div>
-  <button class="btn btn-g btn-s navbtn" id="btn-basket" style="display:none" onclick="openBasket()">
-    Consolidated report<span class="badge" id="bk-n">0</span></button>
-  <button class="btn btn-g btn-s" id="btn-reset" style="display:none" onclick="resetAll()">Load another file</button>
 </div></div>
 
 <!-- 1 ── UPLOAD ─────────────────────────────────────────────────────────── -->
@@ -1012,39 +987,38 @@ tr.en-newtag td{background:var(--warn-bg)}
 <div class="screen" id="sc-dash"><div class="wrap">
   <div class="pagebar">
     <div class="pb-id">
-      <div class="pb-t"><span id="pbTitle">Status</span></div>
       <div class="pb-scope" id="pbScope"></div>
     </div>
     <div class="pb-acts">
-      <button class="btn btn-g btn-s" id="reqBtn" onclick="openEng()">Requisition engineer</button>
       <button class="btn btn-g btn-s" onclick="openEng()">Responsible engineers</button>
-      <span class="pb-div"></span>
       <button class="btn btn-g btn-s" onclick="openProgress()">Check progress</button>
       <button class="btn btn-g btn-s" onclick="openVdr()">VDR status report</button>
       <span class="pb-div"></span>
+      <button class="btn btn-g btn-s navbtn" id="btn-basket" style="display:none" onclick="openBasket()">
+        Consolidated report<span class="badge" id="bk-n">0</span></button>
       <button class="btn btn-g btn-s" onclick="go('filter')">Change scope</button>
+      <button class="btn btn-g btn-s" id="btn-reset" style="display:none" onclick="resetAll()">Load another file</button>
     </div>
   </div>
 
   <div class="tabcard">
     <div class="tabbar" id="tabbar">
-      <button class="tabb on" data-v="all">All</button>
-      <button class="tabb" data-v="A">Full Purchase Order</button>
+      <button class="tabb on" data-v="A">Full Purchase Order</button>
       <button class="tabb" data-v="B" id="tabB">For Review &amp; Originator</button>
     </div>
     <div class="tabnote" id="tabnote"></div>
   </div>
 
-  <div class="statgrid" id="statgrid">
+  <div class="statgrid single" id="statgrid">
     <article class="ccard" data-h="A" data-c="codes" id="cardA-codes">
       <div class="cc-h">
         <span class="cc-badge all">FULL PO</span>
         <div class="cc-t">Documents by type</div>
         <div class="cc-tools"><div id="fcA"></div>
-          <button class="chip" onclick="event.stopPropagation();exportCodeReport('A')">⤓ Report</button></div>
+          <button class="chip" onclick="event.stopPropagation();exportCodeReport('A')">⤓ Report</button>
+          <button class="cc-q" id="qA" onclick="event.stopPropagation()">?</button></div>
       </div>
       <div class="cc-top">
-        <div class="cc-sub" id="subA"></div>
         <div class="cb-note" id="exA"></div>
       </div>
       <div class="cc-body">
@@ -1055,7 +1029,7 @@ tr.en-newtag td{background:var(--warn-bg)}
         <div class="mini" id="miniA"></div>
       </div>
       <div class="pblock" id="ovA"></div>
-      <div class="notes" id="ndA" style="display:none">
+      <div class="notes" id="ndA">
         <button class="notes-t" onclick="event.stopPropagation();toggleNotes('A')">
           <span class="ic">&#9432;</span><span class="tx" id="ntA"></span><span class="ch">&#9660;</span></button>
         <div class="notes-b" id="nbA" hidden>
@@ -1071,10 +1045,10 @@ tr.en-newtag td{background:var(--warn-bg)}
         <span class="cc-badge rev">FOR REVIEW - ORIGINATOR</span>
         <div class="cc-t">Documents by type</div>
         <div class="cc-tools"><div id="fcB"></div>
-          <button class="chip" onclick="event.stopPropagation();exportCodeReport('B')">⤓ Report</button></div>
+          <button class="chip" onclick="event.stopPropagation();exportCodeReport('B')">⤓ Report</button>
+          <button class="cc-q" id="qB" onclick="event.stopPropagation()">?</button></div>
       </div>
       <div class="cc-top">
-        <div class="cc-sub" id="subB"></div>
         <div class="cb-note" id="exB"></div>
       </div>
       <div class="cc-body">
@@ -1085,7 +1059,7 @@ tr.en-newtag td{background:var(--warn-bg)}
         <div class="mini" id="miniB"></div>
       </div>
       <div class="pblock" id="ovB"></div>
-      <div class="notes" id="ndB" style="display:none">
+      <div class="notes" id="ndB">
         <button class="notes-t" onclick="event.stopPropagation();toggleNotes('B')">
           <span class="ic">&#9432;</span><span class="tx" id="ntB"></span><span class="ch">&#9660;</span></button>
         <div class="notes-b" id="nbB" hidden>
@@ -1102,13 +1076,10 @@ tr.en-newtag td{background:var(--warn-bg)}
         <span class="cc-badge all">FULL PO</span>
         <div class="cc-t">Disciplines that must review</div>
         <div class="cc-tools">
-          <button class="chip" onclick="event.stopPropagation();exportDiscReport('A')">⤓ Report</button></div>
+          <button class="chip" onclick="event.stopPropagation();exportDiscReport('A')">⤓ Report</button>
+          <button class="cc-q" id="qDA" onclick="event.stopPropagation()">?</button></div>
       </div>
-      <div class="cc-top"><div class="cc-sub">The outer circle is the documents in scope; each discipline sits
-        inside it, sized by how many of them it must review — so a document reviewed by three disciplines is
-        still one document. From columns AC–CT; a discipline marked <b>FOR REVIEW</b> with no date in its
-        closed-date column is still pending. <b style="color:#2563EB">Blue</b> in a bar is the part you have
-        already cleared — waiting on them alone.</div></div>
+      <div class="cc-top"><div class="cb-note" id="dexA"></div></div>
       <div class="cc-body">
         <div class="chartbox" id="dboxA" onclick="toggleBlock('A','disc')">
           <span class="cue">click for progress by discipline →</span>
@@ -1116,7 +1087,13 @@ tr.en-newtag td{background:var(--warn-bg)}
         </div>
         <div class="mini" id="dminA"></div>
       </div>
-      <div class="pblock" id="dovA"></div>
+      <div class="notes" id="ndDA">
+        <button class="notes-t" onclick="event.stopPropagation();toggleNotes('DA')">
+          <span class="ic">&#9432;</span><span class="tx" id="ntDA"></span><span class="ch">&#9660;</span></button>
+        <div class="notes-b" id="nbDA" hidden>
+          <div class="cb-note info2" id="dnA" style="display:none"></div>
+        </div>
+      </div>
       <div class="bytype" id="dbtA"></div>
       <div class="stuck" id="skA" style="display:none"></div>
     </article>
@@ -1125,13 +1102,10 @@ tr.en-newtag td{background:var(--warn-bg)}
         <span class="cc-badge rev">FOR REVIEW - ORIGINATOR</span>
         <div class="cc-t">Disciplines that must review</div>
         <div class="cc-tools">
-          <button class="chip" onclick="event.stopPropagation();exportDiscReport('B')">⤓ Report</button></div>
+          <button class="chip" onclick="event.stopPropagation();exportDiscReport('B')">⤓ Report</button>
+          <button class="cc-q" id="qDB" onclick="event.stopPropagation()">?</button></div>
       </div>
-      <div class="cc-top"><div class="cc-sub">The outer circle is the documents in scope; each discipline sits
-        inside it, sized by how many of them it must review — so a document reviewed by three disciplines is
-        still one document. From columns AC–CT; a discipline marked <b>FOR REVIEW</b> with no date in its
-        closed-date column is still pending. <b style="color:#2563EB">Blue</b> in a bar is the part you have
-        already cleared — waiting on them alone.</div></div>
+      <div class="cc-top"><div class="cb-note" id="dexB"></div></div>
       <div class="cc-body">
         <div class="chartbox" id="dboxB" onclick="toggleBlock('B','disc')">
           <span class="cue">click for progress by discipline →</span>
@@ -1139,7 +1113,13 @@ tr.en-newtag td{background:var(--warn-bg)}
         </div>
         <div class="mini" id="dminB"></div>
       </div>
-      <div class="pblock" id="dovB"></div>
+      <div class="notes" id="ndDB">
+        <button class="notes-t" onclick="event.stopPropagation();toggleNotes('DB')">
+          <span class="ic">&#9432;</span><span class="tx" id="ntDB"></span><span class="ch">&#9660;</span></button>
+        <div class="notes-b" id="nbDB" hidden>
+          <div class="cb-note info2" id="dnB" style="display:none"></div>
+        </div>
+      </div>
       <div class="bytype" id="dbtB"></div>
       <div class="stuck" id="skB" style="display:none"></div>
     </article>
@@ -1182,11 +1162,11 @@ tr.en-newtag td{background:var(--warn-bg)}
 <!-- 3c ── CHECK PROGRESS ─────────────────────────────────────────────────── -->
 <div class="screen" id="sc-eng"><div class="wrap">
   <div class="pagebar">
+    <button class="pb-back" onclick="leaveEng()" title="Back to status" aria-label="Back to status">←</button>
     <div class="pb-t"><span>Responsible engineers</span></div>
     <div class="pb-sp"></div>
     <div class="pb-scope" id="enScope"></div>
     <button class="btn btn-p btn-s" id="enSave" onclick="downloadRegister()">⤓ Download register</button>
-    <button class="btn btn-g btn-s" onclick="leaveEng()">← Back to status</button>
   </div>
 
   <div class="card" style="padding:16px 18px">
@@ -1201,9 +1181,15 @@ tr.en-newtag td{background:var(--warn-bg)}
     </div>
   </div>
 
-  <div class="cb-note info2" id="enBasis" style="margin-top:12px"></div>
-  <div class="cb-note warn2" id="enCarry" style="display:none;margin-top:12px"></div>
-  <div class="cb-note info2" id="enNew" style="display:none;margin-top:12px"></div>
+  <div class="notes" id="ndEN" style="margin-top:12px">
+    <button class="notes-t" onclick="toggleNotes('EN')">
+      <span class="ic">&#9432;</span><span class="tx" id="ntEN"></span><span class="ch">&#9660;</span></button>
+    <div class="notes-b" id="nbEN" hidden>
+      <div class="cb-note info2" id="enBasis"></div>
+      <div class="cb-note warn2" id="enCarry" style="display:none"></div>
+      <div class="cb-note info2" id="enNew" style="display:none"></div>
+    </div>
+  </div>
 
   <div class="en-tabs" id="enTabs">
     <button class="tabb on" data-e="tags">By equipment tag</button>
@@ -1235,9 +1221,9 @@ tr.en-newtag td{background:var(--warn-bg)}
 
 <div class="screen" id="sc-engload"><div class="wrap">
   <div class="pagebar">
+    <button class="pb-back" onclick="go('dash')" title="Back to status" aria-label="Back to status">←</button>
     <div class="pb-t"><span>Carry engineers forward</span></div>
     <div class="pb-sp"></div>
-    <button class="btn btn-g btn-s" onclick="go('dash')">← Back to status</button>
   </div>
   <div class="card fl-wrap" style="max-width:760px">
     <div class="fl-head">
@@ -1269,10 +1255,10 @@ tr.en-newtag td{background:var(--warn-bg)}
 
 <div class="screen" id="sc-progress"><div class="wrap">
   <div class="pagebar">
+    <button class="pb-back" onclick="go('dash')" title="Back to status" aria-label="Back to status">←</button>
     <div class="pb-t"><span>Check progress</span></div>
     <div class="pb-sp"></div>
     <div class="pb-scope" id="pgScope"></div>
-    <button class="btn btn-g btn-s" onclick="go('dash')">← Back to status</button>
   </div>
 
   <!-- before a file is chosen -->
@@ -1336,10 +1322,10 @@ tr.en-newtag td{background:var(--warn-bg)}
 <!-- 3b ── TAKE ACTION ───────────────────────────────────────────────────── -->
 <div class="screen" id="sc-action"><div class="wrap">
   <div class="pagebar">
+    <button class="pb-back" onclick="go('dash')" title="Back to status" aria-label="Back to status">←</button>
     <div class="pb-t"><span id="acTitle">Take action</span></div>
     <div class="pb-sp"></div>
     <div class="pb-scope" id="acScope"></div>
-    <button class="btn btn-g btn-s" onclick="go('dash')">← Back to status</button>
   </div>
   <div class="ac-hero" id="acHero"></div>
   <div class="ac-sum" id="acSum"></div>
@@ -1470,7 +1456,7 @@ const THINGS = [
 const DEADLINE_DAYS = 15;   // days allowed from CIRCULATE DATE to close
 
 const S = { rows:[], hdr:{}, depts:[], meta:{}, po:null, dep:null, disc:null, discIdx:null, discCidx:null,
-            sub:[], docs:[], cur:null, basket:[], inc:{A:null,B:null}, tab:'all', sheet:'action' };
+            sub:[], docs:[], cur:null, basket:[], inc:{A:null,B:null}, tab:'A', sheet:'action' };
 const $ = id => document.getElementById(id);
 const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
@@ -2166,9 +2152,11 @@ function topCodes(map, n){
   return head + (e.length>n ? ', +'+(e.length-n)+' more' : '');
 }
 
-/* How many documents every reviewing discipline has already signed off — a
-   document-level figure, unlike a sum of reviews, so it sits beside the
-   progress percentage without inviting the reader to add them up. */
+/* The documents the discipline chart is drawn over: those that still need
+   somebody's review, which is what the outer circle stands for.
+   `done` — every reviewing discipline signed off — is no longer shown: at 93%
+   beside a real 43% closed it read as the work being finished, when all it
+   says is that the signatures are in. */
 function signedOff(allDocs){
   const docs=allDocs.filter(d=>!noAction(d));
   let done=0;
@@ -2205,7 +2193,15 @@ function setSVG(outerN, parts, size, ownName){
     }
     if(best){ best.p=p; placed.push(best); }
   });
-  const tip=p=>`${p.name} — ${p.n} of ${outerN} documents · ${p.n-p.pending} signed, ${p.pending} still to sign`;
+  /* Everything the legend used to spell out, said only about the circle the
+     reader is actually pointing at. */
+  const tip=p=>{
+    const l=[`<b>${p.n.toLocaleString()}</b> of <b>${outerN.toLocaleString()}</b> documents to review`,
+             `<b>${(p.n-p.pending).toLocaleString()}</b> signed off · <b>${p.pending.toLocaleString()}</b> still to sign`];
+    if(p.mine){ if(p.circDone) l.push(`<b>${p.circDone.toLocaleString()}</b> reviewed by you but still circulating`); }
+    else if(p.mineDone) l.push(`<b>${p.mineDone.toLocaleString()}</b> circulating documents you have reviewed and they have not`);
+    return l.join('<br>');
+  };
   const ring = host
     ? `<g class="setb host" data-k="${esc(host.name)}">
          <circle cx="${cx}" cy="${cy}" r="${R}" fill="${host.col}" fill-opacity=".13"
@@ -2220,9 +2216,10 @@ function setSVG(outerN, parts, size, ownName){
         Math.min(13, Math.max(9, b.r*0.5))}" font-weight="700" fill="#fff"
         dominant-baseline="middle">${b.p.n}</text>
     </g>`).join('');
-  const data={}; parts.forEach(p=>data[p.name]=tip(p));
+  const data={}, cols={};
+  parts.forEach(p=>{ data[p.name]=tip(p); cols[p.name]=p.col; });
   return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" role="img"
-    data-tips='${esc(JSON.stringify(data))}'
+    data-tips='${esc(JSON.stringify(data))}' data-cols='${esc(JSON.stringify(cols))}'
     aria-label="${outerN} documents, with each discipline sized by how many it reviews">
     ${ring}${bubbles}</svg>`;
 }
@@ -2232,20 +2229,23 @@ function setSVG(outerN, parts, size, ownName){
 function wireSet(hostId, half){
   const host=$(hostId); if(!host) return;
   const svg=host.querySelector('svg'); if(!svg) return;
-  let tips={}; try{ tips=JSON.parse(svg.dataset.tips||'{}'); }catch(e){}
+  let tips={}, cols={};
+  try{ tips=JSON.parse(svg.dataset.tips||'{}'); }catch(e){}
+  try{ cols=JSON.parse(svg.dataset.cols||'{}'); }catch(e){}
   svg.querySelectorAll('.setb').forEach(g=>{
     const name=g.dataset.k, isHost=g.classList.contains('host');
     g.style.cursor='pointer';
     const card=()=>g.closest('.ccard');
     const deployed=()=>{ const c=card(); return c && c.classList.contains('open'); };
-    g.addEventListener('mousemove',e=>{ const t=TIP(); if(!t) return;
-      t.innerHTML=`<b>${esc(name)}</b><br>${esc(tips[name]||'')}<br>
-        <span style="opacity:.7">${(isHost||!deployed())? 'click for progress by discipline'
-                                                        : 'click for its documents'}</span>`;
-      t.style.display='block';
-      t.style.left=Math.min(e.clientX+14, innerWidth-t.offsetWidth-10)+'px';
-      t.style.top=(e.clientY+16)+'px'; });
-    g.addEventListener('mouseleave',()=>{ const t=TIP(); if(t) t.style.display='none'; });
+    /* The tooltip is shown by a class, not by display — setting display alone
+       left it at opacity 0, so the hover figures never actually appeared. */
+    g.addEventListener('mouseenter',()=>{ const t=TIP(); if(!t) return;
+      t.innerHTML=`<div class="t1"><span class="dot" style="background:${cols[name]||'#B8C4D0'}"></span>${esc(name)}</div>
+        <div class="t2">${tips[name]||''}<br><span style="opacity:.62">${
+          (isHost||!deployed())? 'click for progress by discipline' : 'click for its documents'}</span></div>`;
+      t.classList.add('on'); });
+    g.addEventListener('mousemove',tipAt);
+    g.addEventListener('mouseleave',tipOff);
     /* The first click on the card does what it always did — deploys the list —
        whichever circle it lands on; the host ring never does anything else.
        Once the list is open, a circle is a way into that discipline's own
@@ -2255,7 +2255,7 @@ function wireSet(hostId, half){
     g.addEventListener('click',e=>{
       if(!deployed()) return;                 // let it bubble and open the card
       e.stopPropagation();
-      const t=TIP(); if(t) t.style.display='none';
+      tipOff();
       openAction(half,'disc',name,e); });
   });
 }
@@ -2304,17 +2304,28 @@ function renderDash(){
   $('crumbs').innerHTML=`<span class="c" onclick="go('filter')">${esc(S.dep)}</span>`+
     `<span class="s">/</span><span class="c">${esc(S.disc||'')}</span>`+
     `<span class="s">/</span><span class="c on">${esc(S.po)}</span>`;
-  $('pbTitle').textContent=S.po+' · '+S.dep;
-  $('pbScope').innerHTML=`<span class="mode-chip ${S.sheet==='action'?'':'ovw'}" id="pbMode"></span>`+
+  /* The purchase order and the department are already in the breadcrumb above,
+     and the sheet tab already names the view, so neither is repeated here. */
+  $('pbScope').innerHTML=
     (S.poDesc?`<span class="v">${esc(S.poDesc)}</span>`:'')+
-    `<span class="v">Reviewing as ${esc(S.disc||'—')}</span>`+
-    `<span>latest revision of every document</span>`;
+    `<span>Reviewing as ${esc(S.disc||'—')}</span>`;
 
   renderReqBtn();
   $('tabB').textContent='For Review & Originator';
-  $('subA').textContent='Everything raised by '+S.dep+' under this purchase order.';
-  $('subB').innerHTML='Documents whose <b>'+esc(S.disc||'')+'</b> column reads '+
-    '<b>FOR REVIEW - ORIGINATOR</b> — the ones this discipline owns and must review.';
+  /* what the chart is, kept behind the ? so the cards below it stay level */
+  help('qA','Documents by type — Full Purchase Order',
+    'Everything raised by '+esc(S.dep)+' under this purchase order, grouped by document code. '+
+    'One row per code; the bar is the status mix of its latest revisions. '+
+    'Untick a code in <b>Document types</b> to take it out of both charts.');
+  help('qB','Documents by type — For Review &amp; Originator',
+    'Only documents whose <b>'+esc(S.disc||'')+'</b> column reads <b>FOR REVIEW - ORIGINATOR</b> — '+
+    'the ones this discipline both owns and must review. '+
+    'Untick a code in <b>Document types</b> to take it out of both charts.');
+  ['DA','DB'].forEach(k=>help('q'+k,'Disciplines that must review',
+    'The outer circle is the documents in scope; each discipline sits inside it, sized by how many '+
+    'of them it must review — so a document reviewed by three disciplines is still one document. '+
+    'Hover a circle for its figures. <b style="color:#2563EB">Blue</b> in a bar below is the part '+
+    'you have already cleared — waiting on them alone.'));
 
   /* Routing can change between revisions, so say plainly when reading the
      latest revision gives a different count from filtering every row. */
@@ -2344,7 +2355,7 @@ function renderDash(){
   });
 
   renderHalf('A'); renderHalf('B');
-  setTab(S.tab||'all');
+  setTab(S.tab||'A');
   setSheet(S.sheet||'action');
   $('foot1').textContent='Source: '+S.meta.title+' · Project '+S.meta.project+' · as of '+S.meta.asOf;
 }
@@ -2359,11 +2370,16 @@ function renderHalf(id){
 
   const hidden=base.length-docs.length;
   const allCodes=new Set(base.filter(d=>!noAction(d)).map(d=>d.code||'(no code)')).size;
-  $('ex'+id).innerHTML = hidden
+  /* Only say anything when the picker is actually hiding something — "all 11
+     included" is the normal state and does not need announcing, least of all
+     twice across a pair of cards.  Both cards answer to the same picker, so
+     they appear and disappear together and the pair stays level. */
+  const exTx = hidden
     ? `<span class="lnk" onclick="event.stopPropagation();resetCodes('${id}')">Show all</span>
        — ${st.byCode.length} of ${allCodes} document types shown, ${hidden.toLocaleString()} document${hidden===1?'':'s'} hidden.`
-    : `All ${allCodes} document types included — untick any in <b>Document types</b> to take it out of the chart.`;
-  $('ex'+id).className = hidden? 'cb-note warn2' : 'cb-note';
+    : '';
+  ['ex','dex'].forEach(k=>{ const e=$(k+id);
+    e.innerHTML=exTx; e.className='cb-note warn2'; e.style.display=hidden?'':'none'; });
 
   /* documents that need no review are set aside — say so, and say where */
   const vn=$('vn'+id);
@@ -2453,7 +2469,8 @@ function renderHalf(id){
   if(!ds.total){
     $('ddw'+id).classList.remove('set');
     $('ddw'+id).innerHTML='<div class="half-empty">No discipline is marked FOR REVIEW<br>on these documents.</div>';
-    $('dmin'+id).innerHTML=''; $('dov'+id).innerHTML=''; $('dbt'+id).innerHTML='';
+    $('dmin'+id).innerHTML=''; $('dbt'+id).innerHTML='';
+    $('dn'+id).style.display='none'; syncNotes('D'+id);
     $('dbox'+id).style.pointerEvents='none';
     return;
   }
@@ -2466,31 +2483,27 @@ function renderHalf(id){
                       col:'#B8C4D0', unit:'documents to review'});
   const sq=(STAT[id]||{}).sq||{you:0,others:0,release:0,total:0,done:0};
   const so=signedOff(halfDocs(id));
-  const parts=ds.list.map(e=>({name:e.name, n:e.total, pending:e.pending, col:e.col}));
+  const parts=ds.list.map(e=>({name:e.name, n:e.total, pending:e.pending, col:e.col,
+                               mine:e.mine, mineDone:e.mineDone, circDone:sq.done}));
   $('ddw'+id).classList.add('set');
   setTimeout(()=>wireSet('ddw'+id, id), 0);
-  $('ddw'+id).innerHTML=setSVG(so.docs, parts, 220, S.disc)+
-    `<div class="set-key">`+
-      parts.slice().sort((a,b)=>b.n-a.n).map(p=>`<span class="sk-i" data-k="${esc(p.name)}">
-        <i style="background:${p.col}"></i>${esc(p.name)}
-        <b>${p.n.toLocaleString()}</b></span>`).join('')+
-    `</div>`;
+  /* No legend under the circles: hovering one gives its own figures, and a
+     column of names was both clutter and the reason the pair sat unevenly. */
+  $('ddw'+id).innerHTML=setSVG(so.docs, parts, 220, S.disc);
+  /* "Signed off by every discipline" is deliberately not a headline figure
+     here: at 93% beside a real 43% closed it read as the work being done. */
   $('dmin'+id).innerHTML=[
     ['', ds.list.length, 'disciplines involved'],
     ['', so.docs, 'documents in scope'],
-    ['ok', so.done, 'signed off by every discipline'],
+    ['warn', ds.pending, 'reviews still to be signed'],
     ['warn', sq.total, 'documents still circulating']
   ].map(([c,n,l])=>`<div class="m ${c}"><span class="n">${n.toLocaleString()}</span><span class="l">${l}</span></div>`).join('');
-  $('dov'+id).innerHTML=`
-    <div class="pblock-h"><span class="t">Signed off by every discipline</span>
-      <span class="v">${so.pct}% <small>${so.done.toLocaleString()} of ${so.docs.toLocaleString()} documents</small></span></div>
-    ${dbar(so.done, so.docs-so.done)}
-    <div class="sbar-lab">
-      <span class="li"><span class="dot" style="background:#2E9E6B"></span>Every discipline has signed <b>${so.done.toLocaleString()}</b></span>
-      <span class="li"><span class="dot" style="background:#D4574E"></span>Somebody still to sign <b>${(so.docs-so.done).toLocaleString()}</b></span>
-      <span class="li"><span class="dot" style="background:#D9922E"></span>Circulating now <b>${sq.total}</b>
-        <span style="color:var(--muted);font-weight:600">— a document can be circulating with every
-        signature already in</span></span></div>`;
+  $('dn'+id).style.display='';
+  $('dn'+id).innerHTML=`One document reviewed by three disciplines is <b>three reviews</b> but still
+    <b>one document</b>, so the review counts here are larger than the ${so.docs.toLocaleString()}
+    documents in scope. Read from columns AC–CT: a discipline marked <b>FOR REVIEW</b> with no date in
+    its closed-date column is still pending.`;
+  syncNotes('D'+id);
   const actD=S.sheet==='action';
   const discRows = actD ? ds.list.filter(e=>e.pending>0) : ds.list;
   STAT[id].pendDisc=ds.list.filter(e=>e.pending>0).length;
@@ -2598,13 +2611,22 @@ function toggleNotes(id){
   const open=w.classList.toggle('open');
   b.hidden=!open;
 }
-function syncNotes(id){
-  const w=$('nd'+id), b=$('nb'+id);
+/* The disclosure stays on the card whether or not it has anything to say.
+   Hiding it when empty moved everything below it up on one card and not on
+   its neighbour, which is exactly the misalignment it was meant to avoid. */
+function syncNotes(id, what){
+  what = what || 'how these numbers are counted';
+  const w=$('nd'+id), b=$('nb'+id); if(!w||!b) return;
   const n=[...b.querySelectorAll('.cb-note')].filter(e=>e.style.display!=='none').length;
-  w.style.display = n? '' : 'none';
-  if(!n){ w.classList.remove('open'); b.hidden=true; return; }
-  $('nt'+id).textContent = n===1 ? '1 note on how these numbers are counted'
-                                 : n+' notes on how these numbers are counted';
+  w.classList.toggle('empty', !n);
+  let none=b.querySelector('.notes-none');
+  if(!none){ none=document.createElement('div'); none.className='notes-none';
+             none.textContent='Nothing is set aside or re-counted on this chart — every number is a plain count.';
+             b.appendChild(none); }
+  none.style.display = n? 'none' : '';
+  $('nt'+id).textContent = !n ? 'No notes'
+                         : n===1 ? '1 note on '+what
+                                 : n+' notes on '+what;
 }
 
 function resetCodes(id){
@@ -2647,6 +2669,27 @@ function dbar(closed, pending, only, fromClosed){
 /* flat donut, drawn as SVG arcs so slices stay crisp and hoverable */
 /* One floating tooltip for every donut on the page. */
 const TIP=()=>$('ptip');
+/* Put the tooltip beside the pointer without letting it fall off the screen. */
+function tipAt(e){ const t=TIP(), r=t.getBoundingClientRect();
+  let x=e.clientX+14, y=e.clientY+16;
+  if(x+r.width  > innerWidth -8) x=Math.max(8, e.clientX-r.width-14);
+  if(y+r.height > innerHeight-8) y=Math.max(8, e.clientY-r.height-14);
+  t.style.left=x+'px'; t.style.top=y+'px'; }
+function tipOff(){ TIP().classList.remove('on'); }
+
+/* A "?" on a card header: the long explanation that used to sit under the
+   title, shown only when it is asked for.  Written out, it was two lines on
+   one card and four on the next, and the charts below could not line up. */
+function help(id, title, html){
+  const b=$(id); if(!b) return;
+  b.setAttribute('aria-label', String(title).replace(/<[^>]+>/g,''));
+  b.onmouseenter=()=>{ const t=TIP();
+    t.innerHTML=`<div class="t1">${title}</div><div class="t2">${html}</div>`;
+    t.classList.add('on'); };
+  b.onmousemove=tipAt;
+  b.onmouseleave=tipOff;
+  b.onfocus=b.onmouseenter; b.onblur=tipOff;
+}
 function wireDonut(hostId, defV, defL){
   const host=$(hostId); if(!host) return;
   const ctrV=host.querySelector('.donut-ctr .v'), ctrL=host.querySelector('.donut-ctr .l');
@@ -2738,23 +2781,15 @@ function setSheet(v){
   const pend=(STAT.A&&STAT.A.pendCodes||0)+(STAT.A&&STAT.A.pendDisc||0);
   $('shCount').textContent=pend;
   $('shCount').style.display = v==='action'&&pend ? '' : 'none';
-  const pm=$('pbMode');
-  if(pm){ pm.textContent = v==='action'?'Action view':v==='overview'?'Overview':'Performance';
-          pm.className = 'mode-chip'+(v==='action'?'':v==='overview'?' ovw':' perf'); }
-  /* Performance replaces the chart grid; the scope tabs still apply, but only
-     one half can be measured at a time, so All falls back to the whole PO. */
+  /* Which sheet is open is already named by the sheet tab in the corner, so
+     the page bar no longer repeats it as a chip. */
   const perf = v==='perf';
   $('statgrid').style.display = perf? 'none':'';
   $('perfwrap').style.display = perf? '':'none';
-  document.querySelectorAll('#tabbar .tabb').forEach(b=>{
-    const off = perf && b.dataset.v==='all';
-    b.style.opacity = off? '.45':''; b.style.pointerEvents = off? 'none':''; });
-  if(perf && S.tab==='all'){ S.tab='A';
-    document.querySelectorAll('#tabbar .tabb').forEach(b=>b.classList.toggle('on',b.dataset.v==='A')); }
   if(perf){ renderPerf(); return; }
   /* the lists stay closed until their chart is clicked, in either sheet */
   ['A','B'].forEach(i=>['codes','disc'].forEach(w=>$('card'+i+'-'+w).classList.remove('open')));
-  setTab(S.tab||'all');
+  setTab(S.tab||'A');
 }
 document.addEventListener('click',e=>{ const b=e.target.closest('#sheettabs .sh');
   if(b) setSheet(b.dataset.s); });
@@ -2766,17 +2801,14 @@ function setTab(v){
   S.tab=v;
   document.querySelectorAll('#tabbar .tabb').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
   document.querySelectorAll('.ccard').forEach(c=>{
-    c.style.display = (v==='all' || c.dataset.h===v) ? '' : 'none'; });
-  $('statgrid').classList.toggle('single', v!=='all');
+    c.style.display = c.dataset.h===v ? '' : 'none'; });
+  $('statgrid').classList.add('single');
   requestAnimationFrame(()=>{ alignCards(); requestAnimationFrame(alignCards); });
   if(S.sheet==='perf' && typeof renderPerf==='function') renderPerf();
-  const A=(STAT.A||{}).st, B=(STAT.B||{}).st;
-  $('tabnote').innerHTML =
-    v==='all' ? `Side by side: the whole purchase order (<b>${A?A.total.toLocaleString():0}</b> documents)
-                 against what <b>${esc(S.disc||'')}</b> owns and must review
-                 (<b>${B?B.total.toLocaleString():0}</b>).`
-  : v==='A'  ? `Every document raised by <b>${esc(S.dep)}</b> under this purchase order.`
-             : `Only documents marked <b>FOR REVIEW - ORIGINATOR</b> in the <b>${esc(S.disc||'')}</b> column.`;
+  $('tabnote').innerHTML = (v==='A'
+    ? `Every document raised by <b>${esc(S.dep)}</b> under this purchase order.`
+    : `Only documents marked <b>FOR REVIEW - ORIGINATOR</b> in the <b>${esc(S.disc||'')}</b> column.`)
+    + ` Latest revision of each.`;
 }
 window.setTab=setTab;
 
@@ -4840,6 +4872,11 @@ function renderEng(){
     engineer yet${S.eng.carried?' — these are new since the register you carried forward':''}.
     <span class="lnk" onclick="EN.unOnly=true;renderEng()">Show just those</span>${
       naN? ` · <b>${naN}</b> marked N/A and left out of the workload.`:''}`;
+
+  /* How the list is built sits behind the disclosure — except when tags have
+     nobody on them, which is the one thing worth opening unasked. */
+  syncNotes('EN','how this list is built');
+  if(unassigned && !$('ndEN').classList.contains('open')) toggleNotes('EN');
 
   document.querySelectorAll('#enTabs .tabb').forEach(b=>b.classList.toggle('on',b.dataset.e===EN.view));
   $('enTagsCard').style.display   = EN.view==='tags'   ? '' : 'none';
