@@ -479,6 +479,8 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
   border-bottom:1px solid var(--line)}
 .ac-tools .fill{flex:1}
 .ac-tools .res{font-size:11.5px;font-weight:700;color:var(--muted);white-space:nowrap}
+.ac-tools .hint2{font-size:10.5px;font-weight:600;color:var(--muted);white-space:nowrap}
+@media(max-width:1100px){.ac-tools .hint2{display:none}}
 .ac-tools .res b{color:var(--navy)}
 .ac-sum{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
 .ac-sum .m{flex:1 1 120px;background:var(--sf);border:1px solid var(--line);border-radius:12px;padding:11px 14px;
@@ -726,6 +728,62 @@ tr.en-na td:last-child{opacity:1}
 tr.en-newtag td{background:var(--warn-bg)}
 
 .half-empty{padding:28px 14px;text-align:center;color:var(--muted);font-size:12px;font-weight:600;line-height:1.6}
+
+/* ── engineer list panel ────────────────────────────────────────────────── */
+.navgear{width:34px;height:34px;flex:none;margin-left:10px;border-radius:9px;cursor:pointer;
+  border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.10);color:#fff;padding:0;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:background .18s var(--ease),border-color .18s var(--ease),transform .5s var(--ease)}
+.navgear:hover{background:#fff;border-color:#fff;color:#17558A;transform:rotate(60deg)}
+.navgear:active{transform:rotate(60deg) scale(.94)}
+.modal{position:fixed;inset:0;z-index:400;display:flex;align-items:center;justify-content:center;padding:22px}
+.modal[hidden]{display:none}
+.modal-bd{position:absolute;inset:0;background:rgba(11,37,69,.46);backdrop-filter:blur(2px);
+  animation:fadeIn .2s var(--ease)}
+@keyframes fadeIn{from{opacity:0}}
+@keyframes popIn{from{opacity:0;transform:translateY(10px) scale(.985)}}
+.modal-card{position:relative;background:var(--sf);border-radius:16px;box-shadow:var(--sh3);
+  width:min(720px,100%);max-height:min(84vh,780px);display:flex;flex-direction:column;overflow:hidden;
+  animation:popIn .24s var(--ease)}
+.modal-h{display:flex;align-items:flex-start;gap:14px;padding:18px 20px 14px;border-bottom:1px solid var(--line)}
+.modal-t{font-size:16px;font-weight:800;color:var(--navy)}
+.modal-s{font-size:11px;font-weight:600;color:var(--muted);line-height:1.55;margin-top:4px;max-width:56ch}
+.modal-x{flex:none;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--sf2);
+  color:var(--muted);font-size:12px;cursor:pointer;transition:all .15s var(--ease)}
+.modal-x:hover{background:var(--dang);border-color:var(--dang);color:#fff}
+.modal-b{padding:16px 20px;overflow:auto;flex:1;min-height:0}
+.modal-f{display:flex;align-items:center;gap:12px;padding:13px 20px;border-top:1px solid var(--line);
+  background:var(--sf2)}
+.modal-f .fill{flex:1}
+.ro-dept{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:13px}
+.ro-dept .fill{flex:1}
+.ro-dept label{font-size:9.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.ro-dept select{padding:8px 11px;font-size:12px;font-weight:700;color:var(--navy);border:1px solid var(--line2);
+  border-radius:8px;background:var(--sf2);cursor:pointer;max-width:210px}
+.ro-count{font-size:11px;font-weight:700;color:var(--muted)}
+.ro-add{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:12px}
+@media(max-width:560px){.ro-add{grid-template-columns:1fr}}
+.ro-add input{padding:9px 12px;font-size:12.5px;font-weight:600;color:var(--ink);border:1px solid var(--line2);
+  border-radius:8px;background:var(--sf2);min-width:0;font-family:var(--font)}
+.ro-add input:focus{outline:none;border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.ro-err{font-size:11px;font-weight:700;color:#9C2C24;background:var(--dang-bg);border:1px solid #F2C9C4;
+  border-radius:8px;padding:7px 11px;margin-bottom:11px}
+.ro-scroll{max-height:42vh;overflow:auto;border:1px solid var(--line);border-radius:10px}
+table.ro-t{table-layout:auto}
+table.ro-t tbody tr{cursor:default}
+table.ro-t tbody td{padding:6px 12px}
+.ro-mail{width:100%;padding:5px 8px;font-size:11.5px;font-weight:600;color:var(--ink);font-family:var(--font);
+  border:1px solid transparent;border-radius:6px;background:transparent}
+.ro-mail:hover{border-color:var(--line2);background:var(--sf2)}
+.ro-mail:focus{outline:none;border-color:var(--blue);background:#fff}
+.ro-mail::placeholder{color:#A9B5C3;font-weight:600}
+.ro-rm{border:1px solid var(--line2);background:var(--sf2);color:var(--muted);border-radius:7px;
+  padding:4px 10px;font-size:10.5px;font-weight:800;cursor:pointer;transition:all .15s var(--ease)}
+.ro-rm:hover{background:var(--dang);border-color:var(--dang);color:#fff}
+@keyframes roNew{from{background:#D7ECDF}}
+table.ro-t tbody tr.ro-new td{animation:roNew 1.4s var(--ease)}
+.ro-note{font-size:10.5px;font-weight:600;color:var(--muted);line-height:1.5}
+.ro-note b{color:var(--navy)}
 
 /* ── motion ─────────────────────────────────────────────────────────────
    Every entrance animates only from a start state, never to opacity:0, so a
@@ -1037,6 +1095,19 @@ tr.en-newtag td{background:var(--warn-bg)}
   <div class="crumbs" id="crumbs"></div>
   <div class="sp"></div>
   <div class="projchip" id="navinfo" style="display:none"></div>
+  <button class="navgear" id="btn-roster" onclick="openRoster()"
+          title="Engineer list — add or remove names" aria-label="Engineer list">
+    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="3.1"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33
+               1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06
+               a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09
+               A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06
+               A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51
+               1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9
+               a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  </button>
 </div></div>
 
 <!-- 1 ── UPLOAD ─────────────────────────────────────────────────────────── -->
@@ -1198,8 +1269,8 @@ tr.en-newtag td{background:var(--warn-bg)}
           <div class="cb-note info2" id="dnA" style="display:none"></div>
         </div>
       </div>
-      <div class="bytype" id="dbtA"></div>
       <div class="stuck" id="skA" style="display:none"></div>
+      <div class="bytype" id="dbtA"></div>
     </article>
     <article class="ccard" data-h="B" data-c="disc" id="cardB-disc">
       <div class="cc-h">
@@ -1224,8 +1295,8 @@ tr.en-newtag td{background:var(--warn-bg)}
           <div class="cb-note info2" id="dnB" style="display:none"></div>
         </div>
       </div>
-      <div class="bytype" id="dbtB"></div>
       <div class="stuck" id="skB" style="display:none"></div>
+      <div class="bytype" id="dbtB"></div>
     </article>
   </div>
 
@@ -1302,12 +1373,9 @@ tr.en-newtag td{background:var(--warn-bg)}
 
   <div class="card" id="enTagsCard" style="padding:0;overflow:hidden">
     <div class="ac-tools">
-      <span class="lbl">Order by</span>
-      <button class="chip on" id="enSortTag">Tag</button>
-      <button class="chip" id="enSortDocs">Most documents</button>
-      <button class="chip" id="enSortProg">Least progress</button>
-      <span class="nav-sep" style="background:var(--line2);height:18px"></span>
+      <span class="lbl">Filter</span>
       <button class="chip" id="enOnlyUn">Unassigned only</button>
+      <span class="hint2">Click a column heading to sort by it; click again to turn it around.</span>
       <div class="fill"></div>
       <span class="res" id="enCount"></span>
     </div>
@@ -1435,12 +1503,10 @@ tr.en-newtag td{background:var(--warn-bg)}
   <div class="ac-sum" id="acSum"></div>
   <div class="dt-wrap" style="border-radius:14px;border:1px solid var(--line)">
     <div class="ac-tools">
-      <span class="lbl">Order by</span>
-      <button class="chip on" id="acCrit">Critical first</button>
-      <button class="chip" id="acOver">Deadline crossed</button>
-      <button class="chip" id="acRev">Most revisions first</button>
-      <span class="nav-sep" style="background:var(--line2);height:18px"></span>
+      <span class="lbl">Filter</span>
       <button class="chip" id="acCirc">Circulating only</button>
+      <button class="chip" id="acCrit">Critical only</button>
+      <span class="hint2">Click a column heading to sort by it; click again to turn it around.</span>
       <div class="fill"></div>
       <span class="res" id="acCount"></span>
       <button class="chip" onclick="exportActionXlsx()">⤓ Download as Excel</button>
@@ -1536,6 +1602,47 @@ tr.en-newtag td{background:var(--warn-bg)}
   <button class="sh" data-s="perf">Performance</button>
 </div>
 <div class="ptip" id="ptip"></div>
+
+<!-- ── engineer list ───────────────────────────────────────────────────────
+     The roster used to be a constant in the source, so changing it meant
+     editing the file.  It is edited here instead and kept in this browser. -->
+<div class="modal" id="rosterModal" hidden>
+  <div class="modal-bd" onclick="closeRoster()"></div>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="rosterTitle">
+    <div class="modal-h">
+      <div>
+        <div class="modal-t" id="rosterTitle">Engineer list</div>
+        <div class="modal-s">Names offered when assigning a requisition or responsible engineer.
+          An email address is optional — where one is given, a report emailed to that engineer is
+          addressed to them automatically.</div>
+      </div>
+      <button class="modal-x" onclick="closeRoster()" aria-label="Close">&#10005;</button>
+    </div>
+    <div class="modal-b">
+      <div class="ro-dept">
+        <label for="roDept">Department</label>
+        <select id="roDept"></select>
+        <span class="ro-count" id="roCount"></span>
+        <div class="fill"></div>
+        <button class="chip" onclick="addRosterDept()">New department</button>
+      </div>
+      <div class="ro-add">
+        <input id="roName" placeholder="Engineer name" autocomplete="off" spellcheck="false">
+        <input id="roMail" placeholder="Email address (optional)" autocomplete="off" spellcheck="false" type="email">
+        <button class="btn btn-p btn-s" onclick="addRosterName()">Add engineer</button>
+      </div>
+      <div class="ro-err" id="roErr" hidden></div>
+      <div class="ro-scroll"><table class="dt ro-t"><thead>
+        <tr><th>Engineer</th><th>Email address</th><th style="width:76px"></th></tr>
+        </thead><tbody id="roBody"></tbody></table></div>
+    </div>
+    <div class="modal-f">
+      <div class="ro-note" id="roNote"></div>
+      <div class="fill"></div>
+      <button class="btn btn-g btn-s" onclick="closeRoster()">Close</button>
+    </div>
+  </div>
+</div>
 
 <div id="printarea"></div>
 
@@ -1641,6 +1748,31 @@ const ENG_ROSTER = {
     'RAJESWARAN SELVARAJ','RAMESH GUNASEKAR','REDDYVARI RAJESH','SARAVANA KUMAR S','SHAIK DASTAGIRI',
     'SIVASUBRAMANIAN JEYARAMAN','SURULIMUTHU SATHISHKUMAR','VENKATESH ALAGARSAMY','YASHWANTH C']
 };
+/* ── the roster, as the reader keeps it ─────────────────────────
+   ENG_ROSTER above is only the starting point.  The list actually offered
+   lives in this browser and is edited from the gear in the header, so adding
+   or removing a name never means editing this file again.
+
+   An email address is optional against each name.  Where one is given, a
+   report emailed about that engineer is addressed to them instead of leaving
+   the To: line for somebody to fill in by hand. */
+const ROSTER_KEY='vdt.roster.v1';
+let ROSTER={ list:{}, mail:{} };
+function loadRoster(){
+  let saved=null;
+  try{ saved=JSON.parse(localStorage.getItem(ROSTER_KEY)); }catch(e){}
+  ROSTER = (saved && saved.list && Object.keys(saved.list).length)
+    ? { list:saved.list, mail:saved.mail||{} }
+    : { list:JSON.parse(JSON.stringify(ENG_ROSTER)), mail:{} };
+  return ROSTER;
+}
+function saveRoster(){
+  try{ localStorage.setItem(ROSTER_KEY, JSON.stringify(ROSTER)); return true; }
+  catch(e){ return false; }
+}
+const engMail = n => (ROSTER.mail||{})[String(n||'').trim()] || '';
+loadRoster();
+
 /* PO + equipment tag, the pair a responsible engineer is assigned to */
 const tagKey = (po,tag) => String(po).trim()+'\u0001'+String(tag).trim();
 
@@ -1727,7 +1859,7 @@ function parseBook(bytes){
   S.fileBytes=bytes;
   /* built-in roster, plus the sheet if this workbook still has one, plus every
      name the register itself already uses — so nothing is ever unpickable */
-  const list={}; Object.keys(ENG_ROSTER).forEach(k=>list[k]=ENG_ROSTER[k].slice());
+  const list={}; Object.keys(ROSTER.list).forEach(k=>list[k]=ROSTER.list[k].slice());
   Object.entries(ctx.engList||{}).forEach(([k,v])=>{
     list[k]=[...new Set((list[k]||[]).concat(v))].sort((a,b)=>a.localeCompare(b)); });
   const used=new Set(Object.values(ctx.req||{}).concat(Object.values(ctx.resp||{})));
@@ -2804,6 +2936,43 @@ function countUp(el, to, suffix){
   })(t0);
 }
 
+/* ── sorting, from the column heading ─────────────────────────────────────
+   A row of chips saying "order by" is a second place to look for something
+   the table already shows.  The heading is where a reader expects to click,
+   so that is where it lives: first click sorts by that column, second turns
+   it around.  Filters stay as chips, because a filter changes what is in the
+   table and a heading cannot say that.
+
+   A column declares `desc:true` when its useful end is the big one — counts
+   and ages read most-first; names, codes and percentages read least-first. */
+function sortHead(headId, cols, st, redraw){
+  const el=$(headId); if(!el) return;
+  el.innerHTML='<tr>'+cols.map(c=>
+    `<th class="${st.k===c.k?'on':''}" data-k="${esc(c.k)}"${c.right?' style="text-align:right"':''}
+       title="Sort by ${esc(c.t)}">${esc(c.t)}<span class="sa">${
+       st.k===c.k ? (st.dir>0?'▲':'▼') : '▲'}</span></th>`).join('')+'</tr>';
+  el.querySelectorAll('th').forEach(th=>th.onclick=()=>{
+    const k=th.dataset.k, c=cols.find(x=>x.k===k); if(!c) return;
+    if(st.k===k) st.dir=-st.dir; else { st.k=k; st.dir=c.desc?-1:1; }
+    redraw();
+  });
+}
+/* Sort by the chosen column.  `pin` keeps a catch-all row at the bottom
+   whichever way the column is pointing, and the original index is the last
+   tiebreak so equal values never shuffle between one redraw and the next. */
+function sortRows(list, cols, st, pin){
+  const c=cols.find(x=>x.k===st.k);
+  if(!c || !c.v) return list;
+  return list.map((x,i)=>({x,i})).sort((p,q)=>{
+    if(pin){ const d=pin(p.x)-pin(q.x); if(d) return d; }
+    const a=c.v(p.x), b=c.v(q.x);
+    const d = (typeof a==='number' && typeof b==='number')
+      ? a-b
+      : String(a==null?'':a).localeCompare(String(b==null?'':b), undefined, {numeric:true});
+    return d ? d*st.dir : p.i-q.i;
+  }).map(o=>o.x);
+}
+
 const TIP=()=>$('ptip');
 /* Put the tooltip beside the pointer without letting it fall off the screen. */
 function tipAt(e){ const t=TIP(), r=t.getBoundingClientRect();
@@ -3543,7 +3712,24 @@ window.exportProgressXlsx=exportProgressXlsx;
    with both on, critical documents lead, most-revised among them at the top.
    ────────────────────────────────────────────────────────────────────────── */
 const AC = { half:'A', kind:'code', key:'', bandCode:null,
-             crit:true, over:false, rev:false, circ:false, rows:[] };
+             crit:false, circ:false, rows:[], sort:{k:null, dir:1} };
+
+/* The columns of the action table, each with the value it sorts on.  The last
+   one is renamed by the caller, because a discipline list is "waiting on" and
+   a document list is "still to close". */
+function acCols(byDisc){
+  const owing = r => r.d.latest.depts.filter(x=>x.review&&!x.closed).map(x=>x.name).join(', ');
+  return [
+    {k:'doc',   t:'Document',   v:r=>r.d.label},
+    {k:'equip', t:'Equipment',  v:r=>r.d.xref||''},
+    {k:'code',  t:'Code',       v:r=>r.d.code||''},
+    {k:'rev',   t:'Rev',        v:r=>r.d.rev||''},
+    {k:'nrev',  t:'Revisions',  v:r=>r.d.nRev||0, desc:true},
+    {k:'status',t:'Status',     v:r=>String(r.d.status||'')},
+    {k:'days',  t:'Days',       v:r=>r.d.days==null?-1:r.d.days, desc:true, right:true},
+    {k:'who',   t:byDisc?'Waiting on':'Still to close', v:r=>r.disc || owing(r)}
+  ];
+}
 
 /* the critical types: calculations and general arrangement drawings */
 function isCriticalCode(c){
@@ -3569,8 +3755,8 @@ function openBand(half, key, code, ev){
 function openAction(half, kind, key, ev){
   AC.half=half; AC.kind=kind; AC.key=key;
   if(kind!=='band') AC.bandCode=null;
-  AC.crit=true; AC.over=false; AC.rev=false; AC.circ=false;
-  ['acCrit','acOver','acRev','acCirc'].forEach(id=>$(id).onclick=()=>toggleAc(id));
+  AC.crit=false; AC.circ=false; AC.sort={k:null, dir:1};
+  ['acCrit','acCirc'].forEach(id=>$(id).onclick=()=>toggleAc(id));
   /* take the bar the reader just pressed and carry it to the top of the next
      page, so it is obvious which progress they are acting on */
   const row = ev && ev.target.closest && ev.target.closest('.trow');
@@ -3603,8 +3789,6 @@ function flyBar(src, run){
 
 function toggleAc(id){
   if(id==='acCrit') AC.crit=!AC.crit;
-  if(id==='acOver') AC.over=!AC.over;
-  if(id==='acRev')  AC.rev =!AC.rev;
   if(id==='acCirc') AC.circ=!AC.circ;
   renderAction();
 }
@@ -3648,13 +3832,17 @@ function actionRows(){
 }
 function renderAction(){
   const byDisc = AC.kind==='disc' || AC.kind==='alldisc';
+  const cols=acCols(byDisc);
   let rows=actionRows();
   if(AC.circ) rows=rows.filter(r=>r.d.circulating);
-  rows.sort((p,q)=>{
+  if(AC.crit) rows=rows.filter(r=>isCriticalDoc(r.d));
+  if(AC.sort.k) rows=sortRows(rows, cols, AC.sort);
+  else rows.sort((p,q)=>{
+    /* the order it arrives in when no column has been asked for: the ones
+       that matter first — critical, then longest in circulation */
     const a=p.d, b=q.d;
-    if(AC.crit){ const ca=isCriticalDoc(a)?0:1, cb=isCriticalDoc(b)?0:1; if(ca!==cb) return ca-cb; }
-    if(AC.over){ const oa=overdueBy(a), ob=overdueBy(b); if(oa!==ob) return ob-oa; }
-    if(AC.rev && b.nRev!==a.nRev) return b.nRev-a.nRev;
+    const ca=isCriticalDoc(a)?0:1, cb=isCriticalDoc(b)?0:1; if(ca!==cb) return ca-cb;
+    const oa=overdueBy(a), ob=overdueBy(b); if(oa!==ob) return ob-oa;
     const da=a.days==null?-1:a.days, db=b.days==null?-1:b.days;
     if(db!==da) return db-da;
     return String(a.label).localeCompare(String(b.label));
@@ -3672,8 +3860,6 @@ function renderAction(){
   $('acTitle').textContent=what;
   $('acScope').innerHTML=`<span class="v">${esc(S.po)}</span><span class="v">${esc(scopeName)}</span>`;
   $('acCrit').classList.toggle('on',AC.crit);
-  $('acOver').classList.toggle('on',AC.over);
-  $('acRev').classList.toggle('on',AC.rev);
   $('acCirc').classList.toggle('on',AC.circ);
 
   /* the progress bar of exactly what is being actioned */
@@ -3755,10 +3941,7 @@ function renderAction(){
   $('acSum').innerHTML=tiles.map(([c,n,l])=>`<div class="m ${c}"><div class="n">${n.toLocaleString()}</div><div class="l">${l}</div></div>`).join('');
   $('acCount').innerHTML=`<b>${rows.length.toLocaleString()}</b> row${rows.length===1?'':'s'}`;
 
-  const head=['Document','Equipment','Code','Rev','Revisions','Status','Days']
-    .concat(byDisc?['Waiting on']:['Still to close']);
-  $('acHead').innerHTML='<tr>'+head.map((t,i)=>
-    `<th${i===6?' style="text-align:right"':''}>${esc(t)}</th>`).join('')+'</tr>';
+  sortHead('acHead', cols, AC.sort, renderAction);
   $('acBody').innerHTML = rows.length? rows.map(r=>{
     const d=r.d, m=stMeta(d.status);
     const ageCls=!d.circulating?'info':(d.over>0?'dang':(d.days>=8?'warn':'ok'));
@@ -3802,8 +3985,9 @@ function actionAoa(){
     [S.po+'  ·  '+S.dep+(S.disc?'  ·  reviewing as '+S.disc:'')],
     [(AC.half==='A'?'Full purchase order':'For review — '+(S.disc||''))+
      '  ·  as of '+S.meta.asOf+'  ·  '+AC.rows.length+' rows'+
-     (AC.crit?'  ·  critical first':'')+(AC.rev?'  ·  most revisions first':'')+
-     (AC.circ?'  ·  circulating only':'')],[],head];
+     (AC.crit?'  ·  critical only':'')+(AC.circ?'  ·  circulating only':'')+
+     (AC.sort.k?'  ·  sorted by '+(acCols(byDisc).find(c=>c.k===AC.sort.k)||{t:AC.sort.k}).t+
+       (AC.sort.dir>0?' (ascending)':' (descending)'):'')],[],head];
   AC.rows.forEach(r=>{ const d=r.d;
     const owing=d.latest.depts.filter(x=>x.review&&!x.closed).map(x=>x.name).join('; ');
     aoa.push([d.label,d.title||'',d.xref||'',d.equip||'',d.code||'',d.codeDesc||'',
@@ -3883,10 +4067,20 @@ function emailAction(){
       background:${i%2?'#F6F9FC':'#fff'}">${esc2(c.get(r,i))}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
   copyRich(html, body);
 
-  const href='mailto:?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
+  /* An engineer's own list goes to that engineer, when the roster knows how
+     to reach them — otherwise the To: line is left for the sender to fill. */
+  const to = AC.kind==='engineer' ? engMail(AC.key) : '';
+  const href='mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent(subj)+
+             '&body='+encodeURIComponent(body);
   const note=$('acMailNote');
   note.style.display='';
-  note.innerHTML=`Your mail client is opening with the table already written in the body. The full list was
+  note.innerHTML=(to
+      ? `Addressed to <b>${esc(AC.key)}</b> at <b>${esc(to)}</b>. `
+      : AC.kind==='engineer'
+      ? `No email address on file for <b>${esc(AC.key)}</b> — add one under the gear in the header and the
+         next report will be addressed automatically. `
+      : '')+
+    `Your mail client is opening with the table already written in the body. The full list was
     downloaded as <b>${esc(file)}</b> — a web page cannot attach a file to a draft, so please attach it before
     sending. The same table is on your clipboard as a formatted table: press <b>Ctrl+V</b> in Outlook to paste it.`;
   window.location.href=href;
@@ -4446,6 +4640,153 @@ function snapshot(){
 }
 
 /* ── the consolidated basket ───────────────────────────────────────────── */
+/* ── the engineer list panel ──────────────────────────────────────────────
+   Every edit is written straight to this browser's copy of the roster: there
+   is no Save button because there is nothing to lose by forgetting it, and a
+   list you have to remember to save is a list that goes stale. */
+const RO = { dept:null };
+
+function openRoster(){
+  const depts=rosterDepts();
+  if(!RO.dept || depts.indexOf(RO.dept)<0) RO.dept = (S.disc && depts.indexOf(S.disc)>=0) ? S.disc : depts[0];
+  $('rosterModal').hidden=false;
+  renderRoster();
+  /* Enter adds, from either field, so a long list can be typed straight in */
+  ['roName','roMail'].forEach(id=>$(id).onkeydown=e=>{
+    if(e.key==='Enter'){ e.preventDefault(); addRosterName(); } });
+  setTimeout(()=>$('roName').focus(), 60);
+}
+function closeRoster(){ $('rosterModal').hidden=true; roErr(''); }
+window.openRoster=openRoster; window.closeRoster=closeRoster;
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && !$('rosterModal').hidden) closeRoster(); });
+
+/* Every department the roster knows, plus every discipline the open register
+   has a column for — so a name can be filed against the right one even the
+   first time that discipline is seen. */
+function rosterDepts(){
+  const set=new Set(Object.keys(ROSTER.list));
+  (S.depts||[]).forEach(d=>set.add(typeof d==='string'?d:d.name));
+  if(!set.size) set.add('Vessels');
+  return [...set].filter(Boolean).sort((a,b)=>a.localeCompare(b));
+}
+function roErr(msg){
+  const e=$('roErr'); if(!e) return;
+  e.hidden=!msg; e.textContent=msg||'';
+}
+function renderRoster(justAdded){
+  /* Re-rendering the whole table on every edit threw the reader back to the
+     top of a thirty-name list.  Put them back where they were, and walk the
+     new name into view when there is one. */
+  const sc=document.querySelector('.ro-scroll');
+  const at=sc?sc.scrollTop:0;
+  const depts=rosterDepts();
+  $('roDept').innerHTML=depts.map(d=>
+    `<option value="${esc(d)}"${d===RO.dept?' selected':''}>${esc(d)} (${(ROSTER.list[d]||[]).length})</option>`).join('');
+  $('roDept').onchange=e=>{ RO.dept=e.target.value; roErr(''); renderRoster(); };
+
+  const names=(ROSTER.list[RO.dept]||[]).slice().sort((a,b)=>a.localeCompare(b));
+  const withMail=names.filter(n=>engMail(n)).length;
+  $('roCount').textContent = names.length
+    ? names.length+' name'+(names.length===1?'':'s')+' · '+withMail+' with email'
+    : 'no engineers yet';
+
+  $('roBody').innerHTML = names.length ? names.map(n=>`<tr>
+      <td><div class="docno" style="word-break:normal">${esc(n)}</div></td>
+      <td><input class="ro-mail" data-n="${esc(n)}" type="email" spellcheck="false"
+           placeholder="none" value="${esc(engMail(n))}"></td>
+      <td style="text-align:right"><button class="ro-rm" data-rm="${esc(n)}">Remove</button></td>
+    </tr>`).join('')
+    : `<tr><td colspan="3" class="empty">No engineers in ${esc(RO.dept||'this department')} yet —
+         add the first one above.</td></tr>`;
+
+  $('roBody').querySelectorAll('.ro-mail').forEach(inp=>{
+    const commit=()=>{
+      const n=inp.dataset.n, v=inp.value.trim();
+      if(v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){ roErr('"'+v+'" does not look like an email address.'); return; }
+      roErr('');
+      if(v) ROSTER.mail[n]=v; else delete ROSTER.mail[n];
+      saveRoster(); rosterChanged(false);
+    };
+    inp.onchange=commit;
+    inp.onkeydown=e=>{ if(e.key==='Enter'){ e.preventDefault(); inp.blur(); } };
+  });
+  $('roBody').querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>removeRosterName(b.dataset.rm));
+  if(sc){
+    sc.scrollTop=at;
+    if(justAdded){
+      const row=[...$('roBody').querySelectorAll('.ro-mail')].find(i=>i.dataset.n===justAdded);
+      if(row){ const tr=row.closest('tr');
+        tr.scrollIntoView({block:'nearest', behavior:REDUCED()?'auto':'smooth'});
+        tr.classList.add('ro-new'); setTimeout(()=>tr.classList.remove('ro-new'), 1400); }
+    }
+  }
+
+  /* Say plainly what a removal does and does not touch. */
+  const used=usedNames();
+  $('roNote').innerHTML=`Kept in this browser only — it is not written into the register.
+    ${used.size? '<b>'+used.size+'</b> name'+(used.size===1?' is':'s are')+' already assigned in the open register'
+               : 'No assignments in the open register yet'}.`;
+}
+/* names the open register has actually assigned to something */
+function usedNames(){
+  const out=new Set();
+  if(S.eng){ Object.values(S.eng.req||{}).forEach(n=>{ if(n&&!isNA(n)) out.add(n); });
+             Object.values(S.eng.resp||{}).forEach(n=>{ if(n&&!isNA(n)) out.add(n); }); }
+  return out;
+}
+/* push the edited roster into the open register's own picker list, keeping
+   any name the register already uses so an assignment never loses its name */
+function rosterChanged(redraw, justAdded){
+  if(S.eng){
+    const list={}; Object.keys(ROSTER.list).forEach(k=>list[k]=ROSTER.list[k].slice());
+    usedNames().forEach(n=>{
+      if(!Object.values(list).some(a=>a.indexOf(n)>=0)){
+        const k=(S.disc && list[S.disc]) ? S.disc : (Object.keys(list)[0]||'Vessels');
+        (list[k]=list[k]||[]).push(n); }
+    });
+    Object.keys(list).forEach(k=>list[k].sort((a,b)=>a.localeCompare(b)));
+    S.eng.list=list;
+  }
+  if(redraw!==false) renderRoster(justAdded);
+  if($('sc-eng') && $('sc-eng').classList.contains('on') && typeof renderEng==='function') renderEng();
+}
+function addRosterName(){
+  const n=$('roName').value.trim().replace(/\s+/g,' ');
+  const m=$('roMail').value.trim();
+  if(!n) { roErr('Type the engineer’s name first.'); $('roName').focus(); return; }
+  if(m && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(m)){ roErr('"'+m+'" does not look like an email address.'); return; }
+  const dept=RO.dept||rosterDepts()[0];
+  const arr=(ROSTER.list[dept]=ROSTER.list[dept]||[]);
+  const clash=arr.find(x=>x.toLowerCase()===n.toLowerCase());
+  if(clash){ roErr('"'+clash+'" is already in '+dept+'.'); return; }
+  arr.push(n); arr.sort((a,b)=>a.localeCompare(b));
+  if(m) ROSTER.mail[n]=m;
+  if(!saveRoster()) roErr('This browser would not store the list — it will be lost when the tab closes.');
+  else roErr('');
+  $('roName').value=''; $('roMail').value=''; $('roName').focus();
+  rosterChanged(true, n);
+}
+function removeRosterName(n){
+  const dept=RO.dept;
+  const inUse=usedNames().has(n);
+  const q = inUse
+    ? `"${n}" is assigned in the register that is open. Removing the name here takes it out of the\n`+
+      `pick-list for future assignments; it does NOT clear the assignments already made.\n\nRemove it anyway?`
+    : `Remove "${n}" from ${dept}?`;
+  if(!confirm(q)) return;
+  ROSTER.list[dept]=(ROSTER.list[dept]||[]).filter(x=>x!==n);
+  if(!Object.values(ROSTER.list).some(a=>a.indexOf(n)>=0)) delete ROSTER.mail[n];
+  saveRoster(); roErr(''); rosterChanged();
+}
+function addRosterDept(){
+  const d=(prompt('Name of the department or discipline:')||'').trim();
+  if(!d) return;
+  if(Object.keys(ROSTER.list).some(k=>k.toLowerCase()===d.toLowerCase())){
+    RO.dept=Object.keys(ROSTER.list).find(k=>k.toLowerCase()===d.toLowerCase()); renderRoster(); return; }
+  ROSTER.list[d]=[]; RO.dept=d; saveRoster(); rosterChanged();
+}
+window.addRosterName=addRosterName; window.addRosterDept=addRosterDept;
+
 const BK_KEY='vdt.openpoints.v1';
 function loadBasket(){ try{ S.basket=JSON.parse(localStorage.getItem(BK_KEY))||[]; }catch(e){ S.basket=[]; } paintBasket(); }
 function saveBasket(){ try{ localStorage.setItem(BK_KEY,JSON.stringify(S.basket)); }catch(e){} paintBasket(); }
@@ -4866,15 +5207,36 @@ window.renderReqBtn=renderReqBtn;
    eGesDoc does not know any of this, so a fresh export arrives without it and
    the assignments have to be carried over from the register saved last time.
    ──────────────────────────────────────────────────────────────────────── */
-const EN = { view:'tags', sort:'tag', unOnly:false };
+const EN = { view:'tags', unOnly:false,
+             tagSort:{k:'tag', dir:1}, peopleSort:{k:'tags', dir:-1} };
+
+/* One row per equipment tag.  The shared row — documents naming several tags
+   at once — is pinned to the bottom whichever column is sorting, because it
+   is a catch-all rather than a tag anybody owns. */
+const EN_TAG_COLS = [
+  {k:'tag',   t:'Equipment tag', v:t=>tagLabel(t.tag)},
+  {k:'equip', t:'Equipment',     v:t=>t.equip||''},
+  {k:'n',     t:'Docs',          v:t=>t.n,     desc:true, right:true},
+  {k:'codes', t:'Types',         v:t=>t.codes, desc:true, right:true},
+  {k:'pct',   t:'Progress',      v:t=>t.pct},
+  {k:'who',   t:'Responsible engineer', v:t=>t.who||''}
+];
+const EN_PEOPLE_COLS = [
+  {k:'who',   t:'Engineer',           v:e=>e.who},
+  {k:'tags',  t:'Tags',               v:e=>e.tags.length, desc:true, right:true},
+  {k:'n',     t:'Documents',          v:e=>e.n,           desc:true, right:true},
+  {k:'share', t:'Share of the load',  v:e=>e.n,           desc:true},
+  {k:'pct',   t:'Progress',           v:e=>e.pct},
+  {k:'held',  t:'Equipment tags held',v:e=>e.tags.map(t=>tagLabel(t.tag)).join(', ')}
+];
 
 /* Every name this project knows, the chosen discipline's own list first. */
 function engNames(){
-  const L=(S.eng&&S.eng.list)||ENG_ROSTER;
+  const L=(S.eng&&S.eng.list)||ROSTER.list;
   const mine=(S.disc && L[S.disc])||[];
   if(mine.length) return mine;
   const all=new Set(); Object.values(L).forEach(a=>a.forEach(n=>all.add(n)));
-  if(!all.size) Object.values(ENG_ROSTER).forEach(a=>a.forEach(n=>all.add(n)));
+  if(!all.size) Object.values(ROSTER.list).forEach(a=>a.forEach(n=>all.add(n)));
   return [...all].sort((a,b)=>a.localeCompare(b));
 }
 
@@ -4952,10 +5314,7 @@ function engTags(){
   });
 }
 function engSorted(list){
-  const l=list.slice(), last=(x)=>x.tag===MULTI_TAG?1:0;
-  if(EN.sort==='docs') l.sort((a,b)=>last(a)-last(b) || b.n-a.n || a.tag.localeCompare(b.tag));
-  else if(EN.sort==='prog') l.sort((a,b)=>last(a)-last(b) || a.pct-b.pct || b.n-a.n);
-  else l.sort((a,b)=>last(a)-last(b) || a.tag.localeCompare(b.tag));
+  const l=sortRows(list.slice(), EN_TAG_COLS, EN.tagSort, x=>x.tag===MULTI_TAG?1:0);
   return EN.unOnly ? l.filter(t=>!t.who) : l;
 }
 const tagLabel = t => t===MULTI_TAG ? 'Documents naming several tags' : t;
@@ -5035,8 +5394,6 @@ function renderEng(){
   document.querySelectorAll('#enTabs .tabb').forEach(b=>b.classList.toggle('on',b.dataset.e===EN.view));
   $('enTagsCard').style.display   = EN.view==='tags'   ? '' : 'none';
   $('enPeopleCard').style.display = EN.view==='people' ? '' : 'none';
-  ['enSortTag','enSortDocs','enSortProg'].forEach((id,i)=>
-    $(id).classList.toggle('on', EN.sort===['tag','docs','prog'][i]));
   $('enOnlyUn').classList.toggle('on', EN.unOnly);
 
   EN.view==='people' ? renderEngPeople(tags) : renderEngTags(tags, names);
@@ -5048,8 +5405,7 @@ function renderEngTags(all, names){
   $('enCount').innerHTML=`<b>${rows.length}</b> row${rows.length===1?'':'s'}`+
     ` <span style="color:var(--muted);font-weight:600">· Docs adds to <b>${colTotal.toLocaleString()}</b>${
       colTotal===S.eng.srcN? '' : ' of '+(S.eng.srcN||0).toLocaleString()}, every document counted once</span>`;
-  $('enHead').innerHTML='<tr><th>Equipment tag</th><th>Equipment</th><th style="text-align:right">Docs</th>'+
-    '<th style="text-align:right">Types</th><th>Progress</th><th>Responsible engineer</th></tr>';
+  sortHead('enHead', EN_TAG_COLS, EN.tagSort, renderEng);
   $('enBody').innerHTML = rows.length? rows.map(t=>`<tr class="${
       isNA(t.who)? 'en-na' : (t.who? '' : 'en-newtag')}">
       <td><div class="docno">${t.tag===MULTI_TAG?'<span class="en-multi">SEVERAL TAGS</span>':esc(t.tag)}</div></td>
@@ -5093,11 +5449,10 @@ function renderEngPeople(tags){
   tags.filter(t=>!isNA(t.who)).forEach(t=>{ const who=t.who||'(unassigned)';
     const e=(by[who]=by[who]||{who, tags:[], n:0, closed:0, circ:0});
     e.tags.push(t); e.n+=t.n; e.closed+=t.closed; e.circ+=t.circ; });
-  const list=Object.values(by).map(e=>({...e, pct:e.n?Math.round(e.closed/e.n*100):0}))
-    .sort((a,b)=> b.tags.length-a.tags.length || b.n-a.n);
+  const list=sortRows(Object.values(by).map(e=>({...e, pct:e.n?Math.round(e.closed/e.n*100):0})),
+                      EN_PEOPLE_COLS, EN.peopleSort);
   const maxN=Math.max(1,...list.map(e=>e.n));
-  $('enPHead').innerHTML='<tr><th>Engineer</th><th style="text-align:right">Tags</th>'+
-    '<th style="text-align:right">Documents</th><th>Share of the load</th><th>Progress</th><th>Equipment tags held</th></tr>';
+  sortHead('enPHead', EN_PEOPLE_COLS, EN.peopleSort, renderEng);
   $('enPBody').innerHTML = list.length? list.map(e=>`<tr${e.who==='(unassigned)'?' class="en-newtag"':''}>
       <td><div class="docno">${e.who==='(unassigned)'?'<span class="en-un">unassigned</span>':esc(e.who)}</div></td>
       <td style="text-align:right"><span class="s1 num">${e.tags.length}</span></td>
@@ -5149,8 +5504,6 @@ function setResp(tag, name, prev){
 
 document.addEventListener('click',e=>{
   const b=e.target.closest('#enTabs .tabb'); if(b){ EN.view=b.dataset.e; renderEng(); return; }
-  const m={enSortTag:'tag',enSortDocs:'docs',enSortProg:'prog'};
-  if(e.target.id in m){ EN.sort=m[e.target.id]; renderEng(); return; }
   if(e.target.id==='enOnlyUn'){ EN.unOnly=!EN.unOnly; renderEng(); }
 });
 
