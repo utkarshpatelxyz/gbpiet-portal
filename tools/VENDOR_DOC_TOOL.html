@@ -770,13 +770,14 @@ tr.en-newtag td{background:var(--warn-bg)}
   outline-offset:2px;border-radius:8px}
 
 @media (hover:hover){
-  /* The card itself: a shadow that deepens and a hairline that warms.  It
-     lifts only while closed — a deployed card is tall, and tall things that
-     jump when the pointer crosses them read as a glitch, not as a response. */
-  .ccard{transition:box-shadow .28s var(--ease),border-color .28s var(--ease),
-                   transform .28s var(--ease)}
-  .ccard:hover{box-shadow:var(--sh2);border-color:var(--line2);transform:translateY(-2px)}
-  .ccard.open:hover{transform:none}
+  /* The card answers with light, never with movement.  The pair is meant to
+     read as one row — lifting the card under the pointer puts its neighbour
+     2px out of line, which is the exact misalignment everything else here is
+     built to avoid.  So: a deeper shadow and a brighter top rule. */
+  .ccard{transition:box-shadow .28s var(--ease),border-color .28s var(--ease)}
+  .ccard:hover{box-shadow:var(--sh2)}
+  .ccard[data-h="A"]:hover{border-color:#C9D8F0;border-top-color:#1D4FD8}
+  .ccard[data-h="B"]:hover{border-color:#F0D2CE;border-top-color:#C23F35}
 
   /* Figures are not buttons.  They brighten and square up; they do not move,
      because moving would promise a click that is not there. */
