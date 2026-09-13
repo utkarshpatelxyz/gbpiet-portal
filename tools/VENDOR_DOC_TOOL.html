@@ -653,7 +653,12 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .bytype{max-height:0;overflow:hidden;opacity:0;transition:max-height .5s var(--ease),opacity .35s var(--ease)}
 .ccard.open .bytype{max-height:4000px;opacity:1;margin-top:12px;padding-top:10px;border-top:1px dashed var(--line2)}
 .bt-h{font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
-.trow{display:grid;grid-template-columns:112px 1fr 42px;gap:9px;align-items:center;padding:5px 0}
+/* The row is padded and pulled back out by the same amount: its box now
+   reaches past the text on both sides, so a hover wash has somewhere to sit
+   and the rule down its left edge lands beside the code rather than on it. */
+.trow{display:grid;grid-template-columns:112px 1fr 42px;gap:9px;align-items:center;
+  padding:5px 9px;margin:0 -9px;border-radius:8px;
+  transition:background .16s var(--ease),box-shadow .16s var(--ease)}
 .trow.wide{grid-template-columns:150px 1fr 42px}
 .trow+.trow{border-top:1px solid var(--line)}
 .trow .tc{min-width:0}
@@ -740,7 +745,105 @@ tr.en-newtag td{background:var(--warn-bg)}
    measurable at its true size the moment it is rendered. */
 .actbtn{transition:all .15s var(--ease)}
 .actbtn:active{transform:scale(.95)}
-@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+
+/* ── the feel of the thing ───────────────────────────────────────────────
+   Everything below is interaction only: nothing here changes a number, a
+   layout or what anything means.  Three rules it all obeys —
+
+     1. Only things that do something get a hover that promises something.
+        A figure you cannot click lifts its border, never its whole body.
+     2. Every press answers.  A control that moves under the finger feels
+        connected; one that waits for a repaint feels broken.
+     3. Hover effects are behind @media (hover:hover), or a touch screen
+        keeps the last thing tapped lit up.
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* A press is the fastest feedback there is, so it is never behind a query. */
+.btn:active:not(:disabled),.chip:active,.tabb:active,.pb-back:active,.cc-q:active,
+.notes-t:active,.en-prog:active,.sh:active{transform:translateY(0) scale(.975)}
+.btn,.chip,.pb-back,.cc-q,.notes-t,.en-prog{transition:transform .14s var(--ease),
+  background .18s var(--ease),color .18s var(--ease),border-color .18s var(--ease),
+  box-shadow .22s var(--ease)}
+
+/* Keyboard users get the same affordances, drawn the same way. */
+:where(button,[tabindex],a,input,select):focus-visible{outline:2px solid var(--blue);
+  outline-offset:2px;border-radius:8px}
+
+@media (hover:hover){
+  /* The card itself: a shadow that deepens and a hairline that warms.  It
+     lifts only while closed — a deployed card is tall, and tall things that
+     jump when the pointer crosses them read as a glitch, not as a response. */
+  .ccard{transition:box-shadow .28s var(--ease),border-color .28s var(--ease),
+                   transform .28s var(--ease)}
+  .ccard:hover{box-shadow:var(--sh2);border-color:var(--line2);transform:translateY(-2px)}
+  .ccard.open:hover{transform:none}
+
+  /* Figures are not buttons.  They brighten and square up; they do not move,
+     because moving would promise a click that is not there. */
+  .mini .m{transition:background .2s var(--ease),border-color .2s var(--ease),
+                      box-shadow .2s var(--ease)}
+  .mini .m:hover{background:#fff;border-color:#C9D8F0;box-shadow:var(--sh1)}
+
+  /* A row in a list is a target, so it gets the full treatment: a wash, a
+     rule down the left edge in the colour of the thing, and its action
+     button coming up out of flat. */
+  .bytype .trow:hover,.stuck .trow:hover{background:var(--sf2);
+    box-shadow:inset 3px 0 0 var(--blue),0 1px 2px rgba(11,37,69,.05)}
+  .ccard[data-h="B"] .bytype .trow:hover,.ccard[data-h="B"] .stuck .trow:hover{
+    box-shadow:inset 3px 0 0 var(--dang),0 1px 2px rgba(11,37,69,.05)}
+  .trow .actbtn{opacity:.72}
+  .trow:hover .actbtn{opacity:1;box-shadow:0 2px 8px rgba(212,87,78,.22)}
+
+  /* The chart is the way in, so the invitation moves towards you. */
+  .chartbox{transition:background .2s var(--ease)}
+  .chartbox .cue{transition:opacity .2s var(--ease),transform .2s var(--ease)}
+  .chartbox:hover .cue{transform:translateX(3px)}
+  /* the slice under the pointer steps out of the ring */
+  .dw .sl{transition:opacity .15s var(--ease),transform .18s var(--spring)}
+  .dw .sl:hover{transform:scale(1.045)}
+  /* and a discipline circle swells, with the rest of the diagram dimming
+     behind it so the one you are asking about is the one you can read */
+  .setb{transition:opacity .18s var(--ease)}
+  .setb circle{transition:fill-opacity .18s var(--ease),transform .22s var(--spring),
+                          filter .22s var(--ease)}
+  .setb circle,.setb text{transform-origin:center;transform-box:fill-box}
+  svg:hover .setb:not(:hover){opacity:.45}
+  .setb:hover circle{transform:scale(1.09);filter:drop-shadow(0 3px 7px rgba(11,37,69,.26))}
+
+  .btn-g:hover{box-shadow:var(--sh1);transform:translateY(-1px)}
+  .chip:hover{transform:translateY(-1px);box-shadow:var(--sh1)}
+  .actbtn:hover{transform:translateY(-1px)}
+  .tabb{transition:color .18s var(--ease),background .18s var(--ease)}
+  .en-prog:hover .en-go{transform:translateX(2px)}
+  .en-go{transition:opacity .15s var(--ease),transform .18s var(--ease)}
+}
+
+/* The underline under the open tab slides between tabs instead of cutting. */
+.tabb::after{transition:transform .28s var(--spring),opacity .2s var(--ease)}
+.tabb:not(.on)::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:3px;
+  background:var(--blue);opacity:0;transform:scaleX(.3)}
+.tabb.on::after{opacity:1;transform:scaleX(1)}
+
+/* Cards re-enter on every tab change, not only on first paint — switching
+   scope is a change of subject and should look like one. */
+.statgrid.swap .ccard{animation:cardIn .34s var(--ease) backwards}
+.statgrid.swap .ccard:nth-child(2){animation-delay:.05s}
+
+/* A figure counting up to its value, so the eye lands on it. */
+@keyframes numIn{from{opacity:0;transform:translateY(3px)}}
+.counting{animation:numIn .28s var(--ease)}
+
+/* Thin, quiet scrollbars — the default ones are the loudest thing on a
+   dense page. */
+*{scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--line2);border-radius:20px;
+  border:2px solid var(--sf)}
+::-webkit-scrollbar-thumb:hover{background:#B4C1D2}
+
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}
+  .ccard:hover,.btn-g:hover,.chip:hover,.actbtn:hover{transform:none}}
 
 /* the bar that flies from the list to the action page */
 /* the hero bar carries the move itself, so no floating clone is needed */
@@ -2437,14 +2540,16 @@ function renderHalf(id){
     if(restN) slices.push({key:'', label:(st.byCode.length-10)+' more types', value:restN, col:'#B8C4D0'});
     $('dw'+id).innerHTML=
       `<svg viewBox="0 0 220 220" width="220" height="220" role="img">${donutSVG(slices,220,.56)}</svg>
-       <div class="donut-ctr"><div class="v">${st.total.toLocaleString()}</div><div class="l">documents</div></div>`;
+       <div class="donut-ctr"><div class="v"></div><div class="l">documents</div></div>`;
     wireDonut('dw'+id, st.total.toLocaleString(), 'documents');
+    countUp($('dw'+id).querySelector('.donut-ctr .v'), st.total);
     $('ov'+id).innerHTML=`
       <div class="pblock-h"><span class="t">Overall progress</span>
-        <span class="v">${st.progress}% <small>${st.totals.without.toLocaleString()} of ${st.total.toLocaleString()} closed</small></span></div>
+        <span class="v"><small>${st.totals.without.toLocaleString()} of ${st.total.toLocaleString()} closed</small></span></div>
       ${sbar(st.totals, st.total, id, null)}
       <div class="sbar-lab">${BANDS.filter(b=>st.totals[b.key]).map(b=>
         `<span class="li"><span class="dot" style="background:${b.col}"></span>${esc(b.label)} <b>${st.totals[b.key].toLocaleString()}</b></span>`).join('')}</div>`;
+    countUp($('ov'+id).querySelector('.pblock-h .v'), st.progress, '%');
     const act=S.sheet==='action';
     const codeRows = act ? st.byCode.filter(c=>c.bands.without<c.total) : st.byCode;
     STAT[id].pendCodes=st.byCode.filter(c=>c.bands.without<c.total).length;
@@ -2668,6 +2773,36 @@ function dbar(closed, pending, only, fromClosed){
 
 /* flat donut, drawn as SVG arcs so slices stay crisp and hoverable */
 /* One floating tooltip for every donut on the page. */
+/* ── counting up ──────────────────────────────────────────────────────────
+   A headline figure that arrives already at its value is just text; one that
+   runs up to it is the thing the eye goes to first.  Only the two figures a
+   reader actually lands on do this — the number in the donut and the overall
+   percentage.  Every other figure on the page is meant to be compared, and
+   numbers that are moving cannot be compared.
+
+   The final text is written before the animation starts, so anything reading
+   the element — a test, a screen reader, a copy-paste — sees the true value
+   whether or not the animation has finished. */
+const REDUCED = () => matchMedia('(prefers-reduced-motion:reduce)').matches;
+function countUp(el, to, suffix){
+  if(!el) return;
+  const final = to.toLocaleString() + (suffix||'');
+  el.firstChild && el.firstChild.nodeType===3
+    ? el.firstChild.nodeValue = final
+    : el.insertBefore(document.createTextNode(final), el.firstChild);
+  if(REDUCED() || to<=0) return;
+  const node=el.firstChild, t0=performance.now(), ms=Math.min(900, 340+to*0.55);
+  el.classList.add('counting');
+  (function step(now){
+    const p=Math.min(1,(now-t0)/ms);
+    /* ease-out: most of the distance early, so it never feels like waiting */
+    const v=Math.round(to*(1-Math.pow(1-p,3)));
+    node.nodeValue = v.toLocaleString() + (suffix||'');
+    if(p<1) requestAnimationFrame(step);
+    else { node.nodeValue=final; el.classList.remove('counting'); }
+  })(t0);
+}
+
 const TIP=()=>$('ptip');
 /* Put the tooltip beside the pointer without letting it fall off the screen. */
 function tipAt(e){ const t=TIP(), r=t.getBoundingClientRect();
@@ -2741,7 +2876,21 @@ function arcPath(cx,cy,R,r,a0,a1){
   return `M${x1} ${y1}A${R} ${R} 0 ${big} 1 ${x2} ${y2}L${x3} ${y3}A${r} ${r} 0 ${big} 0 ${x4} ${y4}Z`;
 }
 
-function toggleBlock(id, which){ $('card'+id+'-'+which).classList.toggle('open'); requestAnimationFrame(alignCards); }
+function toggleBlock(id, which){
+  const card=$('card'+id+'-'+which);
+  const opened=card.classList.toggle('open');
+  requestAnimationFrame(alignCards);
+  /* A list that unrolls below the fold looks like nothing happened.  Follow it
+     down — but only far enough to bring its end into view, and never upwards,
+     so the chart you just clicked stays where you left it. */
+  if(!opened) return;
+  setTimeout(()=>{
+    const r=card.getBoundingClientRect();
+    const over=r.bottom-innerHeight+16;
+    if(over<=0) return;
+    scrollBy({top:Math.min(over, r.top-12), behavior:REDUCED()?'auto':'smooth'});
+  }, 420);
+}
 
 /* The two cards in a row carry different amounts of explanatory text, which
    would otherwise leave their donuts at different heights.  Match the header
@@ -2803,6 +2952,10 @@ function setTab(v){
   document.querySelectorAll('.ccard').forEach(c=>{
     c.style.display = c.dataset.h===v ? '' : 'none'; });
   $('statgrid').classList.add('single');
+  /* Re-run the entrance on every tab change, not only the first paint.  The
+     class has to come off and go back on or the animation never restarts. */
+  const g=$('statgrid');
+  if(!REDUCED()){ g.classList.remove('swap'); void g.offsetWidth; g.classList.add('swap'); }
   requestAnimationFrame(()=>{ alignCards(); requestAnimationFrame(alignCards); });
   if(S.sheet==='perf' && typeof renderPerf==='function') renderPerf();
   $('tabnote').innerHTML = (v==='A'
