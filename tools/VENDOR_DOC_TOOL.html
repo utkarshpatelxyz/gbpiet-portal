@@ -1172,6 +1172,14 @@ body[data-skin="studio"] .ccard{border-radius:16px;padding:20px 22px 20px;box-sh
   border-color:var(--line)}
 body[data-skin="studio"] .ccard[data-h="A"]{border-top:2px solid var(--blue)}
 body[data-skin="studio"] .ccard[data-h="B"]{border-top:2px solid var(--dang)}
+/* These rules match the hover ones from the motion layer exactly, and sit
+   later in the file, so without restating them here the skin silently took
+   the card's whole answer to the pointer away. */
+@media (hover:hover){
+  body[data-skin="studio"] .ccard:hover{box-shadow:var(--sh2)}
+  body[data-skin="studio"] .ccard[data-h="A"]:hover{border-color:#C9D8F0;border-top-color:#1D4FD8}
+  body[data-skin="studio"] .ccard[data-h="B"]:hover{border-color:#F0D2CE;border-top-color:#C23F35}
+}
 body[data-skin="studio"] .cc-h{margin-bottom:14px;gap:10px}
 body[data-skin="studio"] .cc-t{font-size:14.5px;font-weight:700;color:var(--ink);letter-spacing:-.2px}
 /* the badge stops being a filled pill and becomes a dot and a word */
