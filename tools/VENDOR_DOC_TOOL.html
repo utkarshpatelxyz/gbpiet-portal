@@ -1072,6 +1072,179 @@ table.ro-t tbody tr.ro-new td{animation:roNew 1.4s var(--ease)}
   .p-sign{display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px;margin-top:26px}
   .p-sign div{border-top:1px solid #0B2545;padding-top:3px;font-size:7pt;color:#5C6B7A}
 }
+
+/* ══ STUDIO SKIN ═════════════════════════════════════════════════════════
+   A second look for the same tool, switched from the header and remembered
+   in the browser.  Everything here is chrome only — no number, no layout and
+   no behaviour changes, so it can be turned off and nothing is lost.
+
+   What it is copying, and why those things read as "premium":
+
+     · Less ink around the data.  Hairline borders, almost no shadow at rest,
+       one flat page colour.  A card earns its edges by being white, not by
+       being outlined and shaded.
+     · Colour lives in the data, not in the furniture.  Badges become a dot
+       and a word; tinted panels become white.
+     · More air.  Bigger radius, bigger padding, bigger gaps — the single
+       cheapest thing that separates expensive-looking from busy.
+     · A wider gap between a number and its label.  Big figure, small quiet
+       caption underneath: the hierarchy does the explaining.
+     · One deep gradient, used once, as the page's identity — not spread
+       across every bar.
+   ═════════════════════════════════════════════════════════════════════════ */
+body[data-skin="studio"]{
+  --bg:#F4F6F9; --sf:#FFFFFF; --sf2:#F7F9FC;
+  --line:#E6E9EF; --line2:#D5DAE3; --ink:#101828; --muted:#667085;
+  --sh1:0 1px 2px rgba(16,24,40,.05);
+  --sh2:0 8px 26px rgba(16,24,40,.09);
+  --sh3:0 24px 60px rgba(16,24,40,.20);
+}
+/* one flat page: the two colour washes behind everything were the loudest
+   thing on screen and nothing was reading through them */
+body[data-skin="studio"]::before{display:none}
+
+/* ── the header goes quiet, so the page can carry the colour ───────────── */
+body[data-skin="studio"] .nav{background:#fff;border-bottom:1px solid var(--line);box-shadow:none}
+body[data-skin="studio"] .nav-in{padding:13px 24px}
+body[data-skin="studio"] .brand{color:var(--ink);font-size:14px;letter-spacing:-.1px}
+body[data-skin="studio"] .brand b{color:var(--blue)}
+body[data-skin="studio"] .brand small{color:#98A2B3;letter-spacing:.15em}
+body[data-skin="studio"] .nav-sep{background:var(--line)}
+body[data-skin="studio"] .crumbs{color:var(--muted)}
+body[data-skin="studio"] .crumbs .c:hover,
+body[data-skin="studio"] .crumbs .c.on{color:var(--ink)}
+body[data-skin="studio"] .crumbs .s{color:#C4CBD6}
+body[data-skin="studio"] .projchip{background:var(--sf2);border-color:var(--line)}
+body[data-skin="studio"] .projchip .k{color:#98A2B3}
+body[data-skin="studio"] .projchip .pn{color:var(--ink)}
+body[data-skin="studio"] .projchip .pd{color:var(--muted)}
+body[data-skin="studio"] .projchip .bar{background:var(--line)}
+body[data-skin="studio"] .navgear,body[data-skin="studio"] .navskin{
+  background:var(--sf2);border-color:var(--line);color:var(--muted)}
+body[data-skin="studio"] .navgear:hover,body[data-skin="studio"] .navskin:hover{
+  background:var(--ink);border-color:var(--ink);color:#fff}
+
+/* ── the one gradient on the page, where the scope is named ────────────── */
+body[data-skin="studio"] #sc-dash .pagebar{
+  background:linear-gradient(118deg,#0B2545 0%,#16457A 46%,#2E86B8 100%);
+  border:0;border-radius:18px;box-shadow:0 12px 34px rgba(11,37,69,.20);
+  padding:26px 28px;margin-top:20px;align-items:flex-end;gap:18px 34px}
+body[data-skin="studio"] #sc-dash .pb-id{flex-direction:column;align-items:flex-start;gap:7px}
+body[data-skin="studio"] #sc-dash .pb-id::before{
+  content:'Scope';font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;
+  color:rgba(255,255,255,.62);
+  background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);
+  border-radius:20px;padding:4px 11px}
+body[data-skin="studio"] #sc-dash .pb-scope{color:rgba(255,255,255,.74);font-size:12.5px;gap:4px 10px}
+body[data-skin="studio"] #sc-dash .pb-scope .v{color:#fff;font-weight:800;font-size:21px;letter-spacing:-.35px}
+body[data-skin="studio"] #sc-dash .pb-scope .v+span::before,
+body[data-skin="studio"] #sc-dash .pb-scope span+span::before{color:rgba(255,255,255,.34)}
+body[data-skin="studio"] #sc-dash .pb-acts .btn-g{
+  background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.26);color:#fff}
+body[data-skin="studio"] #sc-dash .pb-acts .btn-g:hover{background:#fff;border-color:#fff;color:#0B2545}
+body[data-skin="studio"] #sc-dash .pb-acts .badge{background:rgba(255,255,255,.9);color:#0B2545}
+body[data-skin="studio"] #sc-dash .pb-div{background:rgba(255,255,255,.24)}
+/* every other page bar is a plain white strip — one gradient, used once */
+body[data-skin="studio"] .pagebar{border-radius:14px;box-shadow:none;border-color:var(--line);
+  padding:14px 18px}
+
+/* ── scope tabs as a segmented control ─────────────────────────────────── */
+body[data-skin="studio"] .tabcard{background:transparent;border:0;box-shadow:none;overflow:visible;
+  margin-top:20px}
+body[data-skin="studio"] .tabbar{display:inline-flex;background:#EBEEF3;border:1px solid var(--line);
+  border-bottom:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
+body[data-skin="studio"] .tabb{border-radius:9px;padding:9px 20px;font-size:12.5px;font-weight:700;
+  color:var(--muted);background:transparent}
+body[data-skin="studio"] .tabb:hover{color:var(--ink);background:rgba(255,255,255,.6)}
+body[data-skin="studio"] .tabb.on{background:#fff;color:var(--ink);font-weight:800;
+  box-shadow:0 1px 3px rgba(16,24,40,.12)}
+body[data-skin="studio"] .tabb::after{display:none}
+body[data-skin="studio"] .tabnote{padding:13px 2px 0;color:var(--muted)}
+
+/* ── cards: white, hairline, air ───────────────────────────────────────── */
+/* the pair is one row, so it ends on one line: a card that stops short of
+   its neighbour is the single thing that makes a grid look unfinished */
+body[data-skin="studio"] .statgrid{gap:20px;margin-top:18px;align-items:stretch}
+body[data-skin="studio"] .ccard{display:flex;flex-direction:column}
+body[data-skin="studio"] .ccard .bytype:last-child,
+body[data-skin="studio"] .ccard .stuck:last-child{margin-bottom:0}
+body[data-skin="studio"] .ccard{border-radius:16px;padding:20px 22px 20px;box-shadow:var(--sh1);
+  border-color:var(--line)}
+body[data-skin="studio"] .ccard[data-h="A"]{border-top:2px solid var(--blue)}
+body[data-skin="studio"] .ccard[data-h="B"]{border-top:2px solid var(--dang)}
+body[data-skin="studio"] .cc-h{margin-bottom:14px;gap:10px}
+body[data-skin="studio"] .cc-t{font-size:14.5px;font-weight:700;color:var(--ink);letter-spacing:-.2px}
+/* the badge stops being a filled pill and becomes a dot and a word */
+body[data-skin="studio"] .cc-badge{background:transparent !important;padding:0;font-size:9px;
+  letter-spacing:.14em;color:#98A2B3;display:inline-flex;align-items:center;gap:6px;order:-1;
+  flex-basis:100%;margin-bottom:-4px}
+body[data-skin="studio"] .cc-badge::before{content:'';width:7px;height:7px;border-radius:50%;flex:none}
+body[data-skin="studio"] .cc-badge.all::before{background:var(--blue)}
+body[data-skin="studio"] .cc-badge.rev::before{background:var(--dang)}
+body[data-skin="studio"] .cc-badge.all{color:#5A6B85}
+body[data-skin="studio"] .cc-badge.rev{color:#9A6862}
+
+/* ── figures: bigger number, quieter caption, hairlines instead of boxes ─ */
+body[data-skin="studio"] .mini{gap:0}
+body[data-skin="studio"] .mini .m{background:transparent !important;border:0 !important;
+  border-bottom:1px solid var(--line) !important;border-radius:0;padding:9px 2px;box-shadow:none !important}
+body[data-skin="studio"] .mini .m:last-child{border-bottom:0 !important}
+body[data-skin="studio"] .mini .m:hover{background:var(--sf2) !important;border-radius:8px}
+body[data-skin="studio"] .mini .m .n{font-size:21px;letter-spacing:-.6px;min-width:62px;color:var(--ink)}
+body[data-skin="studio"] .mini .m .l{font-size:10.5px;color:var(--muted);font-weight:600}
+body[data-skin="studio"] .donut-ctr .v{color:var(--ink);letter-spacing:-1px}
+body[data-skin="studio"] .donut-ctr .l{color:#98A2B3}
+
+/* ── bars, blocks and notes ────────────────────────────────────────────── */
+body[data-skin="studio"] .pblock{border-top:1px solid var(--line);margin-top:16px;padding-top:14px}
+body[data-skin="studio"] .pblock-h .t{color:#98A2B3;letter-spacing:.11em}
+body[data-skin="studio"] .pblock-h .v{font-size:23px;letter-spacing:-.6px}
+body[data-skin="studio"] .sbar{height:22px;border-radius:7px;border-color:var(--line);background:#F0F2F6}
+body[data-skin="studio"] .trow .sbar{height:15px;border-radius:5px}
+body[data-skin="studio"] .bt-h{color:#98A2B3;letter-spacing:.11em}
+body[data-skin="studio"] .ccard.open .bytype,
+body[data-skin="studio"] .stuck{border-top-color:var(--line)}
+body[data-skin="studio"] .notes-t{background:var(--sf2);border-color:var(--line);border-radius:9px;
+  padding:9px 12px}
+body[data-skin="studio"] .cb-note.info2{background:#F2F6FE;border-color:#DCE7FA}
+body[data-skin="studio"] .cb-note.warn2{background:#FEF8EE;border-color:#F2E2C4}
+
+/* ── controls ──────────────────────────────────────────────────────────── */
+body[data-skin="studio"] .btn{border-radius:9px;font-weight:700}
+body[data-skin="studio"] .btn-p{background:var(--blue);box-shadow:0 1px 2px rgba(16,24,40,.08)}
+body[data-skin="studio"] .btn-p:hover:not(:disabled){background:#1D4FD8;box-shadow:0 4px 14px rgba(37,99,235,.28)}
+body[data-skin="studio"] .btn-g{border-color:var(--line2);color:var(--ink)}
+body[data-skin="studio"] .chip{border-radius:8px;border-color:var(--line2);color:var(--muted);font-weight:700}
+body[data-skin="studio"] .chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+body[data-skin="studio"] .cc-q{border-color:var(--line2);background:#fff}
+body[data-skin="studio"] .ms-btn{border-radius:8px;border-color:var(--line2)}
+body[data-skin="studio"] .actbtn{border-radius:7px}
+
+/* ── tables ────────────────────────────────────────────────────────────── */
+body[data-skin="studio"] .dt-wrap{border-radius:0 0 16px 16px;border-color:var(--line);box-shadow:var(--sh1)}
+body[data-skin="studio"] .ac-tools{background:#fff;border-bottom:1px solid var(--line);padding:14px 16px}
+body[data-skin="studio"] table.dt thead th{background:#FAFBFD;color:#98A2B3;letter-spacing:.11em;
+  border-bottom:1px solid var(--line);padding:11px 14px}
+body[data-skin="studio"] table.dt thead th.on{background:#F2F5FA;color:var(--ink)}
+body[data-skin="studio"] table.dt tbody td{border-bottom:1px solid var(--line);padding:11px 14px}
+body[data-skin="studio"] table.dt tbody tr:nth-child(even) td{background:var(--sf)}
+body[data-skin="studio"] table.dt tbody tr:hover td{background:#F5F8FE}
+body[data-skin="studio"] .ac-hero,body[data-skin="studio"] .card,
+body[data-skin="studio"] .ac-sum .m{border-radius:16px;border-color:var(--line);box-shadow:var(--sh1)}
+body[data-skin="studio"] .ac-sum .m .n{letter-spacing:-.6px}
+
+/* ── sheet tabs ────────────────────────────────────────────────────────── */
+body[data-skin="studio"] .sheettabs .sh{background:#EBEEF3;border-color:var(--line);color:var(--muted)}
+body[data-skin="studio"] .sheettabs .sh.on{background:#fff;color:var(--ink)}
+
+/* the switch itself */
+.navskin{height:34px;flex:none;margin-left:8px;padding:0 13px;border-radius:9px;cursor:pointer;
+  border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.10);color:#fff;
+  font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:7px;
+  transition:background .18s var(--ease),border-color .18s var(--ease),color .18s var(--ease)}
+.navskin:hover{background:#fff;border-color:#fff;color:#17558A}
+.navskin .sw{width:9px;height:9px;border-radius:50%;background:currentColor;flex:none;opacity:.75}
 </style>
 </head>
 <body>
@@ -1095,6 +1268,8 @@ table.ro-t tbody tr.ro-new td{animation:roNew 1.4s var(--ease)}
   <div class="crumbs" id="crumbs"></div>
   <div class="sp"></div>
   <div class="projchip" id="navinfo" style="display:none"></div>
+  <button class="navskin" id="btn-skin" onclick="toggleSkin()" title="Switch the look of the tool">
+    <span class="sw"></span><span id="skinName">Studio</span></button>
   <button class="navgear" id="btn-roster" onclick="openRoster()"
           title="Engineer list — add or remove names" aria-label="Engineer list">
     <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7"
@@ -1756,6 +1931,30 @@ const ENG_ROSTER = {
    An email address is optional against each name.  Where one is given, a
    report emailed about that engineer is addressed to them instead of leaving
    the To: line for somebody to fill in by hand. */
+/* ── two looks, one tool ──────────────────────────────────────────────────
+   "Studio" is the quieter chrome — hairlines, white cards, one gradient.
+   "Classic" is what the tool has always looked like.  The switch is chrome
+   only: no figure, no layout and no behaviour differs between them, so it is
+   safe to leave on whichever the team prefers. */
+const SKIN_KEY='vdt.skin.v1';
+function applySkin(v){
+  document.body.dataset.skin = v==='classic' ? '' : 'studio';
+  const n=$('skinName'); if(n) n.textContent = v==='classic' ? 'Classic' : 'Studio';
+  const b=$('btn-skin'); if(b) b.title = v==='classic'
+    ? 'Classic look — click for Studio' : 'Studio look — click for Classic';
+}
+function toggleSkin(){
+  const now = document.body.dataset.skin==='studio' ? 'classic' : 'studio';
+  try{ localStorage.setItem(SKIN_KEY, now); }catch(e){}
+  applySkin(now);
+  /* the cards are levelled by measurement, so they have to be re-measured
+     once the new padding has landed */
+  requestAnimationFrame(()=>{ if(typeof alignCards==='function') alignCards(); });
+}
+window.toggleSkin=toggleSkin;
+(function(){ let v='studio'; try{ v=localStorage.getItem(SKIN_KEY)||'studio'; }catch(e){}
+  applySkin(v); })();
+
 const ROSTER_KEY='vdt.roster.v1';
 let ROSTER={ list:{}, mail:{} };
 function loadRoster(){
