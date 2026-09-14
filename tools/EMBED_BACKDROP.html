@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Backdrop Embedder — Vendor Document Management</title>
+<style>
+:root{
+  --navy:#0B2545; --blue:#2563EB; --cyan:#06B6D4; --ink:#101828; --muted:#667085;
+  --line:#E6E9EF; --line2:#D5DAE3; --bg:#F4F6F9; --sf:#fff;
+  --ok:#2E9E6B; --ok-bg:#E7F6EE; --warn:#D9922E; --warn-bg:#FDF3E2;
+  --dang:#D4574E; --dang-bg:#FDECEA;
+  --ease:cubic-bezier(.4,0,.2,1);
+  --font:'Inter','Segoe UI',system-ui,-apple-system,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sh1:0 1px 2px rgba(16,24,40,.05); --sh2:0 8px 26px rgba(16,24,40,.09);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);line-height:1.5;
+  -webkit-font-smoothing:antialiased}
+.nav{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.nav-in{max-width:1060px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:14px}
+.brand{font-size:14px;font-weight:800}.brand b{color:var(--blue)}
+.brand small{display:block;font-size:9px;font-weight:700;letter-spacing:.15em;
+  text-transform:uppercase;color:#98A2B3}
+.wrap{max-width:1060px;margin:0 auto;padding:0 24px 60px}
+.hero{padding:34px 0 22px}
+.hero h1{font-size:27px;font-weight:800;letter-spacing:-.5px}
+.hero p{color:var(--muted);font-size:13.5px;margin-top:9px;max-width:74ch}
+.hero p b{color:var(--ink)}
+.card{background:var(--sf);border:1px solid var(--line);border-radius:16px;box-shadow:var(--sh1);
+  padding:20px 22px;margin-bottom:18px}
+.step{display:flex;align-items:center;gap:11px;margin-bottom:14px}
+.step .n{width:25px;height:25px;flex:none;border-radius:50%;background:var(--navy);color:#fff;
+  font-size:11.5px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.step.done .n{background:var(--ok)}
+.step h2{font-size:15px;font-weight:800;letter-spacing:-.2px}
+.step .s{font-size:11.5px;color:var(--muted);font-weight:600}
+.drop{border:2px dashed var(--line2);border-radius:13px;background:#FAFBFD;padding:26px 18px;
+  text-align:center;cursor:pointer;transition:all .18s var(--ease)}
+.drop:hover,.drop.over{border-color:var(--blue);background:#F4F8FF}
+.drop .t{font-size:13px;font-weight:800;color:var(--navy)}
+.drop .s{font-size:11.5px;color:var(--muted);font-weight:600;margin-top:4px}
+input[type=file]{display:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:14px}
+.fld label{display:block;font-size:9.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:5px}
+.fld input,.fld select{width:100%;padding:9px 11px;font-size:12.5px;font-weight:700;color:var(--navy);
+  border:1px solid var(--line2);border-radius:8px;background:#FAFBFD;font-family:var(--font)}
+.fld input:focus,.fld select:focus{outline:none;border-color:var(--blue);background:#fff;
+  box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.fld .h{font-size:10.5px;color:var(--muted);font-weight:600;margin-top:4px}
+.btn{padding:11px 20px;font-size:12.5px;font-weight:800;border-radius:9px;cursor:pointer;
+  border:1px solid transparent;transition:all .16s var(--ease)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-p{background:var(--blue);color:#fff}
+.btn-p:hover:not(:disabled){background:#1D4FD8;box-shadow:0 4px 14px rgba(37,99,235,.28)}
+.btn-g{background:#fff;border-color:var(--line2);color:var(--navy)}
+.btn-g:hover:not(:disabled){border-color:var(--blue);color:var(--blue)}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:15px}
+.row .fill{flex:1}
+.note{font-size:11.5px;font-weight:600;border-radius:9px;padding:9px 12px;line-height:1.55;margin-top:12px}
+.note b{font-weight:800}
+.note.ok{background:var(--ok-bg);color:#1B6B48;border:1px solid #BFE6D2}
+.note.warn{background:var(--warn-bg);color:#8A5A12;border:1px solid #F0DCB6}
+.note.bad{background:var(--dang-bg);color:#9C2C24;border:1px solid #F2C9C4}
+.note.info{background:#EEF4FE;color:#1A4FBF;border:1px solid #CFE0FA}
+.prev{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;margin-top:14px}
+.prev video{width:300px;max-width:100%;border-radius:11px;border:1px solid var(--line);background:#000}
+.facts{flex:1;min-width:220px;font-size:12px}
+.facts .f{display:flex;justify-content:space-between;gap:12px;padding:6px 0;
+  border-bottom:1px solid var(--line)}
+.facts .f:last-child{border-bottom:0}
+.facts .k{color:var(--muted);font-weight:700}
+.facts .v{font-weight:800;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:11.5px}
+.bar{height:7px;border-radius:20px;background:#EBEEF3;overflow:hidden;margin-top:12px}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--blue));
+  transition:width .2s linear}
+.mono{font-family:var(--mono);font-size:11px}
+.hide{display:none}
+.sz{font-variant-numeric:tabular-nums}
+.foot{text-align:center;font-size:11px;color:var(--muted);font-weight:600;padding:26px 0 0;
+  border-top:1px solid var(--line);margin-top:26px}
+</style></head>
+<body>
+
+<div class="nav"><div class="nav-in">
+  <div class="brand">BACKDROP <b>EMBEDDER</b><small>Vendor Document Management</small></div>
+</div></div>
+
+<div class="wrap">
+  <div class="hero">
+    <h1>Put your video inside the tool</h1>
+    <p>Everything here happens in this browser — the video never leaves your laptop. It is shrunk to
+      something a single HTML file can carry, written into the tool, and handed back as
+      <b>one file you can email</b>. Nothing has to travel alongside it.</p>
+  </div>
+
+  <!-- 1 ── the video ────────────────────────────────────────────────────── -->
+  <div class="card">
+    <div class="step" id="st1"><div class="n">1</div>
+      <div><h2>Choose the video</h2>
+        <div class="s">Any format this browser can play — mp4, mov, webm.</div></div></div>
+    <div class="drop" id="vdrop" onclick="vfile.click()">
+      <div class="t">Drop <span class="mono">video.mp4</span> here</div>
+      <div class="s">or click to browse</div>
+    </div>
+    <input type="file" id="vfile" accept="video/*">
+    <div id="vinfo" class="hide">
+      <div class="prev">
+        <video id="vprev" muted loop playsinline></video>
+        <div class="facts" id="vfacts"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 ── shrink it ────────────────────────────────────────────────────── -->
+  <div class="card hide" id="c2">
+    <div class="step" id="st2"><div class="n">2</div>
+      <div><h2>Shrink it to fit</h2>
+        <div class="s">It sits behind a card, dimmed. Detail is wasted; small and slow reads best.</div></div></div>
+    <div class="grid">
+      <div class="fld"><label>Start at</label>
+        <input id="oStart" type="number" min="0" step="0.5" value="0">
+        <div class="h">seconds into the clip</div></div>
+      <div class="fld"><label>Length</label>
+        <input id="oLen" type="number" min="2" max="30" step="1" value="8">
+        <div class="h">seconds — it loops</div></div>
+      <div class="fld"><label>Width</label>
+        <select id="oW">
+          <option value="854">854 px — smallest</option>
+          <option value="1280" selected>1280 px — recommended</option>
+          <option value="1600">1600 px — sharpest</option>
+        </select>
+        <div class="h">height follows the source</div></div>
+      <div class="fld"><label>Quality</label>
+        <select id="oQ">
+          <option value="350000">Light — smallest file</option>
+          <option value="700000" selected>Balanced — recommended</option>
+          <option value="1400000">High — largest file</option>
+        </select>
+        <div class="h">bitrate</div></div>
+    </div>
+    <div class="row">
+      <button class="btn btn-p" id="btnShrink" onclick="shrink()">Shrink the video</button>
+      <div class="fill"></div>
+      <span class="s mono" id="shStat" style="color:var(--muted);font-weight:700"></span>
+    </div>
+    <div class="bar hide" id="shBar"><i></i></div>
+    <div id="shOut"></div>
+  </div>
+
+  <!-- 3 ── the tool ─────────────────────────────────────────────────────── -->
+  <div class="card hide" id="c3">
+    <div class="step" id="st3"><div class="n">3</div>
+      <div><h2>Choose the tool file</h2>
+        <div class="s">The <span class="mono">VENDOR_DOC_TOOL.html</span> you were sent.</div></div></div>
+    <div class="drop" id="hdrop" onclick="hfile.click()">
+      <div class="t">Drop <span class="mono">VENDOR_DOC_TOOL.html</span> here</div>
+      <div class="s">or click to browse</div>
+    </div>
+    <input type="file" id="hfile" accept=".html,.htm">
+    <div id="hinfo"></div>
+  </div>
+
+  <!-- 4 ── build ────────────────────────────────────────────────────────── -->
+  <div class="card hide" id="c4">
+    <div class="step" id="st4"><div class="n">4</div>
+      <div><h2>Build the single file</h2>
+        <div class="s">One HTML with the video inside it.</div></div></div>
+    <div id="buildInfo"></div>
+    <div class="row">
+      <button class="btn btn-p" id="btnBuild" onclick="build()">Build and download</button>
+      <button class="btn btn-g" onclick="preview()">Preview it first</button>
+    </div>
+  </div>
+
+  <div class="foot">Nothing is uploaded. Every step runs in this browser.</div>
+</div>
+
+<script>
+const $=i=>document.getElementById(i);
+const MB=n=>(n/1048576).toFixed(2)+' MB';
+/* base64 adds a third: 3 bytes become 4 characters */
+const embedded=n=>Math.ceil(n/3)*4;
+
+let SRC=null;        // the file the user chose
+let SMALL=null;      // the shrunk Blob
+let HTML=null;       // the tool's text
+let HNAME='VENDOR_DOC_TOOL.html';
+
+function wire(drop, input, fn){
+  input.onchange=e=>{ const f=e.target.files[0]; if(f) fn(f); };
+  ['dragenter','dragover'].forEach(t=>drop.addEventListener(t,e=>{
+    e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave','drop'].forEach(t=>drop.addEventListener(t,e=>{
+    e.preventDefault(); drop.classList.remove('over'); }));
+  drop.addEventListener('drop',e=>{ const f=e.dataTransfer.files[0]; if(f) fn(f); });
+}
+
+/* ── 1 ── */
+wire($('vdrop'), $('vfile'), f=>{
+  SRC=f; SMALL=null; $('shOut').innerHTML='';
+  const v=$('vprev'); v.src=URL.createObjectURL(f); v.play().catch(()=>{});
+  v.onloadedmetadata=()=>{
+    $('vinfo').classList.remove('hide');
+    $('st1').classList.add('done');
+    $('c2').classList.remove('hide');
+    const est=embedded(f.size);
+    $('vfacts').innerHTML=
+      row('File', f.name)+
+      row('Size', MB(f.size))+
+      row('Length', v.duration.toFixed(1)+' s')+
+      row('Frame', v.videoWidth+' × '+v.videoHeight)+
+      row('If embedded as-is', MB(est));
+    const big = est > 4*1048576;
+    $('vfacts').insertAdjacentHTML('afterend',
+      `<div class="note ${big?'warn':'ok'}">${big
+        ? `As it stands this would add <b>${MB(est)}</b> to the tool — too much to email comfortably.
+           Shrink it below; a few seconds at a low bitrate is all this needs.`
+        : `Small enough to embed directly, though shrinking it below will make it smaller still.`}</div>`);
+    $('oLen').value=Math.min(8, Math.max(2, Math.round(v.duration)));
+  };
+});
+const row=(k,v)=>`<div class="f"><span class="k">${k}</span><span class="v">${v}</span></div>`;
+
+/* ── 2 ── re-encode through a canvas, entirely in this browser ─────────── */
+function pickMime(){
+  const want=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm','video/mp4'];
+  return want.find(m=>window.MediaRecorder && MediaRecorder.isTypeSupported(m)) || '';
+}
+async function shrink(){
+  if(!SRC) return;
+  const mime=pickMime();
+  if(!mime){ $('shOut').innerHTML=`<div class="note bad">This browser cannot re-encode video.
+      Use Chrome or Edge, or embed the file as it is.</div>`; return; }
+  const start=+$('oStart').value||0, len=Math.max(2,+$('oLen').value||8);
+  const outW=+$('oW').value, rate=+$('oQ').value;
+  $('btnShrink').disabled=true; $('shBar').classList.remove('hide');
+  $('shStat').textContent='working…'; $('shOut').innerHTML='';
+
+  const v=document.createElement('video');
+  v.src=URL.createObjectURL(SRC); v.muted=true; v.playsInline=true;
+  await new Promise(r=>{ v.onloadedmetadata=r; });
+  const scale=Math.min(1, outW/v.videoWidth);
+  const w=Math.round(v.videoWidth*scale/2)*2, h=Math.round(v.videoHeight*scale/2)*2;
+  const c=document.createElement('canvas'); c.width=w; c.height=h;
+  const x=c.getContext('2d');
+  v.currentTime=Math.min(start, Math.max(0, v.duration-0.1));
+  await new Promise(r=>{ v.onseeked=r; });
+  await v.play().catch(()=>{});
+
+  const chunks=[];
+  const rec=new MediaRecorder(c.captureStream(24), {mimeType:mime, videoBitsPerSecond:rate});
+  rec.ondataavailable=e=>{ if(e.data && e.data.size) chunks.push(e.data); };
+  const done=new Promise(r=>{ rec.onstop=r; });
+  rec.start();
+  const t0=performance.now();
+  (function pump(){
+    if(rec.state!=='recording') return;
+    x.drawImage(v, 0, 0, w, h);
+    const p=Math.min(1,(performance.now()-t0)/(len*1000));
+    $('shBar').firstElementChild.style.width=(p*100).toFixed(0)+'%';
+    if(p>=1){ rec.stop(); v.pause(); return; }
+    requestAnimationFrame(pump);
+  })();
+  await done;
+
+  SMALL=new Blob(chunks,{type:mime.split(';')[0]});
+  $('btnShrink').disabled=false; $('shStat').textContent='';
+  $('shBar').classList.add('hide'); $('shBar').firstElementChild.style.width='0';
+  $('st2').classList.add('done'); $('c3').classList.remove('hide');
+  showBuild();
+
+  const est=embedded(SMALL.size), cut=Math.round((1-SMALL.size/SRC.size)*100);
+  $('shOut').innerHTML=
+    `<div class="note ${est>4*1048576?'warn':'ok'}">
+      <b>${MB(SRC.size)}</b> → <b>${MB(SMALL.size)}</b>${cut>0?` — ${cut}% smaller`:''}
+      · ${w}×${h}, ${len}s, loops.
+      Embedded it adds <b>${MB(est)}</b> to the tool.
+      ${est>4*1048576?' Still on the large side — try a shorter length or a lighter quality.':''}
+     </div>
+     <div class="prev"><video id="sprev" muted loop playsinline autoplay></video>
+       <div class="facts">${row('Format', SMALL.type)}${row('Size', MB(SMALL.size))}
+         ${row('Frame', w+' × '+h)}${row('Adds to the tool', MB(est))}</div></div>`;
+  $('sprev').src=URL.createObjectURL(SMALL);
+}
+
+/* ── 3 ── */
+wire($('hdrop'), $('hfile'), f=>{
+  const fr=new FileReader();
+  fr.onload=()=>{
+    HTML=fr.result; HNAME=f.name;
+    const ok=HTML.indexOf("const BG_VIDEO = '';")>=0;
+    $('hinfo').innerHTML=`<div class="note ${ok?'ok':'bad'}">${ok
+      ? `<b>${f.name}</b> · ${MB(f.size)} — ready.`
+      : `<b>${f.name}</b> does not have the backdrop slot in it. Use a copy of the tool from
+         this version onwards, or one where <span class="mono">BG_VIDEO</span> has not already been filled.`}</div>`;
+    if(ok){ $('st3').classList.add('done'); $('c4').classList.remove('hide'); showBuild(); }
+    else HTML=null;
+  };
+  fr.readAsText(f);
+});
+
+function showBuild(){
+  const blob=SMALL||SRC; if(!blob||!HTML) return;
+  if(!SMALL && SRC.size>RAW_CAP){
+    $('buildInfo').innerHTML=`<div class="note bad">This clip is <b>${MB(SRC.size)}</b> — far too big to
+      put inside an HTML file as it stands. <b>Run step 2 first.</b> What comes out of it depends on the
+      length and quality you choose, not on the size of the original, so a 250 MB source and a 2 MB
+      source both end up around the same place.</div>`;
+    $('btnBuild').disabled=true; return;
+  }
+  $('btnBuild').disabled=false;
+  const total=HTML.length+embedded(blob.size);
+  const big=total>6*1048576;
+  $('buildInfo').innerHTML=`<div class="note ${big?'warn':'info'}">
+    Tool <b>${MB(HTML.length)}</b> + video <b>${MB(embedded(blob.size))}</b>
+    = <b class="sz">${MB(total)}</b> in one file.
+    ${big?' That is heavy for email — consider shrinking the video further.':''}</div>`;
+}
+
+/* ── 4 ── */
+/* Above this, turning the file into a data URI is what hangs the tab rather
+   than what produces something anybody can send. */
+const RAW_CAP = 8*1048576;
+function merged(){
+  return new Promise((res,rej)=>{
+    const blob=SMALL||SRC;
+    if(!blob||!HTML) return rej(new Error('Choose a video and the tool file first.'));
+    if(!SMALL && SRC.size>RAW_CAP) return rej(new Error(
+      'This clip is '+MB(SRC.size)+'. Embedded as it is, it would make an HTML file of about '+
+      MB(embedded(SRC.size))+' — too big to open, let alone email. Run step 2 first: the result '+
+      'depends only on the length and quality you pick, not on how big the original is.'));
+    const fr=new FileReader();
+    fr.onload=()=>{
+      const uri=fr.result;                       // already a data: URI
+      res(HTML.replace("const BG_VIDEO = '';", "const BG_VIDEO = '"+uri+"';"));
+    };
+    fr.onerror=()=>rej(new Error('Could not read the video.'));
+    fr.readAsDataURL(blob);
+  });
+}
+async function build(){
+  try{
+    $('btnBuild').disabled=true; $('btnBuild').textContent='Building…';
+    const out=await merged();
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([out],{type:'text/html'}));
+    a.download=HNAME.replace(/\.html?$/i,'')+'_with_backdrop.html';
+    a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+    $('buildInfo').insertAdjacentHTML('beforeend',
+      `<div class="note ok">Downloaded <b>${a.download}</b> — that single file is the whole tool.</div>`);
+  }catch(e){
+    $('buildInfo').insertAdjacentHTML('beforeend',`<div class="note bad">${e.message}</div>`);
+  }finally{ $('btnBuild').disabled=false; $('btnBuild').textContent='Build and download'; }
+}
+async function preview(){
+  try{
+    const out=await merged();
+    const w=window.open(); w.document.write(out); w.document.close();
+  }catch(e){
+    $('buildInfo').insertAdjacentHTML('beforeend',`<div class="note bad">${e.message}</div>`);
+  }
+}
+</script>
+</body></html>

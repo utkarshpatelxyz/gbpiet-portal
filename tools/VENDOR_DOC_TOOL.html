@@ -1073,6 +1073,51 @@ table.ro-t tbody tr.ro-new td{animation:roNew 1.4s var(--ease)}
   .p-sign div{border-top:1px solid #0B2545;padding-top:3px;font-size:7pt;color:#5C6B7A}
 }
 
+/* ── the backdrop behind the entry screens ────────────────────────────────
+   Plain white behind the scope card read as unfinished.  Two ways to fill it:
+
+     ambient — drifting colour, drawn in CSS, costs nothing and ships inside
+               the single file by definition;
+     video   — a clip embedded as a data URI, so the tool is still ONE file
+               you can email.  Base64 adds about a third to the clip's size,
+               so a 2 MB video makes the file roughly 3 MB.
+
+   Either way the stage is decorative: it sits at z-index -3, never takes a
+   pointer event, and the page works identically with it turned off. */
+.bgstage{position:fixed;inset:0;z-index:-3;pointer-events:none;overflow:hidden;
+  opacity:0;transition:opacity .8s var(--ease)}
+.bgstage.on{opacity:1}
+.bgstage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  filter:saturate(.92)}
+/* The scrim is what keeps the card readable over whatever is behind it, so
+   it is sized to the thing it is covering: a photographic video needs real
+   cover, drawn colour needs almost none.  Set for video, it flattened the
+   drawn backdrop to the white it was meant to replace. */
+.bg-scrim{position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(244,246,249,0) 0%,rgba(244,246,249,.22) 62%,
+             rgba(244,246,249,.72) 100%)}
+.bgstage.has-video .bg-scrim{
+  background:linear-gradient(180deg,rgba(244,246,249,.74) 0%,rgba(244,246,249,.86) 58%,
+             rgba(244,246,249,.95) 100%)}
+.bgstage.has-video .bg-amb{display:none}
+/* the no-cost option: three slow blooms, drifting out of phase */
+/* The inset only has to cover the drift, not swallow it: at -25% the blooms
+   were positioned against a box half again the size of the screen, which put
+   most of them outside it. */
+.bg-amb{position:absolute;inset:-8%;
+  background:
+    radial-gradient(46rem 40rem at 8% 14%,rgba(37,99,235,.42),transparent 66%),
+    radial-gradient(42rem 38rem at 92% 8%,rgba(6,182,212,.38),transparent 66%),
+    radial-gradient(52rem 44rem at 72% 82%,rgba(46,134,184,.34),transparent 68%),
+    radial-gradient(38rem 34rem at 22% 94%,rgba(99,102,241,.26),transparent 68%);
+  animation:ambDrift 46s ease-in-out infinite alternate}
+@keyframes ambDrift{
+  0%  {transform:translate3d(0,0,0) scale(1)}
+  50% {transform:translate3d(1.6%,-1.4%,0) scale(1.05)}
+  100%{transform:translate3d(-1.4%,1.6%,0) scale(1.02)}
+}
+@media (prefers-reduced-motion:reduce){.bg-amb{animation:none}}
+
 /* ══ STUDIO SKIN ═════════════════════════════════════════════════════════
    A second look for the same tool, switched from the header and remembered
    in the browser.  Everything here is chrome only — no number, no layout and
@@ -1268,6 +1313,13 @@ body[data-skin="studio"] .sheettabs .sh.on{background:#fff;color:var(--ink)}
       <span class="mms-brand">MERIDIAM</span>
     </div>
   </div>
+</div>
+
+<!-- The backdrop for the two screens you see before any data is loaded.
+     Decorative only: aria-hidden, and the page is identical without it. -->
+<div class="bgstage" id="bgStage" aria-hidden="true">
+  <div class="bg-amb"></div>
+  <div class="bg-scrim"></div>
 </div>
 
 <div class="nav"><div class="nav-in">
@@ -1939,6 +1991,54 @@ const ENG_ROSTER = {
    An email address is optional against each name.  Where one is given, a
    report emailed about that engineer is addressed to them instead of leaving
    the To: line for somebody to fill in by hand. */
+/* ══ BACKDROP ════════════════════════════════════════════════════════════
+   The screens before any data is loaded — drop the file, choose the scope —
+   sat on flat white.  They now sit on a backdrop.
+
+   TO USE YOUR OWN VIDEO, paste it into BG_VIDEO below as a data URI:
+
+       BG_VIDEO = 'data:video/mp4;base64,AAAAIGZ0eXBpc29t...'
+
+   and the tool is STILL ONE FILE — nothing to send alongside it.  Base64
+   adds roughly a third to the clip's size, so keep it short, muted and
+   seamless: 5-10 seconds, 1280x720 or less, 2 MB or under.  It is behind a
+   scrim and a card, so detail is wasted and slow, low-contrast motion reads
+   best.  Anything that fails to load falls back to the drawn backdrop below
+   without a broken frame.
+
+   An ordinary path ('media/clip.mp4') works too, but then the video is a
+   second file that has to travel with the HTML — which is the thing this
+   tool has always avoided.
+   ════════════════════════════════════════════════════════════════════════ */
+const BG_VIDEO = '';                  // paste a data: URI (or a path) here
+const BG_SCREENS = ['upload','filter'];   // where the backdrop is shown
+
+const BG = { built:false, el:null };
+function buildBackdrop(){
+  if(BG.built) return; BG.built=true;
+  const stage=$('bgStage'); if(!stage || !BG_VIDEO) return;
+  const v=document.createElement('video');
+  v.muted=true; v.loop=true; v.playsInline=true; v.autoplay=true;
+  v.setAttribute('muted',''); v.setAttribute('playsinline','');
+  v.preload='auto';
+  /* A clip that will not play leaves the drawn backdrop in place rather than
+     a black rectangle, so a bad paste degrades instead of breaking. */
+  v.onerror=()=>{ stage.classList.remove('has-video'); v.remove(); BG.el=null; };
+  v.oncanplay=()=>stage.classList.add('has-video');
+  v.src=BG_VIDEO;
+  stage.insertBefore(v, stage.firstChild);
+  BG.el=v;
+}
+function showBackdrop(screen){
+  const stage=$('bgStage'); if(!stage) return;
+  const on = BG_SCREENS.indexOf(screen)>=0;
+  if(on) buildBackdrop();
+  stage.classList.toggle('on', on);
+  /* Nothing plays off-screen, and nothing plays for a reader who has asked
+     the machine to stop moving things. */
+  if(BG.el){ if(on && !REDUCED()) BG.el.play().catch(()=>{}); else BG.el.pause(); }
+}
+
 /* ── two looks, one tool ──────────────────────────────────────────────────
    "Studio" is the quieter chrome — hairlines, white cards, one gradient.
    "Classic" is what the tool has always looked like.  The switch is chrome
@@ -1962,6 +2062,9 @@ function toggleSkin(){
 window.toggleSkin=toggleSkin;
 (function(){ let v='studio'; try{ v=localStorage.getItem(SKIN_KEY)||'studio'; }catch(e){}
   applySkin(v); })();
+/* the upload screen is already on when the page loads, so the backdrop has
+   to be lit without waiting for the first go() */
+addEventListener('DOMContentLoaded',()=>showBackdrop('upload'));
 
 const ROSTER_KEY='vdt.roster.v1';
 let ROSTER={ list:{}, mail:{} };
@@ -5867,6 +5970,8 @@ function go(s){
   if(s==='filter') $('crumbs').innerHTML='';
   /* the sheet strip belongs to the status page only */
   $('sheettabs').classList.toggle('on', s==='dash');
+  /* the backdrop belongs to the screens before any data is on screen */
+  showBackdrop(s);
 }
 /* The assignments are held in the page, not in the file, until the register is
    written back out.  Closing the tab with unsaved ones loses the work. */
