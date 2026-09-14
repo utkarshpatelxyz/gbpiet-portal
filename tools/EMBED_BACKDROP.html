@@ -218,9 +218,33 @@ wire($('vdrop'), $('vfile'), f=>{
            Shrink it below; a few seconds at a low bitrate is all this needs.`
         : `Small enough to embed directly, though shrinking it below will make it smaller still.`}</div>`);
     $('oLen').value=Math.min(8, Math.max(2, Math.round(v.duration)));
+    $('oLen').max=Math.max(2, Math.floor(v.duration));
+    $('oStart').max=Math.max(0, Math.floor(v.duration)-2);
+    estimate();
   };
+  ['oStart','oLen','oQ','oW'].forEach(id=>$(id).oninput=$(id).onchange=estimate);
 });
 const row=(k,v)=>`<div class="f"><span class="k">${k}</span><span class="v">${v}</span></div>`;
+
+/* The length the source can actually supply from the chosen start — asking
+   for 30 seconds of a 26 second clip used to capture the last frame, frozen,
+   for the difference. */
+function usableLen(){
+  const v=$('vprev'), start=Math.max(0,+$('oStart').value||0);
+  const want=Math.max(2,+$('oLen').value||8);
+  const have=(v && v.duration ? v.duration : want) - start;
+  return {len:Math.max(2, Math.min(want, have)), want, clipped: want>have+0.05};
+}
+/* Size is bitrate times seconds, near enough — worth saying before the reader
+   spends a minute encoding to find out. */
+function estimate(){
+  const v=$('vprev'); if(!v || !v.duration) return;
+  const u=usableLen(), rate=+$('oQ').value;
+  const bytes=rate/8*u.len, est=embedded(bytes);
+  $('shStat').innerHTML=`about <b>${MB(est)}</b> added`+
+    (u.clipped? ` · only ${u.len.toFixed(1)}s available from ${(+$('oStart').value||0)}s`:'');
+  $('shStat').style.color = est>3*1048576 ? 'var(--warn)' : 'var(--muted)';
+}
 
 /* ── 2 ── re-encode through a canvas, entirely in this browser ─────────── */
 function pickMime(){
@@ -232,13 +256,16 @@ async function shrink(){
   const mime=pickMime();
   if(!mime){ $('shOut').innerHTML=`<div class="note bad">This browser cannot re-encode video.
       Use Chrome or Edge, or embed the file as it is.</div>`; return; }
-  const start=+$('oStart').value||0, len=Math.max(2,+$('oLen').value||8);
+  const u=usableLen();
+  const start=Math.max(0,+$('oStart').value||0), len=u.len;
+  if(u.clipped) $('oLen').value=Math.round(len);
   const outW=+$('oW').value, rate=+$('oQ').value;
   $('btnShrink').disabled=true; $('shBar').classList.remove('hide');
   $('shStat').textContent='working…'; $('shOut').innerHTML='';
 
   const v=document.createElement('video');
   v.src=URL.createObjectURL(SRC); v.muted=true; v.playsInline=true;
+  v.loop=true;                      // never capture a frozen tail
   await new Promise(r=>{ v.onloadedmetadata=r; });
   const scale=Math.min(1, outW/v.videoWidth);
   const w=Math.round(v.videoWidth*scale/2)*2, h=Math.round(v.videoHeight*scale/2)*2;
@@ -274,7 +301,8 @@ async function shrink(){
   $('shOut').innerHTML=
     `<div class="note ${est>4*1048576?'warn':'ok'}">
       <b>${MB(SRC.size)}</b> → <b>${MB(SMALL.size)}</b>${cut>0?` — ${cut}% smaller`:''}
-      · ${w}×${h}, ${len}s, loops.
+      · ${w}×${h}, ${len.toFixed(0)}s, loops.${u.clipped
+        ? ` Trimmed to the ${len.toFixed(0)}s the clip actually has from ${start}s.`:''}
       Embedded it adds <b>${MB(est)}</b> to the tool.
       ${est>4*1048576?' Still on the large side — try a shorter length or a lighter quality.':''}
      </div>
