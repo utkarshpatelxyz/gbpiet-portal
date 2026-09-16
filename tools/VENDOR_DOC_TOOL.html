@@ -5590,7 +5590,11 @@ const EN_PEOPLE_COLS = [
   {k:'who',   t:'Engineer',           v:e=>e.who},
   {k:'tags',  t:'Tags',               v:e=>e.tags.length, desc:true, right:true},
   {k:'n',     t:'Documents',          v:e=>e.n,           desc:true, right:true},
-  {k:'share', t:'Share of the load',  v:e=>e.n,           desc:true},
+  /* There was a "Share of the load" column here: each engineer's documents as
+     a fraction of the busiest engineer's.  It was the Documents column beside
+     it, divided — no new fact, a second bar competing with Progress, and a
+     name that did not describe its own arithmetic (the top row read 100%
+     however the work was spread, and the column summed to more than 100). */
   {k:'pct',   t:'Progress',           v:e=>e.pct},
   {k:'held',  t:'Equipment tags held',v:e=>e.tags.map(t=>tagLabel(t.tag)).join(', ')}
 ];
@@ -5816,15 +5820,11 @@ function renderEngPeople(tags){
     e.tags.push(t); e.n+=t.n; e.closed+=t.closed; e.circ+=t.circ; });
   const list=sortRows(Object.values(by).map(e=>({...e, pct:e.n?Math.round(e.closed/e.n*100):0})),
                       EN_PEOPLE_COLS, EN.peopleSort);
-  const maxN=Math.max(1,...list.map(e=>e.n));
   sortHead('enPHead', EN_PEOPLE_COLS, EN.peopleSort, renderEng);
   $('enPBody').innerHTML = list.length? list.map(e=>`<tr${e.who==='(unassigned)'?' class="en-newtag"':''}>
       <td><div class="docno">${e.who==='(unassigned)'?'<span class="en-un">unassigned</span>':esc(e.who)}</div></td>
       <td style="text-align:right"><span class="s1 num">${e.tags.length}</span></td>
       <td style="text-align:right"><span class="s1 num">${e.n}</span></td>
-      <td><div style="display:flex;align-items:center;gap:8px">
-        <div class="en-bar"><i style="width:${Math.round(e.n/maxN*100)}%;background:#2563EB"></i></div>
-        <span class="en-load" style="color:var(--muted)">${Math.round(e.n/maxN*100)}%</span></div></td>
       <td>${e.who==='(unassigned)'
         ? `<div style="display:flex;align-items:center;gap:8px">
              <div class="en-bar"><i style="width:${e.pct}%;background:#2E9E6B"></i></div>
@@ -5837,7 +5837,7 @@ function renderEngPeople(tags){
              <span class="en-go">open →</span></button>`}</td>
       <td><div class="s2">${e.tags.map(t=>esc(tagLabel(t.tag))+' <span style="color:var(--muted)">('+t.n+')</span>').join(' · ')}</div></td>
     </tr>`).join('')
-    : '<tr><td colspan="6" class="empty">No equipment tags in this scope.</td></tr>';
+    : '<tr><td colspan="5" class="empty">No equipment tags in this scope.</td></tr>';
 }
 
 /* a tag can hold characters an id cannot */
