@@ -1147,10 +1147,13 @@ table.ro-t tbody tr.ro-new td{animation:roNew 1.4s var(--ease)}
    Either way the stage is decorative: it sits at z-index -3, never takes a
    pointer event, and the page works identically with it turned off. */
 .bgstage{position:fixed;inset:0;z-index:-3;pointer-events:none;overflow:hidden;
-  opacity:0;transition:opacity .8s var(--ease);--dim:.34}
+  opacity:0;transition:opacity .8s var(--ease);--dim:.78}
 .bgstage.on{opacity:1}
 .bgstage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-  filter:saturate(1.06) contrast(1.04);will-change:transform}
+  will-change:transform}
+/* A wash wants the picture calm behind it; a vignette wants it present. */
+.bgstage.veil-light video{filter:saturate(.92)}
+.bgstage.veil-dark  video{filter:saturate(1.06) contrast(1.04)}
 /* The scrim is what keeps the card readable over whatever is behind it, so
    it is sized to the thing it is covering: a photographic video needs real
    cover, drawn colour needs almost none.  Set for video, it flattened the
@@ -1158,16 +1161,25 @@ table.ro-t tbody tr.ro-new td{animation:roNew 1.4s var(--ease)}
 .bg-scrim{position:absolute;inset:0;
   background:linear-gradient(180deg,rgba(244,246,249,0) 0%,rgba(244,246,249,.22) 62%,
              rgba(244,246,249,.72) 100%)}
-/* A white wash was the wrong instrument: it does not darken a photograph so
-   much as erase it.  What a video behind a page actually needs is depth —
-   a tinted vignette that sinks the edges and leaves the middle legible, with
-   the page's own text lifted to white to sit on top of it.
-   BG_DIM drives the whole thing, so how much of the clip shows is one number. */
-.bgstage.has-video .bg-scrim{
+/* Two ways to put a page over a film, and which is right depends entirely on
+   the film.  On busy, bright aerial footage the wash wins: the page stays the
+   subject and the picture becomes texture behind it.  On slow, dark footage
+   the vignette wins: the picture stays a picture and the page sits on it.
+   BG_VEIL picks one, BG_DIM sets how strong it is — both set by the
+   embedder's slider rather than by editing this file. */
+
+/* the wash — pale, even, the page unchanged on top of it */
+.bgstage.veil-light.has-video .bg-scrim{
+  background:linear-gradient(180deg,
+    rgba(244,246,249,calc(var(--dim) * .95)) 0%,
+    rgba(244,246,249,calc(var(--dim) * 1.10)) 58%,
+    rgba(244,246,249,calc(var(--dim) * 1.22)) 100%)}
+
+/* the vignette — sinks the edges, and the page lifts its text to white */
+.bgstage.veil-dark.has-video .bg-scrim{
   background:
-    /* A floor that does not scale with BG_DIM: however much of the clip the
-     reader wants to see, the band the headline sits in keeps enough cover to
-     hold white text over a bright sky. */
+    /* a floor that does not scale with BG_DIM, so the headline always has
+       enough cover to hold white text over a bright sky */
     linear-gradient(180deg,rgba(6,20,38,.34) 0%,rgba(6,20,38,.12) 34%,transparent 52%),
     radial-gradient(128% 96% at 50% 34%,
       rgba(8,28,54,calc(var(--dim) * .30)) 0%,
@@ -2268,7 +2280,8 @@ const ENG_ROSTER = {
    tool has always avoided.
    ════════════════════════════════════════════════════════════════════════ */
 const BG_VIDEO = '';                  // paste a data: URI (or a path) here
-const BG_DIM   = 34;                  // 0 = the clip untouched, 100 = nearly black
+const BG_VEIL  = 'light';             // 'light' = white wash · 'dark' = vignette
+const BG_DIM   = 78;                  // how strong that veil is, 0-100
 const BG_SCREENS = ['upload','filter'];   // where the backdrop is shown
 
 const BG = { built:false, el:null };
@@ -2284,6 +2297,7 @@ function buildBackdrop(){
   v.onerror=()=>{ stage.classList.remove('has-video'); document.body.classList.remove('bg-live');
                   v.remove(); BG.el=null; };
   v.oncanplay=()=>{ stage.classList.add('has-video'); paintBackdrop(); };
+  stage.classList.add(BG_VEIL==='dark' ? 'veil-dark' : 'veil-light');
   stage.style.setProperty('--dim', Math.max(0,Math.min(100,BG_DIM))/100);
   v.src=BG_VIDEO;
   stage.insertBefore(v, stage.firstChild);
@@ -2295,7 +2309,9 @@ function paintBackdrop(on){
   const stage=$('bgStage'); if(!stage) return;
   const lit = (on===undefined ? stage.classList.contains('on') : on)
               && stage.classList.contains('has-video');
-  document.body.classList.toggle('bg-live', !!lit);
+  /* Only the vignette asks the page to change: under a white wash the page is
+     already sitting on something pale, and its ordinary dark text is right. */
+  document.body.classList.toggle('bg-live', !!lit && BG_VEIL==='dark');
 }
 function showBackdrop(screen){
   const stage=$('bgStage'); if(!stage) return;

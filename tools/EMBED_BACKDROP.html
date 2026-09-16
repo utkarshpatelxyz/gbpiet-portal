@@ -86,6 +86,15 @@ input[type=file]{display:none}
 .dimrow{display:flex;align-items:center;gap:12px}
 .dimend{font-size:10.5px;font-weight:700;color:var(--muted);white-space:nowrap}
 #oDim{flex:1;accent-color:var(--blue);height:22px}
+.veilrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:560px){.veilrow{grid-template-columns:1fr}}
+.veil{display:flex;flex-direction:column;gap:3px;text-align:left;padding:11px 13px;cursor:pointer;
+  border:1px solid var(--line2);border-radius:11px;background:#FAFBFD;font-family:var(--font);
+  transition:all .16s var(--ease)}
+.veil:hover{border-color:var(--blue)}
+.veil.on{border-color:var(--blue);background:#EEF4FE;box-shadow:0 0 0 3px rgba(37,99,235,.14)}
+.veil .vk{font-size:12.5px;font-weight:800;color:var(--navy)}
+.veil .vs{font-size:10.5px;font-weight:600;color:var(--muted);line-height:1.45}
 .stagewrap{position:relative;margin-top:13px;border-radius:13px;overflow:hidden;
   border:1px solid var(--line);aspect-ratio:16/7;background:#0B2545}
 .stagewrap video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
@@ -98,6 +107,7 @@ input[type=file]{display:none}
 .stagecard .sc-s{font-size:10px;font-weight:600;color:var(--muted);margin-top:3px}
 .stagecard .sc-f{height:19px;border-radius:5px;background:#F0F3F8;border:1px solid var(--line);
   margin-top:8px}
+.stagewrap.on-dark .stagecard{background:rgba(255,255,255,.94)}
 </style></head>
 <body>
 
@@ -186,11 +196,22 @@ input[type=file]{display:none}
       <div><h2>Build the single file</h2>
         <div class="s">One HTML with the video inside it.</div></div></div>
     <div class="dimwrap">
-      <label class="dimlab" for="oDim">How much of the video shows</label>
+      <label class="dimlab">Backdrop style</label>
+      <div class="veilrow" id="veilRow">
+        <button class="veil on" data-veil="light">
+          <span class="vk">White wash</span>
+          <span class="vs">Pale and even. The page stays the subject, the film becomes texture.
+            Best on bright, busy footage.</span></button>
+        <button class="veil" data-veil="dark">
+          <span class="vk">Dark vignette</span>
+          <span class="vs">Sinks the edges and lifts the page's text to white.
+            Best on slow, dark footage.</span></button>
+      </div>
+      <label class="dimlab" for="oDim" style="margin-top:16px" id="dimLab">How strong the wash is</label>
       <div class="dimrow">
-        <span class="dimend">Full strength</span>
-        <input id="oDim" type="range" min="0" max="70" step="2" value="34">
-        <span class="dimend">Heavily dimmed</span>
+        <span class="dimend" id="dimA">Barely there</span>
+        <input id="oDim" type="range" min="0" max="100" step="2" value="78">
+        <span class="dimend" id="dimB">Almost solid</span>
       </div>
       <div class="stagewrap" id="dimPrev">
         <video id="dimVid" muted loop playsinline autoplay></video>
@@ -202,7 +223,8 @@ input[type=file]{display:none}
         </div>
       </div>
       <div class="s" style="color:var(--muted);font-weight:600;font-size:11.5px;margin-top:8px">
-        This is the real clip under the real overlay — slide until it looks right to you.
+        This is your clip under the real overlay, with a mock card on it — slide until the
+        card reads easily and the film still shows.
       </div>
     </div>
     <div id="buildInfo"></div>
@@ -388,9 +410,17 @@ function showBuild(){
 /* ── the dimmer ──────────────────────────────────────────────────────────
    The same gradient the tool uses, over the reader's own clip, so the number
    is chosen by looking rather than by guessing. */
+let VEIL='light';
+/* the same two gradients the tool uses, so the preview is the thing itself */
 function scrimCss(dim){
-  const a=n=>`rgba(8,28,54,${(dim*n).toFixed(3)})`;
-  return `radial-gradient(128% 96% at 50% 34%,${a(.30)} 0%,${a(.78)} 62%,${a(1.25)} 100%),`+
+  const cl=v=>Math.max(0,Math.min(1,v)).toFixed(3);
+  if(VEIL==='light'){
+    const w=n=>`rgba(244,246,249,${cl(dim*n)})`;
+    return `linear-gradient(180deg,${w(.95)} 0%,${w(1.10)} 58%,${w(1.22)} 100%)`;
+  }
+  const a=n=>`rgba(8,28,54,${cl(dim*n)})`;
+  return `linear-gradient(180deg,rgba(6,20,38,.34) 0%,rgba(6,20,38,.12) 34%,transparent 52%),`+
+         `radial-gradient(128% 96% at 50% 34%,${a(.30)} 0%,${a(.78)} 62%,${a(1.25)} 100%),`+
          `linear-gradient(180deg,${a(.92)} 0%,${a(.34)} 34%,${a(.30)} 58%,${a(.95)} 100%)`;
 }
 function paintDim(){
@@ -400,8 +430,21 @@ function paintDim(){
     v.src=URL.createObjectURL(blob); v.dataset.for=String(blob.size); v.play().catch(()=>{});
   }
   $('dimScrim').style.background=scrimCss((+$('oDim').value||0)/100);
+  v.style.filter = VEIL==='light' ? 'saturate(.92)' : 'saturate(1.06) contrast(1.04)';
+  /* the mock page follows the veil, the way the real one does */
+  $('dimPrev').classList.toggle('on-dark', VEIL==='dark');
 }
 $('oDim').oninput=paintDim;
+document.querySelectorAll('#veilRow .veil').forEach(b=>b.onclick=()=>{
+  VEIL=b.dataset.veil;
+  document.querySelectorAll('#veilRow .veil').forEach(x=>x.classList.toggle('on',x===b));
+  $('dimLab').textContent = VEIL==='light' ? 'How strong the wash is'
+                                           : 'How much of the video shows';
+  $('dimA').textContent   = VEIL==='light' ? 'Barely there' : 'Full strength';
+  $('dimB').textContent   = VEIL==='light' ? 'Almost solid' : 'Heavily dimmed';
+  $('oDim').value = VEIL==='light' ? 78 : 34;
+  paintDim();
+});
 
 /* ── 4 ── */
 /* Above this, turning the file into a data URI is what hangs the tab rather
@@ -418,8 +461,9 @@ function merged(){
     const fr=new FileReader();
     fr.onload=()=>{
       const uri=fr.result;                       // already a data: URI
-      const dim=Math.max(0,Math.min(100,+$('oDim').value||34));
+      const dim=Math.max(0,Math.min(100,+$('oDim').value||78));
       res(HTML.replace("const BG_VIDEO = '';", "const BG_VIDEO = '"+uri+"';")
+              .replace(/const BG_VEIL  = '[^']*';/, "const BG_VEIL  = '"+VEIL+"';")
               .replace(/const BG_DIM   = \d+;/, "const BG_DIM   = "+dim+";"));
     };
     fr.onerror=()=>rej(new Error('Could not read the video.'));
