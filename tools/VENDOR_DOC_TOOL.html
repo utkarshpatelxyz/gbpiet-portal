@@ -61,7 +61,7 @@ button,input,select,textarea{font-family:inherit;color:inherit}
 .nav .btn-g{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.34);color:#fff}
 .nav .btn-g:hover{background:#fff;border-color:#fff;color:#17558A}
 .nav .navbtn .badge{background:#fff;color:#17558A}
-.wrap{max-width:1400px;margin:0 auto;padding:0 24px}
+.wrap{max-width:1400px;margin:0 auto;padding:0 24px 56px}
 .screen{display:none}.screen.on{display:block}
 
 /* upload */
@@ -697,6 +697,19 @@ tr.en-na td:last-child{opacity:1}
    nobody finds an affordance that only exists while the pointer is on it.
    So "open" is always on the row, not revealed by hovering it. */
 .en-progcell{display:flex;align-items:center;gap:8px}
+/* Both engineer tables sit on the same rhythm: the picker sets the row
+   height, so it is the picker that is kept small. */
+.en-pick .ms-btn{padding:6px 10px;font-size:11.5px;min-height:0}
+#enBody tr,#enPBody tr{height:44px}
+#enBody td,#enPBody td{padding:5px 12px}
+#enBody .docno,#enPBody .docno{line-height:1.3}
+#enBody .s2.shared{margin-left:6px;color:var(--muted);font-weight:700}
+/* A tag with nobody on it should be findable while scrolling past sixty. */
+tr.en-none td{background:#FFF6F4 !important}
+tr.en-none:hover td{background:#FFEDE9 !important}
+tr.en-none td:first-child{box-shadow:inset 3px 0 0 var(--dang)}
+body[data-dark] tr.en-none td{background:#2A1A18 !important}
+body[data-dark] tr.en-none:hover td{background:#341F1C !important}
 .en-go{font-size:10px;font-weight:800;color:var(--blue);white-space:nowrap;opacity:.72;
   transition:opacity .15s ease,transform .18s var(--ease)}
 tr.en-open{cursor:pointer}
@@ -711,8 +724,12 @@ tr.en-open:focus-visible .en-go{opacity:1}
 /* one height and one rhythm for every small button, whichever bar it sits in */
 .btn-s{height:32px;padding:0 13px;display:inline-flex;align-items:center;justify-content:center;
   white-space:nowrap}
+/* The picker sits hard right, in line with the ones down the table, so the
+   eye finds every engineer control in the same column. */
 .en-req{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 .en-req-l{flex:1;min-width:220px}
+.en-reqpick{width:260px;flex:none;margin-left:auto}
+@media(max-width:620px){.en-reqpick{width:100%;margin-left:0}}
 .en-req-l .k2{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .en-req-l .s2{font-size:12px;color:var(--muted);margin-top:3px}
 .en-req-l .s2 b{color:var(--navy)}
@@ -762,13 +779,35 @@ tr.en-newtag td{background:var(--warn-bg)}
 .modal-f{display:flex;align-items:center;gap:12px;padding:13px 20px;border-top:1px solid var(--line);
   background:var(--sf2)}
 .modal-f .fill{flex:1}
+/* ── writing the register ──────────────────────────────────────────────── */
+.wrbox{position:fixed;inset:0;z-index:420;display:flex;align-items:center;justify-content:center;
+  background:rgba(11,37,69,.42);backdrop-filter:blur(2px);animation:fadeIn .2s var(--ease)}
+.wrbox[hidden]{display:none}
+.wrcard{background:var(--sf);border-radius:16px;box-shadow:var(--sh3);padding:22px 24px;
+  width:min(440px,92vw);animation:popIn .24s var(--ease)}
+.wrt{font-size:15px;font-weight:800;color:var(--navy)}
+.wrs{font-size:11.5px;font-weight:600;color:var(--muted);margin-top:5px;line-height:1.55;min-height:34px}
+.wrbar{height:8px;border-radius:20px;background:var(--sf2);border:1px solid var(--line);
+  overflow:hidden;margin-top:6px}
+.wrbar i{display:block;height:100%;width:0;border-radius:20px;
+  background:linear-gradient(90deg,var(--cyan),var(--blue));transition:width .25s var(--ease)}
+.wrf{display:flex;justify-content:space-between;gap:10px;margin-top:8px;
+  font-size:10.5px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+body[data-dark] .wrcard{background:var(--sf)}
+body[data-dark] .wrbar{background:#1D2734;border-color:var(--line)}
+
 /* ── settings: appearance ──────────────────────────────────────────────── */
+/* Each setting is its own panel.  Run together under plain headings they
+   read as one long form, and the reader has to work out where one subject
+   stops and the next begins. */
+.set-panel{border:1px solid var(--line);border-radius:13px;padding:15px 16px;margin-bottom:14px;
+  background:var(--sf2)}
+.set-panel:last-child{margin-bottom:0}
+body[data-dark] .set-panel{background:#101822;border-color:var(--line)}
 .set-sec{font-size:9.5px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;
-  color:var(--muted);margin:2px 0 10px}
-.set-sec+.set-sec,.ro-scroll+.set-sec{margin-top:20px}
+  color:var(--muted);margin:0 0 10px}
 .set-sub{font-size:11px;font-weight:600;color:var(--muted);line-height:1.55;margin:-4px 0 12px}
-.lookrow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px;
-  padding-bottom:20px;border-bottom:1px solid var(--line)}
+.lookrow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 @media(max-width:560px){.lookrow{grid-template-columns:1fr}}
 .look{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;
   padding:12px 13px;border:1px solid var(--line2);border-radius:11px;background:var(--sf2);
@@ -1589,8 +1628,6 @@ body[data-dark] .foot{color:var(--muted);border-top-color:var(--line)}
       <button class="btn btn-g btn-s" onclick="openProgress()">Check progress</button>
       <button class="btn btn-g btn-s" onclick="openVdr()">VDR status report</button>
       <span class="pb-div"></span>
-      <button class="btn btn-g btn-s navbtn" id="btn-basket" style="display:none" onclick="openBasket()">
-        Consolidated report<span class="badge" id="bk-n">0</span></button>
       <button class="btn btn-g btn-s" onclick="go('filter')">Change scope</button>
       <button class="btn btn-g btn-s" id="btn-reset" style="display:none" onclick="resetAll()">Load another file</button>
     </div>
@@ -1771,16 +1808,20 @@ body[data-dark] .foot{color:var(--muted);border-top-color:var(--line)}
         <div class="s2">One for the whole purchase order. Everything under
           <b id="enPo"></b> is their requisition.</div>
       </div>
-      <div id="enReqPick" style="min-width:280px"></div>
-      <div class="en-src" id="enSrc"></div>
+      <div id="enReqPick" class="en-pick en-reqpick"></div>
     </div>
   </div>
+
+  <div class="cb-note warn2" id="enDirty" style="display:none;margin-top:12px">
+    <span class="dirty-dot"></span>You have changes that are not in a file yet —
+    <b>Download register</b> before you close this tab.</div>
 
   <div class="notes" id="ndEN" style="margin-top:12px">
     <button class="notes-t" onclick="toggleNotes('EN')">
       <span class="ic">&#9432;</span><span class="tx" id="ntEN"></span><span class="ch">&#9660;</span></button>
     <div class="notes-b" id="nbEN" hidden>
       <div class="cb-note info2" id="enBasis"></div>
+      <div class="cb-note" id="enSrcNote" style="display:none"></div>
       <div class="cb-note warn2" id="enCarry" style="display:none"></div>
       <div class="cb-note info2" id="enNew" style="display:none"></div>
     </div>
@@ -2023,6 +2064,17 @@ body[data-dark] .foot{color:var(--muted);border-top-color:var(--line)}
 </div>
 <div class="ptip" id="ptip"></div>
 
+<!-- Writing a 47,000-row register takes long enough that silence reads as a
+     hang.  This says which part is running and how far through it is. -->
+<div class="wrbox" id="wrBox" hidden>
+  <div class="wrcard" role="status" aria-live="polite">
+    <div class="wrt" id="wrT">Writing the register</div>
+    <div class="wrs" id="wrS"></div>
+    <div class="wrbar"><i id="wrI"></i></div>
+    <div class="wrf"><span id="wrP">0%</span><span id="wrN"></span></div>
+  </div>
+</div>
+
 <!-- ── engineer list ───────────────────────────────────────────────────────
      The roster used to be a constant in the source, so changing it meant
      editing the file.  It is edited here instead and kept in this browser. -->
@@ -2038,6 +2090,7 @@ body[data-dark] .foot{color:var(--muted);border-top-color:var(--line)}
       <button class="modal-x" onclick="closeRoster()" aria-label="Close">&#10005;</button>
     </div>
     <div class="modal-b">
+      <div class="set-panel">
       <div class="set-sec">Appearance</div>
       <div class="lookrow" id="lookRow">
         <button class="look" data-look="classic">
@@ -2050,7 +2103,9 @@ body[data-dark] .foot{color:var(--muted);border-top-color:var(--line)}
           <span class="sw"><i style="background:#0C121A"></i><i style="background:#5B8DEF"></i></span>
           <span class="lk">Dark</span><span class="ls">Studio, after hours</span></button>
       </div>
+      </div>
 
+      <div class="set-panel">
       <div class="set-sec">Engineer list</div>
       <div class="set-sub">Names offered when assigning a requisition or responsible engineer.
         An email address is optional — where one is given, a report emailed to that engineer is
@@ -2071,6 +2126,7 @@ body[data-dark] .foot{color:var(--muted);border-top-color:var(--line)}
       <div class="ro-scroll"><table class="dt ro-t"><thead>
         <tr><th>Engineer</th><th>Email address</th><th style="width:76px"></th></tr>
         </thead><tbody id="roBody"></tbody></table></div>
+      </div>
     </div>
     <div class="modal-f">
       <div class="ro-note" id="roNote"></div>
@@ -2439,8 +2495,13 @@ function dropdown(el, cfg){
       <span class="car">▼</span></span></button>
     <div class="ms-pop">
       <div class="ms-qw"><input class="ms-q" placeholder="Type to search…" autocomplete="off"></div>
-      ${cfg.multi?`<div class="ms-acts"><button type="button" data-a="all">Select all</button>
-        <button type="button" data-a="none">Clear</button><span class="ms-cnt"></span></div>`:''}
+      ${cfg.multi
+        ? `<div class="ms-acts"><button type="button" data-a="all">Select all</button>
+             <button type="button" data-a="none">Clear</button><span class="ms-cnt"></span></div>`
+        : cfg.clearable
+        ? `<div class="ms-acts"><button type="button" data-a="clear">Clear</button>
+             <span class="ms-cnt"></span></div>`
+        : ''}
       <div class="ms-list"></div></div>`;
   const btn=el.querySelector('.ms-btn'), q=el.querySelector('.ms-q'), list=el.querySelector('.ms-list');
 
@@ -2457,7 +2518,9 @@ function dropdown(el, cfg){
       badge.style.display='none';
     }
     lab.style.color = n? 'var(--navy)' : 'var(--muted)';
-    const c=el.querySelector('.ms-cnt'); if(c) c.textContent=n+' selected';
+    const c=el.querySelector('.ms-cnt');
+    if(c) c.textContent = cfg.multi ? n+' selected'
+        : n ? 'currently '+((cfg.options.find(x=>el._sel.has(x.v))||{t:''}).t) : 'nothing chosen';
   }
   function draw(){
     const term=q.value.trim().toUpperCase();
@@ -2478,16 +2541,33 @@ function dropdown(el, cfg){
       paint(); draw(); cfg.onChange(el._sel);
     });
   }
-  /* a floating popup has to be told where to be, and told again if the page
-     moves under it */
+  /* A floating popup has to be told where to be, and told again if the page
+     moves under it.
+
+     It used to open downward and, when that did not fit, jump up by its full
+     height — which on a long list meant a 340px panel landing three rows
+     above the row it belongs to, looking like it had come loose from it.  Now
+     it is measured against the room each side actually has, takes the better
+     side, and is capped to fit there.  The list scrolls inside instead. */
   function place(){
     if(!cfg.float) return;
-    const pop=el.querySelector('.ms-pop'), r=btn.getBoundingClientRect();
-    const w=Math.max(r.width, 290), h=pop.offsetHeight||300;
-    let top=r.bottom+5; if(top+h>innerHeight-8) top=Math.max(8, r.top-5-h);
+    const pop=el.querySelector('.ms-pop'), list=el.querySelector('.ms-list');
+    const r=btn.getBoundingClientRect(), GAP=6, EDGE=10;
+    const below=innerHeight-r.bottom-GAP-EDGE, above=r.top-GAP-EDGE;
+    /* the chrome around the list — search box, actions, padding */
+    list.style.maxHeight='none';
+    const chrome=pop.offsetHeight-list.offsetHeight;
+    /* Left to its own devices a 35-name list makes an 840px panel.  A picker
+       that fills the window is not a picker. */
+    const wanted=Math.min(pop.offsetHeight, 340);
+    const down = below>=Math.min(wanted,220) || below>=above;
+    const room = Math.max(120, (down?below:above));
+    const h    = Math.min(wanted, room);
+    list.style.maxHeight=Math.max(80, h-chrome)+'px';
+    const w=Math.max(r.width, 290);
     pop.style.width=w+'px';
-    pop.style.left=Math.min(Math.max(8,r.left), innerWidth-w-8)+'px';
-    pop.style.top=top+'px';
+    pop.style.left=Math.min(Math.max(EDGE,r.left), innerWidth-w-EDGE)+'px';
+    pop.style.top =(down ? r.bottom+GAP : Math.max(EDGE, r.top-GAP-h))+'px';
   }
   if(cfg.float){
     el.classList.add('float');
@@ -2501,6 +2581,9 @@ function dropdown(el, cfg){
   q.oninput=draw;
   q.onkeydown=e=>{ if(e.key==='Enter'){ const f=list.querySelector('input'); if(f){ f.checked=!f.checked; f.onchange(); } e.preventDefault(); } };
   el.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{
+    if(b.dataset.a==='clear'){            // single-select: empty it and close
+      el._sel=new Set(); el.classList.remove('on');
+      paint(); draw(); cfg.onChange(el._sel); return; }
     const term=q.value.trim().toUpperCase();
     const shown=cfg.options.filter(o=>!term||(o.t+' '+(o.s||'')).toUpperCase().indexOf(term)>=0);
     if(b.dataset.a==='all') shown.forEach(o=>el._sel.add(o.v)); else shown.forEach(o=>el._sel.delete(o.v));
@@ -3263,9 +3346,8 @@ function renderHalf(id){
   /* "Signed off by every discipline" is deliberately not a headline figure
      here: at 93% beside a real 43% closed it read as the work being done. */
   $('dmin'+id).innerHTML=[
-    ['', ds.list.length, 'disciplines involved'],
     ['', so.docs, 'documents in scope'],
-    ['warn', ds.pending, 'reviews still to be signed'],
+    ['', ds.list.length, 'disciplines involved'],
     ['warn', sq.total, 'documents still circulating']
   ].map(([c,n,l])=>`<div class="m ${c}"><span class="n">${n.toLocaleString()}</span><span class="l">${l}</span></div>`).join('');
   $('dn'+id).style.display='';
@@ -4337,6 +4419,7 @@ const NOT_CLOSED = d => !noAction(d) && String(d.status).toUpperCase()!=='REVIEW
 function actionRows(){
   const docs=halfDocs(AC.half);
   if(AC.kind==='engineer') return engineerDocs(AC.key).map(d=>({d, disc:null}));
+  if(AC.kind==='tag')      return tagDocs(AC.key).map(d=>({d, disc:null}));
   if(AC.kind==='band'){
     /* A band is a slice of the progress bar, so it is drawn from the same
        documents the bar counts — including the closed ones.  It is not an
@@ -4382,7 +4465,8 @@ function renderAction(){
   AC.rows=rows;
 
   const scopeName = AC.half==='A' ? 'Full purchase order' : 'For review — '+(S.disc||'');
-  const what = AC.kind==='engineer' ? AC.key+' — every document they hold'
+  const what = AC.kind==='tag'      ? tagLabel(AC.key)+' — every document on it'
+             : AC.kind==='engineer' ? AC.key+' — every document they hold'
              : AC.kind==='band'     ? bandTitle()
              : AC.kind==='stuck'    ? STUCK_T[AC.key](S.disc)
              : AC.kind==='code'     ? 'Document type '+AC.key
@@ -4405,6 +4489,13 @@ function renderAction(){
     hero={title:'All document types', sub:stats.st.byCode.length+' types in this scope',
           pct:stats.st.progress, bar:sbar(stats.st.totals,stats.st.total),
           v:stats.st.totals.without, tot:stats.st.total, unit:'closed'};
+  } else if(AC.kind==='tag'){
+    const t=engTags().find(x=>x.tag===AC.key);
+    if(t) hero={title:tagLabel(t.tag), sub:(t.equip||'')+(t.who? ' · '+t.who : ' · no responsible engineer yet'),
+      pct:t.pct,
+      bar:`<div class="sbar"><i style="width:${t.n?t.closed/t.n*100:0}%;background:#2E9E6B"></i>`+
+          `<i style="width:${t.n?t.circ/t.n*100:0}%;background:#D9922E"></i></div>`,
+      v:t.closed, tot:t.n, unit:'closed'};
   } else if(AC.kind==='engineer'){
     const mine=engTags().filter(t=>t.who===AC.key);
     const n=mine.reduce((a,t)=>a+t.n,0), done=mine.reduce((a,t)=>a+t.closed,0),
@@ -4458,8 +4549,8 @@ function renderAction(){
   /* an engineer's page is a whole workload, not an outstanding list, so it is
      counted the way somebody would ask about their own desk */
   const closedN=rows.filter(r=>String(r.d.status).toUpperCase()==='REVIEWED WITHOUT COMMENTS').length;
-  const tiles = AC.kind==='engineer'
-    ? [['', uniq, 'documents held'],
+  const tiles = (AC.kind==='engineer'||AC.kind==='tag')
+    ? [['', uniq, AC.kind==='tag'?'documents on this tag':'documents held'],
        ['ok', closedN, 'closed'],
        ['warn', circN, 'circulating now'],
        ['dang', uniq-closedN, 'still to close'],
@@ -4498,7 +4589,8 @@ function renderAction(){
 
 /* ── the list as a spreadsheet, and as an Outlook draft ─────────────────── */
 function actionTitle(){
-  return (AC.kind==='engineer' ? AC.key+' — documents held'
+  return (AC.kind==='tag' ? tagLabel(AC.key)+' — documents on this tag'
+        : AC.kind==='engineer' ? AC.key+' — documents held'
         : AC.kind==='band' ? bandTitle()
         : AC.kind==='stuck' ? STUCK_T[AC.key](S.disc)
         : AC.kind==='code' ? 'Document type '+AC.key
@@ -5325,9 +5417,11 @@ const BK_KEY='vdt.openpoints.v1';
 function loadBasket(){ try{ S.basket=JSON.parse(localStorage.getItem(BK_KEY))||[]; }catch(e){ S.basket=[]; } paintBasket(); }
 function saveBasket(){ try{ localStorage.setItem(BK_KEY,JSON.stringify(S.basket)); }catch(e){} paintBasket(); }
 function paintBasket(){
+  /* The button that carried this badge is gone from the page bar; the basket
+     itself still works, so the count is written only if something shows it. */
   const n=(S.basket||[]).length;
-  $('bk-n').textContent=n;
-  $('btn-basket').style.display = S.rows.length? '' : 'none';
+  const bn=$('bk-n'); if(bn) bn.textContent=n;
+  const bk=$('btn-basket'); if(bk) bk.style.display = S.rows.length? '' : 'none';
 }
 function addToBasket(){
   if(!reportHasContent()) return alert('Tick at least one point, or write a general remark, before adding this document.');
@@ -5807,6 +5901,17 @@ function engineerDocs(name){
     t.docs.forEach(d=>{ if(!seen.has(d.tr)){ seen.add(d.tr); out.push(d); } }); });
   return out;
 }
+/* The documents on one equipment tag — the same list the tag's own row counts,
+   so the number in the Docs column and the number on the page agree. */
+function tagDocs(tag){
+  const t=engTags().find(x=>x.tag===tag);
+  return t? t.docs.slice() : [];
+}
+function openTag(tag, ev){
+  AC.half='B';
+  openAction('B','tag',tag,ev);
+}
+window.openTag=openTag;
 
 /* The key under which the documents naming several equipments at once are
    held — one row, one owner, so no document is counted twice and the column
@@ -5866,7 +5971,7 @@ window.openEngineer=openEngineer;
 function openEng(){
   if(!S.docs || !S.docs.length) return alert('Choose a purchase order first.');
   /* Nothing to carry forward from a register that already has the columns. */
-  if(!S.eng.hadCols && !S.eng.carried && !S.eng.skipped){ go('engload'); return; }
+  if(!S.eng.hadCols && !S.eng.didCarry && !S.eng.skipped){ go('engload'); return; }
   renderEng();
   go('eng');
 }
@@ -5877,21 +5982,27 @@ function renderEng(){
   $('enPo').textContent=S.po;
   const names=engNames();
 
-  /* where the current assignments came from */
-  const src = S.eng.carried ? `assignments carried from ${esc(S.eng.prevName||'an earlier register')}`
-            : S.eng.hadCols ? 'assignments read from this register'
-                            : 'this register has no engineer columns yet — download to add them';
-  $('enSrc').innerHTML=`<span style="color:${S.eng.dirty?'var(--warn)':'var(--muted)'}">${
-    S.eng.dirty?'<span class="dirty-dot"></span>unsaved changes — download before you close':src}</span>`;
+  /* Where the assignments came from is provenance, not a heading — it lives
+     in the notes with everything else that explains the list. */
+  const src = S.eng.didCarry ? `Assignments were carried across from <b>${esc(S.eng.prevName||'an earlier register')}</b>`+
+                               `${S.eng.carried? ` — <b>${S.eng.carried}</b> in all.` : ', which had none to give.'}`
+            : S.eng.hadCols ? 'Assignments were read from the register you loaded.'
+                            : 'This register has no engineer columns yet — downloading adds them.';
+  const wrote=S.eng.wrote;
+  $('enSrcNote').style.display='';
+  $('enSrcNote').innerHTML = src +
+    (wrote? ` Written to <b>${esc(wrote.file)}</b> — ${wrote.resp.toLocaleString()} rows carry a
+             responsible engineer and ${wrote.req.toLocaleString()} a requisition engineer.` : '');
+  /* unsaved work is a warning, and belongs where it can be seen */
+  $('enDirty').style.display = (S.eng && S.eng.dirty) ? '' : 'none';
 
   /* requisition engineer — one per purchase order */
   const req=S.eng.req[S.po]||'';
   dropdown($('enReqPick'), {
     placeholder: names.length? 'Choose the requisition engineer' : 'No names in the Engineer List sheet',
-    /* the same way out as the responsible-engineer pickers have */
-    options: (req ? [{v:'', t:'Clear the selection', s:'leave this purchase order without one'}] : [])
-      .concat(names.map(n=>({v:n, t:n}))),
+    options: names.map(n=>({v:n, t:n})),
     selected: new Set(req? [req] : []),
+    clearable: !!req,
     disabled: !names.length,
     onChange: v=>{ if(!setReq([...v][0]||'')) $('enReqPick').setSel(new Set(req?[req]:[])); }
   });
@@ -5945,17 +6056,19 @@ function renderEngTags(all, names){
     ` <span style="color:var(--muted);font-weight:600">· Docs adds to <b>${colTotal.toLocaleString()}</b>${
       colTotal===S.eng.srcN? '' : ' of '+(S.eng.srcN||0).toLocaleString()}, every document counted once</span>`;
   sortHead('enHead', EN_TAG_COLS, EN.tagSort, renderEng);
-  $('enBody').innerHTML = rows.length? rows.map(t=>`<tr class="${
-      isNA(t.who)? 'en-na' : (t.who? '' : 'en-newtag')}">
+  $('enBody').innerHTML = rows.length? rows.map(t=>`<tr class="en-open${
+      isNA(t.who)? ' en-na' : (t.who? '' : ' en-none')}" tabindex="0" role="button"
+      title="See the documents on ${esc(tagLabel(t.tag))}">
       <td><div class="docno">${t.tag===MULTI_TAG?'<span class="en-multi">SEVERAL TAGS</span>':esc(t.tag)}</div></td>
       <td><div class="s2" title="${esc(t.equip)}">${esc(t.equip||'—')}</div></td>
       <td style="text-align:right"><span class="s1 num">${t.n}</span>${
-        t.sharedN? `<div class="s2 num" title="documents naming this tag alongside others">+${t.sharedN} shared</div>`:''}</td>
+        t.sharedN? `<span class="s2 num shared" title="documents naming this tag alongside others">+${t.sharedN}</span>`:''}</td>
       <td style="text-align:right"><span class="s2 num">${t.codes}</span></td>
-      <td><div style="display:flex;align-items:center;gap:8px">
+      <td><div class="en-progcell">
         <div class="en-bar"><i style="width:${t.pct}%;background:#2E9E6B"></i>${
           t.circ? `<i style="width:${Math.round(t.circ/(t.n||1)*100)}%;background:#D9922E"></i>`:''}</div>
-        <span class="en-load" style="color:${t.pct?'var(--ok)':'var(--muted)'}">${t.pct}%</span></div></td>
+        <span class="en-load" style="color:${t.pct?'var(--ok)':'var(--muted)'}">${t.pct}%</span>
+        <span class="en-go">open →</span></div></td>
       <td><div class="en-pick" id="ep-${cssId(t.tag)}"></div></td>
     </tr>`).join('')
     : `<tr><td colspan="6" class="empty">${EN.unOnly?'Every tag has a responsible engineer.':'No equipment tags in this scope.'}</td></tr>`;
@@ -5964,6 +6077,12 @@ function renderEngTags(all, names){
   rows.forEach(t=>{
     const host=$('ep-'+cssId(t.tag)); if(!host) return;
     engPicker(host, names, t.who, v=>setResp(t.tag, v, t.who), 'Assign…');
+    /* the picker is a control inside a row that is itself a button, so it
+       must not carry its clicks up to it */
+    host.addEventListener('click', e=>e.stopPropagation());
+    host.addEventListener('keydown', e=>e.stopPropagation());
+    const tr=host.closest('tr');
+    if(tr) tr.onclick=ev=>openTag(t.tag, ev);
   });
 }
 
@@ -5971,10 +6090,9 @@ function renderEngTags(all, names){
    aside.  It floats, because inside the scrolling table an ordinary popup has
    nowhere to appear. */
 function engPicker(host, names, current, apply, placeholder){
-  /* Once a name is set there was no way back to blank — only to a different
-     name, or to N/A, which means something else entirely. */
-  const opts=(current ? [{v:'', t:'Clear the selection', s:'leave this without an engineer'}] : [])
-    .concat([{v:ENG_NA, t:'N/A — no engineer needed', s:'counts towards nobody'}])
+  /* Clear is an action in the popup's own bar, the way Document types does
+     it — not a row in the list pretending to be a name. */
+  const opts=[{v:ENG_NA, t:'N/A — no engineer needed', s:'counts towards nobody'}]
     .concat(names.map(n=>({v:n, t:n})));
   dropdown(host, {
     placeholder: placeholder,
@@ -5982,6 +6100,7 @@ function engPicker(host, names, current, apply, placeholder){
     selected: new Set(current? [current] : []),
     disabled: !names.length,
     float: true,
+    clearable: !!current,
     onChange: v=>{ if(!apply([...v][0]||'')) host.setSel(new Set(current?[current]:[])); }
   });
 }
@@ -6077,7 +6196,11 @@ function readCarry(f){
     Object.entries(ctx.req||{}).forEach(([po,v])=>{ if(v && !S.eng.req[po]){ S.eng.req[po]=v; nreq++; } });
     Object.entries(ctx.resp||{}).forEach(([k,v])=>{ if(v && !S.eng.resp[k]){ S.eng.resp[k]=v; nresp++; } });
     if(ctx.engList) S.eng.list = Object.keys(S.eng.list||{}).length ? S.eng.list : ctx.engList;
-    S.eng.carried = nreq+nresp; S.eng.prevName = f.name; S.eng.dirty = true;
+    /* "carried" counts assignments; "didCarry" records that the step happened.
+       A register that had the sheet but no assignments carried nothing, and
+       was sent back to the import screen for ever. */
+    S.eng.carried = nreq+nresp; S.eng.didCarry = true;
+    S.eng.prevName = f.name; S.eng.dirty = true;
     $('egload').classList.remove('on'); $('egfile').value='';
 
     /* the tags this register has that the carried one did not */
@@ -6087,9 +6210,14 @@ function readCarry(f){
       <b>${nreq}</b> requisition engineer${nreq===1?'':'s'} across from <b>${esc(f.name)}</b>.
       ${fresh.length? `<b>${fresh.length}</b> tag${fresh.length===1?'':'s'} on this purchase order
         ${fresh.length===1?'is':'are'} new and still need${fresh.length===1?'s':''} an engineer.`
-        : 'Every tag on this purchase order is covered.'}
-      Download the register before you close, or this is lost.`;
+        : 'Every tag on this purchase order is covered.'}`;
     renderEng(); go('eng');
+    /* Carrying assignments across IS the change — there is nothing for the
+       reader to decide, and asking them to save something they did not type
+       reads as the tool not knowing what it just did.  So the new register is
+       written straight away, with the work visible while it happens. */
+    setTimeout(()=>downloadRegister(null, {silent:true,
+      title:'Carrying the engineers into this register'}), 120);
   },40);
   fr.readAsArrayBuffer(f);
 }
@@ -6099,7 +6227,8 @@ function readCarry(f){
    tab loses them.  Say exactly that, offer the download, and either way come
    back with the figures rebuilt on the new assignments. */
 function leaveEng(){
-  const n=Object.keys(S.eng.resp||{}).length;
+  /* Only asks about edits the reader actually made.  What the carry-forward
+     brought in is written the moment it lands, so it is never pending here. */
   if(S.eng && S.eng.dirty){
     if(confirm('You have engineer changes that are not in a file yet.\n\n'+
                'OK — download the updated register now, then go back.\n'+
@@ -6117,24 +6246,54 @@ function backToStatus(){
   go('dash');
 }
 
-function downloadRegister(after){
-  if(typeof XLSX==='undefined') return alert('Spreadsheet engine not loaded.');
-  if(!S.fileBytes) return alert('The original file is no longer in memory — reload it first.');
-  const btn=$('enSave'), was=btn.textContent;
-  btn.disabled=true; btn.textContent='Writing…';
-  /* a 47,000-row register takes a while to write; let the button paint first */
-  setTimeout(()=>{
-    try{
-      /* Read the styles too, or the colour coding, column widths and date
-         formats are gone from every column we never touched. */
-      const wb=XLSX.read(S.fileBytes,{type:'array',cellStyles:true});
-      const ws=wb.Sheets[wb.SheetNames[0]];
-      /* The reader hands a fill back raw — {patternType, fgColor} — while the
-         writer expects it under .fill, so an untranslated style is silently
-         dropped.  Only the cells that actually carry a fill are touched; the
-         millions that read back as "none" are left exactly as they are, which
-         is also what keeps this out of a memory spike. */
-      for(const k in ws){
+/* ── writing the register ─────────────────────────────────────────────────
+   Broken into steps that yield to the browser between them, for one reason:
+   a 47,000-row register takes several seconds, and a page that freezes for
+   several seconds with nothing on it reads as a page that has crashed.  Each
+   step reports where it is, so the wait is visibly a wait.
+   ──────────────────────────────────────────────────────────────────────── */
+function wrShow(title, sub){
+  $('wrT').textContent=title||'Writing the register';
+  $('wrS').textContent=sub||'';
+  $('wrI').style.width='0%'; $('wrP').textContent='0%'; $('wrN').textContent='';
+  $('wrBox').hidden=false;
+}
+function wrStep(sub, pct, note){
+  if(sub!=null) $('wrS').textContent=sub;
+  if(pct!=null){ const v=Math.max(0,Math.min(100,Math.round(pct)));
+    $('wrI').style.width=v+'%'; $('wrP').textContent=v+'%'; }
+  if(note!=null) $('wrN').textContent=note;
+}
+function wrHide(){ $('wrBox').hidden=true; }
+/* let the browser paint between steps */
+const yieldPaint = () => new Promise(r=>requestAnimationFrame(()=>setTimeout(r,0)));
+
+async function downloadRegister(after, opts){
+  opts=opts||{};
+  if(typeof XLSX==='undefined'){ alert('Spreadsheet engine not loaded.'); return false; }
+  if(!S.fileBytes){ alert('The original file is no longer in memory — reload it first.'); return false; }
+  const btn=$('enSave'), was=btn? btn.textContent : '';
+  if(btn){ btn.disabled=true; btn.textContent='Writing…'; }
+  wrShow(opts.title||'Writing the register',
+         'Opening the workbook — this is the slow part on a large register.');
+  await yieldPaint();
+  try{
+    /* Read the styles too, or the colour coding, column widths and date
+       formats are gone from every column we never touched. */
+    const wb=XLSX.read(S.fileBytes,{type:'array',cellStyles:true});
+    const ws=wb.Sheets[wb.SheetNames[0]];
+    wrStep('Keeping every fill, width and date format from the original.', 12);
+    await yieldPaint();
+
+    /* The reader hands a fill back raw — {patternType, fgColor} — while the
+       writer expects it under .fill, so an untranslated style is silently
+       dropped.  Only the cells that actually carry a fill are touched. */
+    const keys=Object.keys(ws);
+    let kept=0;
+    for(let i=0;i<keys.length;i+=40000){
+      const end=Math.min(i+40000, keys.length);
+      for(let j=i;j<end;j++){
+        const k=keys[j];
         if(k.charCodeAt(0)===33) continue;                 // '!'
         const c=ws[k], st=c&&c.s;
         if(!st || !st.patternType || st.patternType==='none') continue;
@@ -6142,58 +6301,82 @@ function downloadRegister(after){
         /* a banner cell may carry a fill and no value; SheetJS drops a cell
            with nothing in it, taking the fill with it */
         if(c.v===undefined){ c.t='s'; c.v=''; }
+        kept++;
       }
-      const rg=XLSX.utils.decode_range(ws['!ref']);
-      const cell=(r,c)=>ws[XLSX.utils.encode_cell({r,c})];
-      const put=(r,c,v)=>{ const k=XLSX.utils.encode_cell({r,c});
-        if(v) ws[k]={t:'s',v:String(v)}; else delete ws[k]; };
+      wrStep(null, 12+(end/keys.length)*28, kept.toLocaleString()+' formatted cells kept');
+      await yieldPaint();
+    }
 
-      /* reuse the columns if this register already has them */
-      const hdr={}; for(let c=rg.s.c;c<=rg.e.c;c++){ const k=cell(3,c); if(k&&k.v) hdr[String(k.v).trim()]=c; }
-      const cReq = hdr[ENG_REQ]  !== undefined ? hdr[ENG_REQ]  : rg.e.c+1;
-      const cRes = hdr[ENG_RESP] !== undefined ? hdr[ENG_RESP] : Math.max(rg.e.c+2, cReq+1);
-      put(3,cReq,ENG_REQ); put(3,cRes,ENG_RESP);
+    const rg=XLSX.utils.decode_range(ws['!ref']);
+    const cell=(r,c)=>ws[XLSX.utils.encode_cell({r,c})];
+    const put=(r,c,v)=>{ const k=XLSX.utils.encode_cell({r,c});
+      if(v) ws[k]={t:'s',v:String(v)}; else delete ws[k]; };
 
-      const iPO=hdr['PURCHASE ORDER'], iXR=hdr['CROSS REFERENCE'];
-      let nr=0, nt=0, nAmb=0;
-      for(let r=4;r<=rg.e.r;r++){
-        const po=cell(r,iPO); if(!po||!String(po.v).trim()) continue;
-        const p=String(po.v).trim();
-        if(S.eng.req[p]){ put(r,cReq,S.eng.req[p]); nr++; }
-        const xr=cell(r,iXR);
+    /* reuse the columns if this register already has them */
+    const hdr={}; for(let c=rg.s.c;c<=rg.e.c;c++){ const k=cell(3,c); if(k&&k.v) hdr[String(k.v).trim()]=c; }
+    const cReq = hdr[ENG_REQ]  !== undefined ? hdr[ENG_REQ]  : rg.e.c+1;
+    const cRes = hdr[ENG_RESP] !== undefined ? hdr[ENG_RESP] : Math.max(rg.e.c+2, cReq+1);
+    put(3,cReq,ENG_REQ); put(3,cRes,ENG_RESP);
+
+    const iPO=hdr['PURCHASE ORDER'], iXR=hdr['CROSS REFERENCE'];
+    let nr=0, nt=0, nAmb=0;
+    const rows=rg.e.r-3;
+    wrStep('Writing the requisition and responsible engineer against every row.', 40);
+    await yieldPaint();
+    for(let r=4;r<=rg.e.r;r+=6000){
+      const end=Math.min(r+6000, rg.e.r+1);
+      for(let x=r;x<end;x++){
+        const po=cell(x,iPO); if(!po||!String(po.v).trim()) continue;
+        const pp=String(po.v).trim();
+        if(S.eng.req[pp]){ put(x,cReq,S.eng.req[pp]); nr++; }
+        const xr=cell(x,iXR);
         const tags=splitTags(xr? xr.v : '');
         if(tags.length>1){
           /* a row naming several equipments is owned by the shared row, so it
              has exactly one owner like every other document */
-          const who=S.eng.resp[tagKey(p,MULTI_TAG)];
-          if(who){ put(r,cRes,who); nt++; } else nAmb++;
+          const who=S.eng.resp[tagKey(pp,MULTI_TAG)];
+          if(who){ put(x,cRes,who); nt++; } else nAmb++;
         } else if(tags.length===1){
-          const who=S.eng.resp[tagKey(p,tags[0])];
-          if(who){ put(r,cRes,who); nt++; }
+          const who=S.eng.resp[tagKey(pp,tags[0])];
+          if(who){ put(x,cRes,who); nt++; }
         }
       }
-      rg.e.c=Math.max(rg.e.c,cRes); ws['!ref']=XLSX.utils.encode_range(rg);
-
-      /* No Engineer List sheet is written any more: the roster is in the tool,
-         and the names that matter are in the two columns themselves. */
-      /* the register keeps the name it arrived with, so its date stays on it */
-      const base=String(S.fileName||'CONSOLIDATED_STATUS').replace(/\.[^.]+$/,'')
-                   .replace(/_with_engineers$/i,'');
-      XLSX.writeFile(wb, base+'_with_engineers.xlsx', {compression:true, cellStyles:true});
-      S.eng.dirty=false;
-      btn.textContent=was; btn.disabled=false;
-      renderEng(); renderReqBtn();
-      if(typeof after==='function') setTimeout(after,0);
-      alert('Register written: '+nr.toLocaleString()+' rows carry a requisition engineer and '+
-            nt.toLocaleString()+' carry a responsible engineer.'+
-            (nAmb? '\n\n'+nAmb.toLocaleString()+' row'+(nAmb===1?'':'s')+' name several equipment tags '+
-                   'and have no owner yet — assign the "Several tags" row to cover them.' : '')+
-            '\n\nLoad this file next time — or feed it to the carry-forward — to keep the assignments.');
-    }catch(err){
-      btn.textContent=was; btn.disabled=false;
-      alert('Could not write the register: '+err.message);
+      wrStep(null, 40+((end-4)/rows)*45, nt.toLocaleString()+' rows given an engineer');
+      await yieldPaint();
     }
-  },60);
+    rg.e.c=Math.max(rg.e.c,cRes); ws['!ref']=XLSX.utils.encode_range(rg);
+
+    /* No Engineer List sheet is written any more: the roster is in the tool,
+       and the names that matter are in the two columns themselves. */
+    wrStep('Saving the file.', 88);
+    await yieldPaint();
+    /* the register keeps the name it arrived with, so its date stays on it */
+    const base=String(S.fileName||'CONSOLIDATED_STATUS').replace(/\.[^.]+$/,'')
+                 .replace(/_with_engineers$/i,'');
+    const fname=base+'_with_engineers.xlsx';
+    XLSX.writeFile(wb, fname, {compression:true, cellStyles:true});
+    wrStep('Done.', 100, fname);
+    S.eng.dirty=false;
+    if(btn){ btn.textContent=was; btn.disabled=false; }
+    await yieldPaint();
+    setTimeout(wrHide, 700);
+    renderEng(); renderReqBtn();
+    S.eng.wrote={file:fname, req:nr, resp:nt, amb:nAmb};
+    renderEng();
+    if(typeof after==='function') setTimeout(after,0);
+    if(!opts.silent)
+      alert('Register written: '+nr.toLocaleString()+' rows carry a requisition engineer and '+
+        nt.toLocaleString()+' carry a responsible engineer.'+
+        (nAmb? '\n\n'+nAmb.toLocaleString()+' row'+(nAmb===1?'':'s')+' name several equipment tags '+
+               'and have no owner yet — assign the "Several tags" row to cover them.' : '')+
+        '\n\nLoad this file next time — or feed it to the carry-forward — to keep the assignments.');
+    return true;
+  }catch(err){
+    wrHide();
+    if(btn){ btn.textContent=was; btn.disabled=false; }
+    alert('Could not write the register: '+err.message);
+    return false;
+  }
 }
 window.openEng=openEng; window.skipCarry=skipCarry; window.downloadRegister=downloadRegister;
 window.leaveEng=leaveEng; window.backToStatus=backToStatus;
