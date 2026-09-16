@@ -693,13 +693,16 @@ table.dt tbody tr.grp td{background:#E3EBF4 !important;padding:8px 12px;cursor:d
 .en-pick .ms-btn{width:100%;justify-content:space-between}
 tr.en-na td{opacity:.5}
 tr.en-na td:last-child{opacity:1}
-/* the workload bar is a way in, so it has to look like one */
-.en-prog{display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;padding:4px 6px;
-  margin:-4px -6px;border-radius:8px;font:inherit;cursor:pointer;text-align:left;transition:background .15s ease}
-.en-prog:hover{background:var(--sf2)}
-.en-prog:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
-.en-go{font-size:10px;font-weight:800;color:var(--blue);opacity:0;transition:opacity .15s ease;white-space:nowrap}
-.en-prog:hover .en-go{opacity:1}
+/* The whole row is the way in — the bar alone was too small a target, and
+   nobody finds an affordance that only exists while the pointer is on it.
+   So "open" is always on the row, not revealed by hovering it. */
+.en-progcell{display:flex;align-items:center;gap:8px}
+.en-go{font-size:10px;font-weight:800;color:var(--blue);white-space:nowrap;opacity:.72;
+  transition:opacity .15s ease,transform .18s var(--ease)}
+tr.en-open{cursor:pointer}
+tr.en-open:hover .en-go{opacity:1;transform:translateX(2px)}
+tr.en-open:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+tr.en-open:focus-visible .en-go{opacity:1}
 .en-multi{font-size:10px;font-weight:800;letter-spacing:.06em;color:#1A4FBF;background:#EEF4FE;
   border:1px solid #CFE0FA;border-radius:5px;padding:2px 7px}
 .en-na-tag{font-size:11px;font-weight:800;color:var(--muted);background:var(--info-bg);
@@ -718,6 +721,10 @@ tr.en-na td:last-child{opacity:1}
 .en-tabs .tabb{border:1px solid var(--line);background:var(--sf);border-radius:9px;
   padding:7px 14px;font:inherit;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer}
 .en-tabs .tabb.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+/* These are pills, not scope tabs.  The sliding underline belongs to the
+   tabs at the top of the status page and was hanging off the bottom of
+   these, a blue stub under a navy pill. */
+.en-tabs .tabb::after{display:none !important}
 .en-pick{min-width:200px}
 .en-un{font-size:11px;font-weight:800;color:var(--dang);background:var(--dang-bg);
   border-radius:20px;padding:2px 9px;white-space:nowrap}
@@ -755,6 +762,24 @@ tr.en-newtag td{background:var(--warn-bg)}
 .modal-f{display:flex;align-items:center;gap:12px;padding:13px 20px;border-top:1px solid var(--line);
   background:var(--sf2)}
 .modal-f .fill{flex:1}
+/* ── settings: appearance ──────────────────────────────────────────────── */
+.set-sec{font-size:9.5px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--muted);margin:2px 0 10px}
+.set-sec+.set-sec,.ro-scroll+.set-sec{margin-top:20px}
+.set-sub{font-size:11px;font-weight:600;color:var(--muted);line-height:1.55;margin:-4px 0 12px}
+.lookrow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px;
+  padding-bottom:20px;border-bottom:1px solid var(--line)}
+@media(max-width:560px){.lookrow{grid-template-columns:1fr}}
+.look{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;
+  padding:12px 13px;border:1px solid var(--line2);border-radius:11px;background:var(--sf2);
+  cursor:pointer;font-family:var(--font);transition:all .16s var(--ease)}
+.look:hover{border-color:var(--blue)}
+.look.on{border-color:var(--blue);background:#EEF4FE;box-shadow:0 0 0 3px rgba(37,99,235,.14)}
+body[data-dark] .look.on{background:#16243B}
+.look .sw{display:flex;gap:3px;margin-bottom:5px}
+.look .sw i{width:16px;height:16px;border-radius:5px;border:1px solid rgba(11,37,69,.18)}
+.look .lk{font-size:12.5px;font-weight:800;color:var(--navy)}
+.look .ls{font-size:10.5px;font-weight:600;color:var(--muted);line-height:1.4}
 .ro-dept{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:13px}
 .ro-dept .fill{flex:1}
 .ro-dept label{font-size:9.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
@@ -818,8 +843,8 @@ table.ro-t tbody tr.ro-new td{animation:roNew 1.4s var(--ease)}
 
 /* A press is the fastest feedback there is, so it is never behind a query. */
 .btn:active:not(:disabled),.chip:active,.tabb:active,.pb-back:active,.cc-q:active,
-.notes-t:active,.en-prog:active,.sh:active{transform:translateY(0) scale(.975)}
-.btn,.chip,.pb-back,.cc-q,.notes-t,.en-prog{transition:transform .14s var(--ease),
+.notes-t:active,.sh:active{transform:translateY(0) scale(.975)}
+.btn,.chip,.pb-back,.cc-q,.notes-t{transition:transform .14s var(--ease),
   background .18s var(--ease),color .18s var(--ease),border-color .18s var(--ease),
   box-shadow .22s var(--ease)}
 
@@ -873,8 +898,6 @@ table.ro-t tbody tr.ro-new td{animation:roNew 1.4s var(--ease)}
   .chip:hover{transform:translateY(-1px);box-shadow:var(--sh1)}
   .actbtn:hover{transform:translateY(-1px)}
   .tabb{transition:color .18s var(--ease),background .18s var(--ease)}
-  .en-prog:hover .en-go{transform:translateX(2px)}
-  .en-go{transition:opacity .15s var(--ease),transform .18s var(--ease)}
 }
 
 /* The underline under the open tab slides between tabs instead of cutting. */
@@ -1103,6 +1126,10 @@ table.ro-t tbody tr.ro-new td{animation:roNew 1.4s var(--ease)}
    BG_DIM drives the whole thing, so how much of the clip shows is one number. */
 .bgstage.has-video .bg-scrim{
   background:
+    /* A floor that does not scale with BG_DIM: however much of the clip the
+     reader wants to see, the band the headline sits in keeps enough cover to
+     hold white text over a bright sky. */
+    linear-gradient(180deg,rgba(6,20,38,.34) 0%,rgba(6,20,38,.12) 34%,transparent 52%),
     radial-gradient(128% 96% at 50% 34%,
       rgba(8,28,54,calc(var(--dim) * .30)) 0%,
       rgba(8,28,54,calc(var(--dim) * .78)) 62%,
@@ -1141,9 +1168,12 @@ table.ro-t tbody tr.ro-new td{animation:roNew 1.4s var(--ease)}
 body.bg-live .up-hero h1{color:#fff;text-shadow:0 2px 26px rgba(4,16,34,.55)}
 body.bg-live .up-hero p{color:rgba(255,255,255,.90);text-shadow:0 1px 16px rgba(4,16,34,.5)}
 body.bg-live .up-hero p b{color:#fff}
-body.bg-live .drop{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.46);
-  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-body.bg-live .drop:hover,body.bg-live .drop.over{background:rgba(255,255,255,.18);
+/* Tinted dark, not white: a white glass over bright footage leaves white text
+   sitting on whatever happens to be behind it, which on a sunlit container
+   yard is nothing at all. */
+body.bg-live .drop{background:rgba(6,20,38,.34);border-color:rgba(255,255,255,.52);
+  backdrop-filter:blur(14px) saturate(1.1);-webkit-backdrop-filter:blur(14px) saturate(1.1)}
+body.bg-live .drop:hover,body.bg-live .drop.over{background:rgba(6,20,38,.46);
   border-color:#fff}
 body.bg-live .drop .t{color:#fff;text-shadow:0 1px 12px rgba(4,16,34,.45)}
 body.bg-live .drop .s{color:rgba(255,255,255,.82)}
@@ -1207,9 +1237,9 @@ body[data-skin="studio"] .projchip .k{color:#98A2B3}
 body[data-skin="studio"] .projchip .pn{color:var(--ink)}
 body[data-skin="studio"] .projchip .pd{color:var(--muted)}
 body[data-skin="studio"] .projchip .bar{background:var(--line)}
-body[data-skin="studio"] .navgear,body[data-skin="studio"] .navskin{
+body[data-skin="studio"] .navgear{
   background:var(--sf2);border-color:var(--line);color:var(--muted)}
-body[data-skin="studio"] .navgear:hover,body[data-skin="studio"] .navskin:hover{
+body[data-skin="studio"] .navgear:hover{
   background:var(--ink);border-color:var(--ink);color:#fff}
 
 /* ── the one gradient on the page, where the scope is named ────────────── */
@@ -1333,14 +1363,128 @@ body[data-skin="studio"] .ac-sum .m .n{letter-spacing:-.6px}
 body[data-skin="studio"] .sheettabs .sh{background:#EBEEF3;border-color:var(--line);color:var(--muted)}
 body[data-skin="studio"] .sheettabs .sh.on{background:#fff;color:var(--ink)}
 
-/* the switch itself */
-.navskin{height:34px;flex:none;margin-left:8px;padding:0 13px;border-radius:9px;cursor:pointer;
-  border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.10);color:#fff;
-  font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;white-space:nowrap;
-  display:inline-flex;align-items:center;gap:7px;
-  transition:background .18s var(--ease),border-color .18s var(--ease),color .18s var(--ease)}
-.navskin:hover{background:#fff;border-color:#fff;color:#17558A}
-.navskin .sw{width:9px;height:9px;border-radius:50%;background:currentColor;flex:none;opacity:.75}
+
+/* ══ DARK ════════════════════════════════════════════════════════════════
+   Not a third skin but a layer over Studio: the page keeps that layout and
+   only its colours are restated.  Written as tokens first, then the handful
+   of places that hardcode a light value, then the places that used --navy as
+   a BACKGROUND — those invert, and a light background under white text is
+   the one way a dark theme goes truly wrong.
+   ════════════════════════════════════════════════════════════════════════ */
+body[data-dark]{
+  --navy:#E7ECF5; --navy2:#C6D2E4;
+  --ink:#E9EDF5; --muted:#94A2B8;
+  --line:#242E3C; --line2:#35425640;
+  --bg:#0C121A; --sf:#131B25; --sf2:#1A2431;
+  --blue:#5B8DEF; --cyan:#3FC8DE; --teal:#3E9FB2;
+  --ok:#43C18A; --ok-bg:#12291E;
+  --warn:#E2A54D; --warn-bg:#2C2113;
+  --dang:#E5786E; --dang-bg:#2F1917;
+  --info:#94A2B8; --info-bg:#1A2431;
+  --sh1:0 1px 2px rgba(0,0,0,.45);
+  --sh2:0 10px 30px rgba(0,0,0,.55);
+  --sh3:0 26px 64px rgba(0,0,0,.65);
+  color-scheme:dark;
+}
+body[data-dark]{--line2:#354256}
+/* --navy is a text colour here, so everything that used it as a fill needs a
+   real fill instead */
+body[data-dark] .chip.on,body[data-dark] .seg button.on,body[data-dark] .seg2 button.on,
+body[data-dark] .en-tabs .tabb.on,body[data-dark] .you{
+  background:var(--blue);border-color:var(--blue);color:#fff}
+body[data-dark] .back:hover,body[data-dark] .pb-back:hover,body[data-dark] .cc-q:hover,
+body[data-dark] .modal-x:hover{background:var(--blue);border-color:var(--blue);color:#fff}
+body[data-dark] .btn-p{background:var(--blue);color:#fff}
+body[data-dark] .btn-p:hover:not(:disabled){background:#4A7FE8}
+
+/* header, hero and the surfaces under them */
+body[data-dark][data-skin="studio"] .nav{background:#0F1621;border-bottom-color:var(--line)}
+body[data-dark] .projchip{background:var(--sf2);border-color:var(--line)}
+body[data-dark] .brand b{color:var(--blue)}
+body[data-dark] .navgear{background:var(--sf2);border-color:var(--line);color:var(--muted)}
+body[data-dark] .navgear:hover{background:var(--blue);border-color:var(--blue);color:#fff}
+body[data-dark] #sc-dash .pagebar{
+  background:linear-gradient(118deg,#111C2C 0%,#16324F 48%,#1D4E70 100%);
+  box-shadow:0 12px 34px rgba(0,0,0,.5)}
+
+/* tabs, cards, notes */
+body[data-dark][data-skin="studio"] .tabbar{background:#101822;border-color:var(--line)}
+body[data-dark][data-skin="studio"] .tabb.on{background:var(--sf);color:var(--ink);
+  box-shadow:0 1px 3px rgba(0,0,0,.5)}
+body[data-dark][data-skin="studio"] .tabb:hover{background:rgba(255,255,255,.05)}
+body[data-dark] .ccard{background:var(--sf);border-color:var(--line)}
+body[data-dark][data-skin="studio"] .ccard[data-h="A"]:hover{border-color:#2C4670;border-top-color:#7FA6F5}
+body[data-dark][data-skin="studio"] .ccard[data-h="B"]:hover{border-color:#5A302C;border-top-color:#EE8C82}
+body[data-dark] .cc-badge.all{color:#8FA3C4}
+body[data-dark] .cc-badge.rev{color:#C99189}
+body[data-dark] .notes-t{background:var(--sf2);border-color:var(--line);color:var(--muted)}
+body[data-dark] .notes-t:hover,body[data-dark] .notes.open .notes-t{
+  background:#1F2B3A;border-color:var(--line2);color:var(--ink)}
+body[data-dark] .cb-note.info2{background:#16243B;border-color:#263C5E;color:#9CBEF5}
+body[data-dark] .cb-note.info2 b{color:#C6DBFF}
+body[data-dark] .cb-note.warn2{background:#2A2214;border-color:#4A3A1C;color:#E3B96E}
+body[data-dark] .cb-note.warn2 b{color:#F2D49A}
+body[data-dark] .cb-note.void2{background:#1E2430;border-color:#303A4A;color:#9FAEC4}
+body[data-dark] .cb-note.act2{background:#16243B;border-color:#263C5E;color:#9CBEF5}
+
+/* charts and bars */
+body[data-dark] .sbar{background:#1D2734;border-color:var(--line)}
+body[data-dark] .en-bar{background:#1D2734}
+body[data-dark] .mini .m{border-bottom-color:var(--line) !important}
+body[data-dark][data-skin="studio"] .mini .m:hover{background:#1D2734 !important}
+body[data-dark] .donut-ctr .v{color:var(--ink)}
+body[data-dark] .dw svg circle[stroke="var(--line2)"]{stroke:var(--line2)}
+body[data-dark] .setb circle[stroke="#fff"]{stroke:#131B25}
+body[data-dark] .sbar.live i:hover{box-shadow:inset 0 0 0 2px rgba(255,255,255,.55)}
+
+/* tables */
+body[data-dark] .dt-wrap,body[data-dark] .ac-hero,body[data-dark] .card,
+body[data-dark] .ac-sum .m{background:var(--sf);border-color:var(--line)}
+body[data-dark] .ac-tools{background:#101822;border-bottom-color:var(--line)}
+body[data-dark] table.dt thead th{background:#101822;color:var(--muted);
+  border-bottom-color:var(--line)}
+body[data-dark] table.dt thead th.on{background:#1B2838;color:var(--ink)}
+body[data-dark] table.dt thead th:hover{color:var(--blue)}
+body[data-dark] table.dt tbody td{background:var(--sf);border-bottom-color:var(--line)}
+body[data-dark] table.dt tbody tr:nth-child(even) td{background:#161F2A}
+body[data-dark] table.dt tbody tr:hover td{background:#1C2839}
+body[data-dark] table.dt tbody tr.grp td{background:#1B2534 !important}
+body[data-dark] tr.en-newtag td{background:#2A2214 !important}
+body[data-dark] tr.en-na td{opacity:.45}
+body[data-dark] .bytype .trow:hover,body[data-dark] .stuck .trow:hover{background:#1C2839}
+body[data-dark] .trow.sk-mine{background:#16223A}
+
+/* menus, popups, modals */
+body[data-dark] .ms-btn,body[data-dark] .fld input,body[data-dark] .fld select,
+body[data-dark] .ro-add input{background:var(--sf2);border-color:var(--line2);color:var(--ink)}
+body[data-dark] .ms-pop{background:var(--sf);border-color:var(--line2);box-shadow:var(--sh2)}
+body[data-dark] .ms-q{background:var(--sf2);border-color:var(--line2);color:var(--ink)}
+body[data-dark] .ms-row:hover{background:#1C2839}
+body[data-dark] .ms-row.sel{background:#16243B}
+body[data-dark] .modal-card{background:var(--sf)}
+body[data-dark] .modal-h,body[data-dark] .modal-f{border-color:var(--line)}
+body[data-dark] .modal-f{background:#101822}
+body[data-dark] .modal-x{background:var(--sf2);border-color:var(--line);color:var(--muted)}
+body[data-dark] .ro-scroll{border-color:var(--line)}
+body[data-dark] .ro-mail:hover{background:var(--sf2);border-color:var(--line2)}
+body[data-dark] .ro-mail:focus{background:#0F1621;border-color:var(--blue);color:var(--ink)}
+body[data-dark] .ro-rm{background:var(--sf2);border-color:var(--line);color:var(--muted)}
+body[data-dark] .ro-rm:hover{background:var(--dang);border-color:var(--dang);color:#fff}
+body[data-dark] .ro-dept select{background:var(--sf2);border-color:var(--line2);color:var(--ink)}
+
+/* the entry screens */
+body[data-dark] .drop{background:#131B25;border-color:var(--line2)}
+body[data-dark] .drop:hover,body[data-dark] .drop.over{background:#18222F;border-color:var(--blue)}
+body[data-dark] .bg-scrim{background:linear-gradient(180deg,rgba(12,18,26,0) 0%,
+  rgba(12,18,26,.30) 62%,rgba(12,18,26,.80) 100%)}
+body[data-dark] .bg-amb{opacity:.75}
+body[data-dark] .sheettabs .sh{background:#101822;border-color:var(--line);color:var(--muted)}
+body[data-dark] .sheettabs .sh.on{background:var(--sf);color:var(--ink)}
+body[data-dark] .ptip{background:#05294F;box-shadow:0 10px 30px rgba(0,0,0,.6)}
+body[data-dark] ::-webkit-scrollbar-thumb{background:#2B3849;border-color:var(--sf)}
+body[data-dark] ::-webkit-scrollbar-thumb:hover{background:#3A4A60}
+body[data-dark] .foot{color:var(--muted);border-top-color:var(--line)}
+
 </style>
 </head>
 <body>
@@ -1371,10 +1515,8 @@ body[data-skin="studio"] .sheettabs .sh.on{background:#fff;color:var(--ink)}
   <div class="crumbs" id="crumbs"></div>
   <div class="sp"></div>
   <div class="projchip" id="navinfo" style="display:none"></div>
-  <button class="navskin" id="btn-skin" onclick="toggleSkin()" title="Switch the look of the tool">
-    <span class="sw"></span><span id="skinName">Studio</span></button>
   <button class="navgear" id="btn-roster" onclick="openRoster()"
-          title="Engineer list — add or remove names" aria-label="Engineer list">
+          title="Settings — appearance and the engineer list" aria-label="Settings">
     <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7"
          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <circle cx="12" cy="12" r="3.1"/>
@@ -1889,14 +2031,30 @@ body[data-skin="studio"] .sheettabs .sh.on{background:#fff;color:var(--ink)}
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="rosterTitle">
     <div class="modal-h">
       <div>
-        <div class="modal-t" id="rosterTitle">Engineer list</div>
-        <div class="modal-s">Names offered when assigning a requisition or responsible engineer.
-          An email address is optional — where one is given, a report emailed to that engineer is
-          addressed to them automatically.</div>
+        <div class="modal-t" id="rosterTitle">Settings</div>
+        <div class="modal-s">How the tool looks, and the engineers it offers. Both are kept in this
+          browser — neither is written into the register.</div>
       </div>
       <button class="modal-x" onclick="closeRoster()" aria-label="Close">&#10005;</button>
     </div>
     <div class="modal-b">
+      <div class="set-sec">Appearance</div>
+      <div class="lookrow" id="lookRow">
+        <button class="look" data-look="classic">
+          <span class="sw"><i style="background:#2E86B8"></i><i style="background:#F4F6F9"></i></span>
+          <span class="lk">Classic</span><span class="ls">The original blue header</span></button>
+        <button class="look" data-look="studio">
+          <span class="sw"><i style="background:#FFFFFF"></i><i style="background:#E6E9EF"></i></span>
+          <span class="lk">Studio</span><span class="ls">Quiet, white, hairlines</span></button>
+        <button class="look" data-look="dark">
+          <span class="sw"><i style="background:#0C121A"></i><i style="background:#5B8DEF"></i></span>
+          <span class="lk">Dark</span><span class="ls">Studio, after hours</span></button>
+      </div>
+
+      <div class="set-sec">Engineer list</div>
+      <div class="set-sub">Names offered when assigning a requisition or responsible engineer.
+        An email address is optional — where one is given, a report emailed to that engineer is
+        addressed to them automatically.</div>
       <div class="ro-dept">
         <label for="roDept">Department</label>
         <select id="roDept"></select>
@@ -2100,21 +2258,30 @@ function showBackdrop(screen){
    only: no figure, no layout and no behaviour differs between them, so it is
    safe to leave on whichever the team prefers. */
 const SKIN_KEY='vdt.skin.v1';
+const SKINS=['classic','studio','dark'];
+let SKIN='studio';
+/* Dark is not a third layout — it is Studio with its colours restated, so it
+   carries the same data-skin and adds a flag the colour layer keys off. */
 function applySkin(v){
-  document.body.dataset.skin = v==='classic' ? '' : 'studio';
-  const n=$('skinName'); if(n) n.textContent = v==='classic' ? 'Classic' : 'Studio';
-  const b=$('btn-skin'); if(b) b.title = v==='classic'
-    ? 'Classic look — click for Studio' : 'Studio look — click for Classic';
-}
-function toggleSkin(){
-  const now = document.body.dataset.skin==='studio' ? 'classic' : 'studio';
-  try{ localStorage.setItem(SKIN_KEY, now); }catch(e){}
-  applySkin(now);
-  /* the cards are levelled by measurement, so they have to be re-measured
-     once the new padding has landed */
+  SKIN = SKINS.indexOf(v)>=0 ? v : 'studio';
+  document.body.dataset.skin = SKIN==='classic' ? '' : 'studio';
+  if(SKIN==='dark') document.body.setAttribute('data-dark','');
+  else document.body.removeAttribute('data-dark');
+  document.querySelectorAll('#lookRow .look').forEach(b=>
+    b.classList.toggle('on', b.dataset.look===SKIN));
+  /* the cards are levelled by measurement, so they are re-measured once the
+     new padding has landed */
   requestAnimationFrame(()=>{ if(typeof alignCards==='function') alignCards(); });
 }
-window.toggleSkin=toggleSkin;
+function setSkin(v){
+  try{ localStorage.setItem(SKIN_KEY, v); }catch(e){}
+  applySkin(v);
+}
+window.setSkin=setSkin;
+document.addEventListener('click',e=>{
+  const b=e.target.closest && e.target.closest('#lookRow .look');
+  if(b) setSkin(b.dataset.look);
+});
 (function(){ let v='studio'; try{ v=localStorage.getItem(SKIN_KEY)||'studio'; }catch(e){}
   applySkin(v); })();
 /* the upload screen is already on when the page loads, so the backdrop has
@@ -5015,6 +5182,8 @@ function openRoster(){
   const depts=rosterDepts();
   if(!RO.dept || depts.indexOf(RO.dept)<0) RO.dept = (S.disc && depts.indexOf(S.disc)>=0) ? S.disc : depts[0];
   $('rosterModal').hidden=false;
+  document.querySelectorAll('#lookRow .look').forEach(b=>
+    b.classList.toggle('on', b.dataset.look===SKIN));
   renderRoster();
   /* Enter adds, from either field, so a long list can be typed straight in */
   ['roName','roMail'].forEach(id=>$(id).onkeydown=e=>{
@@ -5719,7 +5888,9 @@ function renderEng(){
   const req=S.eng.req[S.po]||'';
   dropdown($('enReqPick'), {
     placeholder: names.length? 'Choose the requisition engineer' : 'No names in the Engineer List sheet',
-    options: names.map(n=>({v:n, t:n})),
+    /* the same way out as the responsible-engineer pickers have */
+    options: (req ? [{v:'', t:'Clear the selection', s:'leave this purchase order without one'}] : [])
+      .concat(names.map(n=>({v:n, t:n}))),
     selected: new Set(req? [req] : []),
     disabled: !names.length,
     onChange: v=>{ if(!setReq([...v][0]||'')) $('enReqPick').setSel(new Set(req?[req]:[])); }
@@ -5755,10 +5926,9 @@ function renderEng(){
     <span class="lnk" onclick="EN.unOnly=true;renderEng()">Show just those</span>${
       naN? ` · <b>${naN}</b> marked N/A and left out of the workload.`:''}`;
 
-  /* How the list is built sits behind the disclosure — except when tags have
-     nobody on them, which is the one thing worth opening unasked. */
+  /* How the list is built sits behind the disclosure, and stays there: a
+     panel that opens itself is one the reader has to close before working. */
   syncNotes('EN','how this list is built');
-  if(unassigned && !$('ndEN').classList.contains('open')) toggleNotes('EN');
 
   document.querySelectorAll('#enTabs .tabb').forEach(b=>b.classList.toggle('on',b.dataset.e===EN.view));
   $('enTagsCard').style.display   = EN.view==='tags'   ? '' : 'none';
@@ -5801,7 +5971,10 @@ function renderEngTags(all, names){
    aside.  It floats, because inside the scrolling table an ordinary popup has
    nowhere to appear. */
 function engPicker(host, names, current, apply, placeholder){
-  const opts=[{v:ENG_NA, t:'N/A — no engineer needed', s:'counts towards nobody'}]
+  /* Once a name is set there was no way back to blank — only to a different
+     name, or to N/A, which means something else entirely. */
+  const opts=(current ? [{v:'', t:'Clear the selection', s:'leave this without an engineer'}] : [])
+    .concat([{v:ENG_NA, t:'N/A — no engineer needed', s:'counts towards nobody'}])
     .concat(names.map(n=>({v:n, t:n})));
   dropdown(host, {
     placeholder: placeholder,
@@ -5821,22 +5994,21 @@ function renderEngPeople(tags){
   const list=sortRows(Object.values(by).map(e=>({...e, pct:e.n?Math.round(e.closed/e.n*100):0})),
                       EN_PEOPLE_COLS, EN.peopleSort);
   sortHead('enPHead', EN_PEOPLE_COLS, EN.peopleSort, renderEng);
-  $('enPBody').innerHTML = list.length? list.map(e=>`<tr${e.who==='(unassigned)'?' class="en-newtag"':''}>
+  $('enPBody').innerHTML = list.length? list.map(e=>{
+    const open = e.who!=='(unassigned)';
+    return `<tr class="${open?'en-open':'en-newtag'}"${open
+      ? ` tabindex="0" role="button" title="See every document ${esc(e.who)} is working on"`+
+        ` onclick="openEngineer('${esc(e.who).replace(/'/g,"\\'")}',event)"` : ''}>
       <td><div class="docno">${e.who==='(unassigned)'?'<span class="en-un">unassigned</span>':esc(e.who)}</div></td>
       <td style="text-align:right"><span class="s1 num">${e.tags.length}</span></td>
       <td style="text-align:right"><span class="s1 num">${e.n}</span></td>
-      <td>${e.who==='(unassigned)'
-        ? `<div style="display:flex;align-items:center;gap:8px">
-             <div class="en-bar"><i style="width:${e.pct}%;background:#2E9E6B"></i></div>
-             <span class="en-load" style="color:var(--muted)">${e.pct}%</span></div>`
-        : `<button class="en-prog" onclick="openEngineer('${esc(e.who).replace(/'/g,"\\'")}',event)"
-             title="See every document ${esc(e.who)} is working on">
-             <div class="en-bar"><i style="width:${e.pct}%;background:#2E9E6B"></i>${
-               e.circ? `<i style="width:${Math.round(e.circ/(e.n||1)*100)}%;background:#D9922E"></i>`:''}</div>
-             <span class="en-load" style="color:${e.pct?'var(--ok)':'var(--muted)'}">${e.pct}%</span>
-             <span class="en-go">open →</span></button>`}</td>
+      <td><div class="en-progcell">
+          <div class="en-bar"><i style="width:${e.pct}%;background:#2E9E6B"></i>${
+            open && e.circ? `<i style="width:${Math.round(e.circ/(e.n||1)*100)}%;background:#D9922E"></i>`:''}</div>
+          <span class="en-load" style="color:${e.pct?'var(--ok)':'var(--muted)'}">${e.pct}%</span>
+          ${open?'<span class="en-go">open →</span>':''}</div></td>
       <td><div class="s2">${e.tags.map(t=>esc(tagLabel(t.tag))+' <span style="color:var(--muted)">('+t.n+')</span>').join(' · ')}</div></td>
-    </tr>`).join('')
+    </tr>`;}).join('')
     : '<tr><td colspan="5" class="empty">No equipment tags in this scope.</td></tr>';
 }
 
@@ -5846,8 +6018,9 @@ const cssId = t => String(t).replace(/[^A-Za-z0-9_-]/g,'_');
 function setReq(name){
   const prev=S.eng.req[S.po]||'';
   if(name===prev) return true;
-  if(prev && !confirm(`Do you want to change the requisition engineer for ${S.po} from "${prev}" to "${name}"?`))
-    return false;
+  const q = !name ? `Remove "${prev}" as the requisition engineer for ${S.po}?`
+                  : `Do you want to change the requisition engineer for ${S.po} from "${prev}" to "${name}"?`;
+  if(prev && !confirm(q)) return false;
   if(name) S.eng.req[S.po]=name; else delete S.eng.req[S.po];
   S.eng.dirty=true; renderEng(); renderReqBtn();
   return true;
@@ -5867,6 +6040,13 @@ function setResp(tag, name, prev){
   return true;
 }
 
+/* The workload row is focusable, so it answers the key that a button would. */
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter' && e.key!==' ') return;
+  const r=e.target.closest && e.target.closest('tr.en-open');
+  if(!r) return;
+  e.preventDefault(); r.click();
+});
 document.addEventListener('click',e=>{
   const b=e.target.closest('#enTabs .tabb'); if(b){ EN.view=b.dataset.e; renderEng(); return; }
   if(e.target.id==='enOnlyUn'){ EN.unOnly=!EN.unOnly; renderEng(); }
