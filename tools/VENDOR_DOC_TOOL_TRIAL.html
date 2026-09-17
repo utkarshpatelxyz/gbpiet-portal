@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vendor Document Management (Trial) — Powered by MERIDIAM</title>
+<title>Vendor Document Management — Powered by MERIDIAM</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -1094,8 +1094,6 @@ table.ro-t tbody tr.ro-new td{animation:roNew 1.4s var(--ease)}
   opacity:0;transform:translateY(10px)}
 .mms-name{margin-top:16px;font-size:clamp(28px,5.4vw,62px);font-weight:800;letter-spacing:-.01em;color:#fff;
   line-height:1.12;opacity:0;transform:translateY(22px);text-shadow:0 0 44px rgba(69,192,206,.4)}
-.mms-trial{font-size:9.5px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;
-  color:rgba(255,255,255,.55);margin-top:7px}
 .mms-rule{height:2px;width:0;margin:26px auto 0;border-radius:2px;
   background:linear-gradient(90deg,#2F97AA,#45C0CE);box-shadow:0 0 14px rgba(69,192,206,.7)}
 .mms-powered{margin-top:24px;opacity:0;transform:translateY(10px);display:flex;align-items:center;
@@ -1539,114 +1537,179 @@ body[data-dark] ::-webkit-scrollbar-thumb:hover{background:#3A4A60}
 body[data-dark] .foot{color:var(--muted);border-top-color:var(--line)}
 
 
-/* ══ TRIAL — THE LAUNCHPAD ═══════════════════════════════════════════════
-   A tile says three things and stops: what the app is, what it is for, and
-   how much is waiting.  No progress bar, no footnote, no colour coding, no
-   tile bigger than its neighbour — everything that was on the face of a tile
-   is inside the app it opens.  A wall of tiles that all look the same is what
-   makes one number on one of them mean something.
-   ═══════════════════════════════════════════════════════════════════════ */
-.lp{padding:14px 0 0}
+/* ══ THE SHELL ═══════════════════════════════════════════════════════════
+   A launchpad shell: a white bar across the top, a blue page behind it, and a
+   wall of identical tiles.  The chrome is quiet so the work is not.
 
-/* The two ways in, as page tabs — the shape a launchpad uses for this. */
-.lp-bar{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;
-  border-bottom:1px solid var(--line)}
+   It is written against the Studio treatment, which this build always has on,
+   and stops at the dark look — a blue daylight page under a dark theme is the
+   one way this goes wrong.
+   ═══════════════════════════════════════════════════════════════════════ */
+body[data-skin="studio"]:not([data-dark]){
+  --blue:#0A6ED1;
+  --ink:#32363A; --muted:#6A6D70;
+  --line:#E5E5E5; --line2:#D9D9D9;
+  --bg:#E6EDF5; --sf:#FFFFFF; --sf2:#F7F8FA;
+  background:linear-gradient(180deg,#C7D9EC 0%,#DAE5F0 34%,#E7EEF5 72%,#EDF2F7 100%);
+  background-attachment:fixed;
+}
+body[data-skin="studio"]:not([data-dark])::before{display:none}
+
+/* the bar across the top */
+body[data-skin="studio"]:not([data-dark]) .nav{
+  background:#fff;border-bottom:1px solid var(--line2);box-shadow:0 1px 2px rgba(0,0,0,.05)}
+body[data-skin="studio"]:not([data-dark]) .nav-in{padding:0 22px;min-height:47px;gap:12px}
+body[data-skin="studio"]:not([data-dark]) .brand{color:var(--ink);font-size:13.5px;font-weight:700}
+body[data-skin="studio"]:not([data-dark]) .brand b{color:var(--blue)}
+body[data-skin="studio"]:not([data-dark]) .brand small{color:#8E9296;font-size:8.5px}
+body[data-skin="studio"]:not([data-dark]) .crumbs{font-size:13px;font-weight:400;color:var(--muted)}
+body[data-skin="studio"]:not([data-dark]) .crumbs .c.on{color:var(--ink);font-weight:600}
+body[data-skin="studio"]:not([data-dark]) .crumbs .s{color:#BFC3C7}
+
+/* the way home: a quiet icon button, the way a shell bar carries one */
+.navhome{display:none;align-items:center;gap:7px;height:32px;padding:0 11px;border-radius:5px;
+  background:transparent;border:1px solid transparent;color:var(--muted);
+  font-size:12.5px;font-weight:500;cursor:pointer;flex:none;
+  transition:background .14s var(--ease),color .14s var(--ease)}
+.navhome.on{display:inline-flex}
+.navhome:hover{background:#EBF2FA;color:var(--blue)}
+body[data-dark] .navhome{color:var(--muted)}
+body[data-dark] .navhome:hover{background:#1C2839;color:var(--blue)}
+
+/* ══ THE LAUNCHPAD ═══════════════════════════════════════════════════════
+   A tile says three things and stops: what the app is, one line on what it is
+   for, and one figure.  Every tile is the same size, the same white and the
+   same ink — a number means something because its neighbours are quiet.
+   ═══════════════════════════════════════════════════════════════════════ */
+.lp{padding:18px 0 0}
+
+/* who is looking, as page tabs */
+.lp-bar{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;border-bottom:1px solid #C6CCD2}
 .lp-bar .fill{flex:1 1 20px}
-.lp-bar .btn{margin-bottom:8px}
-.roleseg{display:flex;gap:26px;flex:none}
-.roleseg button{position:relative;background:none;border:0;padding:10px 0 11px;
-  font-size:13.5px;font-weight:500;color:var(--muted);cursor:pointer;white-space:nowrap;
-  transition:color .16s var(--ease)}
+.lp-bar .btn{margin-bottom:9px}
+.roleseg{display:flex;gap:28px;flex:none}
+.roleseg button{position:relative;background:none;border:0;padding:11px 1px 12px;
+  font-size:15px;font-weight:400;color:var(--muted);cursor:pointer;white-space:nowrap;
+  transition:color .14s var(--ease)}
 .roleseg button:hover{color:var(--ink)}
 .roleseg button.on{color:var(--ink);font-weight:600}
-.roleseg button.on::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;
+.roleseg button.on::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:3px;
   background:var(--blue)}
 
-/* the scope, once, as a quiet line — not six boxes */
+/* the scope, once, as a quiet line */
 .lp-scope{display:flex;flex-wrap:wrap;gap:3px 9px;margin:13px 0 0;
-  font-size:11.5px;font-weight:500;color:var(--muted)}
+  font-size:12.5px;font-weight:400;color:var(--muted)}
 .lp-scope b{color:var(--ink);font-weight:600}
-.lp-scope i{font-style:normal;color:var(--line2)}
+.lp-scope i{font-style:normal;color:#B9BFC5}
 
 .lp-grp{margin-top:26px}
-.lp-grp-h{margin-bottom:11px}
-.lp-grp-h h2{font-size:15px;font-weight:600;color:var(--ink);letter-spacing:0}
+.lp-grp-h{margin-bottom:12px}
+.lp-grp-h h2{font-size:17px;font-weight:400;color:var(--ink);letter-spacing:0}
 
-.lp-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:13px;
-  align-items:stretch}
-.tile{display:flex;flex-direction:column;min-height:200px;padding:17px 19px 18px;
-  background:var(--sf);border:1px solid var(--line2);border-radius:8px;
+/* Fixed tiles, left-aligned — they do not stretch to fill the row, because a
+   tile that changes width with the window stops being a known thing. */
+.lp-tiles{display:grid;grid-template-columns:repeat(auto-fill,244px);gap:12px;justify-content:start}
+@media(max-width:560px){.lp-tiles{grid-template-columns:1fr}}
+.tile{display:flex;flex-direction:column;height:238px;padding:18px 20px 20px;
+  background:var(--sf);border:1px solid var(--line2);border-radius:4px;
   font:inherit;color:inherit;text-align:left;cursor:pointer;overflow:hidden;
-  transition:border-color .16s var(--ease),box-shadow .16s var(--ease)}
+  transition:background .14s var(--ease),border-color .14s var(--ease)}
 /* The name takes two lines if it needs them, the sentence sits straight under
-   it, and the figure is pinned to the foot of the tile — so the figures line up
-   across a row without the short names leaving a hole under them. */
+   it, and the figure is pinned to the foot — so the figures line up across a
+   row without a short name leaving a hole under it. */
 .tile .t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
-  font-size:14.5px;font-weight:600;color:var(--ink);line-height:1.3}
-.tile .d{display:block;margin-top:4px;font-size:11.5px;font-weight:500;color:var(--muted);
-  line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  font-size:16px;font-weight:400;color:var(--ink);line-height:1.3}
+.tile .d{display:block;margin-top:5px;font-size:13.5px;font-weight:400;color:var(--muted);
+  line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tile .mid{flex:1}
-.tile .ft{display:flex;align-items:center;gap:12px;min-height:34px}
-.tile .ic{display:flex;color:var(--blue);opacity:.72;flex:none}
-.tile .n{font-size:32px;font-weight:400;color:var(--ink);letter-spacing:-.5px;line-height:1;
+.tile .ft{display:flex;align-items:center;gap:13px;min-height:38px}
+.tile .ic{display:flex;color:#6C90B4;flex:none;transition:color .14s var(--ease)}
+.tile .n{font-size:38px;font-weight:300;color:var(--ink);letter-spacing:-1px;line-height:1;
   font-variant-numeric:tabular-nums}
-.tile .n small{font-size:15px;font-weight:400;margin-left:1px}
-.tile .n.word{font-size:19px;color:var(--muted)}
-.tile:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.tile .n small{font-size:19px;font-weight:300;margin-left:1px}
+.tile:focus-visible{outline:1px dotted var(--ink);outline-offset:-4px}
 @media (hover:hover){
-  .tile:hover{border-color:var(--blue);box-shadow:0 2px 10px rgba(11,37,69,.09)}
-  .tile:hover .ic{opacity:1}
+  .tile:hover{background:#F5F6F7;border-color:#C2C6CA}
+  .tile:hover .ic{color:var(--blue)}
 }
 @keyframes tilein{from{opacity:0}to{opacity:1}}
-.lp-tiles.in .tile{animation:tilein .28s var(--ease) both}
+.lp-tiles.in .tile{animation:tilein .26s var(--ease) both}
 @media (prefers-reduced-motion:reduce){.lp-tiles.in .tile{animation:none}}
 
-/* home button in the header, the way back from anywhere */
-.navhome{display:none;align-items:center;gap:7px;height:32px;padding:0 12px;border-radius:9px;
-  background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.34);color:#fff;
-  font-size:11.5px;font-weight:800;cursor:pointer;flex:none;
-  transition:background .16s var(--ease),color .16s var(--ease),border-color .16s var(--ease)}
-.navhome.on{display:inline-flex}
-.navhome:hover{background:#fff;border-color:#fff;color:#17558A}
-.navtrial{font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#fff;
-  background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);border-radius:20px;
-  padding:3px 9px;flex:none}
-
 /* ── the worklist every "take action" tile opens ───────────────────────────
-   One screen, five entrances.  Only the documents, only the ones circulating,
+   One screen, four entrances.  Only the documents, only the ones circulating,
    and only the columns an engineer needs to pick the next one up. */
 .wk-head{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 0}
-.wk-head .m{flex:1 1 140px;background:var(--sf);border:1px solid var(--line);border-radius:12px;
-  padding:11px 14px;box-shadow:var(--sh1);position:relative;overflow:hidden}
-.wk-head .m .n{font-size:22px;font-weight:800;color:var(--navy);line-height:1;font-variant-numeric:tabular-nums}
-.wk-head .m .l{font-size:10px;font-weight:700;color:var(--muted);margin-top:5px}
-.wk-head .m.dang .n{color:var(--dang)}.wk-head .m.warn .n{color:var(--warn)}.wk-head .m.ok .n{color:var(--ok)}
-.wk-head .m::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--line2)}
-.wk-head .m.dang::after{background:var(--dang)}.wk-head .m.warn::after{background:var(--warn)}
-.wk-head .m.ok::after{background:var(--ok)}
-.wk-why{font-size:11.5px;font-weight:600;color:var(--muted);line-height:1.6;background:var(--sf);
-  border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:10px;
-  padding:10px 14px;margin:14px 0}
-.wk-why b{color:var(--navy)}
-.wk-q{flex:0 1 230px;min-width:150px;padding:7px 11px;font-size:12px;font-weight:600;color:var(--navy);
-  background:var(--sf);border:1px solid var(--line2);border-radius:8px}
-.wk-q:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
-.wk-q::placeholder{color:var(--muted);font-weight:600}
+.wk-head .m{flex:1 1 150px;background:var(--sf);border:1px solid var(--line2);border-radius:4px;
+  padding:13px 16px}
+.wk-head .m .n{font-size:26px;font-weight:300;color:var(--ink);line-height:1;
+  font-variant-numeric:tabular-nums}
+.wk-head .m .l{font-size:12px;font-weight:400;color:var(--muted);margin-top:6px}
+/* the one figure that stays coloured: work that is already late */
+.wk-head .m.dang .n{color:#BB0000}
+.wk-q{flex:0 1 240px;min-width:150px;padding:7px 11px;font-size:13px;font-weight:400;color:var(--ink);
+  background:var(--sf);border:1px solid var(--line2);border-radius:4px}
+.wk-q:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px rgba(10,110,209,.18)}
+.wk-q::placeholder{color:var(--muted);font-weight:400}
 #wkBody tr{cursor:pointer}
-.wk-open{display:inline-block;white-space:nowrap;font-size:9px;font-weight:800;color:var(--blue);letter-spacing:.08em;text-transform:uppercase;
-  white-space:nowrap}
+.wk-open{display:inline-block;white-space:nowrap;font-size:9px;font-weight:800;color:var(--blue);
+  letter-spacing:.08em;text-transform:uppercase}
+/* the square-cornered furniture of a launchpad, and its one blue button */
+body[data-skin="studio"]:not([data-dark]) #sc-work .pagebar,
+body[data-skin="studio"]:not([data-dark]) #sc-work .card{border-radius:4px}
+body[data-skin="studio"]:not([data-dark]) .chip{border-radius:4px}
+body[data-skin="studio"]:not([data-dark]) .chip.on{
+  background:var(--blue);border-color:var(--blue);color:#fff}
+body[data-skin="studio"]:not([data-dark]) .btn{border-radius:4px}
+body[data-skin="studio"]:not([data-dark]) .btn-p{
+  background:var(--blue);box-shadow:none}
+body[data-skin="studio"]:not([data-dark]) .btn-p:hover:not(:disabled){
+  background:#0854A0;transform:none;box-shadow:none}
+body[data-skin="studio"]:not([data-dark]) .pb-back{border-radius:4px}
 
-/* ── trial under the Studio skin ───────────────────────────────────────── */
-body[data-skin="studio"] .tile{border-color:var(--line2);box-shadow:none}
-body[data-skin="studio"] .navhome{background:var(--sf2);border-color:var(--line2);color:var(--navy)}
-body[data-skin="studio"] .navhome:hover{background:var(--navy);border-color:var(--navy);color:#fff}
-body[data-skin="studio"] .navtrial{background:var(--sf2);border-color:var(--line2);color:var(--muted)}
+/* The overview used to open on a deep navy band — one gradient, used once, as
+   the page's identity.  Under a launchpad shell that band is the loudest thing
+   on screen and it swallowed the page title, so it is a plain bar like every
+   other page's.  The dark look keeps its own. */
+body[data-skin="studio"]:not([data-dark]) #sc-dash .pagebar{
+  background:var(--sf);border:1px solid var(--line2);border-radius:4px;box-shadow:none;
+  padding:12px 18px;margin-top:16px;align-items:center;gap:12px 18px}
+body[data-skin="studio"]:not([data-dark]) #sc-dash .pb-scope{
+  color:var(--muted);font-size:12px;gap:4px 9px}
+body[data-skin="studio"]:not([data-dark]) #sc-dash .pb-scope .v{
+  color:var(--ink);font-weight:600;font-size:12px;letter-spacing:0}
+body[data-skin="studio"]:not([data-dark]) #sc-dash .pb-scope .v+span::before,
+body[data-skin="studio"]:not([data-dark]) #sc-dash .pb-scope span+span::before{color:var(--line2)}
+body[data-skin="studio"]:not([data-dark]) #sc-dash .pb-acts .btn-g{
+  background:var(--sf);border-color:var(--line2);color:var(--ink)}
+body[data-skin="studio"]:not([data-dark]) #sc-dash .pb-acts .btn-g:hover{
+  border-color:var(--blue);color:var(--blue)}
+body[data-skin="studio"]:not([data-dark]) #sc-dash .pb-t{color:var(--ink);font-size:16px;font-weight:600}
 
-/* ── trial after dark ──────────────────────────────────────────────────── */
+/* One corner radius for the surfaces, a tighter one for the controls. */
+body[data-skin="studio"]:not([data-dark]) .card,
+body[data-skin="studio"]:not([data-dark]) .panel,
+body[data-skin="studio"]:not([data-dark]) .ccard,
+body[data-skin="studio"]:not([data-dark]) .dt-wrap,
+body[data-skin="studio"]:not([data-dark]) .pagebar,
+body[data-skin="studio"]:not([data-dark]) .drop,
+body[data-skin="studio"]:not([data-dark]) .ac-sum .m,
+body[data-skin="studio"]:not([data-dark]) .loadbox{border-radius:8px}
+body[data-skin="studio"]:not([data-dark]) .ms-btn,
+body[data-skin="studio"]:not([data-dark]) .ms-pop,
+body[data-skin="studio"]:not([data-dark]) .fld select{border-radius:4px}
+
+/* With no clip embedded there is nothing to dim, and the ambient wash only
+   fights the page behind it — so the page shows through instead. */
+body[data-skin="studio"]:not([data-dark]) .bgstage:not(.has-video){display:none}
+
+/* ── after dark ────────────────────────────────────────────────────────── */
 body[data-dark] .tile,body[data-dark] .wk-head .m{background:var(--sf);border-color:var(--line2)}
-body[data-dark] .tile:hover{border-color:var(--blue)}
-body[data-dark] .lp-bar,body[data-dark] .lp-grp-h{border-color:var(--line)}
+body[data-dark] .tile:hover{background:#18222F;border-color:var(--blue)}
+body[data-dark] .tile .ic{color:#7FA6F5}
+body[data-dark] .lp-bar{border-color:var(--line2)}
 body[data-dark] .wk-q{background:var(--sf2);border-color:var(--line2);color:var(--ink)}
+body[data-dark] .wk-head .m.dang .n{color:#E5786E}
 body[data-dark] #wkBody tr:hover td{background:#1C2839}
 
 </style>
@@ -1658,7 +1721,6 @@ body[data-dark] #wkBody tr:hover td{background:#1C2839}
   <div class="mms-inner">
     <div class="mms-eyebrow">Module</div>
     <div class="mms-name" id="mms-name">Vendor Document Management</div>
-    <div class="mms-trial">Trial version</div>
     <div class="mms-rule"></div>
     <div class="mms-powered">
       <span class="mms-powered-by">Powered by</span>
@@ -1676,7 +1738,6 @@ body[data-dark] #wkBody tr:hover td{background:#1C2839}
 
 <div class="nav"><div class="nav-in">
   <div class="brand">VENDOR <b>DOCUMENT MANAGEMENT</b><small>Powered by MERIDIAM</small></div>
-  <span class="navtrial" title="A trial of the app-based layout. The original tool is unchanged.">Trial</span>
   <div class="nav-sep"></div>
   <button class="navhome" id="btn-home" onclick="goHome()" title="Back to the home page">
     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
@@ -1781,7 +1842,7 @@ body[data-dark] #wkBody tr:hover td{background:#1C2839}
     <div class="pb-scope" id="wkScope"></div>
   </div>
   <div class="wk-head" id="wkSum"></div>
-  <div class="dt-wrap" style="border-radius:14px;border:1px solid var(--line);margin-top:14px">
+  <div class="dt-wrap" style="border-radius:4px;border:1px solid var(--line2);margin-top:14px">
     <div class="ac-tools">
       <input class="wk-q" id="wkQ" placeholder="Search this list"
              autocomplete="off" spellcheck="false" aria-label="Search this list">
@@ -2278,15 +2339,12 @@ body[data-dark] #wkBody tr:hover td{background:#1C2839}
       <div class="set-panel">
       <div class="set-sec">Appearance</div>
       <div class="lookrow" id="lookRow">
-        <button class="look" data-look="classic">
-          <span class="sw"><i style="background:#2E86B8"></i><i style="background:#F4F6F9"></i></span>
-          <span class="lk">Classic</span><span class="ls">The original blue header</span></button>
-        <button class="look" data-look="studio">
-          <span class="sw"><i style="background:#FFFFFF"></i><i style="background:#E6E9EF"></i></span>
-          <span class="lk">Studio</span><span class="ls">Quiet, white, hairlines</span></button>
+        <button class="look" data-look="light">
+          <span class="sw"><i style="background:#FFFFFF"></i><i style="background:#C7D9EC"></i></span>
+          <span class="lk">Light</span><span class="ls">White shell, daylight page</span></button>
         <button class="look" data-look="dark">
           <span class="sw"><i style="background:#0C121A"></i><i style="background:#5B8DEF"></i></span>
-          <span class="lk">Dark</span><span class="ls">Studio, after hours</span></button>
+          <span class="lk">Dark</span><span class="ls">The same tool, after hours</span></button>
       </div>
       </div>
 
@@ -2502,14 +2560,14 @@ function showBackdrop(screen){
    "Classic" is what the tool has always looked like.  The switch is chrome
    only: no figure, no layout and no behaviour differs between them, so it is
    safe to leave on whichever the team prefers. */
-const SKIN_KEY='vdt.skin.v1';
-const SKINS=['classic','studio','dark'];
-let SKIN='studio';
+const SKIN_KEY='vdt.skin.trial.v1';
+const SKINS=['light','dark'];
+let SKIN='light';
 /* Dark is not a third layout — it is Studio with its colours restated, so it
    carries the same data-skin and adds a flag the colour layer keys off. */
 function applySkin(v){
-  SKIN = SKINS.indexOf(v)>=0 ? v : 'studio';
-  document.body.dataset.skin = SKIN==='classic' ? '' : 'studio';
+  SKIN = SKINS.indexOf(v)>=0 ? v : 'light';
+  document.body.dataset.skin = 'studio';
   if(SKIN==='dark') document.body.setAttribute('data-dark','');
   else document.body.removeAttribute('data-dark');
   document.querySelectorAll('#lookRow .look').forEach(b=>
@@ -6644,9 +6702,12 @@ const ICO={
 
 /* ── the groups on the home page, and the order each role reads them in ──── */
 const LP_GROUPS={ act:'Take action', plan:'Plan the work', see:'Reports' };
-/* Which group a role reads first is the whole of the difference — no tile is
-   hidden from anybody, and none is made bigger than its neighbour. */
-const LP_ORDER={ eng:['act','see','plan'], mgr:['see','plan','act'] };
+/* Each app belongs to exactly one tab.  Reviewing is the work itself — the
+   documents circulating against your discipline, and nothing else on screen.
+   Managing is everything that looks across the whole purchase order for the
+   originator department: the reports and the planning.  Nothing appears in
+   both, because a tile in two places is a tile nobody trusts. */
+const LP_ORDER={ eng:['act'], mgr:['see','plan'] };
 
 /* ═══ HOME ══════════════════════════════════════════════════════════════ */
 function goHome(){ renderHome(); go('home'); }
@@ -6680,33 +6741,33 @@ function homeApps(){
   return [
     /* ── take action ───────────────────────────────────────────────────── */
     {g:'act', id:'mine',    ic:ICO.mine,    n:mine.length,
-     t:'My review actions',   d:'Circulating, not closed by you',   open:()=>openWork('mine')},
+     t:'My review actions',   d:'Not yet closed by you',   open:()=>openWork('mine')},
     {g:'act', id:'others',   ic:ICO.others,  n:oth.length,
-     t:'Waiting on others',   d:'Reviewed by you, held elsewhere',  open:()=>openWork('others')},
+     t:'Waiting on others',   d:'Held by another discipline',  open:()=>openWork('others')},
     {g:'act', id:'release',  ic:ICO.release, n:rel.length,
-     t:'Ready to release',    d:'All sign-offs in, still circulating', open:()=>openWork('release')},
+     t:'Ready to release',    d:'Every sign-off is in', open:()=>openWork('release')},
     {g:'act', id:'every',    ic:ICO.every,   n:circ.length,
-     t:'Everything circulating', d:'The whole circuit on this order', open:()=>openWork('every')},
+     t:'Everything circulating', d:'The whole circuit', open:()=>openWork('every')},
 
     /* ── plan the work ─────────────────────────────────────────────────── */
     {g:'plan', id:'assign',  ic:ICO.assign,  n:unassigned,
-     t:'Assign engineers',    d:'Tags with nobody against them',    open:()=>openAssign('tags')},
+     t:'Assign engineers',    d:'Tags with nobody on them',    open:()=>openAssign('tags')},
     {g:'plan', id:'load',    ic:ICO.load,    n:people.size,
-     t:'Workload by engineer',d:'How much sits on each person',     open:()=>openAssign('people')},
+     t:'Workload by engineer',d:'What sits on each person',     open:()=>openAssign('people')},
     {g:'plan', id:'progress',ic:ICO.compare, n:null,
      t:'Check progress',      d:'Against an earlier export',
      open:()=>{ crumbApp('Check progress'); openProgress(); }},
 
     /* ── reports ───────────────────────────────────────────────────────── */
     {g:'see', id:'overview', ic:ICO.grid,    n:st.total,
-     t:'Project overview',    d:'Progress by type and discipline',  open:()=>openOverview('action')},
+     t:'Project overview',    d:'By type and discipline',  open:()=>openOverview('action')},
     {g:'see', id:'perf',     ic:ICO.clock,   n: perf? perf.pct : 0, unit:'%',
      t:'Review performance',  d:'Against the '+DEADLINE_DAYS+'-day rule', open:()=>openOverview('perf')},
     {g:'see', id:'vdr',      ic:ICO.doc,     n:null,
      t:'Vendor document status', d:'The client-format report',
      open:()=>{ crumbApp('Vendor document status'); openVdr(); }},
     {g:'see', id:'points',   ic:ICO.list,    n:basket,
-     t:'Open points',         d:'Comments collected on documents',
+     t:'Open points',         d:'Comments on documents',
      open:()=>{ crumbApp('Open points'); openBasket(); }}
   ];
 }
@@ -6731,10 +6792,13 @@ function renderHome(){
     b.onclick=()=>setRole(b.dataset.r);
   });
 
-  /* the scope, once, as a line of text */
+  /* The scope, once, as a line of text — and it is not the same scope in the
+     two tabs.  Reviewing is what this discipline owes; managing is the whole
+     purchase order raised by the originator department. */
   $('lpScope').innerHTML=[
-    `<b>${esc(S.po)}</b>`, esc(S.poDesc||''), esc(S.dep),
-    'reviewing as <b>'+esc(S.disc||'—')+'</b>',
+    `<b>${esc(S.po)}</b>`, esc(S.poDesc||''),
+    ROLE==='mgr' ? 'whole purchase order, originator <b>'+esc(S.dep)+'</b>'
+                 : esc(S.dep)+' <i>·</i> reviewing as <b>'+esc(S.disc||'—')+'</b>',
     '<b>'+S.docs.length.toLocaleString()+'</b> documents',
     'as of '+esc((S.meta&&S.meta.asOf)||'—')
   ].filter(Boolean).join('<i>·</i>');
