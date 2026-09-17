@@ -1540,120 +1540,65 @@ body[data-dark] .foot{color:var(--muted);border-top-color:var(--line)}
 
 
 /* ══ TRIAL — THE LAUNCHPAD ═══════════════════════════════════════════════
-   Apps instead of screens.  A tile answers three things and stops: what job
-   it does, how much of that job is waiting, and whether it is yours to do.
-   Everything deeper lives inside the app it opens.
-
-   Nothing here invents a new visual language.  The radii, hairlines, shadows,
-   figure sizes and table are the ones already in this file, so an app opened
-   from a tile looks like the page it replaced.
+   A tile says three things and stops: what the app is, what it is for, and
+   how much is waiting.  No progress bar, no footnote, no colour coding, no
+   tile bigger than its neighbour — everything that was on the face of a tile
+   is inside the app it opens.  A wall of tiles that all look the same is what
+   makes one number on one of them mean something.
    ═══════════════════════════════════════════════════════════════════════ */
-.lp{padding:18px 0 0}
-.lp-hero{display:flex;align-items:flex-end;gap:12px 18px;flex-wrap:wrap}
-.lp-hero h1{font-size:23px;font-weight:800;color:var(--navy);letter-spacing:-.5px;line-height:1.15}
-.lp-hero .sub{font-size:12.5px;color:var(--muted);margin-top:4px;max-width:62ch}
-.lp-hero .fill{flex:1 1 30px}
+.lp{padding:14px 0 0}
 
-/* Who is looking.  Not a login — the same file is opened by a reviewer and by
-   the lead who is chasing them, and each wants a different first tile.  The
-   choice is kept in this browser, so two people sharing the file never see
-   each other's. */
-.roleseg{display:flex;background:var(--sf2);border:1px solid var(--line2);border-radius:11px;
-  padding:3px;gap:3px;flex:none}
-.roleseg button{background:none;border:0;padding:7px 13px;border-radius:8px;font-size:11.5px;font-weight:700;
-  color:var(--muted);cursor:pointer;white-space:nowrap;
-  transition:color .16s var(--ease),background .16s var(--ease),box-shadow .16s var(--ease)}
-.roleseg button:hover{color:var(--navy)}
-.roleseg button.on{background:var(--sf);color:var(--navy);box-shadow:var(--sh1)}
+/* The two ways in, as page tabs — the shape a launchpad uses for this. */
+.lp-bar{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;
+  border-bottom:1px solid var(--line)}
+.lp-bar .fill{flex:1 1 20px}
+.lp-bar .btn{margin-bottom:8px}
+.roleseg{display:flex;gap:26px;flex:none}
+.roleseg button{position:relative;background:none;border:0;padding:10px 0 11px;
+  font-size:13.5px;font-weight:500;color:var(--muted);cursor:pointer;white-space:nowrap;
+  transition:color .16s var(--ease)}
+.roleseg button:hover{color:var(--ink)}
+.roleseg button.on{color:var(--ink);font-weight:600}
+.roleseg button.on::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;
+  background:var(--blue)}
 
-/* the scope, stated once, at the top of the home page */
-.lp-scope{display:flex;align-items:center;gap:8px 18px;flex-wrap:wrap;margin:16px 0 2px;
-  background:var(--sf);border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh1);padding:11px 16px}
-.lp-scope .u{display:flex;flex-direction:column;gap:2px;min-width:0}
-.lp-scope .k{font-size:8.5px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
-.lp-scope .v{font-size:13.5px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lp-scope .bar{width:1px;height:28px;background:var(--line);flex:none}
-.lp-scope .fill{flex:1 1 20px}
+/* the scope, once, as a quiet line — not six boxes */
+.lp-scope{display:flex;flex-wrap:wrap;gap:3px 9px;margin:13px 0 0;
+  font-size:11.5px;font-weight:500;color:var(--muted)}
+.lp-scope b{color:var(--ink);font-weight:600}
+.lp-scope i{font-style:normal;color:var(--line2)}
 
-.lp-grp{margin-top:22px}
-.lp-grp-h{display:flex;align-items:baseline;gap:12px;margin-bottom:11px}
-.lp-grp-h h2{font-size:14px;font-weight:800;color:var(--navy);letter-spacing:-.1px;white-space:nowrap}
-.lp-grp-h .s{font-size:11.5px;font-weight:600;color:var(--muted)}
-.lp-grp-h .rule{flex:1;height:1px;background:var(--line)}
-@media(max-width:700px){.lp-grp-h .s{display:none}}
+.lp-grp{margin-top:26px}
+.lp-grp-h{margin-bottom:11px}
+.lp-grp-h h2{font-size:15px;font-weight:600;color:var(--ink);letter-spacing:0}
 
-.lp-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(214px,1fr));gap:14px;align-items:stretch}
-.tile{position:relative;display:flex;flex-direction:column;min-height:164px;padding:15px 16px 13px;
-  background:var(--sf);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh1);
+.lp-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:13px;
+  align-items:stretch}
+.tile{display:flex;flex-direction:column;min-height:200px;padding:17px 19px 18px;
+  background:var(--sf);border:1px solid var(--line2);border-radius:8px;
   font:inherit;color:inherit;text-align:left;cursor:pointer;overflow:hidden;
-  transition:box-shadow .22s var(--ease),border-color .22s var(--ease),transform .22s var(--spring)}
-.tile::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--line2);
-  transition:width .22s var(--ease)}
-.tile.warn::after{background:var(--warn)} .tile.dang::after{background:var(--dang)}
-.tile.ok::after{background:var(--ok)}     .tile.blue::after{background:var(--blue)}
-.tile.plum::after{background:#6B3FA0}     .tile.teal::after{background:var(--teal)}
-.tile-h{display:flex;align-items:flex-start;gap:10px;padding-right:4px}
-.tile.lead .tile-h{padding-right:78px}
-/* The name and the sentence under it share a fixed block, so the figure on
-   every tile starts at the same height and a row reads as one row — while a
-   one-line name still sits directly above its own sentence. */
-.tile-h .tx{display:block;min-width:0;flex:1;min-height:68px}
-.tile .ic{width:30px;height:30px;flex:none;border-radius:9px;background:var(--sf2);border:1px solid var(--line);
-  color:var(--muted);display:flex;align-items:center;justify-content:center}
-.tile.warn .ic{background:var(--warn-bg);border-color:#F0DCB6;color:#9A6414}
-.tile.dang .ic{background:var(--dang-bg);border-color:#F1BEB9;color:#9C2C24}
-.tile.ok   .ic{background:var(--ok-bg);border-color:#C4E7D4;color:#1F7A50}
-.tile.blue .ic{background:#EAF1FE;border-color:#C7D9FA;color:#1D4ED8}
-.tile.plum .ic{background:#F2ECF9;border-color:#DCCDEE;color:#5B3489}
-.tile.teal .ic{background:#E6F5F7;border-color:#C2E4E9;color:#1F6C7A}
-/* Two lines for the name, two for the sentence under it, always — so the
-   figure on every tile starts at the same height and a row of tiles reads
-   as one row rather than four cards that happen to be side by side. */
+  transition:border-color .16s var(--ease),box-shadow .16s var(--ease)}
+/* The name takes two lines if it needs them, the sentence sits straight under
+   it, and the figure is pinned to the foot of the tile — so the figures line up
+   across a row without the short names leaving a hole under them. */
 .tile .t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
-  font-size:13px;font-weight:800;color:var(--navy);line-height:1.25}
-.tile .d{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
-  font-size:11px;font-weight:600;color:var(--muted);line-height:1.45;margin-top:3px}
-.tile .mid{display:flex;flex:1;align-items:flex-end;padding-top:10px}
-.tile .n{display:block;font-size:34px;font-weight:800;color:var(--navy);letter-spacing:-1.2px;line-height:.95;
+  font-size:14.5px;font-weight:600;color:var(--ink);line-height:1.3}
+.tile .d{display:block;margin-top:4px;font-size:11.5px;font-weight:500;color:var(--muted);
+  line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .mid{flex:1}
+.tile .ft{display:flex;align-items:center;gap:12px;min-height:34px}
+.tile .ic{display:flex;color:var(--blue);opacity:.72;flex:none}
+.tile .n{font-size:32px;font-weight:400;color:var(--ink);letter-spacing:-.5px;line-height:1;
   font-variant-numeric:tabular-nums}
-.tile .n small{font-size:14px;font-weight:800;letter-spacing:0;margin-left:3px}
-.tile.warn .n{color:#9A6414} .tile.dang .n{color:var(--dang)} .tile.ok .n{color:#1F7A50}
-.tile.blue .n{color:#1D4ED8} .tile.plum .n{color:#5B3489} .tile.teal .n{color:#1F6C7A}
-.tile .n.quiet{color:var(--muted);font-size:25px;letter-spacing:-.6px}
-.tile .f{display:block;font-size:10.5px;font-weight:700;color:var(--muted);margin-top:9px;padding-top:9px;padding-right:22px;
-  border-top:1px solid var(--line);line-height:1.4;min-height:32px}
-.tile .f b{color:var(--navy)}
-.tile .f .late{color:var(--dang)}
-.tile .go{display:block;position:absolute;right:13px;bottom:11px;font-size:13px;font-weight:800;color:var(--line2);
-  transition:color .2s var(--ease),transform .2s var(--ease)}
-.tile .sb{display:flex;height:6px;border-radius:20px;overflow:hidden;background:var(--sf2);
-  border:1px solid var(--line);margin-top:13px}
-.tile .sb i{display:block;height:100%}
-
-/* The app the role is pointed at is twice as wide and carries the split of
-   its own number, so "which one do I open" is answered before it is asked. */
-.tile.lead{grid-column:span 2}
-@media(max-width:600px){.tile.lead{grid-column:span 1}}
-.tile.lead .n{font-size:44px;letter-spacing:-1.9px}
-.tile .ribbon{position:absolute;top:0;right:0;font-size:8px;font-weight:800;letter-spacing:.12em;
-  text-transform:uppercase;color:#fff;background:var(--navy);padding:4px 10px;border-radius:0 13px 0 10px}
-.tile.off{opacity:.6}
-.tile.off .n{color:var(--muted)}
+.tile .n small{font-size:15px;font-weight:400;margin-left:1px}
+.tile .n.word{font-size:19px;color:var(--muted)}
 .tile:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 @media (hover:hover){
-  .tile:hover{border-color:var(--line2);box-shadow:var(--sh2);transform:translateY(-3px)}
-  .tile:hover::after{width:5px}
-  .tile:hover .go{color:var(--blue);transform:translateX(3px)}
-  .tile:active{transform:translateY(-1px)}
+  .tile:hover{border-color:var(--blue);box-shadow:0 2px 10px rgba(11,37,69,.09)}
+  .tile:hover .ic{opacity:1}
 }
-@media (prefers-reduced-motion:reduce){
-  .tile,.tile::after,.tile .go{transition:none}
-  .tile:hover{transform:none}
-}
-/* the tiles arrive rather than appear, once, on the way in */
-@keyframes tilein{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-.lp-tiles.in .tile{animation:tilein .34s var(--ease) both}
+@keyframes tilein{from{opacity:0}to{opacity:1}}
+.lp-tiles.in .tile{animation:tilein .28s var(--ease) both}
 @media (prefers-reduced-motion:reduce){.lp-tiles.in .tile{animation:none}}
 
 /* home button in the header, the way back from anywhere */
@@ -1692,32 +1637,15 @@ body[data-dark] .foot{color:var(--muted);border-top-color:var(--line)}
   white-space:nowrap}
 
 /* ── trial under the Studio skin ───────────────────────────────────────── */
-body[data-skin="studio"] .tile{border-color:var(--line);box-shadow:0 1px 2px rgba(16,24,40,.05)}
-body[data-skin="studio"] .lp-scope{box-shadow:0 1px 2px rgba(16,24,40,.05)}
+body[data-skin="studio"] .tile{border-color:var(--line2);box-shadow:none}
 body[data-skin="studio"] .navhome{background:var(--sf2);border-color:var(--line2);color:var(--navy)}
 body[data-skin="studio"] .navhome:hover{background:var(--navy);border-color:var(--navy);color:#fff}
 body[data-skin="studio"] .navtrial{background:var(--sf2);border-color:var(--line2);color:var(--muted)}
-@media (hover:hover){
-  body[data-skin="studio"] .tile:hover{border-color:var(--line2);box-shadow:var(--sh2);transform:translateY(-3px)}
-}
 
 /* ── trial after dark ──────────────────────────────────────────────────── */
-body[data-dark] .tile,body[data-dark] .lp-scope,body[data-dark] .wk-head .m,
-body[data-dark] .wk-why{background:var(--sf);border-color:var(--line)}
-body[data-dark] .tile .ic{background:var(--sf2);border-color:var(--line);color:var(--muted)}
-body[data-dark] .tile.warn .ic{background:var(--warn-bg);border-color:#4A3A1C;color:#E3B96E}
-body[data-dark] .tile.dang .ic{background:var(--dang-bg);border-color:#5A302C;color:#EE8C82}
-body[data-dark] .tile.ok   .ic{background:var(--ok-bg);border-color:#1E4634;color:#5FD2A0}
-body[data-dark] .tile.blue .ic{background:#16243B;border-color:#263C5E;color:#9CBEF5}
-body[data-dark] .tile.plum .ic{background:#221A33;border-color:#3A2C55;color:#B594E0}
-body[data-dark] .tile.teal .ic{background:#10262C;border-color:#1E4048;color:#6FC6D6}
-body[data-dark] .tile.warn .n{color:#E2A54D} body[data-dark] .tile.dang .n{color:#E5786E}
-body[data-dark] .tile.ok .n{color:#43C18A}   body[data-dark] .tile.blue .n{color:#7FA6F5}
-body[data-dark] .tile.plum .n{color:#B594E0} body[data-dark] .tile.teal .n{color:#6FC6D6}
-body[data-dark] .tile .ribbon{background:var(--blue);color:#fff}
-body[data-dark] .tile .sb{background:#1D2734;border-color:var(--line)}
-body[data-dark] .roleseg{background:#101822;border-color:var(--line)}
-body[data-dark] .roleseg button.on{background:var(--sf);color:var(--ink)}
+body[data-dark] .tile,body[data-dark] .wk-head .m{background:var(--sf);border-color:var(--line2)}
+body[data-dark] .tile:hover{border-color:var(--blue)}
+body[data-dark] .lp-bar,body[data-dark] .lp-grp-h{border-color:var(--line)}
 body[data-dark] .wk-q{background:var(--sf2);border-color:var(--line2);color:var(--ink)}
 body[data-dark] #wkBody tr:hover td{background:#1C2839}
 
@@ -1827,16 +1755,12 @@ body[data-dark] #wkBody tr:hover td{background:#1C2839}
      to learn a dashboard first. -->
 <div class="screen" id="sc-home"><div class="wrap">
   <div class="lp">
-    <div class="lp-hero">
-      <div>
-        <h1 id="lpH">Home</h1>
-        <div class="sub" id="lpSub"></div>
-      </div>
-      <div class="fill"></div>
+    <div class="lp-bar">
       <div class="roleseg" id="lpRole" role="group" aria-label="Who is using the tool">
         <button data-r="eng" type="button">I am reviewing</button>
         <button data-r="mgr" type="button">I am managing</button>
       </div>
+      <div class="fill"></div>
       <button class="btn btn-g btn-s" onclick="go('filter')">Change scope</button>
       <button class="btn btn-g btn-s" onclick="resetAll()">Load another file</button>
     </div>
@@ -1856,7 +1780,6 @@ body[data-dark] #wkBody tr:hover td{background:#1C2839}
     <div class="pb-sp"></div>
     <div class="pb-scope" id="wkScope"></div>
   </div>
-  <div class="wk-why" id="wkWhy"></div>
   <div class="wk-head" id="wkSum"></div>
   <div class="dt-wrap" style="border-radius:14px;border:1px solid var(--line);margin-top:14px">
     <div class="ac-tools">
@@ -6703,8 +6626,8 @@ window.setRole=setRole;
 
 /* ── the icons on the tiles ───────────────────────────────────────────────
    One stroke weight, one size, drawn inline so the file stays a single file. */
-const _svg = d => '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" '+
-  'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+d+'</svg>';
+const _svg = d => '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" '+
+  'stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+d+'</svg>';
 const ICO={
   mine   :_svg('<rect x="3" y="4" width="18" height="16" rx="2.6"/><path d="M8 12.2l2.6 2.6L16 9.4"/>'),
   others :_svg('<path d="M15.5 20.5v-1.8a3.6 3.6 0 0 0-3.6-3.6H6.1a3.6 3.6 0 0 0-3.6 3.6v1.8"/><circle cx="9" cy="7.4" r="3.6"/><path d="M21.5 20.5v-1.8a3.6 3.6 0 0 0-2.7-3.5"/><path d="M16.2 4a3.6 3.6 0 0 1 0 6.9"/>'),
@@ -6720,17 +6643,10 @@ const ICO={
 };
 
 /* ── the groups on the home page, and the order each role reads them in ──── */
-const LP_GROUPS={
-  act :{t:'Take action',            s:'documents circulating right now — these are what move the work'},
-  plan:{t:'Plan the work',          s:'who is on what, and what has moved since last time'},
-  see :{t:'See the whole picture',  s:'everything the register can be asked about'}
-};
+const LP_GROUPS={ act:'Take action', plan:'Plan the work', see:'Reports' };
+/* Which group a role reads first is the whole of the difference — no tile is
+   hidden from anybody, and none is made bigger than its neighbour. */
 const LP_ORDER={ eng:['act','see','plan'], mgr:['see','plan','act'] };
-const LP_LEAD ={ eng:'mine',              mgr:'overview' };
-const LP_HEAD ={
-  eng:{h:'Your documents', s:'Start with the documents circulating against your discipline. Everything else on this page is one click away when you want it.'},
-  mgr:{h:'The purchase order', s:'Start with where the purchase order stands, then look at who is holding what. The action apps below are what your engineers see.'}
-};
 
 /* ═══ HOME ══════════════════════════════════════════════════════════════ */
 function goHome(){ renderHome(); go('home'); }
@@ -6749,138 +6665,62 @@ window.crumbApp=crumbApp;
 function homeApps(){
   const docs=S.docs||[];
   const circ=docs.filter(d=>d.circulating);
-  const of=k=>circ.filter(d=>d.stuck===k);
-  const mine=of('you'), oth=of('others'), rel=of('release');
-  const late=l=>l.filter(d=>d.over>0).length;
-  const crit=l=>l.filter(d=>isCriticalDoc(d)).length;
-  const T=circ.length||1;
-  const w=n=>(n/T*100).toFixed(2);
-  const split=`<div class="sb" title="${mine.length} waiting on you · ${oth.length} on other disciplines · ${rel.length} ready to release">
-      <i style="width:${w(mine.length)}%;background:#D9922E"></i>
-      <i style="width:${w(oth.length)}%;background:#2563EB"></i>
-      <i style="width:${w(rel.length)}%;background:#2E9E6B"></i></div>`;
+  const of=k=>circ.filter(d=>d.stuck===k).length;
+  const mine={length:of('you')}, oth={length:of('others')}, rel={length:of('release')};
 
   let tags=[]; try{ tags=engTags(); }catch(e){ tags=[]; }
   const unassigned=tags.filter(t=>!t.who).length;
   const people=new Set(tags.map(t=>t.who).filter(Boolean));
-  const held=tags.filter(t=>t.who).reduce((a,t)=>a+t.n,0);
 
   const st=statsFor(halfBase('A'));
-  const stBar=`<div class="sb">`+BANDS.map(b=>
-      `<i style="width:${((st.totals[b.key]||0)/(st.total||1)*100).toFixed(2)}%;background:${b.col}"></i>`).join('')+`</div>`;
-
   let perf=null;
   try{ perf=perfAgg(cyclesFor(halfBase('A'),'tr')); }catch(e){ perf=null; }
   const basket=(S.basket||[]).length;
 
   return [
     /* ── take action ───────────────────────────────────────────────────── */
-    {g:'act', id:'mine', cls:'warn', ic:ICO.mine,
-     t:'My review actions',
-     d:'Circulating, and '+(S.disc||'your discipline')+' has not closed it',
-     n:mine.length, bar:split,
-     f: mine.length
-        ? `<span class="late">${late(mine)} past the ${DEADLINE_DAYS}-day deadline</span> · ${crit(mine)} critical`
-        : 'Nothing in this purchase order is waiting on you',
-     open:()=>openWork('mine')},
-
-    {g:'act', id:'others', cls:'blue', ic:ICO.others,
-     t:'Waiting on other disciplines',
-     d:'You are done — somebody else is not',
-     n:oth.length, bar:split,
-     f: oth.length
-        ? `held by <b>${new Set([].concat(...oth.map(d=>d.othersOpen))).size}</b> discipline`+
-          (new Set([].concat(...oth.map(d=>d.othersOpen))).size===1?'':'s')+` · ${late(oth)} past the deadline`
-        : 'Nothing of yours is held by anyone else',
-     open:()=>openWork('others')},
-
-    {g:'act', id:'release', cls:'ok', ic:ICO.release,
-     t:'Ready to release',
-     d:'Every discipline signed off — send it back',
-     n:rel.length, bar:split,
-     f: rel.length
-        ? `finished work nobody has noticed is finished`
-        : 'Nothing is sitting signed-off in the circuit',
-     open:()=>openWork('release')},
-
-    {g:'act', id:'every', cls:'teal', ic:ICO.every,
-     t:'Everything circulating',
-     d:'The whole circuit on this purchase order',
-     n:circ.length, bar:split,
-     f:`<b>${late(circ)}</b> past the deadline · longest out <b>${
-         circ.reduce((m,d)=>Math.max(m,d.days||0),0)}</b> days`,
-     open:()=>openWork('every')},
+    {g:'act', id:'mine',    ic:ICO.mine,    n:mine.length,
+     t:'My review actions',   d:'Circulating, not closed by you',   open:()=>openWork('mine')},
+    {g:'act', id:'others',   ic:ICO.others,  n:oth.length,
+     t:'Waiting on others',   d:'Reviewed by you, held elsewhere',  open:()=>openWork('others')},
+    {g:'act', id:'release',  ic:ICO.release, n:rel.length,
+     t:'Ready to release',    d:'All sign-offs in, still circulating', open:()=>openWork('release')},
+    {g:'act', id:'every',    ic:ICO.every,   n:circ.length,
+     t:'Everything circulating', d:'The whole circuit on this order', open:()=>openWork('every')},
 
     /* ── plan the work ─────────────────────────────────────────────────── */
-    {g:'plan', id:'assign', cls:unassigned?'dang':'ok', ic:ICO.assign,
-     t:'Assign engineers',
-     d:'One responsible engineer per equipment tag',
-     n:unassigned, quiet:!unassigned,
-     f: unassigned
-        ? `still to assign, of <b>${tags.length}</b> equipment tag${tags.length===1?'':'s'}`
-        : `all <b>${tags.length}</b> equipment tag${tags.length===1?'':'s'} covered`,
-     open:()=>openAssign('tags')},
-
-    {g:'plan', id:'load', cls:'plum', ic:ICO.load,
-     t:'Workload by engineer',
-     d:'How much sits on each person',
-     n:people.size, quiet:!people.size,
-     f: people.size
-        ? `holding <b>${held.toLocaleString()}</b> document${held===1?'':'s'} between them`
-        : 'nobody is assigned yet — start with Assign engineers',
-     open:()=>openAssign('people')},
-
-    {g:'plan', id:'progress', cls:'', ic:ICO.compare, quiet:true,
-     t:'Check progress',
-     d:'This export against an earlier one',
-     n:'Compare',
-     f:'what closed, what is new, what has not moved',
+    {g:'plan', id:'assign',  ic:ICO.assign,  n:unassigned,
+     t:'Assign engineers',    d:'Tags with nobody against them',    open:()=>openAssign('tags')},
+    {g:'plan', id:'load',    ic:ICO.load,    n:people.size,
+     t:'Workload by engineer',d:'How much sits on each person',     open:()=>openAssign('people')},
+    {g:'plan', id:'progress',ic:ICO.compare, n:null,
+     t:'Check progress',      d:'Against an earlier export',
      open:()=>{ crumbApp('Check progress'); openProgress(); }},
 
-    /* ── see the whole picture ─────────────────────────────────────────── */
-    {g:'see', id:'overview', cls:'blue', ic:ICO.grid,
-     t:'Project overview',
-     d:'Progress by document type and by discipline',
-     n:st.total, bar:stBar,
-     f:`<b>${st.progress}%</b> reviewed without comments · ${st.byCode.length} document types`,
-     open:()=>openOverview('action')},
-
-    {g:'see', id:'perf', cls:'plum', ic:ICO.clock,
-     t:'Review performance',
-     d:'Against the '+DEADLINE_DAYS+'-day rule, over all history',
-     n: perf? perf.pct : 0, unit:'%',
-     f: perf
-        ? `on time · median <b>${perf.med}</b> days · <b>${perf.lost.toLocaleString()}</b> days lost`
-        : 'no closed circulations to measure yet',
-     open:()=>openOverview('perf')},
-
-    {g:'see', id:'vdr', cls:'', ic:ICO.doc, quiet:true,
-     t:'Vendor document status',
-     d:'The client-format VDR report',
-     n:'Report',
-     f:'critical and other documents, week by week',
+    /* ── reports ───────────────────────────────────────────────────────── */
+    {g:'see', id:'overview', ic:ICO.grid,    n:st.total,
+     t:'Project overview',    d:'Progress by type and discipline',  open:()=>openOverview('action')},
+    {g:'see', id:'perf',     ic:ICO.clock,   n: perf? perf.pct : 0, unit:'%',
+     t:'Review performance',  d:'Against the '+DEADLINE_DAYS+'-day rule', open:()=>openOverview('perf')},
+    {g:'see', id:'vdr',      ic:ICO.doc,     n:null,
+     t:'Vendor document status', d:'The client-format report',
      open:()=>{ crumbApp('Vendor document status'); openVdr(); }},
-
-    {g:'see', id:'points', cls:'', ic:ICO.list, quiet:!basket,
-     t:'Open points register',
-     d:'Comments collected against documents',
-     n: basket || 'Empty',
-     f: basket ? `point${basket===1?'':'s'} collected in this browser`
-               : 'nothing collected yet',
-     open:()=>{ crumbApp('Open points register'); openBasket(); }}
+    {g:'see', id:'points',   ic:ICO.list,    n:basket,
+     t:'Open points',         d:'Comments collected on documents',
+     open:()=>{ crumbApp('Open points'); openBasket(); }}
   ];
 }
 
-function tileHTML(a, lead){
-  const n = typeof a.n==='number' ? a.n.toLocaleString() : esc(a.n);
-  return `<button type="button" class="tile ${a.cls||''}${lead?' lead':''}" data-a="${esc(a.id)}">
-    ${lead?'<span class="ribbon">Start here</span>':''}
-    <span class="tile-h"><span class="ic">${a.ic}</span>
-      <span class="tx"><span class="t">${esc(a.t)}</span><span class="d">${esc(a.d)}</span></span></span>
-    <span class="mid"><span class="n${a.quiet?' quiet':''}">${n}${a.unit?`<small>${esc(a.unit)}</small>`:''}</span></span>
-    ${lead&&a.bar?a.bar:''}
-    <span class="f">${a.f||''}</span>
-    <span class="go">&#8594;</span></button>`;
+function tileHTML(a){
+  const n = a.n==null ? ''
+    : `<span class="n${typeof a.n==='number'?'':' word'}">${
+        typeof a.n==='number'? a.n.toLocaleString() : esc(a.n)
+      }${a.unit?`<small>${esc(a.unit)}</small>`:''}</span>`;
+  return `<button type="button" class="tile" data-a="${esc(a.id)}" title="${esc(a.t+' — '+a.d)}">
+    <span class="t">${esc(a.t)}</span>
+    <span class="d">${esc(a.d)}</span>
+    <span class="mid"></span>
+    <span class="ft"><span class="ic">${a.ic}</span>${n}</span></button>`;
 }
 
 function renderHome(){
@@ -6890,32 +6730,21 @@ function renderHome(){
     b.classList.toggle('on', b.dataset.r===ROLE);
     b.onclick=()=>setRole(b.dataset.r);
   });
-  const H=LP_HEAD[ROLE];
-  $('lpH').textContent=H.h;
-  $('lpSub').textContent=H.s;
 
+  /* the scope, once, as a line of text */
   $('lpScope').innerHTML=[
-    ['Purchase order', esc(S.po)],
-    ['Description', esc(S.poDesc||'—')],
-    ['Originator department', esc(S.dep)],
-    ['Reviewing as', esc(S.disc||'—')],
-    ['Documents in scope', S.docs.length.toLocaleString()],
-    ['Status as of', esc((S.meta&&S.meta.asOf)||'—')]
-  ].map(([k,v],i)=>
-    (i?'<span class="bar"></span>':'')+
-    `<span class="u"><span class="k">${k}</span><span class="v" title="${v}">${v}</span></span>`
-  ).join('')+'<span class="fill"></span>';
+    `<b>${esc(S.po)}</b>`, esc(S.poDesc||''), esc(S.dep),
+    'reviewing as <b>'+esc(S.disc||'—')+'</b>',
+    '<b>'+S.docs.length.toLocaleString()+'</b> documents',
+    'as of '+esc((S.meta&&S.meta.asOf)||'—')
+  ].filter(Boolean).join('<i>·</i>');
 
-  const apps=homeApps(), lead=LP_LEAD[ROLE];
+  const apps=homeApps();
   $('lpGroups').innerHTML=LP_ORDER[ROLE].map(gk=>{
     const list=apps.filter(a=>a.g===gk); if(!list.length) return '';
-    const G=LP_GROUPS[gk];
-    /* the role's own app leads its group, wherever that group sits */
-    const l=list.slice().sort((a,b)=>(a.id===lead?-1:0)-(b.id===lead?-1:0));
     return `<section class="lp-grp">
-      <div class="lp-grp-h"><h2>${esc(G.t)}</h2><span class="s">${esc(G.s)}</span>
-        <span class="rule"></span></div>
-      <div class="lp-tiles in">${l.map(a=>tileHTML(a, a.id===lead)).join('')}</div>
+      <div class="lp-grp-h"><h2>${esc(LP_GROUPS[gk])}</h2></div>
+      <div class="lp-tiles in">${list.map(tileHTML).join('')}</div>
     </section>`;
   }).join('');
 
@@ -6923,8 +6752,7 @@ function renderHome(){
     const a=apps.find(x=>x.id===b.dataset.a);
     if(a) b.onclick=()=>a.open();
   });
-  $('lpFoot').innerHTML=`Read from <b>${esc((S.meta&&S.meta.file)||'the consolidated status workbook')}</b>
-     · everything is computed in this browser, nothing is uploaded anywhere.`;
+  $('lpFoot').innerHTML=`Everything is computed in this browser — nothing is uploaded anywhere.`;
 }
 window.renderHome=renderHome;
 
@@ -6936,25 +6764,10 @@ window.renderHome=renderHome;
 const WK={ mode:'mine', q:'', over:false, crit:false, sort:{k:null,dir:1}, rows:[] };
 
 const WK_MODES={
-  mine:{ key:'you', cls:'warn',
-    t:()=>'Waiting on '+(S.disc||'your discipline'),
-    why:()=>`Every document here is <b>circulating now</b> and ${esc(S.disc||'your discipline')} has not
-      closed its review. That is the whole of this page — no charts, no other statuses. Click a row to
-      open the document, or download the list and work through it.`},
-  others:{ key:'others', cls:'blue',
-    t:()=>'Reviewed by you — held by other disciplines',
-    why:()=>`You have closed your review on all of these. They are still circulating only because
-      another discipline has not closed theirs. The last column names who; chasing them is what
-      releases the document.`},
-  release:{ key:'release', cls:'ok',
-    t:()=>'Ready to release to the vendor',
-    why:()=>`Every discipline has signed off on these and nothing is outstanding against them. They are
-      still in the circuit because nobody has noticed they are finished — returning them to the vendor
-      costs nothing and closes them.`},
-  every:{ key:null, cls:'teal',
-    t:()=>'Everything circulating on '+(S.po||''),
-    why:()=>`Every document in this purchase order that is still in the circuit, whoever it is waiting
-      on. Use the last column to see who holds it.`}
+  mine   :{ key:'you',     cls:'warn', t:()=>'Waiting on '+(S.disc||'your discipline')},
+  others :{ key:'others',  cls:'blue', t:()=>'Reviewed by you — held by other disciplines'},
+  release:{ key:'release', cls:'ok',   t:()=>'Ready to release to the vendor'},
+  every  :{ key:null,      cls:'teal', t:()=>'Everything circulating on '+(S.po||'')}
 };
 
 const WK_COLS=[
@@ -7020,7 +6833,6 @@ function renderWork(){
   $('wkScope').innerHTML=`<span class="v">${esc(S.po)}</span><span class="v">${esc(S.dep)}</span>`+
     `<span class="v">Reviewing as ${esc(S.disc||'—')}</span>`+
     `<span>as of ${esc((S.meta&&S.meta.asOf)||'—')}</span>`;
-  $('wkWhy').innerHTML=M.why();
 
   const lateN=all.filter(d=>d.over>0).length;
   const critN=all.filter(d=>isCriticalDoc(d)).length;
