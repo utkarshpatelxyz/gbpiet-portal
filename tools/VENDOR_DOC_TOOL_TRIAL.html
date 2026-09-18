@@ -2542,8 +2542,9 @@ body[data-dark] #alBody tr.al-sub td{background:#101822}
     <div class="modal-h">
       <div>
         <div class="modal-t" id="rosterTitle">Settings</div>
-        <div class="modal-s">How the tool looks, and the engineers it offers. Both are kept in this
-          browser — neither is written into the register.</div>
+        <div class="modal-s">How the tool looks, and the engineers it offers. Edits are kept in this
+          browser; <b>Copy the list as code</b> prints the names and addresses back out as the two
+          blocks in this file, so a shared copy carries them.</div>
       </div>
       <button class="modal-x" onclick="closeRoster()" aria-label="Close">&#10005;</button>
     </div>
@@ -2584,6 +2585,8 @@ body[data-dark] #alBody tr.al-sub td{background:#101822}
       </div>
     </div>
     <div class="modal-f">
+      <button class="btn btn-g btn-s" onclick="copyRosterCode()"
+        title="Print this list, addresses included, as the two blocks to paste into the file">Copy the list as code</button>
       <div class="ro-note" id="roNote"></div>
       <div class="fill"></div>
       <button class="btn btn-g btn-s" onclick="closeRoster()">Close</button>
@@ -2741,6 +2744,13 @@ const ENG_ROSTER = {
     'RAJESWARAN SELVARAJ','RAMESH GUNASEKAR','REDDYVARI RAJESH','SARAVANA KUMAR S','SHAIK DASTAGIRI',
     'SIVASUBRAMANIAN JEYARAMAN','SURULIMUTHU SATHISHKUMAR','VENKATESH ALAGARSAMY','YASHWANTH C']
 };
+/* Addresses that ship with the file.  Fill these in, or edit the list under
+   the gear and use "Copy the list as code" to print this block out again.
+   A name with no address here simply has none until somebody types one. */
+const ENG_MAIL = {
+  // 'PATEL UTKARSH' : 'utkarsh.patel@example.com',
+};
+
 /* ── the roster, as the reader keeps it ─────────────────────────
    ENG_ROSTER above is only the starting point.  The list actually offered
    lives in this browser and is edited from the gear in the header, so adding
@@ -2854,9 +2864,12 @@ let ROSTER={ list:{}, mail:{} };
 function loadRoster(){
   let saved=null;
   try{ saved=JSON.parse(localStorage.getItem(ROSTER_KEY)); }catch(e){}
+  /* The list is the reader's - deletions and additions stick.  The addresses
+     start from the ones in the file, so a fresh copy is never blank, and
+     anything typed here wins over them. */
   ROSTER = (saved && saved.list && Object.keys(saved.list).length)
-    ? { list:saved.list, mail:saved.mail||{} }
-    : { list:JSON.parse(JSON.stringify(ENG_ROSTER)), mail:{} };
+    ? { list:saved.list, mail:Object.assign({}, ENG_MAIL, saved.mail||{}) }
+    : { list:JSON.parse(JSON.stringify(ENG_ROSTER)), mail:Object.assign({}, ENG_MAIL) };
   return ROSTER;
 }
 function saveRoster(){
@@ -3404,6 +3417,9 @@ function buildDash(){
   S.sub=sub;
   S.poDesc = sub.length? sv(sub[0],'PURCHASE ORDER DESCRIPTION') : '';
   S.docs = buildDocs(S, S.po, S.dep, S.disc);
+  /* The supplier is on every row of the purchase order and is how people
+     actually recognise it - "the Bergama order", not "1041003240". */
+  S.vendor = vendorName(S.docs);
   S.prev = null;                      // any earlier file compared against this one
   /* Straight to the home page.  Carrying engineers across from the last
      register is a job, so it lives inside the app whose job it is — nobody is
@@ -3701,6 +3717,7 @@ function renderDash(){
      and the sheet tab already names the view, so neither is repeated here. */
   $('pbScope').innerHTML=
     (S.poDesc?`<span class="v">${esc(S.poDesc)}</span>`:'')+
+    (S.vendor?`<span class="v" title="${esc(S.vendor)}">${esc(vendShort(S.vendor,34))}</span>`:'')+
     `<span>Reviewing as ${esc(S.disc||'—')}</span>`;
 
   renderReqBtn();
@@ -5913,7 +5930,7 @@ function renderRoster(justAdded){
 
   /* Say plainly what a removal does and does not touch. */
   const used=usedNames();
-  $('roNote').innerHTML=`Kept in this browser only — it is not written into the register.
+  $('roNote').innerHTML=`Edits live in this browser — use <b>Copy the list as code</b> to put them in the file.
     ${used.size? '<b>'+used.size+'</b> name'+(used.size===1?' is':'s are')+' already assigned in the open register'
                : 'No assignments in the open register yet'}.`;
 }
@@ -7092,6 +7109,7 @@ function homeApps(){
   const openA=stA.total-stA.totals.without, openB=stB.total-stB.totals.without;
   let perf=null;
   try{ perf=perfAgg(cyclesFor(halfBase('A'),'tr')); }catch(e){ perf=null; }
+  const allLate=(S.docs||[]).filter(d=>d.circulating && d.over>0).length;
   const noWhy=lateNoWhy().length, nWhy=withWhy().length;
 
   return [
@@ -7104,8 +7122,9 @@ function homeApps(){
      t:'Ready to release',    d:'Every sign-off is in', open:()=>openWork('release')},
     {g:'act', id:'every',    ic:ICO.every,   n:circ.length,
      t:'Everything circulating', d:'The whole circuit', open:()=>openWork('every')},
-    {g:'act', id:'why',      ic:ICO.why,     n:noWhy,
-     t:'Delays to explain',   d:'Late, and nothing said yet', open:()=>openWork('why')},
+    {g:'act', id:'why',      ic:ICO.why,     n:allLate,
+     t:'Delays to explain',   d:noWhy? noWhy+' still to explain' : 'every one explained',
+     open:()=>openWork('why')},
 
     /* ── the whole purchase order ──────────────────────────────────────── */
     {g:'poA', id:'aAct',  ic:ICO.focus, n:openA,
@@ -7172,7 +7191,7 @@ function renderHome(){
      two tabs.  Reviewing is what this discipline owes; managing is the whole
      purchase order raised by the originator department. */
   $('lpScope').innerHTML=[
-    `<b>${esc(S.po)}</b>`, esc(S.poDesc||''),
+    `<b>${esc(S.po)}</b>`, esc(S.poDesc||''), S.vendor? '<b title="'+esc(S.vendor)+'">'+esc(vendShort(S.vendor,40))+'</b>' : '',
     ROLE==='mgr' ? 'whole purchase order, originator <b>'+esc(S.dep)+'</b>'
                  : esc(S.dep)+' <i>·</i> reviewing as <b>'+esc(S.disc||'—')+'</b>',
     '<b>'+S.docs.length.toLocaleString()+'</b> documents',
@@ -7210,23 +7229,35 @@ const WK_MODES={
   every  :{ key:null,      cls:'teal', t:()=>'Everything circulating on '+(S.po||'')},
   /* Not slices of the circuit but slices of what is known about it: the late
      ones nobody has explained, and the ones somebody has. */
-  why    :{ key:null,      cls:'dang', t:()=>'Late, with no reason recorded',
-            only:d=>needsWhy(d)},
-  said   :{ key:null,      cls:'warn', t:()=>'Reasons recorded against late documents',
+  why    :{ key:null, cls:'dang', why:true, allLate:true,
+            t:()=>'Delayed documents \u2014 past the '+DEADLINE_DAYS+'-day deadline',
+            only:d=>d.over>0},
+  said   :{ key:null, cls:'warn', why:true, allLate:true,
+            t:()=>'Reasons recorded against late documents',
             only:d=>!!remarkOf(d)}
 };
 
-const WK_COLS=[
-  {k:'doc',   t:'Document',      v:r=>r.d.label},
-  {k:'equip', t:'Equipment',     v:r=>r.d.xref||''},
-  {k:'code',  t:'Document type', v:r=>r.d.code||''},
-  {k:'rev',   t:'Rev',           v:r=>r.d.rev||''},
-  {k:'circ',  t:'Circulated',    v:r=>r.d.circDate?r.d.circDate.getTime():0, desc:true},
-  {k:'days',  t:'Days out',      v:r=>r.d.days==null?-1:r.d.days, desc:true, right:true},
-  {k:'who',   t:'Waiting on',    v:r=>r.d.othersOpen.join(', ')},
-  {k:'why',   t:'Reason for delay', v:r=>{ const x=remarkOf(r.d); return x? x.reason : (r.d.over>0?'~':'~~'); }},
-  {k:'open',  t:'',              v:null}
+/* The reason a document is late belongs on the page whose job is the reason.
+   Everywhere else it would be a column of dashes with a button nobody came for,
+   so the column is not drawn at all - and the table is built to the columns
+   rather than the columns squeezed into a fixed table. */
+const WK_BASE=[
+  {k:'doc',   t:'Document',      w:'auto',   v:r=>r.d.label},
+  {k:'equip', t:'Equipment',     w:'140px',  v:r=>r.d.xref||''},
+  {k:'code',  t:'Document type', w:'140px',  v:r=>r.d.code||''},
+  {k:'rev',   t:'Rev',           w:'52px',   v:r=>r.d.rev||''},
+  {k:'circ',  t:'Circulated',    w:'104px',  v:r=>r.d.circDate?r.d.circDate.getTime():0, desc:true},
+  {k:'days',  t:'Days out',      w:'78px',   v:r=>r.d.days==null?-1:r.d.days, desc:true, right:true},
+  {k:'who',   t:'Waiting on',    w:'178px',  v:r=>r.d.othersOpen.join(', ')}
 ];
+const WK_WHY={k:'why', t:'Reason for delay', w:'188px',
+  /* unexplained first when sorted by this column, then the oldest reason */
+  v:r=>{ const x=remarkOf(r.d); return x? '1'+x.reason : '0'; }};
+const WK_OPEN={k:'open', t:'', w:'66px', v:null};
+function wkCols(){
+  return WK_MODES[WK.mode].why ? WK_BASE.concat([WK_WHY, WK_OPEN])
+                               : WK_BASE.concat([WK_OPEN]);
+}
 
 function openWork(mode){
   if(!S.docs || !S.docs.length) return alert('Choose a purchase order first.');
@@ -7263,11 +7294,14 @@ function renderWork(){
   if(WK.q){ const q=WK.q.toUpperCase(); rows=rows.filter(r=>r.d.searchKey.indexOf(q)>=0); }
   if(WK.over) rows=rows.filter(r=>r.d.over>0);
   if(WK.crit) rows=rows.filter(r=>isCriticalDoc(r.d));
-  if(WK.sort.k) rows=sortRows(rows, WK_COLS, WK.sort);
+  const COLS=wkCols();
+  if(WK.sort.k) rows=sortRows(rows, COLS, WK.sort);
   else rows.sort((p,q)=>{
     /* untouched, the order is the order an engineer would pick them up in:
-       critical first, then whatever has been out longest */
+       on a delay list the ones nobody has explained lead, and everywhere
+       else critical first, then whatever has been out longest */
     const a=p.d, b=q.d;
+    if(M.why){ const wa=remarkOf(a)?1:0, wb=remarkOf(b)?1:0; if(wa!==wb) return wa-wb; }
     const ca=isCriticalDoc(a)?0:1, cb=isCriticalDoc(b)?0:1; if(ca!==cb) return ca-cb;
     const oa=a.over>0?a.over:-1, ob=b.over>0?b.over:-1; if(oa!==ob) return ob-oa;
     const da=a.days==null?-1:a.days, db=b.days==null?-1:b.days;
@@ -7278,25 +7312,39 @@ function renderWork(){
 
   crumbApp(M.t());
   $('wkTitle').textContent=M.t();
-  $('wkScope').innerHTML=`<span class="v">${esc(S.po)}</span><span class="v">${esc(S.dep)}</span>`+
+  $('wkScope').innerHTML=`<span class="v">${esc(S.po)}</span>`+
+    vendChip(34)+
+    `<span class="v">${esc(S.dep)}</span>`+
     `<span class="v">Reviewing as ${esc(S.disc||'—')}</span>`+
     `<span>as of ${esc((S.meta&&S.meta.asOf)||'—')}</span>`;
 
   const lateN=all.filter(d=>d.over>0).length;
   const critN=all.filter(d=>isCriticalDoc(d)).length;
   const worst=all.reduce((m,d)=>Math.max(m,d.days||0),0);
-  $('wkSum').innerHTML=[
-    [M.cls, all.length, WK.mode==='every'?'circulating in this purchase order':'documents on this list'],
-    ['dang', lateN, 'past the '+DEADLINE_DAYS+'-day deadline'],
-    ['', critN, 'critical (calculations / GA)'],
-    ['', worst, 'days — the longest one has been out']
-  ].map(([c,n,l])=>`<div class="m ${c}"><div class="n">${n.toLocaleString()}</div><div class="l">${l}</div></div>`).join('');
+  const said=all.filter(d=>remarkOf(d)).length;
+  /* On a delay list every row is already past the deadline, so counting that
+     again says nothing.  What is worth counting there is how much of it has
+     been answered. */
+  $('wkSum').innerHTML=(M.allLate
+    ? [[M.cls, all.length, 'delayed documents on this list'],
+       ['dang', all.length-said, 'still to explain'],
+       ['ok',  said, 'explained'],
+       ['', worst, 'days — the longest one has been out']]
+    : [[M.cls, all.length, WK.mode==='every'?'circulating in this purchase order':'documents on this list'],
+       ['dang', lateN, 'past the '+DEADLINE_DAYS+'-day deadline'],
+       ['', critN, 'critical (calculations / GA)'],
+       ['', worst, 'days — the longest one has been out']]
+  ).map(([c,n,l])=>`<div class="m ${c}"><div class="n">${n.toLocaleString()}</div><div class="l">${l}</div></div>`).join('');
 
+  /* the deadline filter is meaningless on a list that is nothing but late */
+  $('wkOver').style.display = M.allLate ? 'none' : '';
   $('wkOver').classList.toggle('on',WK.over);
   $('wkCrit').classList.toggle('on',WK.crit);
   $('wkCount').innerHTML=`<b>${rows.length.toLocaleString()}</b> of ${all.length.toLocaleString()} shown`;
 
-  sortHead('wkHead', WK_COLS, WK.sort, renderWork);
+  $('wkTable').querySelector('colgroup').innerHTML =
+    COLS.map(c=>`<col style="width:${c.w}">`).join('');
+  sortHead('wkHead', COLS, WK.sort, renderWork);
   $('wkBody').innerHTML = rows.length ? rows.map(r=>{
     const d=r.d;
     const ageCls = d.over>0 ? 'dang' : (d.days>=8 ? 'warn' : 'ok');
@@ -7317,10 +7365,10 @@ function renderWork(){
       <td style="text-align:right">${d.days!=null?`<span class="tag ${ageCls} num">${d.days}d</span>`:'<span class="s2">—</span>'}
         <div class="s2 num">${d.over>0?'+'+d.over+' late':''}</div></td>
       <td><div class="s2">${who}</div></td>
-      <td>${remarkCell(d)}</td>
+      ${M.why? `<td>${remarkCell(d)}</td>` : ''}
       <td><span class="wk-open">open &#8594;</span></td>
     </tr>`;
-  }).join('') : `<tr><td colspan="9" class="empty">${
+  }).join('') : `<tr><td colspan="${COLS.length}" class="empty">${
       all.length ? 'Nothing here matches those filters.'
                  : 'Nothing is on this list — there is no action of this kind outstanding.'}</td></tr>`;
   $('wkBody').querySelectorAll('tr[data-tr]').forEach(tr=>tr.onclick=()=>openDoc(tr.dataset.tr));
@@ -7458,6 +7506,16 @@ function readRemarkSheet(wb){
   });
   return out;
 }
+
+/* A supplier's registered name runs to sixty characters and would be the
+   longest thing on any line it joins, so it is shortened where it is only
+   there to be recognised — the whole of it is on the hover. */
+function vendShort(n,max){
+  n=String(n||'').trim(); max=max||34;
+  return n.length>max ? n.slice(0,max-1).replace(/[\s,·-]+$/,'')+'\u2026' : n;
+}
+const vendChip = (max) => S.vendor
+  ? `<span class="v" title="${esc(S.vendor)}">${esc(vendShort(S.vendor,max))}</span>` : '';
 
 const remarkOf = d => (S.remarks||{})[rmKey(S.po, d.tr)] || null;
 /* the documents that owe an explanation: late, circulating, and nothing said */
@@ -7776,6 +7834,47 @@ function exportLoadXlsx(){
   XLSX.writeFile(wb,'Workload_all_POs_'+String(S.dep).replace(/[^\w]+/g,'_')+'.xlsx',{cellStyles:true});
 }
 window.exportLoadXlsx=exportLoadXlsx;
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE LIST, AS CODE
+   The engineer list and the addresses beside it are edited in the browser, and
+   a browser is not a thing that can be shared.  This prints both back out as
+   the two blocks that live in the file, so one person's edit becomes everyone's
+   by pasting it in — which is the only route there is without a server.
+   ═══════════════════════════════════════════════════════════════════════════ */
+function rosterCode(){
+  const q=t=>"'"+String(t).replace(/\\/g,'\\\\').replace(/'/g,"\\'")+"'";
+  const L=Object.keys(ROSTER.list).sort().map(dep=>{
+    const names=(ROSTER.list[dep]||[]).slice().sort((a,b)=>a.localeCompare(b));
+    const wrapped=[]; let line='    ';
+    names.forEach((n,i)=>{ const bit=q(n)+(i<names.length-1?',':'');
+      if(line.length+bit.length>96){ wrapped.push(line); line='    '; }
+      line+=bit; });
+    if(line.trim()) wrapped.push(line);
+    return '  '+q(dep)+': [\n'+wrapped.join('\n')+']';
+  }).join(',\n');
+  /* Every address that has a value, not only the ones whose name is still on
+     a list — an address typed and then orphaned by a deletion is the one thing
+     this must not quietly throw away. */
+  const M=Object.keys(ROSTER.mail||{}).filter(n=>String(ROSTER.mail[n]||'').trim())
+            .sort((a,b)=>a.localeCompare(b));
+  const pad=Math.max(0,...M.map(n=>q(n).length));
+  const E=M.map(n=>'  '+q(n)+' '.repeat(pad-q(n).length)+' : '+q(engMail(n))+',').join('\n');
+  return 'const ENG_ROSTER = {\n'+L+'\n};\n\nconst ENG_MAIL = {\n'+
+    (E||'  // nobody has an address yet')+'\n};\n';
+}
+function copyRosterCode(){
+  const code=rosterCode();
+  const n=Object.values(ROSTER.list).reduce((a,x)=>a+x.length,0);
+  const m=Object.keys(ROSTER.mail||{}).filter(k=>ROSTER.mail[k]).length;
+  copyRich('<pre>'+esc(code)+'</pre>', code);
+  roErr('');
+  $('roNote').innerHTML=`<b>${n}</b> name${n===1?'':'s'} and <b>${m}</b> address${m===1?'':'es'}
+    copied as code. Paste it over the <b>ENG_ROSTER</b> and <b>ENG_MAIL</b> blocks near the top of
+    this HTML file, and everyone who opens that copy sees the same list.`;
+}
+window.copyRosterCode=copyRosterCode; window.rosterCode=rosterCode;
 
 function go(s){
   ['upload','filter','home','work','load','dash','progress','eng','engload','action','doc','report','basket','vdr']
