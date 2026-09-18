@@ -1660,6 +1660,10 @@ body[data-skin="studio"]:not([data-dark]) #sc-work .card{border-radius:4px}
 body[data-skin="studio"]:not([data-dark]) .chip{border-radius:4px}
 body[data-skin="studio"]:not([data-dark]) .chip.on{
   background:var(--blue);border-color:var(--blue);color:#fff}
+body[data-skin="studio"]:not([data-dark]) .seg button.on,
+body[data-skin="studio"]:not([data-dark]) .seg2 button.on{
+  background:var(--blue);border-color:var(--blue);color:#fff}
+body[data-skin="studio"]:not([data-dark]) .seg2 button.on small{color:rgba(255,255,255,.8)}
 body[data-skin="studio"]:not([data-dark]) .btn{border-radius:4px}
 body[data-skin="studio"]:not([data-dark]) .btn-p{
   background:var(--blue);box-shadow:none}
@@ -1702,6 +1706,57 @@ body[data-skin="studio"]:not([data-dark]) .fld select{border-radius:4px}
 /* With no clip embedded there is nothing to dim, and the ambient wash only
    fights the page behind it — so the page shows through instead. */
 body[data-skin="studio"]:not([data-dark]) .bgstage:not(.has-video){display:none}
+
+/* ══ THE CHART PAGE ══════════════════════════════════════════════════════
+   Which half and which sheet are tiles on the home page now, so the tab strip
+   above the cards and the sheet tabs in the corner have nothing left to
+   decide.  The note that used to sit under the tabs stays — it is the one
+   line that says which half you are looking at.
+   ═══════════════════════════════════════════════════════════════════════ */
+#tabbar{display:none}
+.sheettabs,.sheettabs.on{display:none}
+/* with the tabs gone the card around the note is a box around one sentence */
+body[data-skin="studio"]:not([data-dark]) .tabcard{
+  background:transparent;border:0;box-shadow:none;border-radius:0;overflow:visible;margin-top:14px}
+body[data-skin="studio"]:not([data-dark]) .tabnote{
+  padding:0 2px;font-size:12.5px;font-weight:400;color:var(--muted)}
+body[data-skin="studio"]:not([data-dark]) .tabnote b{color:var(--ink);font-weight:600}
+
+/* the cards, in the launchpad's hand: no coloured edge, lighter figures */
+body[data-skin="studio"]:not([data-dark]) .ccard,
+body[data-skin="studio"]:not([data-dark]) .ccard[data-h="A"],
+body[data-skin="studio"]:not([data-dark]) .ccard[data-h="B"]{
+  border:1px solid var(--line2);box-shadow:none;padding:18px 20px}
+@media (hover:hover){
+  body[data-skin="studio"]:not([data-dark]) .ccard:hover,
+  body[data-skin="studio"]:not([data-dark]) .ccard[data-h="A"]:hover,
+  body[data-skin="studio"]:not([data-dark]) .ccard[data-h="B"]:hover{
+    border-color:#C2C6CA;box-shadow:none}
+}
+body[data-skin="studio"]:not([data-dark]) .cc-t{
+  font-size:16px;font-weight:600;color:var(--ink);letter-spacing:0}
+body[data-skin="studio"]:not([data-dark]) .cc-badge{font-size:9px;color:#8E9296}
+body[data-skin="studio"]:not([data-dark]) .mini .m .n{
+  font-size:24px;font-weight:300;letter-spacing:-.5px;color:var(--ink)}
+body[data-skin="studio"]:not([data-dark]) .mini .m .l{
+  font-size:12px;font-weight:400;color:var(--muted)}
+body[data-skin="studio"]:not([data-dark]) .mini .m:hover{border-radius:4px}
+body[data-skin="studio"]:not([data-dark]) .donut-ctr .v{font-weight:300}
+body[data-skin="studio"]:not([data-dark]) .pblock-h .v{font-weight:300}
+body[data-skin="studio"]:not([data-dark]) .sbar{border-radius:4px;border-color:var(--line2)}
+body[data-skin="studio"]:not([data-dark]) .trow .sbar{border-radius:3px}
+body[data-skin="studio"]:not([data-dark]) .bt-h,
+body[data-skin="studio"]:not([data-dark]) .pblock-h .t{color:#8E9296}
+body[data-skin="studio"]:not([data-dark]) .notes-t{border-radius:4px;border-color:var(--line2)}
+body[data-skin="studio"]:not([data-dark]) .actbtn{border-radius:4px}
+body[data-skin="studio"]:not([data-dark]) .ac-sum .m,
+body[data-skin="studio"]:not([data-dark]) .ac-hero,
+body[data-skin="studio"]:not([data-dark]) .panel{border-radius:8px;border-color:var(--line2);box-shadow:none}
+body[data-skin="studio"]:not([data-dark]) .ac-sum .m .n{font-weight:300}
+
+/* A file picker the browser draws itself, next to a drop zone that already
+   takes a click, reads as two ways to do one thing.  Only the zone is shown. */
+#egfile,#pgfile{display:none}
 
 /* ── after dark ────────────────────────────────────────────────────────── */
 body[data-dark] .tile,body[data-dark] .wk-head .m{background:var(--sf);border-color:var(--line2)}
@@ -1871,7 +1926,7 @@ body[data-dark] #wkBody tr:hover td{background:#1C2839}
 <div class="screen" id="sc-dash"><div class="wrap">
   <div class="pagebar">
     <button class="pb-back" onclick="goHome()" title="Back to home" aria-label="Back to home">&#8592;</button>
-    <div class="pb-t"><span>Project overview</span></div>
+    <div class="pb-t"><span id="dashTitle">Project overview</span></div>
     <div class="pb-sp"></div>
     <div class="pb-scope" id="pbScope"></div>
     <div class="pb-acts">
@@ -3112,10 +3167,9 @@ function buildDash(){
   S.poDesc = sub.length? sv(sub[0],'PURCHASE ORDER DESCRIPTION') : '';
   S.docs = buildDocs(S, S.po, S.dep, S.disc);
   S.prev = null;                      // any earlier file compared against this one
-  /* The register of engineers is the second half of "ready to use", so it is
-     asked for once, here, before the home page is ever seen — not buried
-     inside the app that happens to need it. */
-  if(!S.eng.hadCols && !S.eng.didCarry && !S.eng.skipped){ S.eng.wantHome=true; go('engload'); return; }
+  /* Straight to the home page.  Carrying engineers across from the last
+     register is a job, so it lives inside the app whose job it is — nobody is
+     stopped at the door with a file they may not have. */
   goHome();
 }
 
@@ -6236,11 +6290,7 @@ function openEng(){
   renderEng();
   go('eng');
 }
-function skipCarry(){
-  S.eng.skipped=true; renderEng();
-  if(S.eng.wantHome){ S.eng.wantHome=false; return goHome(); }
-  go('eng');
-}
+function skipCarry(){ S.eng.skipped=true; renderEng(); go('eng'); }
 
 function renderEng(){
   $('enScope').innerHTML=`<span class="v">${esc(S.po)}</span><span class="v">${esc(S.dep)}</span>`;
@@ -6476,8 +6526,7 @@ function readCarry(f){
       ${fresh.length? `<b>${fresh.length}</b> tag${fresh.length===1?'':'s'} on this purchase order
         ${fresh.length===1?'is':'are'} new and still need${fresh.length===1?'s':''} an engineer.`
         : 'Every tag on this purchase order is covered.'}`;
-    if(S.eng.wantHome){ S.eng.wantHome=false; renderEng(); goHome(); }
-    else { renderEng(); go('eng'); }
+    renderEng(); go('eng');
     /* Carrying assignments across IS the change — there is nothing for the
        reader to decide, and asking them to save something they did not type
        reads as the tool not knowing what it just did.  So the new register is
@@ -6669,15 +6718,12 @@ window.setReq=setReq; window.setResp=setResp;
 let CUR='upload';
 
 /* Reviewer or lead.  Not a login: the same file is opened by the engineer who
-   owes the reviews and by whoever is chasing them, and each wants a different
-   first tile.  Kept in this browser, so two people sharing the file on a
-   common drive never see each other's choice. */
-const ROLE_KEY='vdt.role.v1';
+   owes the reviews and by whoever is chasing them.  It is deliberately NOT
+   remembered — every session opens on the reviewing tab, because that is the
+   work, and a lead who wants the other one is one click away. */
 let ROLE='eng';
-(function(){ try{ const v=localStorage.getItem(ROLE_KEY); if(v==='eng'||v==='mgr') ROLE=v; }catch(e){} })();
 function setRole(r){
   ROLE = r==='mgr' ? 'mgr' : 'eng';
-  try{ localStorage.setItem(ROLE_KEY,ROLE); }catch(e){}
   renderHome();
 }
 window.setRole=setRole;
@@ -6697,17 +6743,25 @@ const ICO={
   grid   :_svg('<rect x="3" y="3" width="7.6" height="7.6" rx="1.8"/><rect x="13.4" y="3" width="7.6" height="7.6" rx="1.8"/><rect x="3" y="13.4" width="7.6" height="7.6" rx="1.8"/><rect x="13.4" y="13.4" width="7.6" height="7.6" rx="1.8"/>'),
   clock  :_svg('<circle cx="12" cy="12" r="9"/><path d="M12 6.6V12l3.6 2.2"/>'),
   doc    :_svg('<path d="M14 2.8H7.2a2.2 2.2 0 0 0-2.2 2.2v14a2.2 2.2 0 0 0 2.2 2.2h9.6a2.2 2.2 0 0 0 2.2-2.2V7.8z"/><path d="M14 2.8v5h5"/><path d="M8.4 13h7.2M8.4 16.4h4.6"/>'),
+  pie    :_svg('<path d="M11.2 3.3a8.8 8.8 0 1 0 9.5 9.5h-9.5V3.3z"/><path d="M14.6 2.7a8.8 8.8 0 0 1 6.7 6.7h-6.7V2.7z"/>'),
+  focus  :_svg('<circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="3.9"/><circle cx="12" cy="12" r=".9" fill="currentColor" stroke="none"/>'),
   list   :_svg('<path d="M9 6.2h12M9 12h12M9 17.8h12"/><path d="M4.2 6.2h.01M4.2 12h.01M4.2 17.8h.01"/>')
 };
 
 /* ── the groups on the home page, and the order each role reads them in ──── */
-const LP_GROUPS={ act:'Take action', plan:'Plan the work', see:'Reports' };
+const LP_GROUPS={
+  act :'Take action',
+  poA :'Complete Purchase Order Overview',
+  poB :'For Review & Originator Overview',
+  plan:'Plan the work',
+  see :'Reports'
+};
 /* Each app belongs to exactly one tab.  Reviewing is the work itself — the
    documents circulating against your discipline, and nothing else on screen.
    Managing is everything that looks across the whole purchase order for the
    originator department: the reports and the planning.  Nothing appears in
    both, because a tile in two places is a tile nobody trusts. */
-const LP_ORDER={ eng:['act'], mgr:['see','plan'] };
+const LP_ORDER={ eng:['act'], mgr:['poA','poB','plan','see'] };
 
 /* ═══ HOME ══════════════════════════════════════════════════════════════ */
 function goHome(){ renderHome(); go('home'); }
@@ -6733,7 +6787,10 @@ function homeApps(){
   const unassigned=tags.filter(t=>!t.who).length;
   const people=new Set(tags.map(t=>t.who).filter(Boolean));
 
-  const st=statsFor(halfBase('A'));
+  /* Both halves, because the managing tab now opens each of them directly
+     rather than through a tab strip inside the page. */
+  const stA=statsFor(halfBase('A')), stB=statsFor(halfBase('B'));
+  const openA=stA.total-stA.totals.without, openB=stB.total-stB.totals.without;
   let perf=null;
   try{ perf=perfAgg(cyclesFor(halfBase('A'),'tr')); }catch(e){ perf=null; }
   const basket=(S.basket||[]).length;
@@ -6749,6 +6806,22 @@ function homeApps(){
     {g:'act', id:'every',    ic:ICO.every,   n:circ.length,
      t:'Everything circulating', d:'The whole circuit', open:()=>openWork('every')},
 
+    /* ── the whole purchase order ──────────────────────────────────────── */
+    {g:'poA', id:'aAct',  ic:ICO.focus, n:openA,
+     t:'Action view',  d:'What is still to close',
+     open:()=>openOverview('A','action')},
+    {g:'poA', id:'aOver', ic:ICO.pie,   n:stA.total,
+     t:'Overview',     d:'Everything, closed included',
+     open:()=>openOverview('A','overview')},
+
+    /* ── only what this discipline owns and must review ────────────────── */
+    {g:'poB', id:'bAct',  ic:ICO.focus, n:openB,
+     t:'Action view',  d:'What is still to close',
+     open:()=>openOverview('B','action')},
+    {g:'poB', id:'bOver', ic:ICO.pie,   n:stB.total,
+     t:'Overview',     d:'Everything, closed included',
+     open:()=>openOverview('B','overview')},
+
     /* ── plan the work ─────────────────────────────────────────────────── */
     {g:'plan', id:'assign',  ic:ICO.assign,  n:unassigned,
      t:'Assign engineers',    d:'Tags with nobody on them',    open:()=>openAssign('tags')},
@@ -6759,10 +6832,9 @@ function homeApps(){
      open:()=>{ crumbApp('Check progress'); openProgress(); }},
 
     /* ── reports ───────────────────────────────────────────────────────── */
-    {g:'see', id:'overview', ic:ICO.grid,    n:st.total,
-     t:'Project overview',    d:'By type and discipline',  open:()=>openOverview('action')},
     {g:'see', id:'perf',     ic:ICO.clock,   n: perf? perf.pct : 0, unit:'%',
-     t:'Review performance',  d:'Against the '+DEADLINE_DAYS+'-day rule', open:()=>openOverview('perf')},
+     t:'Review performance',  d:'Against the '+DEADLINE_DAYS+'-day rule',
+     open:()=>openOverview('A','perf')},
     {g:'see', id:'vdr',      ic:ICO.doc,     n:null,
      t:'Vendor document status', d:'The client-format report',
      open:()=>{ crumbApp('Vendor document status'); openVdr(); }},
@@ -6954,13 +7026,21 @@ window.renderWork=renderWork;
 
 /* ═══ THE OTHER APPS ════════════════════════════════════════════════════ */
 
-/* The whole of the page this tool used to be, on one tile. */
-function openOverview(sheet){
+/* The chart page, opened straight at one half and one sheet.  The tab strip
+   and the sheet tabs it used to carry are gone: both choices are tiles on the
+   home page now, so the page arrives already showing what was asked for. */
+const OV_NAME={A:'Complete purchase order', B:'For review & originator'};
+function openOverview(half, sheet){
   if(!S.docs || !S.docs.length) return alert('Choose a purchase order first.');
+  S.tab   = half==='B' ? 'B' : 'A';
+  S.sheet = sheet;
   go('dash');
   renderDash();                       /* rendered while visible, so the pair levels */
-  if(sheet && sheet!=='action') setSheet(sheet);
-  crumbApp(sheet==='perf' ? 'Review performance' : 'Project overview');
+  const name = sheet==='perf'
+    ? 'Review performance'
+    : OV_NAME[S.tab]+' — '+(sheet==='action' ? 'action view' : 'overview');
+  $('dashTitle').textContent=name;
+  crumbApp(name);
   requestAnimationFrame(()=>requestAnimationFrame(alignCards));
 }
 window.openOverview=openOverview;
