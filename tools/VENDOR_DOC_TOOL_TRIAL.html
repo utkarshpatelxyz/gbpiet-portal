@@ -1849,12 +1849,132 @@ body[data-dark] .gone-tag{background:#2C2113;border-color:#4A3A1C;color:#E3B96E}
 body[data-dark] #alBody tr.al-r.open td{background:#16243B}
 body[data-dark] #alBody tr.al-sub td{background:#101822}
 
+/* ══ THE OPENING ═════════════════════════════════════════════════════════
+   What the tool is, told as the thing it does rather than as a logo.
+
+   Documents arrive from the left and pile against a narrowing gate — codes and
+   numbers straight out of a real register, so the pile is recognisably the
+   reader's own backlog and not an abstraction.  The pressure shows: the queue
+   tightens, the gate glows hot, the count climbs.  Then MERIDIAM crosses the
+   frame, the gate opens, and everything that was stuck goes through and keeps
+   going.  Five seconds, one idea, no video file.
+   ═══════════════════════════════════════════════════════════════════════ */
+#mrd-module-splash .mms-stage{position:absolute;left:0;right:0;top:50%;height:380px;
+  transform:translateY(-50%);overflow:hidden;z-index:1;
+  transition:opacity .7s var(--ease),filter .7s var(--ease)}
+#mrd-module-splash.tell .mms-stage{opacity:0;filter:blur(7px)}
+#mrd-module-splash.reduced .mms-stage{display:none}
+
+/* the channel the documents run down */
+.mms-rails{position:absolute;left:0;right:0;top:50%;height:252px;transform:translateY(-50%);
+  border-top:1px solid rgba(69,192,206,.13);border-bottom:1px solid rgba(69,192,206,.13);
+  background:linear-gradient(90deg,transparent,rgba(47,151,170,.05) 35%,rgba(47,151,170,.05) 65%,transparent)}
+
+/* the gate: two walls that meet in the middle and then stand aside */
+.mms-gate{position:absolute;left:50%;top:0;width:300px;height:100%;transform:translateX(-50%);
+  overflow:visible}
+.mms-gate .gw{transition:transform 1s cubic-bezier(.22,1,.36,1)}
+/* filled body, and only the funnel edge stroked — a stroke round the whole
+   path drew a box nobody asked for */
+.mms-gate .gw .fill{fill:rgba(47,151,170,.15);stroke:none;transition:fill .5s ease}
+.mms-gate .gw .edge{fill:none;stroke:rgba(69,192,206,.5);stroke-width:1.6;
+  stroke-linejoin:round;transition:stroke .5s ease}
+.mms-gate.jammed .gw .fill{fill:rgba(140,62,28,.26)}
+.mms-gate.jammed .gw .edge{stroke:rgba(224,122,60,.85)}
+.mms-gate.opened .gw.t{transform:translateY(-104px)}
+.mms-gate.opened .gw.b{transform:translateY(104px)}
+.mms-gate.opened .gw .fill{fill:rgba(47,151,170,.10)}
+.mms-gate.opened .gw .edge{stroke:rgba(105,220,232,.62)}
+
+/* the heat that builds behind a queue nobody is clearing */
+.mms-heat{position:absolute;left:50%;top:50%;width:520px;height:340px;transform:translate(-50%,-50%);
+  border-radius:50%;opacity:0;pointer-events:none;
+  background:radial-gradient(circle,rgba(224,122,60,.42) 0%,rgba(224,122,60,.12) 42%,transparent 70%);
+  transition:opacity .5s ease,background .6s ease}
+.mms-heat.cool{background:radial-gradient(circle,rgba(69,192,206,.40) 0%,rgba(69,192,206,.10) 42%,transparent 70%)}
+
+/* what the queue costs, counted while it grows */
+.mms-count{position:absolute;left:50%;top:2px;transform:translateX(-50%);text-align:center;
+  opacity:0;transition:opacity .4s ease}
+.mms-count.on{opacity:1}
+.mms-count .n{font-family:var(--mono);font-size:30px;font-weight:700;color:#E8A06B;line-height:1;
+  font-variant-numeric:tabular-nums;text-shadow:0 0 22px rgba(224,122,60,.55)}
+.mms-count .l{font-size:8.5px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;
+  color:rgba(232,160,107,.68);margin-top:7px}
+.mms-count.cleared .n{color:#69DCE8;text-shadow:0 0 22px rgba(69,192,206,.6)}
+.mms-count.cleared .l{color:rgba(105,220,232,.7)}
+
+/* one document */
+.mms-chip{position:absolute;left:0;top:0;display:flex;align-items:center;gap:6px;
+  padding:5px 9px 5px 7px;border-radius:4px;white-space:nowrap;
+  font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.02em;
+  color:#B9D4E4;background:rgba(17,39,60,.94);border:1px solid rgba(88,146,180,.45);
+  box-shadow:0 3px 12px rgba(0,0,0,.4);
+  will-change:transform;transform:translate3d(-300px,0,0);
+  transition:color .45s ease,border-color .45s ease,background .45s ease}
+.mms-chip i{width:8px;height:10px;border-radius:1.5px;background:#3E7FA8;flex:none;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)}
+.mms-chip.hot{color:#F2CBA8;background:rgba(58,29,18,.94);border-color:rgba(214,120,72,.7)}
+.mms-chip.hot i{background:#D97A4E}
+.mms-chip.free{color:#A6EEDD;background:rgba(11,48,56,.92);border-color:rgba(69,192,206,.55)}
+.mms-chip.free i{background:#45C0CE}
+
+/* MERIDIAM, crossing the frame */
+.mms-sweep{position:absolute;top:0;bottom:0;left:0;width:34%;pointer-events:none;opacity:0;
+  background:linear-gradient(90deg,transparent,rgba(105,220,232,.20) 42%,rgba(190,245,250,.55) 62%,transparent);
+  filter:blur(6px);transform:translateX(-120%)}
+.mms-sweep.go{animation:mmsSweep .92s cubic-bezier(.4,0,.25,1) forwards}
+@keyframes mmsSweep{0%{opacity:0;transform:translateX(-120%)}
+  18%{opacity:1}82%{opacity:1}100%{opacity:0;transform:translateX(320%)}}
+.mms-word{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.82);
+  font-size:clamp(22px,4.2vw,46px);font-weight:800;letter-spacing:.3em;white-space:nowrap;
+  color:#fff;text-shadow:0 0 40px rgba(105,220,232,.85);opacity:0;pointer-events:none}
+.mms-word.go{animation:mmsWord 1.15s cubic-bezier(.22,1,.36,1) forwards}
+@keyframes mmsWord{0%{opacity:0;transform:translate(-50%,-50%) scale(.82);letter-spacing:.5em}
+  26%{opacity:1;transform:translate(-50%,-50%) scale(1);letter-spacing:.3em}
+  64%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1.1);letter-spacing:.26em}}
+
+/* the title waits for the flow to be running, then takes the frame */
+#mrd-module-splash .mms-inner{opacity:0;transition:opacity .5s ease}
+#mrd-module-splash.tell .mms-inner,#mrd-module-splash.reduced .mms-inner{opacity:1}
+#mrd-module-splash.open .mms-eyebrow,#mrd-module-splash.open .mms-name,
+#mrd-module-splash.open .mms-rule,#mrd-module-splash.open .mms-powered{animation:none}
+#mrd-module-splash.tell .mms-eyebrow{animation:mmsFadeUp .5s ease forwards .05s}
+#mrd-module-splash.tell .mms-name{animation:mmsFadeUp .62s cubic-bezier(.22,1,.36,1) forwards .14s}
+#mrd-module-splash.tell .mms-rule{animation:mmsRule .5s cubic-bezier(.22,1,.36,1) forwards .38s}
+#mrd-module-splash.tell .mms-powered{animation:mmsFadeUp .5s ease forwards .5s}
+#mrd-module-splash.reduced .mms-eyebrow,#mrd-module-splash.reduced .mms-name,
+#mrd-module-splash.reduced .mms-powered{opacity:1;transform:none;animation:none}
+#mrd-module-splash.reduced .mms-rule{width:min(360px,60%);animation:none}
+
+/* a way past it for anyone who has seen it */
+.mms-skip{position:absolute;right:20px;bottom:18px;z-index:4;font-size:10px;font-weight:600;
+  letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.3);
+  background:none;border:0;cursor:pointer;padding:6px 8px;font-family:var(--font)}
+.mms-skip:hover{color:rgba(255,255,255,.75)}
+
 </style>
 </head>
 <body>
 
 <div id="mrd-module-splash" aria-hidden="true">
   <div class="mms-topline"></div>
+  <div class="mms-stage" id="mmsStage">
+    <div class="mms-rails"></div>
+    <div class="mms-heat" id="mmsHeat"></div>
+    <div class="mms-flow" id="mmsFlow"></div>
+    <svg class="mms-gate" id="mmsGate" viewBox="0 0 300 380" preserveAspectRatio="none" aria-hidden="true">
+      <g class="gw t"><path class="fill" d="M0,64 L300,64 L182,158 L118,158 Z"/>
+        <polyline class="edge" points="0,64 118,158 182,158 300,64"/></g>
+      <g class="gw b"><path class="fill" d="M0,316 L300,316 L182,222 L118,222 Z"/>
+        <polyline class="edge" points="0,316 118,222 182,222 300,316"/></g>
+    </svg>
+    <div class="mms-sweep" id="mmsSweep"></div>
+    <div class="mms-word" id="mmsWord">MERIDIAM</div>
+    <div class="mms-count" id="mmsCount"><div class="n" id="mmsN">0</div>
+      <div class="l" id="mmsL">documents held</div></div>
+  </div>
+  <button class="mms-skip" id="mmsSkip" type="button">Skip</button>
   <div class="mms-inner">
     <div class="mms-eyebrow">Module</div>
     <div class="mms-name" id="mms-name">Vendor Document Management</div>
@@ -2642,19 +2762,199 @@ function fmtS(d){   // compact form for the secondary line in the table
 const daysBetween=(a,b)=> (!a||!b)?null:Math.round((b-a)/86400000);
 
 /* ── Module splash ─────────────────────────────────────────────────────── */
+/* ══ THE OPENING ═════════════════════════════════════════════════
+   Five seconds of what this tool is for, drawn rather than filmed - which is
+   the only way it can live inside a file somebody emails to somebody else.
+
+   Documents come in from the left carrying real codes off a real register.
+   They reach a gate that is too narrow, and they stop.  The queue builds, the
+   count climbs, the gate runs hot.  MERIDIAM crosses the frame, the gate
+   stands aside, and everything that was stuck goes through - and the ones
+   still arriving never slow down.
+
+   One requestAnimationFrame loop moving transforms, so it is cheap; one seeded
+   random so it looks the same every time; a Skip for anyone who has seen it,
+   and nothing at all for a reader who has asked for less motion.
+   ════════════════════════════════════════════════════════════════════ */
 (function(){
   const splash=document.getElementById('mrd-module-splash');
   if(!splash) return;
-  let t1=null,t2=null;
+  const stage=document.getElementById('mmsStage'),
+        flow =document.getElementById('mmsFlow'),
+        gate =document.getElementById('mmsGate'),
+        heat =document.getElementById('mmsHeat'),
+        sweep=document.getElementById('mmsSweep'),
+        word =document.getElementById('mmsWord'),
+        cnt  =document.getElementById('mmsCount'),
+        cN   =document.getElementById('mmsN'),
+        cL   =document.getElementById('mmsL'),
+        skip =document.getElementById('mmsSkip');
+
+  /* codes and document numbers as they actually read in the register */
+  const LABELS=['PLG-0003','CAL-0005','PLD-0008','GEA-01-D-101','DOS-0002','PLD-0001',
+    'EXP-25-D-004','PRC-0010','DET-02-D-606','MDR-01-D-504','CAL-02-D-607','QAC-0004',
+    'HYT-01-D-101','GEA-02-D-102','PLD-0019','EXP-01-D-310','VDB-0007','CER-0002',
+    'DET-01-D-101','GEA-02-D-304','PLD-0011','CAL-01-D-506','PRC-0004','DOS-0009'];
+
+  const T_OPEN=2500, T_TELL=3760, T_END=5000, IN_MS=880, OUT_MS=860;
+  const N_JAM=20, N_FREE=14, LANES=5, LANE_H=48;
+
+  /* seeded, so the same five seconds play every time */
+  let _s=20260919;
+  const rnd=()=>{ _s=(_s*1664525+1013904223)&0x7fffffff; return _s/0x7fffffff; };
+
+  const easeOut=t=>1-Math.pow(1-t,3);
+  /* A released queue does not creep away — it goes.  A cubic ease-in left
+     everything looking frozen for most of the flush. */
+  const easeIn =t=>Math.pow(t,1.5);
+  const clamp=(v,a,c)=>v<a?a:(v>c?c:v);
+  const REDUCED_M=()=>matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+  /* Where a document can get to at a given height: the funnel wall, read off
+     the same path the SVG draws, so the pile and the picture cannot disagree. */
+  function gateEdge(y,H,gateX){
+    const ly=y/H*380, gl=gateX-150;
+    let lx;
+    if(ly<=158)      lx=Math.max(0,(ly-64)/94*118);
+    else if(ly>=222) lx=Math.max(0,(316-ly)/94*118);
+    else             lx=118;
+    return gl+lx;
+  }
+
+  let raf=0, t1=null, t2=null, chips=[], done=false;
+
+  function build(){
+    flow.innerHTML='';
+    chips=[];
+    const W=stage.clientWidth||1200, H=stage.clientHeight||330;
+    const gateX=W/2, midY=H/2;
+    const laneY=i=>midY-(LANES-1)/2*LANE_H+i*LANE_H;
+    for(let i=0;i<N_JAM+N_FREE;i++){
+      const el=document.createElement('div');
+      el.className='mms-chip';
+      el.innerHTML='<i></i>'+LABELS[i%LABELS.length];
+      el.style.transform='translate3d(-400px,0,0)';
+      flow.appendChild(el);
+      const jam=i<N_JAM, lane=i%LANES, col=Math.floor(i/LANES);
+      const w=el.offsetWidth||104, yc=laneY(lane)-11;
+      chips.push({el, lane, col, jam,
+        born: jam ? 120+i*80 : T_OPEN+300+(i-N_JAM)*96,
+        x0: -170-rnd()*130,
+        /* The front of the queue follows the slope of the wall, so the pile
+           wedges into the mouth of the funnel the way a real one would --
+           the outer lanes stop short, the middle lane reaches the neck. */
+        qx: gateEdge(laneY(lane),H,gateX)-w-11-col*118-rnd()*6,
+        y : yc, midY: midY-11, gateX,
+        wob: rnd()*6.28, out: jam ? T_OPEN+col*55 : 0,
+        hot:false, free:false});
+    }
+    return {W,H,gateX,midY};
+  }
+
+  /* Squeezed towards the centre line while passing the gate, fanning back to
+     its own lane once through - which is what makes it read as a channel. */
+  function yAt(c,x){
+    const k=clamp(1-Math.abs(x-c.gateX)/86,0,1);
+    return c.y+(c.midY-c.y)*k*0.72;
+  }
+
+  function frame(t0){
+    const step=now=>{
+      const t=now-t0;
+      let queued=0;
+      for(const c of chips){
+        if(t<c.born){ c.el.style.opacity='0'; continue; }
+        c.el.style.opacity='1';
+        let x;
+        if(c.jam){
+          const inP=clamp((t-c.born)/IN_MS,0,1);
+          x=c.x0+(c.qx-c.x0)*easeOut(inP);
+          if(inP>=1){
+            queued++;
+            /* the pressure of a queue nobody is clearing */
+            x=c.qx+Math.sin(t/150+c.wob)*1.3+clamp((t-1500)/150,0,7);
+            if(!c.hot && t>1450){ c.hot=true; c.el.classList.add('hot'); }
+          }
+          if(t>c.out){
+            const p=clamp((t-c.out)/OUT_MS,0,1);
+            x=x+(stageW+180-x)*easeIn(p)*1.0;
+            if(!c.free && p>0.04){ c.free=true; c.el.classList.remove('hot'); c.el.classList.add('free'); }
+          }
+        } else {
+          const p=clamp((t-c.born)/1600,0,1);
+          x=c.x0+(stageW+180-c.x0)*p;
+          if(!c.free){ c.free=true; c.el.classList.add('free'); }
+        }
+        c.el.style.transform='translate3d('+x.toFixed(1)+'px,'+yAt(c,x).toFixed(1)+'px,0)';
+      }
+
+      if(t<T_OPEN){
+        cnt.classList.toggle('on', queued>0);
+        cN.textContent=queued;
+        heat.style.opacity=String(clamp(queued/12,0,1));
+        if(queued>=6) gate.classList.add('jammed');
+      }
+      if(t>=T_OPEN && !gate.classList.contains('opened')){
+        gate.classList.remove('jammed'); gate.classList.add('opened');
+        heat.classList.add('cool');
+      }
+      if(t>=T_OPEN){
+        /* The backlog counts DOWN as it drains — a number falling to nothing
+           is the whole point, and counting the cleared ones up buried it. */
+        const held=chips.filter(c=>c.jam && t<=c.out+OUT_MS*0.5).length;
+        cN.textContent=held;
+        if(held===0 && !cnt.classList.contains('cleared')){
+          cnt.classList.add('cleared'); cL.textContent='flowing again';
+        }
+        heat.style.opacity=String(clamp(1-(t-T_OPEN)/900,0,1)*0.75);
+        if(t>T_OPEN+1500) cnt.classList.remove('on');
+      }
+      if(t>=T_OPEN-320 && !sweep.classList.contains('go')){
+        sweep.classList.add('go'); word.classList.add('go');
+      }
+      if(t<T_END) raf=requestAnimationFrame(step);
+    };
+    raf=requestAnimationFrame(step);
+  }
+
+  let stageW=1200;
+  function close(){
+    if(done) return; done=true;
+    cancelAnimationFrame(raf);
+    splash.classList.add('closing');
+    t2=setTimeout(()=>{
+      splash.classList.remove('open','closing','tell','reduced');
+      flow.innerHTML='';
+    },480);
+  }
+
   window.showModuleSplash=function(name){
     if(name) document.getElementById('mms-name').textContent=name;
-    clearTimeout(t1); clearTimeout(t2);
-    splash.classList.remove('open','closing');
-    void splash.offsetWidth;                 // restart the reveal every time
+    clearTimeout(t1); clearTimeout(t2); cancelAnimationFrame(raf);
+    done=false;
+    splash.classList.remove('open','closing','tell','reduced');
+    gate.classList.remove('jammed','opened');
+    sweep.classList.remove('go'); word.classList.remove('go');
+    cnt.classList.remove('on','cleared'); cL.textContent='documents held';
+    heat.classList.remove('cool'); heat.style.opacity='0';
+    void splash.offsetWidth;
     splash.classList.add('open');
-    t1=setTimeout(()=>{ splash.classList.add('closing');
-      t2=setTimeout(()=>splash.classList.remove('open','closing'),480); },1650);
+
+    if(REDUCED_M()){
+      splash.classList.add('reduced','tell');
+      t1=setTimeout(close,1400);
+      return;
+    }
+    const g=build(); stageW=g.W;
+    frame(performance.now());
+    t1=setTimeout(()=>{
+      splash.classList.add('tell');
+      t1=setTimeout(close, T_END-T_TELL+260);
+    }, T_TELL);
   };
+  if(skip) skip.onclick=close;
+  splash.addEventListener('click',e=>{ if(e.target!==skip) close(); });
+  addEventListener('keydown',e=>{ if(splash.classList.contains('open')) close(); });
   showModuleSplash('Vendor Document Management');
 })();
 
