@@ -5375,8 +5375,10 @@ function renderAction(){
       v:t.closed, tot:t.n, unit:'closed'};
   } else if(AC.kind==='engineer'){
     const mine=engTags().filter(t=>t.who===AC.key);
-    const n=mine.reduce((a,t)=>a+t.n,0), done=mine.reduce((a,t)=>a+t.closed,0),
-          circ=mine.reduce((a,t)=>a+t.circ,0);
+    /* mineN is what each tag adds to this person: a document shared across
+       several of their tags is counted on one of them only */
+    const n=mine.reduce((a,t)=>a+t.mineN,0), done=mine.reduce((a,t)=>a+t.mineClosed,0),
+          circ=mine.reduce((a,t)=>a+t.mineCirc,0);
     hero={title:AC.key, sub:mine.length+' equipment tag'+(mine.length===1?'':'s')+' · '+
             mine.map(t=>tagLabel(t.tag)).slice(0,6).join(', ')+(mine.length>6?' …':''),
           pct:n?Math.round(done/n*100):0,
