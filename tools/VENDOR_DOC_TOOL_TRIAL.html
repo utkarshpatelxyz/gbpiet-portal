@@ -708,6 +708,9 @@ tr.en-na td:last-child{opacity:1}
 .en-twin{margin-left:7px;font-size:10px;font-weight:800;letter-spacing:.04em;color:#0854A0;
   background:#EAF2FC;border:1px solid #C6DCF5;border-radius:4px;padding:1px 5px;vertical-align:1px}
 #enBody .s2.en-twinof{color:var(--muted);font-weight:600;margin-top:2px;white-space:normal;overflow:visible}
+#acBody .de-from{color:var(--muted);font-weight:600;margin-top:3px;white-space:normal}
+#acBody .de-from.on{color:#0854A0;font-weight:700}
+#acBody .en-pick{min-width:178px}
 /* A tag with nobody on it should be findable while scrolling past sixty. */
 tr.en-none td{background:#FFF6F4 !important}
 tr.en-none:hover td{background:#FFEDE9 !important}
@@ -3264,7 +3267,7 @@ function bookModel(wb, aoa){
     });
   }
   return { meta, hdr:H, headArr:head, depts, rows, engList, req, resp,
-           remarks: readRemarkSheet(wb),
+           remarks: readRemarkSheet(wb), docEng: readDocEngSheet(wb),
            hasEngCols: iReq!==undefined && iResp!==undefined };
 }
 function readBook(bytes){ const wb=bookOpen(bytes); return bookModel(wb, bookRows(wb)); }
@@ -3310,9 +3313,9 @@ async function parseBook(bytes){
       (list[k]=list[k]||[]).push(n); });
     Object.keys(list).forEach(x=>list[x].sort((a,b)=>a.localeCompare(b)));
   }
-  S.eng={ list, req:ctx.req||{}, resp:ctx.resp||{},
+  S.eng={ list, req:ctx.req||{}, resp:ctx.resp||{}, doc:ctx.docEng||{},
           hadCols:ctx.hasEngCols, hadList:!!ctx.engList,
-          carried:0, dirty:false, prevName:'' };
+          carried:0, dirty:false, prevName:'', stamp:0 };
   S.remarks=ctx.remarks||{};
   S.allpo=null;
   buildFilters();
@@ -5216,8 +5219,13 @@ function acCols(byDisc){
     {k:'status',t:'Status',     v:r=>String(r.d.status||'')},
     {k:'days',  t:'Days',       v:r=>r.d.days==null?-1:r.d.days, desc:true, right:true},
     {k:'who',   t:byDisc?'Waiting on':'Still to close', v:r=>r.disc || owing(r)}
-  ];
+  ].concat(AC.kind==='tag'
+    ? [{k:'deng', t:'Responsible engineer', v:r=>docWhoOf(r.d)||''}]
+    : []);
 }
+/* Widths to match: the engineer column only exists on an equipment tag. */
+const AC_W=['auto','148px','150px','58px','78px','132px','82px','158px'];
+function acWidths(){ return AC.kind==='tag' ? AC_W.concat(['200px']) : AC_W; }
 
 /* the critical types: calculations and general arrangement drawings */
 function isCriticalCode(c){
@@ -5368,19 +5376,19 @@ function renderAction(){
           v:stats.st.totals.without, tot:stats.st.total, unit:'closed'};
   } else if(AC.kind==='tag'){
     const t=engTags().find(x=>x.tag===AC.key);
-    if(t) hero={title:tagLabel(t.tag), sub:(t.equip||'')+(t.who? ' · '+t.who : ' · no responsible engineer yet'),
+    if(t) hero={title:tagLabel(t.tag), sub:(t.equip||'')+(t.who? ' · '+t.who : ' · no responsible engineer yet')+
+      (t.who && t.mineN!==t.n ? ` · ${t.mineN} of ${t.n} counted towards them` : ''),
       pct:t.pct,
       bar:`<div class="sbar"><i style="width:${t.n?t.closed/t.n*100:0}%;background:#2E9E6B"></i>`+
           `<i style="width:${t.n?t.circ/t.n*100:0}%;background:#D9922E"></i></div>`,
       v:t.closed, tot:t.n, unit:'closed'};
   } else if(AC.kind==='engineer'){
-    const mine=engTags().filter(t=>t.who===AC.key);
-    /* mineN is what each tag adds to this person: a document shared across
-       several of their tags is counted on one of them only */
-    const n=mine.reduce((a,t)=>a+t.mineN,0), done=mine.reduce((a,t)=>a+t.mineClosed,0),
-          circ=mine.reduce((a,t)=>a+t.mineCirc,0);
-    hero={title:AC.key, sub:mine.length+' equipment tag'+(mine.length===1?'':'s')+' · '+
-            mine.map(t=>tagLabel(t.tag)).slice(0,6).join(', ')+(mine.length>6?' …':''),
+    const e=engPeople().find(x=>x.who===AC.key)||{tags:[],n:0,closed:0,circ:0};
+    const mine=e.tags, n=e.n, done=e.closed, circ=e.circ;
+    hero={title:AC.key, sub: mine.length
+            ? mine.length+' equipment tag'+(mine.length===1?'':'s')+' · '+
+              mine.map(t=>t.tag).slice(0,6).join(', ')+(mine.length>6?' …':'')
+            : 'documents assigned one at a time — no equipment tag of their own',
           pct:n?Math.round(done/n*100):0,
           bar:`<div class="sbar"><i style="width:${n?done/n*100:0}%;background:#2E9E6B"></i>`+
               `<i style="width:${n?circ/n*100:0}%;background:#D9922E"></i></div>`,
@@ -5444,6 +5452,8 @@ function renderAction(){
   $('acCount').innerHTML=`<b>${rows.length.toLocaleString()}</b> row${rows.length===1?'':'s'}`;
 
   sortHead('acHead', cols, AC.sort, renderAction);
+  $('acTable').querySelector('colgroup').innerHTML =
+    acWidths().map(w=>`<col style="width:${w}">`).join('');
   $('acBody').innerHTML = rows.length? rows.map(r=>{
     const d=r.d, m=stMeta(d.status);
     const ageCls=!d.circulating?'info':(d.over>0?'dang':(d.days>=8?'warn':'ok'));
@@ -5460,10 +5470,35 @@ function renderAction(){
         <div class="s2 num">${d.circulating&&d.over>0?'+'+d.over+' late':''}</div></td>
       <td><div class="s2">${AC.kind==='stuck'&&AC.key==='release'
             ? '<b style="color:var(--ok)">all reviews closed — release it</b>'
-            : esc(r.disc || (owing.length?owing.join(', '):'—'))}</div></td>
+            : esc(r.disc || (owing.length?owing.join(', '):'—'))}</div></td>${deCell(d)}
     </tr>`;
-  }).join('') : `<tr><td colspan="8" class="empty">Nothing outstanding here${AC.circ?' that is circulating':''}.</td></tr>`;
+  }).join('') : `<tr><td colspan="${cols.length}" class="empty">Nothing outstanding here${AC.circ?' that is circulating':''}.</td></tr>`;
+  mountDocEng(rows);
   $('acMailNote').style.display='none';
+}
+
+/* The cell that carries one document's engineer, and the picker that changes
+   it.  Empty everywhere but an equipment tag's own list — that is where an
+   engineer is looking at the documents and can say which are not theirs. */
+function deCell(d){
+  if(AC.kind!=='tag') return '';
+  const set=docSetOn(d), who=docWhoOf(d);
+  const note = set ? (isNA(set)? 'set aside on this document' : 'set on this document')
+             : who ? 'from the equipment tag'
+                   : 'no engineer yet';
+  return `<td><div class="en-pick" id="dp-${cssId(d.tr)}"></div>`+
+         `<div class="s2 de-from${set?' on':''}">${note}</div></td>`;
+}
+function mountDocEng(rows){
+  if(AC.kind!=='tag') return;
+  const names=engNames();
+  rows.forEach(r=>{
+    const d=r.d, host=$('dp-'+cssId(d.tr)); if(!host) return;
+    const cur=docWhoOf(d);
+    engPicker(host, names, cur, v=>setDocResp(d, [...v][0]||''), 'Assign…');
+    host.addEventListener('click', e=>e.stopPropagation());
+    host.addEventListener('keydown', e=>e.stopPropagation());
+  });
 }
 
 /* ── the list as a spreadsheet, and as an Outlook draft ─────────────────── */
@@ -6784,10 +6819,7 @@ function engDocs(){ return halfDocs('B').filter(engCountable); }
 /* Everything one engineer holds in this scope: the documents that count
    towards them, each one once however many tags it names. */
 function engineerDocs(name){
-  const out=[], seen=new Set();
-  engTagIndex().list.forEach(t=>{ if(t.who!==name) return;
-    t.mineDocs.forEach(d=>{ if(!seen.has(d.tr)){ seen.add(d.tr); out.push(d); } }); });
-  return out;
+  return engDocs().filter(d=>docWhoOf(d)===name);
 }
 /* The documents on one equipment tag — the same list the tag's own row counts,
    so the number in the Docs column and the number on the page agree. */
@@ -6873,7 +6905,10 @@ function engTagIndex(){
     const who=whoOf(e.tag);
     const closed=e.docs.filter(d=>String(d.status).toUpperCase()==='REVIEWED WITHOUT COMMENTS').length;
     const circ=e.docs.filter(d=>d.circulating).length;
-    const mine=e.docs.filter(d=>ownerTag(d)===e.tag);
+    /* the documents this tag puts on its engineer's desk: the ones it owns,
+       less any moved to somebody else one by one */
+    const setOn=d=>(S.eng.doc||{})[rmKey(S.po,d.tr)]||'';
+    const mine=e.docs.filter(d=>ownerTag(d)===e.tag && (setOn(d)||who)===who);
     const g=twinsOf[e.tag]||null;
     return { ...e, n:e.docs.length, closed, circ, codes:e.codes.size,
              sharedN:e.shared.length,
@@ -6886,7 +6921,61 @@ function engTagIndex(){
   });
   return { list:rows, whoOf, ownerTag, twinsOf };
 }
-function engTags(){ return engTagIndex().list; }
+/* engTagIndex walks every document in scope, which is too much to do inside a
+   sort comparator.  It is built once and kept until something it depends on
+   changes — the purchase order, an assignment, the document types in play. */
+let EIX=null, EIX_KEY='';
+function engIndex(){
+  const k=[S.po, (S.eng&&S.eng.stamp)||0, (S.docs||[]).length,
+           (S.inc&&S.inc.B)? [...S.inc.B].sort().join('\u0001') : '-'].join('\u0002');
+  if(EIX && EIX_KEY===k) return EIX;
+  EIX_KEY=k; EIX=engTagIndex(); return EIX;
+}
+function engBump(){ if(S.eng) S.eng.stamp=((S.eng.stamp)||0)+1; EIX=null; }
+function engTags(){ return engIndex().list; }
+
+/* The engineer a document counts towards, and where that answer came from. */
+function docSetOn(d){ return (S.eng.doc||{})[rmKey(S.po, d.tr)]||''; }
+function docFromTag(d){ const ix=engIndex(); return ix.whoOf(ix.ownerTag(d)); }
+function docWhoOf(d){ return docSetOn(d) || docFromTag(d); }
+
+/* Everyone with work in this scope: the documents they hold, and the equipment
+   tags they hold them through.  Somebody given documents one at a time has no
+   tags and a real number, which is the point of the whole exercise. */
+function engPeople(){
+  const by={};
+  const get=k=>(by[k]=by[k]||{who:k, tags:[], docs:[]});
+  engDocs().forEach(d=>{ const w=docWhoOf(d); if(isNA(w)) return;
+    get(w||'(unassigned)').docs.push(d); });
+  engIndex().list.forEach(t=>{ if(isNA(t.who)) return; get(t.who||'(unassigned)').tags.push(t); });
+  return Object.values(by).map(e=>{
+    const n=e.docs.length;
+    const closed=e.docs.filter(d=>String(d.status).toUpperCase()==='REVIEWED WITHOUT COMMENTS').length;
+    const circ=e.docs.filter(d=>d.circulating).length;
+    return {...e, n, closed, circ, pct:n?Math.round(closed/n*100):0};
+  });
+}
+
+/* Moving one document off the tag's engineer, or back onto them. */
+function setDocResp(d, name){
+  const k=rmKey(S.po, d.tr);
+  const prev=(S.eng.doc||{})[k]||'';
+  const tagWho=docFromTag(d);
+  if(name===tagWho) name='';                 // the tag already says this
+  if(name===prev) return true;
+  const q = !name      ? `Put ${d.label} back with the engineer on its equipment tag${
+                            tagWho? ' — '+tagWho : ''}?`
+          : isNA(name)   ? `Mark ${d.label} as N/A? It counts towards nobody, and you can give
+                            it an engineer later.`
+                         : `Make "${name}" responsible for ${d.label}? It counts towards them
+                            instead of ${prev||tagWho||'nobody'}.`;
+  if(!confirm(q)) return false;
+  S.eng.doc=S.eng.doc||{};
+  if(name) S.eng.doc[k]=name; else delete S.eng.doc[k];
+  S.eng.dirty=true; engBump(); renderAction();
+  return true;
+}
+window.setDocResp=setDocResp;
 function engSorted(list){
   const l=sortRows(list.slice(), EN_TAG_COLS, EN.tagSort, x=>x.docs.length?0:1);
   return EN.unOnly ? l.filter(t=>!t.who) : l;
@@ -6963,6 +7052,7 @@ function renderEng(){
   const tags=engTags();
   /* Say the rule where the reader can find it, with this register's own
      numbers in it — the arithmetic is only surprising when it is unexplained. */
+  const moved=Object.keys(S.eng.doc||{}).filter(k=>k.indexOf(S.po+RM_SEP)===0).length;
   const shareN=tags.filter(t=>t.sharedN).length, famT=tags.filter(t=>t.twins).length;
   const famG=new Set(tags.filter(t=>t.twins).map(t=>t.twins[0])).size;
   $('enShared').style.display = (shareN||famG)? '' : 'none';
@@ -6972,7 +7062,10 @@ function renderEng(){
        towards one engineer only: the one on the first tag it names.` : '')+
     (famG? ` <b>${famT}</b> tag${famT===1?'':'s'}, in <b>${famG}</b> set${famG===1?'':'s'}, carry exactly
        the same documents — identical equipment. Assigning one assigns the set, and the documents
-       are counted once, not once per tag.` : '');
+       are counted once, not once per tag.` : '')+
+    ` Open a tag to see its documents: each one starts with the tag's engineer, and any that is
+       not theirs can be given to somebody else, or marked N/A, on the document itself.`+
+    (moved? ` <b>${moved}</b> document${moved===1?' has':'s have'} been given an engineer that way.` : '');
   const unassigned=tags.filter(t=>!t.who).length, naN=tags.filter(t=>isNA(t.who)).length;
   $('enNew').style.display = unassigned? '' : 'none';
   if(unassigned) $('enNew').innerHTML=`<b>${unassigned}</b> of ${tags.length} equipment tag${
@@ -7060,14 +7153,11 @@ function engPicker(host, names, current, apply, placeholder){
 }
 
 function renderEngPeople(tags){
-  const by={};
-  /* Counted from the documents each tag owns, not from what it displays: a
-     document on three identical tags is one engineer's work, once. */
-  tags.filter(t=>!isNA(t.who)).forEach(t=>{ const who=t.who||'(unassigned)';
-    const e=(by[who]=by[who]||{who, tags:[], n:0, closed:0, circ:0});
-    e.tags.push(t); e.n+=t.mineN; e.closed+=t.mineClosed; e.circ+=t.mineCirc; });
-  const list=sortRows(Object.values(by).map(e=>({...e, pct:e.n?Math.round(e.closed/e.n*100):0})),
-                      EN_PEOPLE_COLS, EN.peopleSort);
+  /* Counted from the documents themselves: a document belongs to exactly one
+     engineer, whether it got there through an equipment tag or was handed over
+     one at a time.  Somebody who only ever received documents that way has no
+     tags at all and still belongs on this list. */
+  const list=sortRows(engPeople(), EN_PEOPLE_COLS, EN.peopleSort);
   sortHead('enPHead', EN_PEOPLE_COLS, EN.peopleSort, renderEng);
   $('enPBody').innerHTML = list.length? list.map(e=>{
     const open = e.who!=='(unassigned)';
@@ -7082,8 +7172,10 @@ function renderEngPeople(tags){
             open && e.circ? `<i style="width:${Math.round(e.circ/(e.n||1)*100)}%;background:#D9922E"></i>`:''}</div>
           <span class="en-load" style="color:${e.pct?'var(--ok)':'var(--muted)'}">${e.pct}%</span>
           ${open?'<span class="en-go">open →</span>':''}</div></td>
-      <td><div class="s2">${e.tags.map(t=>esc(t.tag)+' <span style="color:var(--muted)">('+t.n+
-        (t.twinOf? ', shared with '+esc(t.twinOf) : '')+')</span>').join(' · ')}</div></td>
+      <td><div class="s2">${e.tags.length
+          ? e.tags.map(t=>esc(t.tag)+' <span style="color:var(--muted)">('+t.mineN+
+              (t.twinOf? ', shared with '+esc(t.twinOf) : '')+')</span>').join(' · ')
+          : '<span style="color:var(--muted)">no equipment tags — documents assigned one by one</span>'}</div></td>
     </tr>`;}).join('')
     : '<tr><td colspan="5" class="empty">No equipment tags in this scope.</td></tr>';
 }
@@ -7106,7 +7198,7 @@ function setResp(tag, name, prev){
   if(name===prev) return true;
   /* Tags carrying exactly the same documents are one piece of work: they take
      the same engineer, and the confirmation says so before it happens. */
-  const fam=engTagIndex().twinsOf[tag] || [tag];
+  const fam=engIndex().twinsOf[tag] || [tag];
   const also=fam.filter(t=>t!==tag);
   const q = !name      ? `Remove "${prev}" as the responsible engineer for ${tag}?`
           : isNA(name)   ? `Mark ${tag} as N/A? It will count towards nobody, and you can give it an engineer later.`
@@ -7120,7 +7212,7 @@ function setResp(tag, name, prev){
   if(!confirm(q+extra)) return false;
   fam.forEach(t=>{ const k=tagKey(S.po,t);
     if(name) S.eng.resp[k]=name; else delete S.eng.resp[k]; });
-  S.eng.dirty=true; renderEng();
+  S.eng.dirty=true; engBump(); renderEng();
   return true;
 }
 
@@ -7160,6 +7252,9 @@ function readCarry(f){
     let nreq=0, nresp=0;
     Object.entries(ctx.req||{}).forEach(([po,v])=>{ if(v && !S.eng.req[po]){ S.eng.req[po]=v; nreq++; } });
     Object.entries(ctx.resp||{}).forEach(([k,v])=>{ if(v && !S.eng.resp[k]){ S.eng.resp[k]=v; nresp++; } });
+    S.eng.doc=S.eng.doc||{};
+    Object.entries(ctx.docEng||{}).forEach(([k,v])=>{ if(v && !S.eng.doc[k]){ S.eng.doc[k]=v; nresp++; } });
+    engBump();
     if(ctx.engList) S.eng.list = Object.keys(S.eng.list||{}).length ? S.eng.list : ctx.engList;
     /* "carried" counts assignments; "didCarry" records that the step happened.
        A register that had the sheet but no assignments carried nothing, and
@@ -7286,7 +7381,7 @@ async function downloadRegister(after, opts){
     const iTRc=hdr['TR NUMBER'], iStc=hdr['DOCUMENT STATUS'],
           iRetc=hdr['RETURN STATUS FOR THE SUPPLIER'];
     const live={};                    // one document -> still circulating somewhere
-    let nr=0, nt=0, nAmb=0;
+    let nr=0, nt=0, nAmb=0, nDoc=0;
     const rows=rg.e.r-3;
     wrStep('Writing the requisition and responsible engineer against every row.', 40);
     await yieldPaint();
@@ -7296,9 +7391,10 @@ async function downloadRegister(after, opts){
         const po=cell(x,iPO); if(!po||!String(po.v).trim()) continue;
         const pp=String(po.v).trim();
         if(S.eng.req[pp]){ put(x,cReq,S.eng.req[pp]); nr++; }
+        const trRow = iTRc!==undefined && cell(x,iTRc) ? String(cell(x,iTRc).v).trim() : '';
         if(iTRc!==undefined && iStc!==undefined){
-          const trc=cell(x,iTRc), stc=cell(x,iStc);
-          const tr=trc? String(trc.v).trim() : '';
+          const stc=cell(x,iStc);
+          const tr=trRow;
           if(tr){
             const k=rmKey(pp,tr);
             const eff=effStatus(stc? String(stc.v).trim() : '',
@@ -7307,19 +7403,25 @@ async function downloadRegister(after, opts){
             else if(live[k]===undefined) live[k]=false;
           }
         }
-        const xr=cell(x,iXR);
-        const tags=splitTags(xr? xr.v : '');
-        if(tags.length){
-          /* one owner per row, the same one the screens count it for: the
-             first tag it names that has a real engineer */
-          let who='';
-          for(let ti=0;ti<tags.length;ti++){
-            const v=S.eng.resp[tagKey(pp,tags[ti])];
-            if(v && !isNA(v)){ who=v; break; }
+        const ovWho = trRow ? (S.eng.doc||{})[rmKey(pp,trRow)] : '';
+        if(ovWho){
+          /* an engineer named on this document itself overrules its tags */
+          put(x,cRes,ovWho); nt++; nDoc++;
+        } else {
+          const xr=cell(x,iXR);
+          const tags=splitTags(xr? xr.v : '');
+          if(tags.length){
+            /* one owner per row, the same one the screens count it for: the
+               first tag it names that has a real engineer */
+            let who='';
+            for(let ti=0;ti<tags.length;ti++){
+              const v=S.eng.resp[tagKey(pp,tags[ti])];
+              if(v && !isNA(v)){ who=v; break; }
+            }
+            if(!who && tags.length===1){ const v=S.eng.resp[tagKey(pp,tags[0])]; if(v) who=v; }
+            if(who){ put(x,cRes,who); nt++; }
+            else if(tags.length>1) nAmb++;
           }
-          if(!who && tags.length===1){ const v=S.eng.resp[tagKey(pp,tags[0])]; if(v) who=v; }
-          if(who){ put(x,cRes,who); nt++; }
-          else if(tags.length>1) nAmb++;
         }
       }
       wrStep(null, 40+((end-4)/rows)*45, nt.toLocaleString()+' rows given an engineer');
@@ -7358,6 +7460,33 @@ async function downloadRegister(after, opts){
                              font:{bold:true,color:{rgb:'FFFFFFFF'}}}; });
       XLSX.utils.book_append_sheet(wb, rs, REMARK_SHEET);
     }
+    /* and the overrides themselves, so a deliberate one is still deliberate
+       when this file is loaded again */
+    { const old=wb.SheetNames.indexOf(DOCENG_SHEET);
+      if(old>=0){ wb.SheetNames.splice(old,1); delete wb.Sheets[DOCENG_SHEET]; } }
+    const deKeep=[];
+    Object.keys(S.eng.doc||{}).forEach(k=>{
+      const v=S.eng.doc[k]; if(!v) return;
+      /* drop one whose document this file no longer has; keep everything else,
+         including documents this file says nothing about */
+      if(iTRc!==undefined && live[k]===undefined) return;
+      deKeep.push([k,v]);
+    });
+    if(deKeep.length){
+      const aoa=[DE_HEAD.slice()];
+      deKeep.forEach(pair=>{
+        const p2=pair[0].split(RM_SEP);
+        const d=(S.docs||[]).find(x=>x.tr===p2[1]);
+        aoa.push([p2[0], p2[1], d? d.label : p2[1], d? (d.xref||'') : '', d? (d.code||'') : '', pair[1]]);
+      });
+      const ds=XLSX.utils.aoa_to_sheet(aoa);
+      ds['!cols']=[{wch:16},{wch:34},{wch:34},{wch:26},{wch:12},{wch:30}];
+      DE_HEAD.forEach(function(_,c){ const k2=XLSX.utils.encode_cell({r:0,c});
+        if(ds[k2]) ds[k2].s={fill:{patternType:'solid',fgColor:{rgb:'FF0B2545'}},
+                             font:{bold:true,color:{rgb:'FFFFFFFF'}}}; });
+      XLSX.utils.book_append_sheet(wb, ds, DOCENG_SHEET);
+    }
+    S.eng.wroteDocEng=deKeep.length;
     S.eng.wroteRemarks={kept:rmKeep.length, dropped:rmDrop.length};
     wrStep('Saving the file.', 88);
     await yieldPaint();
@@ -7867,6 +7996,32 @@ const DELAY_REASONS=[
 const RM_SEP='\u0001';
 const rmKey=(po,tr)=>String(po).trim()+RM_SEP+String(tr).trim();
 
+/* One engineer against one document, where the equipment tag's answer is not
+   the right one.  Kept in its own sheet for the same reason the delay reasons
+   are: the RESPONSIBLE ENGINEER column cannot say whether a name was inherited
+   from the tag or set by hand, and that difference has to survive the trip. */
+const DOCENG_SHEET='Document Engineers';
+const DE_HEAD=['PURCHASE ORDER','TR NUMBER','DOCUMENT','EQUIPMENT','CODE','RESPONSIBLE ENGINEER'];
+function readDocEngSheet(wb){
+  const name=wb.SheetNames.find(n=>n.trim().toLowerCase()===DOCENG_SHEET.toLowerCase());
+  if(!name) return {};
+  let aoa;
+  try{ aoa=XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,blankrows:false,defval:''}); }
+  catch(e){ return {}; }
+  if(!aoa || aoa.length<2) return {};
+  const head=aoa[0].map(h=>String(h||'').trim().toUpperCase());
+  const iPO=head.indexOf('PURCHASE ORDER'), iTR=head.indexOf('TR NUMBER'),
+        iW=head.indexOf('RESPONSIBLE ENGINEER');
+  if(iPO<0 || iTR<0 || iW<0) return {};
+  const out={};
+  aoa.slice(1).forEach(r=>{
+    const po=String(r[iPO]==null?'':r[iPO]).trim(), tr=String(r[iTR]==null?'':r[iTR]).trim(),
+          w=String(r[iW]==null?'':r[iW]).trim();
+    if(po && tr && w) out[rmKey(po,tr)]=w;
+  });
+  return out;
+}
+
 function readRemarkSheet(wb){
   const name=wb.SheetNames.find(n=>n.trim().toLowerCase()===REMARK_SHEET.toLowerCase());
   if(!name) return {};
@@ -8033,7 +8188,7 @@ async function buildAllPo(step){
       if(circ){ T.circ++; if(late) T.late++; }
     });
     /* and once in the pile the engineers are measured on */
-    P.docs.push({tags, circ, late});
+    P.docs.push({tags, circ, late, tr:k.slice(k.indexOf('\u0001')+1)});
     P.n++; out.n++;
     if(circ){ P.circ++; out.circ++; if(late){ P.late++; out.late++; } }
   });
@@ -8055,17 +8210,25 @@ async function buildAllPo(step){
     /* and the documents, counted once each — a document naming several tags
        goes to the first of them with an engineer on it */
     P.docs.forEach(d=>{
-      let who='';
-      for(let i=0;i<d.tags.length;i++){
-        const raw=whoOf(d.tags[i]);
-        if(raw && !isNA(raw)){ who=raw; break; }
-      }
+      /* an engineer named on the document itself comes first, then the first
+         of its tags that has one */
+      let who=(S.eng.doc||{})[rmKey(P.po, d.tr)]||'';
       if(!who){
-        if(d.tags.every(t=>isNA(whoOf(t)))) return;       // every tag set aside
+        for(let i=0;i<d.tags.length;i++){
+          const raw=whoOf(d.tags[i]);
+          if(raw && !isNA(raw)){ who=raw; break; }
+        }
+      }
+      if(isNA(who)) return;                                // set aside on purpose
+      if(!who){
+        if(d.tags.every(t=>isNA(whoOf(t)))) return;        // every tag set aside
         who='(unassigned)';
       }
-      const E=out.eng[who]; if(!E) return;
-      const R=E.pos[P.po]; if(!R) return;
+      /* somebody who only ever received documents one at a time holds no tag,
+         and still belongs on this list */
+      const E=(out.eng[who]=out.eng[who]||{who, pos:{}, tags:0, n:0, circ:0, late:0,
+                                           unassigned: who==='(unassigned)'});
+      const R=(E.pos[P.po]=E.pos[P.po]||{po:P.po, desc:P.desc, tags:[], n:0, circ:0, late:0});
       R.n++; E.n++;
       if(d.circ){ R.circ++; E.circ++; if(d.late){ R.late++; E.late++; } }
     });
@@ -8304,7 +8467,7 @@ window.addEventListener('beforeunload',e=>{
 
 function resetAll(){
   S.rows=[];S.docs=[];S.cur=null;S.po=null;S.dep=null;S.disc=null;S.discIdx=null;S.discCidx=null;
-  S.fileBytes=null; S.eng={list:{},req:{},resp:{},carried:0,dirty:false};
+  S.fileBytes=null; S.eng={list:{},req:{},resp:{},doc:{},carried:0,dirty:false,stamp:0};
   S.basket=S.basket||[];
   $('file').value='';$('btn-reset').style.display='none';$('navinfo').style.display='none';
   $('crumbs').innerHTML='';go('upload');
