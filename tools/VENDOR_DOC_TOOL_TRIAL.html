@@ -1804,34 +1804,6 @@ body[data-dark] #wkBody tr:hover td{background:#1C2839}
 .err-s b{font-weight:700}
 .err-why{display:block;margin-top:7px;font-size:11.5px;opacity:.8}
 
-/* ══ WHY IS IT LATE ══════════════════════════════════════════════════════ */
-.rm-chip{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:4px 9px;
-  border:1px solid #F0DCB6;background:var(--warn-bg);color:#8A5A0E;border-radius:4px;
-  font:inherit;font-size:11px;font-weight:600;cursor:pointer;text-align:left;
-  transition:border-color .14s var(--ease),background .14s var(--ease)}
-.rm-chip .rr{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.rm-chip:hover{border-color:#D9922E;background:#FBEED6}
-.rm-ask{padding:4px 11px;border:1px dashed #D9A0A0;background:transparent;color:#BB0000;
-  border-radius:4px;font:inherit;font-size:11px;font-weight:700;cursor:pointer;
-  transition:background .14s var(--ease),border-color .14s var(--ease)}
-.rm-ask:hover{background:var(--dang-bg);border-style:solid}
-.rm-card{max-width:560px}
-.rm-doc{background:var(--sf2);border:1px solid var(--line);border-radius:4px;padding:12px 14px;
-  margin-bottom:16px}
-.rm-no{font-family:var(--mono);font-size:12.5px;font-weight:700;color:var(--ink);word-break:break-all}
-.rm-ti{font-size:12px;color:var(--muted);margin-top:3px}
-.rm-ag{margin-top:7px;font-size:11.5px;font-weight:700}
-.rm-late{color:#BB0000}.rm-ok{color:#2E7D32}
-.rm-l{display:block;font-size:11.5px;font-weight:600;color:var(--ink);margin:0 0 5px}
-.rm-l span{font-weight:400;color:var(--muted)}
-.rm-sel,.rm-in,.rm-tx{width:100%;padding:9px 11px;font-size:13px;font-family:inherit;color:var(--ink);
-  background:var(--sf);border:1px solid var(--line2);border-radius:4px;margin-bottom:15px}
-.rm-tx{resize:vertical;line-height:1.5}
-.rm-sel:focus,.rm-in:focus,.rm-tx:focus{outline:none;border-color:var(--blue);
-  box-shadow:0 0 0 2px rgba(10,110,209,.18)}
-.rm-err{font-size:12px;font-weight:600;color:#BB0000;background:var(--dang-bg);
-  border:1px solid #F1BEB9;border-radius:4px;padding:8px 11px}
-
 /* ══ AN ENGINEER THE DIRECTORY HAS LOST ═════════════════════════════════ */
 .gone-line{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:5px}
 .gone-tag{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.03em;
@@ -1970,37 +1942,12 @@ body[data-dark] #alBody tr.al-sub td{background:#101822}
 .crs-owe{display:inline-block;font-size:11px;font-weight:700;color:var(--dang);
   background:rgba(212,87,78,.09);border:1px solid rgba(212,87,78,.28);border-radius:4px;padding:2px 7px}
 .crs-n{color:var(--warn);font-weight:800}
-.crs-r{color:var(--dang);font-weight:800}
-
-.crs-kpi .m.go{cursor:pointer;transition:box-shadow .15s,transform .15s}
-.crs-kpi .m.go:hover{box-shadow:0 2px 10px rgba(10,110,209,.14);transform:translateY(-1px)}
-.crs-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
-.crs-card{background:var(--card,#fff);border:1px solid var(--line2);border-radius:8px;padding:18px 20px}
-.crs-h .t{font-size:14px;font-weight:700;color:var(--ink)}
-.crs-h .s{font-size:12px;color:var(--muted);margin-top:3px}
-.crs-chart{display:flex;align-items:center;gap:22px;margin-top:14px}
-.crs-chart .donut-wrap{position:relative;flex:0 0 220px;height:220px}
-.crs-leg{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0}
-.crs-li{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:5px;font-size:12.5px}
-.crs-li .dot{width:10px;height:10px;border-radius:3px;flex:none}
-.crs-li .t{flex:1;color:var(--ink2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.crs-li b{font-variant-numeric:tabular-nums;color:var(--ink)}
-.crs-li .p{width:38px;text-align:right;color:var(--muted);font-size:11.5px;font-variant-numeric:tabular-nums}
-.crs-li.go{cursor:pointer}
-.crs-li.go:hover{background:rgba(10,110,209,.06)}
-.crs-ages{margin-top:16px;display:flex;flex-direction:column;gap:10px}
-.crs-bar{display:grid;grid-template-columns:110px 1fr 40px;align-items:center;gap:12px;
-  font-size:12.5px;padding:5px 6px;border-radius:5px}
-.crs-bar .t{color:var(--ink2)}
-.crs-bar .tr{height:12px;background:var(--line2);border-radius:6px;overflow:hidden}
-.crs-bar .tr i{display:block;height:100%;border-radius:6px}
-.crs-bar b{text-align:right;font-variant-numeric:tabular-nums}
-.crs-bar.go{cursor:pointer}
-.crs-bar.go:hover{background:rgba(10,110,209,.06)}
+/* the CRS page is the overview's card; only the tab strip it does not have is left out */
+#sc-crs .tabcard{border-radius:14px}
+#sc-crs .sk-r .c1{color:var(--c)}
 #enPBody .en-crs{display:inline-block;min-width:26px;text-align:right;font-weight:800;color:var(--warn);
   cursor:pointer;border-radius:4px;padding:1px 4px}
 #enPBody .en-crs:hover{background:rgba(217,146,46,.12)}
-@media (max-width:900px){ .crs-row{grid-template-columns:1fr} .crs-chart{flex-direction:column} }
 
 </style>
 </head>
@@ -2210,48 +2157,10 @@ body[data-dark] #alBody tr.al-sub td{background:#101822}
   <div class="foot"></div>
 </div></div>
 
-<!-- ── why is this one late? ───────────────────────────────────────────────
-     One line against one document: a reason from a fixed list so a month of
-     them can be counted, and whatever the engineer wants to add.  It is
-     written into the register and deleted when the document closes. -->
-<div class="modal" id="rmModal" hidden>
-  <div class="modal-bd" onclick="closeRemark()"></div>
-  <div class="modal-card rm-card" role="dialog" aria-modal="true" aria-labelledby="rmTitle">
-    <div class="modal-h">
-      <div>
-        <div class="modal-t" id="rmTitle">Reason for the delay</div>
-        <div class="modal-s">It goes into the register, comes back the next time it is loaded, and is
-          removed by itself once the document closes.</div>
-      </div>
-      <button class="modal-x" onclick="closeRemark()" aria-label="Close">&#10005;</button>
-    </div>
-    <div class="modal-b">
-      <div class="rm-doc">
-        <div class="rm-no" id="rmDoc"></div>
-        <div class="rm-ti" id="rmSub"></div>
-        <div class="rm-ag" id="rmAge"></div>
-      </div>
-      <label class="rm-l" for="rmReason">Reason</label>
-      <select id="rmReason" class="rm-sel"></select>
-      <label class="rm-l" for="rmNote">Remark <span>what exactly is holding it, and what is being done</span></label>
-      <textarea id="rmNote" class="rm-tx" rows="4" placeholder="Vendor promised the revised calculation by Friday; chased twice."></textarea>
-      <label class="rm-l" for="rmWho">Raised by</label>
-      <input id="rmWho" class="rm-in" placeholder="Your name" autocomplete="off">
-      <div class="rm-err" id="rmErr" hidden></div>
-    </div>
-    <div class="modal-f">
-      <button class="btn btn-g btn-s" id="rmDel" onclick="deleteRemark()" hidden>Remove the remark</button>
-      <div class="fill"></div>
-      <button class="btn btn-g btn-s" onclick="closeRemark()">Cancel</button>
-      <button class="btn btn-p btn-s" onclick="saveRemark()">Save</button>
-    </div>
-  </div>
-</div>
-
 
 <!-- 2e ── CLIENT CRS: the replies owed to the client ──────────────────────
-     Behind the four reviewing tiles.  A code 2 or 3 on a revision, and whether
-     our reply transmittal has gone out against it. -->
+     Behind the reviewing tiles.  One row per revision: a code 2 or 3, and
+     whether our reply transmittal has gone out against it. -->
 <div class="screen" id="sc-crsl"><div class="wrap">
   <div class="pagebar">
     <button class="pb-back" onclick="clBack()" title="Back" aria-label="Back">&#8592;</button>
@@ -2260,11 +2169,6 @@ body[data-dark] #alBody tr.al-sub td{background:#101822}
     <div class="pb-scope" id="clScope"></div>
   </div>
   <div class="wk-head" id="clSum"></div>
-  <div class="cb-note info2" id="clNote" style="display:none;margin-top:14px">
-    These are code 2 and code 3 comments on revisions the vendor has since replaced. They are
-    kept apart from the replies owed now, so this list plus <b>My CRS actions</b> adds up to what a
-    filter on the register shows. Answer them if your client still expects it; otherwise they
-    can be left.</div>
   <div class="dt-wrap" style="border-radius:4px;border:1px solid var(--line2);margin-top:14px">
     <div class="ac-tools">
       <input class="wk-q" id="clQ" placeholder="Search this list"
@@ -2286,59 +2190,57 @@ body[data-dark] #alBody tr.al-sub td{background:#101822}
   <div class="foot"></div>
 </div></div>
 
-<!-- 2f ── CLIENT CRS OVERVIEW: the managing tab's view ───────────────────── -->
+<!-- 2f ── CLIENT CRS PAGE: the managing tab's view ───────────────────────
+     The same card as the For Review & Originator overview, the same parts in
+     the same order: badge, title, donut, figures, a progress bar, then where
+     it is sitting.  A click on a donut unrolls the breakdown under it. -->
 <div class="screen" id="sc-crs"><div class="wrap">
   <div class="pagebar">
     <button class="pb-back" onclick="goHome()" title="Back to home" aria-label="Back to home">&#8592;</button>
-    <div class="pb-t"><span>Client CRS — for review &amp; originator</span></div>
+    <div class="pb-t"><span>For review &amp; originator — Client CRS</span></div>
     <div class="pb-sp"></div>
     <div class="pb-scope" id="crsScope"></div>
   </div>
-  <div class="wk-head crs-kpi" id="crsKpi"></div>
 
-  <div class="crs-row">
-    <div class="card crs-card">
-      <div class="crs-h"><div class="t">What the client said</div>
-        <div class="s">The review code on each document's current revision.</div></div>
-      <div class="crs-chart"><div class="donut-wrap" id="crsD1"></div><div class="crs-leg" id="crsL1"></div></div>
-    </div>
-    <div class="card crs-card">
-      <div class="crs-h"><div class="t">Our replies</div>
-        <div class="s">Of the code 2 and code 3 comments, how many have a reply transmittal.</div></div>
-      <div class="crs-chart"><div class="donut-wrap" id="crsD2"></div><div class="crs-leg" id="crsL2"></div></div>
-    </div>
-  </div>
+  <div class="tabcard"><div class="tabnote" id="crsTabnote"></div></div>
 
-  <div class="crs-row">
-    <div class="card crs-card">
-      <div class="crs-h"><div class="t">How long the unanswered ones have waited</div>
-        <div class="s">Days since the client's comments reached us, as of the register date.</div></div>
-      <div class="crs-ages" id="crsAge"></div>
-    </div>
-    <div class="card crs-card" style="padding:0;overflow:hidden">
-      <div class="crs-h" style="padding:18px 20px 10px"><div class="t">On whose desk</div>
-        <div class="s">Each document's engineer — from its equipment tag, or named on the document.</div></div>
-      <div class="dt-scroll" style="max-height:300px">
-        <table class="dt"><colgroup><col style="width:auto"><col style="width:84px"><col style="width:74px">
-          <col style="width:74px"><col style="width:92px"><col style="width:84px"></colgroup>
-          <thead><tr><th>Engineer</th><th style="text-align:right">Awaiting</th><th style="text-align:right">Code 3</th>
-            <th style="text-align:right">Replied</th><th style="text-align:right">Superseded</th>
-            <th style="text-align:right">Longest</th></tr></thead>
-          <tbody id="crsWho"></tbody></table>
+  <div class="statgrid" id="crsGrid">
+    <article class="ccard" data-h="B" data-c="codes" id="crsCard1">
+      <div class="cc-h">
+        <span class="cc-badge rev">FOR REVIEW - ORIGINATOR</span>
+        <div class="cc-t">What the client said</div>
+        <div class="cc-tools">
+          <button class="chip" onclick="event.stopPropagation();exportCrsReport()">&#10515; Report</button></div>
       </div>
-    </div>
-  </div>
+      <div class="cc-top"><div class="cb-note" id="crsEx1"></div></div>
+      <div class="cc-body">
+        <div class="chartbox" id="crsBox1" onclick="crsToggle(1)">
+          <span class="cue">click for replies by document type &#8594;</span>
+          <div class="dw" id="crsDw1"></div>
+        </div>
+        <div class="mini" id="crsMini1"></div>
+      </div>
+      <div class="pblock" id="crsOv1"></div>
+      <div class="stuck" id="crsSk1"></div>
+      <div class="bytype" id="crsBt1"></div>
+    </article>
 
-  <div class="card crs-card" style="padding:0;overflow:hidden;margin-top:16px">
-    <div class="crs-h" style="padding:18px 20px 10px"><div class="t">By document type</div>
-      <div class="s">Code 2 and 3 on the current revision — replied and still owed.</div></div>
-    <div class="dt-scroll" style="max-height:340px">
-      <table class="dt"><colgroup><col style="width:auto"><col style="width:96px"><col style="width:96px">
-        <col style="width:220px"></colgroup>
-        <thead><tr><th>Document type</th><th style="text-align:right">Awaiting</th>
-          <th style="text-align:right">Replied</th><th>Replied / awaiting</th></tr></thead>
-        <tbody id="crsType"></tbody></table>
-    </div>
+    <article class="ccard" data-h="B" data-c="disc" id="crsCard2">
+      <div class="cc-h">
+        <span class="cc-badge rev">FOR REVIEW - ORIGINATOR</span>
+        <div class="cc-t">On whose desk</div>
+      </div>
+      <div class="cc-top"><div class="cb-note" id="crsEx2"></div></div>
+      <div class="cc-body">
+        <div class="chartbox" id="crsBox2" onclick="crsToggle(2)">
+          <span class="cue">click for every engineer &#8594;</span>
+          <div class="dw" id="crsDw2"></div>
+        </div>
+        <div class="mini" id="crsMini2"></div>
+      </div>
+      <div class="stuck" id="crsSk2"></div>
+      <div class="bytype" id="crsBt2"></div>
+    </article>
   </div>
   <div class="foot"></div>
 </div></div>
@@ -3405,7 +3307,7 @@ function bookModel(wb, aoa){
     });
   }
   return { meta, hdr:H, headArr:head, depts, rows, engList, req, resp,
-           remarks: readRemarkSheet(wb), docEng: readDocEngSheet(wb),
+           docEng: readDocEngSheet(wb),
            hasEngCols: iReq!==undefined && iResp!==undefined };
 }
 function readBook(bytes){ const wb=bookOpen(bytes); return bookModel(wb, bookRows(wb)); }
@@ -3454,7 +3356,6 @@ async function parseBook(bytes){
   S.eng={ list, req:ctx.req||{}, resp:ctx.resp||{}, doc:ctx.docEng||{},
           hadCols:ctx.hasEngCols, hadList:!!ctx.engList,
           carried:0, dirty:false, prevName:'', stamp:0 };
-  S.remarks=ctx.remarks||{};
   S.allpo=null;
   buildFilters();
   loadBasket();
@@ -4165,6 +4066,7 @@ function renderDash(){
   /* The purchase order and the department are already in the breadcrumb above,
      and the sheet tab already names the view, so neither is repeated here. */
   $('pbScope').innerHTML=
+    `<span class="v">${esc(S.po)}</span>`+
     (S.poDesc?`<span class="v">${esc(S.poDesc)}</span>`:'')+
     (S.vendor?`<span class="v" title="${esc(S.vendor)}">${esc(vendShort(S.vendor,34))}</span>`:'')+
     `<span>Reviewing as ${esc(S.disc||'—')}</span>`;
@@ -6152,8 +6054,12 @@ function openDoc(tr){
       <div class="m"><div class="k">Overall status</div><div class="v">${esc(L.overall||'—')}</div></div>
       ${d.official?`<div class="m"><div class="k">Official (planned) date</div><div class="v">${fmt(d.official)}</div></div>`:''}
       ${L.reviewCode?`<div class="m"><div class="k">Review code</div><div class="v">${esc(L.reviewCode)}</div></div>`:''}
-      ${crsActs(L)?`<div class="m ${L.crsNo?'ok':'warn'}"><div class="k">Client CRS reply</div><div class="v">${
-          L.crsNo ? (fmt(L.crsOn)||'sent') : 'owed'+(crsDays(L)!=null?' · '+crsDays(L)+'d':'')}</div></div>`:''}
+      ${(()=>{ const ow=d.revs.filter(r=>crsMine(r) && crsOwed(r)), any=d.revs.some(r=>crsMine(r) && crsActs(r));
+          if(!any) return '';
+          return ow.length
+            ? `<div class="m warn"><div class="k">Client CRS reply</div><div class="v">owed on ${
+                ow.length===1 ? 'rev '+esc(ow[0].trRev||'—') : ow.length+' revisions'}</div></div>`
+            : `<div class="m ok"><div class="k">Client CRS reply</div><div class="v">all sent</div></div>`; })()}
       ${L.returned?`<div class="m"><div class="k">Returned to supplier</div><div class="v">${fmt(L.returned)}</div></div>`:''}
       <div class="m"><div class="k">Disciplines closed</div><div class="v">${d.depDone} / ${d.depAll}</div></div>
     </div>
@@ -7099,10 +7005,10 @@ function engPeople(){
   engIndex().list.forEach(t=>{ if(isNA(t.who)) return; get(t.who||'(unassigned)').tags.push(t); });
   /* somebody whose only open work is a reply to the client still belongs here */
   let crs={}; try{ crs=crsByPerson(); }catch(e){ crs={}; }
-  Object.keys(crs).forEach(w=>{ if(crs[w].owed || crs[w].old) get(w); });
+  Object.keys(crs).forEach(w=>{ if(crs[w].owed) get(w); });
   return Object.values(by).map(e=>{
     const c=crs[e.who]||{};
-    e.crs=c.owed||0; e.crsOld=c.old||0; e.crsRej=c.rej||0;
+    e.crs=c.owed||0; e.crsRej=c.rej||0;
     const n=e.docs.length;
     const closed=e.docs.filter(d=>String(d.status).toUpperCase()==='REVIEWED WITHOUT COMMENTS').length;
     const circ=e.docs.filter(d=>d.circulating).length;
@@ -7325,7 +7231,7 @@ function renderEngPeople(tags){
           ? `<span class="en-crs" role="button" tabindex="0" title="${e.crs} repl${e.crs===1?'y':'ies'} owed to the client${
               e.crsRej? ', '+e.crsRej+' of them rejections':''} — open the list"
               onclick="event.stopPropagation();openCrsList('owed','${esc(e.who).replace(/'/g,"\\'")}')">${e.crs}</span>`
-          : '<span class="s2">—</span>'}${e.crsOld? `<div class="s2">+${e.crsOld} earlier rev.</div>`:''}</td>
+          : '<span class="s2">—</span>'}</td>
       <td><div class="en-progcell">
           <div class="en-bar"><i style="width:${e.pct}%;background:#2E9E6B"></i>${
             open && e.circ? `<i style="width:${Math.round(e.circ/(e.n||1)*100)}%;background:#D9922E"></i>`:''}</div>
@@ -7590,35 +7496,8 @@ async function downloadRegister(after, opts){
 
     /* No Engineer List sheet is written any more: the roster is in the tool,
        and the names that matter are in the two columns themselves. */
-    wrStep('Writing the reasons recorded against late documents.', 84);
+    wrStep('Writing the engineers named on single documents.', 84);
     await yieldPaint();
-    const rmKeep=[], rmDrop=[];
-    Object.keys(S.remarks||{}).forEach(k=>{
-      const v=S.remarks[k]; if(!v || (!v.reason && !v.note)) return;
-      /* keep it while the document is still in the circuit, or while this file
-         says nothing about it at all - a remark from another export is not
-         this file's to throw away */
-      if(live[k]===false){ rmDrop.push(k); return; }
-      rmKeep.push([k,v]);
-    });
-    rmDrop.forEach(k=>delete S.remarks[k]);
-    { const old=wb.SheetNames.indexOf(REMARK_SHEET);
-      if(old>=0){ wb.SheetNames.splice(old,1); delete wb.Sheets[REMARK_SHEET]; } }
-    if(rmKeep.length){
-      const aoa=[RM_HEAD.slice()];
-      rmKeep.forEach(pair=>{
-        const p2=pair[0].split(RM_SEP), v=pair[1];
-        const d=(S.docs||[]).find(x=>x.tr===p2[1]);
-        aoa.push([p2[0], p2[1], d? d.label : p2[1], d? (d.xref||'') : '', d? (d.code||'') : '',
-                  v.reason||'', v.note||'', v.who||'', v.on||'', v.late||'']);
-      });
-      const rs=XLSX.utils.aoa_to_sheet(aoa);
-      rs['!cols']=[{wch:16},{wch:34},{wch:34},{wch:16},{wch:12},{wch:32},{wch:62},{wch:22},{wch:13},{wch:11}];
-      RM_HEAD.forEach(function(_,c){ const k2=XLSX.utils.encode_cell({r:0,c});
-        if(rs[k2]) rs[k2].s={fill:{patternType:'solid',fgColor:{rgb:'FF0B2545'}},
-                             font:{bold:true,color:{rgb:'FFFFFFFF'}}}; });
-      XLSX.utils.book_append_sheet(wb, rs, REMARK_SHEET);
-    }
     /* and the overrides themselves, so a deliberate one is still deliberate
        when this file is loaded again */
     { const old=wb.SheetNames.indexOf(DOCENG_SHEET);
@@ -7646,7 +7525,6 @@ async function downloadRegister(after, opts){
       XLSX.utils.book_append_sheet(wb, ds, DOCENG_SHEET);
     }
     S.eng.wroteDocEng=deKeep.length;
-    S.eng.wroteRemarks={kept:rmKeep.length, dropped:rmDrop.length};
     wrStep('Saving the file.', 88);
     await yieldPaint();
     /* the register keeps the name it arrived with, so its date stays on it */
@@ -7730,7 +7608,6 @@ const ICO={
   doc    :_svg('<path d="M14 2.8H7.2a2.2 2.2 0 0 0-2.2 2.2v14a2.2 2.2 0 0 0 2.2 2.2h9.6a2.2 2.2 0 0 0 2.2-2.2V7.8z"/><path d="M14 2.8v5h5"/><path d="M8.4 13h7.2M8.4 16.4h4.6"/>'),
   pie    :_svg('<path d="M11.2 3.3a8.8 8.8 0 1 0 9.5 9.5h-9.5V3.3z"/><path d="M14.6 2.7a8.8 8.8 0 0 1 6.7 6.7h-6.7V2.7z"/>'),
   focus  :_svg('<circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="3.9"/><circle cx="12" cy="12" r=".9" fill="currentColor" stroke="none"/>'),
-  why    :_svg('<path d="M9.2 9a2.9 2.9 0 1 1 3.9 2.7c-.9.35-1.4 1.1-1.4 2v.6"/><circle cx="12" cy="12" r="9.2"/><path d="M11.75 17.6h.01"/>'),
   globe  :_svg('<circle cx="12" cy="12" r="9.2"/><path d="M2.8 12h18.4"/><path d="M12 2.8a14 14 0 0 1 0 18.4 14 14 0 0 1 0-18.4z"/>'),
   list   :_svg('<path d="M9 6.2h12M9 12h12M9 17.8h12"/><path d="M4.2 6.2h.01M4.2 12h.01M4.2 17.8h.01"/>')
 };
@@ -7781,8 +7658,6 @@ function homeApps(){
   const openA=stA.total-stA.totals.without, openB=stB.total-stB.totals.without;
   let perf=null;
   try{ perf=perfAgg(cyclesFor(halfBase('A'),'tr')); }catch(e){ perf=null; }
-  const allLate=(S.docs||[]).filter(d=>d.circulating && d.over>0).length;
-  const noWhy=lateNoWhy().length, nWhy=withWhy().length;
 
   return [
     /* ── take action ───────────────────────────────────────────────────── */
@@ -7794,9 +7669,6 @@ function homeApps(){
      t:'Ready to release',    d:'Every sign-off is in', open:()=>openWork('release')},
     {g:'act', id:'every',    ic:ICO.every,   n:circ.length,
      t:'Everything circulating', d:'The whole circuit', open:()=>openWork('every')},
-    {g:'act', id:'why',      ic:ICO.why,     n:allLate,
-     t:'Delays to explain',   d:noWhy? noWhy+' still to explain' : 'every one explained',
-     open:()=>openWork('why')},
 
     /* ── the whole purchase order ──────────────────────────────────────── */
     {g:'poA', id:'aAct',  ic:ICO.focus, n:openA,
@@ -7834,10 +7706,7 @@ function homeApps(){
      open:()=>openOverview('A','perf')},
     {g:'see', id:'vdr',      ic:ICO.doc,     n:null,
      t:'Vendor document status', d:'The client-format report',
-     open:()=>{ crumbApp('Vendor document status'); openVdr(); }},
-    {g:'see', id:'said',     ic:ICO.why,     n:nWhy,
-     t:'Reasons for delay',   d:'What is holding the late ones',
-     open:()=>openWork('said')}
+     open:()=>{ crumbApp('Vendor document status'); openVdr(); }}
   ];
 }
 
@@ -7901,20 +7770,10 @@ const WK_MODES={
   others :{ key:'others',  cls:'blue', t:()=>'Reviewed by you — held by other disciplines'},
   release:{ key:'release', cls:'ok',   t:()=>'Ready to release to the vendor'},
   every  :{ key:null,      cls:'teal', t:()=>'Everything circulating on '+(S.po||'')},
-  /* Not slices of the circuit but slices of what is known about it: the late
-     ones nobody has explained, and the ones somebody has. */
-  why    :{ key:null, cls:'dang', why:true, allLate:true,
-            t:()=>'Delayed documents \u2014 past the '+DEADLINE_DAYS+'-day deadline',
-            only:d=>d.over>0},
-  said   :{ key:null, cls:'warn', why:true, allLate:true,
-            t:()=>'Reasons recorded against late documents',
-            only:d=>!!remarkOf(d)}
 };
 
-/* The reason a document is late belongs on the page whose job is the reason.
-   Everywhere else it would be a column of dashes with a button nobody came for,
-   so the column is not drawn at all - and the table is built to the columns
-   rather than the columns squeezed into a fixed table. */
+/* The table is built to its columns rather than the columns squeezed into a
+   fixed table. */
 const WK_BASE=[
   {k:'doc',   t:'Document',      w:'auto',   v:r=>r.d.label},
   {k:'equip', t:'Equipment',     w:'140px',  v:r=>r.d.xref||''},
@@ -7924,13 +7783,9 @@ const WK_BASE=[
   {k:'days',  t:'Days out',      w:'78px',   v:r=>r.d.days==null?-1:r.d.days, desc:true, right:true},
   {k:'who',   t:'Waiting on',    w:'178px',  v:r=>r.d.othersOpen.join(', ')}
 ];
-const WK_WHY={k:'why', t:'Reason for delay', w:'188px',
-  /* unexplained first when sorted by this column, then the oldest reason */
-  v:r=>{ const x=remarkOf(r.d); return x? '1'+x.reason : '0'; }};
 const WK_OPEN={k:'open', t:'', w:'66px', v:null};
 function wkCols(){
-  return WK_MODES[WK.mode].why ? WK_BASE.concat([WK_WHY, WK_OPEN])
-                               : WK_BASE.concat([WK_OPEN]);
+  return WK_BASE.concat([WK_OPEN]);
 }
 
 function openWork(mode){
@@ -7972,10 +7827,8 @@ function renderWork(){
   if(WK.sort.k) rows=sortRows(rows, COLS, WK.sort);
   else rows.sort((p,q)=>{
     /* untouched, the order is the order an engineer would pick them up in:
-       on a delay list the ones nobody has explained lead, and everywhere
-       else critical first, then whatever has been out longest */
+       critical first, then whatever has been out longest */
     const a=p.d, b=q.d;
-    if(M.why){ const wa=remarkOf(a)?1:0, wb=remarkOf(b)?1:0; if(wa!==wb) return wa-wb; }
     const ca=isCriticalDoc(a)?0:1, cb=isCriticalDoc(b)?0:1; if(ca!==cb) return ca-cb;
     const oa=a.over>0?a.over:-1, ob=b.over>0?b.over:-1; if(oa!==ob) return ob-oa;
     const da=a.days==null?-1:a.days, db=b.days==null?-1:b.days;
@@ -7995,23 +7848,13 @@ function renderWork(){
   const lateN=all.filter(d=>d.over>0).length;
   const critN=all.filter(d=>isCriticalDoc(d)).length;
   const worst=all.reduce((m,d)=>Math.max(m,d.days||0),0);
-  const said=all.filter(d=>remarkOf(d)).length;
-  /* On a delay list every row is already past the deadline, so counting that
-     again says nothing.  What is worth counting there is how much of it has
-     been answered. */
-  $('wkSum').innerHTML=(M.allLate
-    ? [[M.cls, all.length, 'delayed documents on this list'],
-       ['dang', all.length-said, 'still to explain'],
-       ['ok',  said, 'explained'],
-       ['', worst, 'days — the longest one has been out']]
-    : [[M.cls, all.length, WK.mode==='every'?'circulating in this purchase order':'documents on this list'],
+  $('wkSum').innerHTML=(
+      [[M.cls, all.length, WK.mode==='every'?'circulating in this purchase order':'documents on this list'],
        ['dang', lateN, 'past the '+DEADLINE_DAYS+'-day deadline'],
        ['', critN, 'critical (calculations / GA)'],
        ['', worst, 'days — the longest one has been out']]
   ).map(([c,n,l])=>`<div class="m ${c}"><div class="n">${n.toLocaleString()}</div><div class="l">${l}</div></div>`).join('');
 
-  /* the deadline filter is meaningless on a list that is nothing but late */
-  $('wkOver').style.display = M.allLate ? 'none' : '';
   $('wkOver').classList.toggle('on',WK.over);
   $('wkCrit').classList.toggle('on',WK.crit);
   $('wkCount').innerHTML=`<b>${rows.length.toLocaleString()}</b> of ${all.length.toLocaleString()} shown`;
@@ -8039,7 +7882,6 @@ function renderWork(){
       <td style="text-align:right">${d.days!=null?`<span class="tag ${ageCls} num">${d.days}d</span>`:'<span class="s2">—</span>'}
         <div class="s2 num">${d.over>0?'+'+d.over+' late':''}</div></td>
       <td><div class="s2">${who}</div></td>
-      ${M.why? `<td>${remarkCell(d)}</td>` : ''}
       <td><span class="wk-open">open &#8594;</span></td>
     </tr>`;
   }).join('') : `<tr><td colspan="${COLS.length}" class="empty">${
@@ -8127,34 +7969,7 @@ function favLoading(pct){
   document.title=pct+'% · Reading the workbook';
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   WHY IS IT LATE?
-   A circulating document past the deadline has a reason, and that reason lives
-   with the engineer, not in the register — so it was never written down and
-   never asked about twice.
-
-   A remark is one line against one document: a reason from a fixed list, so a
-   month of them can be counted, plus whatever the engineer wants to say.  It
-   is written into the register on a sheet of its own and read back the next
-   time that register is loaded, so the answer survives the export.
-
-   And it is deleted the moment the document closes: a reason for a delay that
-   is over is noise, and leaving it there is how a register turns into a
-   graveyard.
-   ═══════════════════════════════════════════════════════════════════════════ */
-const REMARK_SHEET='Delay Remarks';
-const RM_HEAD=['PURCHASE ORDER','TR NUMBER','DOCUMENT','EQUIPMENT','CODE','REASON','REMARK',
-               'RAISED BY','RAISED ON','DAYS LATE WHEN RAISED'];
-const DELAY_REASONS=[
-  'Waiting on the vendor to respond',
-  'Waiting on another discipline',
-  'Waiting on the client or licensor',
-  'Comments still under discussion',
-  'Information missing from the document',
-  'Reviewer unavailable',
-  'Held for a related document',
-  'Other'
-];
+/* One document across purchase orders: the order and its TR number. */
 const RM_SEP='\u0001';
 const rmKey=(po,tr)=>String(po).trim()+RM_SEP+String(tr).trim();
 
@@ -8184,29 +7999,6 @@ function readDocEngSheet(wb){
   return out;
 }
 
-function readRemarkSheet(wb){
-  const name=wb.SheetNames.find(n=>n.trim().toLowerCase()===REMARK_SHEET.toLowerCase());
-  if(!name) return {};
-  let aoa;
-  try{ aoa=XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,blankrows:false,defval:''}); }
-  catch(e){ return {}; }
-  if(!aoa || aoa.length<2) return {};
-  const head=aoa[0].map(h=>String(h||'').trim().toUpperCase());
-  const ix=n=>head.indexOf(n);
-  const iPO=ix('PURCHASE ORDER'), iTR=ix('TR NUMBER');
-  if(iPO<0 || iTR<0) return {};
-  const iR=ix('REASON'), iM=ix('REMARK'), iW=ix('RAISED BY'), iD=ix('RAISED ON');
-  const out={};
-  aoa.slice(1).forEach(r=>{
-    const po=String(r[iPO]==null?'':r[iPO]).trim(), tr=String(r[iTR]==null?'':r[iTR]).trim();
-    if(!po || !tr) return;
-    const v={ reason:iR<0?'':String(r[iR]||'').trim(), note:iM<0?'':String(r[iM]||'').trim(),
-              who:iW<0?'':String(r[iW]||'').trim(), on:iD<0?'':String(r[iD]||'').trim() };
-    if(v.reason || v.note) out[rmKey(po,tr)]=v;
-  });
-  return out;
-}
-
 /* A supplier's registered name runs to sixty characters and would be the
    longest thing on any line it joins, so it is shortened where it is only
    there to be recognised — the whole of it is on the hover. */
@@ -8216,71 +8008,6 @@ function vendShort(n,max){
 }
 const vendChip = (max) => S.vendor
   ? `<span class="v" title="${esc(S.vendor)}">${esc(vendShort(S.vendor,max))}</span>` : '';
-
-const remarkOf = d => (S.remarks||{})[rmKey(S.po, d.tr)] || null;
-/* the documents that owe an explanation: late, circulating, and nothing said */
-const needsWhy = d => d.circulating && d.over>0 && !remarkOf(d);
-function lateNoWhy(){ return (S.docs||[]).filter(needsWhy); }
-function withWhy(){ return (S.docs||[]).filter(d=>d.circulating && remarkOf(d)); }
-
-/* who is writing — remembered in this browser, never in the file */
-const ME_KEY='vdt.me.v1';
-function meName(){ try{ return localStorage.getItem(ME_KEY)||''; }catch(e){ return ''; } }
-function setMeName(v){ try{ localStorage.setItem(ME_KEY, String(v||'').trim()); }catch(e){} }
-
-const RM={ tr:null, after:null };
-function openRemark(tr, after){
-  const d=(S.docs||[]).find(x=>x.tr===tr); if(!d) return;
-  RM.tr=tr; RM.after=after||null;
-  const r=remarkOf(d)||{};
-  $('rmDoc').textContent=d.label;
-  $('rmSub').textContent=(d.title||'')+(d.xref? ' · '+d.xref : '');
-  $('rmAge').innerHTML = d.over>0
-    ? `<span class="rm-late">${d.over} day${d.over===1?'':'s'} past the ${DEADLINE_DAYS}-day deadline</span>`
-    : `<span class="rm-ok">${d.days==null?'—':d.days} day${d.days===1?'':'s'} in circulation — inside the deadline</span>`;
-  $('rmReason').innerHTML='<option value="">Choose a reason…</option>'+
-    DELAY_REASONS.map(x=>`<option${x===r.reason?' selected':''}>${esc(x)}</option>`).join('')+
-    (r.reason && DELAY_REASONS.indexOf(r.reason)<0 ? `<option selected>${esc(r.reason)}</option>` : '');
-  $('rmNote').value=r.note||'';
-  $('rmWho').value=r.who||meName();
-  $('rmDel').style.display = remarkOf(d) ? '' : 'none';
-  $('rmErr').hidden=true;
-  $('rmModal').hidden=false;
-  setTimeout(()=>$('rmReason').focus(),60);
-}
-function closeRemark(){ $('rmModal').hidden=true; RM.tr=null; }
-function saveRemark(){
-  const d=(S.docs||[]).find(x=>x.tr===RM.tr); if(!d) return closeRemark();
-  const reason=$('rmReason').value.trim(), note=$('rmNote').value.trim(), who=$('rmWho').value.trim();
-  if(!reason){ const e=$('rmErr'); e.textContent='Choose a reason — it is what makes a month of these countable.'; e.hidden=false; return; }
-  S.remarks=S.remarks||{};
-  S.remarks[rmKey(S.po,d.tr)]={ reason, note, who,
-    on:new Date().toISOString().slice(0,10), late: d.over>0? d.over : 0 };
-  setMeName(who);
-  S.eng.dirty=true;
-  closeRemark();
-  if(typeof RM.after==='function') RM.after();
-}
-function deleteRemark(){
-  const d=(S.docs||[]).find(x=>x.tr===RM.tr); if(!d) return closeRemark();
-  delete (S.remarks||{})[rmKey(S.po,d.tr)];
-  S.eng.dirty=true;
-  closeRemark();
-  if(typeof RM.after==='function') RM.after();
-}
-window.openRemark=openRemark; window.closeRemark=closeRemark;
-window.saveRemark=saveRemark; window.deleteRemark=deleteRemark;
-
-/* the cell that carries it in a worklist row */
-function remarkCell(d){
-  const r=remarkOf(d);
-  if(r) return `<button class="rm-chip" title="${esc(r.note||r.reason)}${r.who?' — '+esc(r.who):''}"
-      onclick="event.stopPropagation();openRemark('${esc(d.tr).replace(/'/g,"\\'")}',renderWork)">
-      <span class="rr">${esc(r.reason)}</span></button>`;
-  if(d.over>0) return `<button class="rm-ask" title="Say why this one is late"
-      onclick="event.stopPropagation();openRemark('${esc(d.tr).replace(/'/g,"\\'")}',renderWork)">Why?</button>`;
-  return '<span class="s2">—</span>';
-}
 
 /* ═══════════════════════════════════════════════════════════════════════════
    ONE ENGINEER, EVERY PURCHASE ORDER
@@ -8309,7 +8036,7 @@ async function buildAllPo(step){
         iRC=H['REVIEW CODE'], iRep=H['NUM TRANSMITTAL REPLY'];
 
   /* latest revision of every document, exactly the way buildDocs picks it */
-  const best={};
+  const best={}, crsRows={};
   for(let i=0;i<rows.length;i+=8000){
     const end=Math.min(i+8000, rows.length);
     for(let j=i;j<end;j++){
@@ -8320,6 +8047,16 @@ async function buildAllPo(step){
                ('#U#'+String(a[iSup]==null?'':a[iSup]).trim()+'~'+String(a[iCode]==null?'':a[iCode]).trim()+
                 '~'+String(a[iXR]==null?'':a[iXR]).trim());
       const k=po+'\u0001'+tr;
+      /* a reply owed to the client is owed on every revision, not only the
+         latest — so it is counted here, row by row, the way Excel filters it */
+      if(iRC!==undefined && myRoleKey(a[disc.i])==='review-org'){
+        const rc=String(a[iRC]==null?'':a[iRC]).trim();
+        if((rc==='2'||rc==='3') && !String(iRep===undefined||a[iRep]==null?'':a[iRep]).trim()){
+          (crsRows[po]=crsRows[po]||[]).push({tags:splitTags(a[iXR]), tr,
+            desc:String(a[iPoD]==null?'':a[iPoD]).trim()});
+          out.crs++;
+        }
+      }
       const c=xdate(a[iCirc]); const t=c? c.getTime() : -1;
       const e=best[k];
       if(!e || t>e.t) best[k]={t, a, po};
@@ -8333,20 +8070,8 @@ async function buildAllPo(step){
     const st=effStatus(String(a[iSt]==null?'':a[iSt]).trim(),
                        String(a[iRet]==null?'':a[iRet]).trim());
     const up=String(st||'NEVER RECEIVED').toUpperCase();
-    if(myRoleKey(a[disc.i])!=='review-org') return;      // the same half
-    /* a reply owed to the client on the current revision — counted apart from
-       the vendor documents, whatever status the document is in; only a void
-       document owes nobody an answer */
-    if(up!=='VOID' && iRC!==undefined){
-      const rc=String(a[iRC]==null?'':a[iRC]).trim();
-      if((rc==='2'||rc==='3') && !String(iRep===undefined||a[iRep]==null?'':a[iRep]).trim()){
-        const P0=(out.pos[po]=out.pos[po]||{po, desc:String(a[iPoD]==null?'':a[iPoD]).trim(),
-                                           tags:{}, docs:[], n:0, circ:0, late:0});
-        (P0.crsDocs=P0.crsDocs||[]).push({tags:splitTags(a[iXR]), tr:k.slice(k.indexOf('\u0001')+1)});
-        P0.crs=(P0.crs||0)+1; out.crs++;
-      }
-    }
     if(ENG_SKIP.indexOf(up)>=0) return;                  // the same set the PO screen drops
+    if(myRoleKey(a[disc.i])!=='review-org') return;      // and the same half
     const circ = up==='CIRCULATING';
     const days = parseInt(String(a[iDays]==null?'':a[iDays]),10);
     const late = circ && !isNaN(days) && (days-DEADLINE_DAYS)>0;
@@ -8407,9 +8132,15 @@ async function buildAllPo(step){
       R.n++; E.n++;
       if(d.circ){ R.circ++; E.circ++; if(d.late){ R.late++; E.late++; } }
     });
-    /* the replies owed to the client, on the same owner rule */
-    (P.crsDocs||[]).forEach(d=>{
-      let who=(S.eng.doc||{})[rmKey(P.po, d.tr)]||'';
+  });
+  /* the replies owed to the client, on the same owner rule as the documents */
+  Object.keys(crsRows).forEach(po=>{
+    const list=crsRows[po];
+    const P=(out.pos[po]=out.pos[po]||{po, desc:list[0].desc, tags:{}, docs:[], n:0, circ:0, late:0});
+    P.crs=list.length;
+    const whoOf=t=>S.eng.resp[tagKey(po,t)]||'';
+    list.forEach(d=>{
+      let who=(S.eng.doc||{})[rmKey(po, d.tr)]||'';
       if(!who){
         for(let i=0;i<d.tags.length;i++){
           const raw=whoOf(d.tags[i]);
@@ -8423,7 +8154,7 @@ async function buildAllPo(step){
       }
       const E=(out.eng[who]=out.eng[who]||{who, pos:{}, tags:0, n:0, circ:0, late:0,
                                            unassigned: who==='(unassigned)'});
-      const R=(E.pos[P.po]=E.pos[P.po]||{po:P.po, desc:P.desc, tags:[], n:0, circ:0, late:0});
+      const R=(E.pos[po]=E.pos[po]||{po, desc:P.desc, tags:[], n:0, circ:0, late:0});
       R.crs=(R.crs||0)+1; E.crs=(E.crs||0)+1;
     });
   });
@@ -8648,7 +8379,7 @@ window.copyRosterCode=copyRosterCode; window.rosterCode=rosterCode;
 /* ═══════════════════════════════════════════════════════════════════════════
    CLIENT CRS — THE CLIENT'S COMMENTS, AND OUR REPLY TO THEM
    ───────────────────────────────────────────────────────────────────────────
-   Every document the client reviews comes back with a code in REVIEW CODE:
+   Every revision the client reviews comes back with a code in REVIEW CODE:
 
         1  no comments                 nothing to answer
         2  with comments               a reply is owed
@@ -8656,26 +8387,24 @@ window.copyRosterCode=copyRosterCode; window.rosterCode=rosterCode;
         4  for information             nothing to answer
 
    The reply is a transmittal: its number lands in NUM TRANSMITTAL REPLY and
-   its date in NUM TRANSMITTAL REPLY DATE.  So a code 2 or 3 with no reply
-   number is a reply this discipline still owes the client.
+   its date in NUM TRANSMITTAL REPLY DATE.  A code 2 or 3 with no reply number
+   is a reply this discipline still owes the client.
 
-   Which revision.  The rule is read against the document's current revision —
-   that is the one the client is waiting on an answer for.  A code 2 or 3 left
-   unanswered on a revision the vendor has since replaced is still counted, but
-   separately, so the two always add up to what a filter on the raw register
-   shows, and nobody has to wonder where the difference went.
+   Every revision, not just the latest.  Unlike a vendor review, a CRS on
+   revision 00 is still owed after the vendor has sent 01 — each one has to be
+   answered.  So the rule is read row by row, exactly the way it is filtered
+   in Excel: the discipline's own column reading FOR REVIEW - ORIGINATOR on
+   that row, REVIEW CODE 2 or 3, NUM TRANSMITTAL REPLY blank.
 
-   The scope is the same one the vendor side's "For review & originator" half
-   uses: this discipline's own documents, the document types in play.  A void
-   document owes nobody a reply.  The engineer is whoever the document belongs
-   to already — its equipment tag's, or the one named on the document itself.
+   The engineer is whoever the document belongs to already — its equipment
+   tag's, or the one named on the document itself.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 const CRS_CODE={
-  '1':{t:'No comments',                   s:'No comments',    col:'#2E9E6B', act:false},
-  '2':{t:'With comments',                 s:'With comments',  col:'#D9922E', act:true},
-  '3':{t:'Rejected — comments as noted',  s:'Rejected',       col:'#D4574E', act:true},
-  '4':{t:'For information',               s:'For information',col:'#8FA3B8', act:false}
+  '1':{t:'No comments',                   s:'No comments',    col:'#2E9E6B'},
+  '2':{t:'With comments',                 s:'With comments',  col:'#D9922E'},
+  '3':{t:'Rejected — comments as noted',  s:'Rejected',       col:'#D4574E'},
+  '4':{t:'For information',               s:'For information',col:'#8FA3B8'}
 };
 const CRS_NONE_COL='#DCE3EA';
 const crsCode = r => String((r && r.reviewCode) || '').trim();
@@ -8691,17 +8420,18 @@ function crsAsOf(){
 const crsDays = r => (r && r.crsIn) ? daysBetween(r.crsIn, crsAsOf()) : null;
 const crsTook = r => (r && r.crsIn && r.crsOn) ? daysBetween(r.crsIn, r.crsOn) : null;
 
-function crsDocs(){
-  return halfDocs('B').filter(d=>String(d.status||'').toUpperCase()!=='VOID');
-}
+/* this discipline's own review, read on the revision's own row */
+const crsMine = r => S.discIdx!=null && myRoleKey(r.row[S.discIdx])==='review-org';
 
-/* One item per revision that came back from the client with a code. */
+/* One item per revision this discipline reviews as originator. */
 function crsItems(){
   const out=[];
-  crsDocs().forEach(d=>{
-    const who=docWhoOf(d);
+  (S.docs||[]).forEach(d=>{
+    let who=null;
     d.revs.forEach((r,i)=>{
-      const code=crsCode(r); if(!code) return;
+      if(!crsMine(r)) return;
+      if(who===null) who=docWhoOf(d);
+      const code=crsCode(r);
       out.push({ d, r, code, cur:i===0, acts:crsActs(r), owed:crsOwed(r),
                  days:crsDays(r), took:crsTook(r), who });
     });
@@ -8712,37 +8442,33 @@ function crsItems(){
 /* Everything the screens say about CRS, from one pass. */
 function crsStats(){
   const items=crsItems();
-  const cur    = items.filter(x=>x.cur);
-  const owed   = cur.filter(x=>x.owed);
+  const back   = items.filter(x=>x.code);
+  const owed   = items.filter(x=>x.owed);
   const rej    = owed.filter(x=>x.code==='3');
-  const done   = cur.filter(x=>x.acts && !x.owed);
-  const old    = items.filter(x=>!x.cur && x.owed);
-  const byCode = {}; cur.forEach(x=>{ byCode[x.code]=(byCode[x.code]||0)+1; });
-  const docs   = crsDocs();
-  return { items, cur, owed, rej, done, old, byCode, docs,
-           notBack: docs.length - cur.length,
+  const done   = items.filter(x=>x.acts && !x.owed);
+  const byCode = {}; back.forEach(x=>{ byCode[x.code]=(byCode[x.code]||0)+1; });
+  return { items, back, owed, rej, done, byCode,
+           notBack: items.length - back.length,
+           docsOwed: new Set(owed.map(x=>x.d.tr)).size,
            oldest : owed.reduce((m,x)=>Math.max(m, x.days||0), 0) };
 }
 
 /* What each person owes the client — separate from their vendor documents,
    because a reply to the client is a different job from a review. */
 function crsByPerson(){
-  const S2=crsStats(), by={};
-  const get=w=>(by[w]=by[w]||{ who:w, owed:0, rej:0, old:0, done:0, oldest:0 });
-  S2.owed.forEach(x=>{ if(isNA(x.who)) return; const e=get(x.who||'(unassigned)');
+  const s=crsStats(), by={};
+  const get=w=>(by[w]=by[w]||{ who:w, owed:0, rej:0, done:0, oldest:0 });
+  s.owed.forEach(x=>{ if(isNA(x.who)) return; const e=get(x.who||'(unassigned)');
     e.owed++; if(x.code==='3') e.rej++; e.oldest=Math.max(e.oldest, x.days||0); });
-  S2.old.forEach(x=>{ if(isNA(x.who)) return; get(x.who||'(unassigned)').old++; });
-  S2.done.forEach(x=>{ if(isNA(x.who)) return; get(x.who||'(unassigned)').done++; });
+  s.done.forEach(x=>{ if(isNA(x.who)) return; get(x.who||'(unassigned)').done++; });
   return by;
 }
 
 /* ── the icons ─────────────────────────────────────────────────────────── */
 ICO.crs    = _svg('<path d="M20.5 14.6a2.2 2.2 0 0 1-2.2 2.2H8.1l-4.6 3.7V5.7a2.2 2.2 0 0 1 2.2-2.2h12.6a2.2 2.2 0 0 1 2.2 2.2z"/><path d="M8 8.6h8.2M8 12h5.4"/>');
 ICO.crsRej = _svg('<path d="M20.5 14.6a2.2 2.2 0 0 1-2.2 2.2H8.1l-4.6 3.7V5.7a2.2 2.2 0 0 1 2.2-2.2h12.6a2.2 2.2 0 0 1 2.2 2.2z"/><path d="M9.6 7.6l5.2 5.2M14.8 7.6l-5.2 5.2"/>');
-ICO.crsOld = _svg('<path d="M3.4 12a8.6 8.6 0 1 0 2.5-6.1L3.4 8.4"/><path d="M3.4 3.6v4.8h4.8"/><path d="M12 7.8V12l3 1.8"/>');
-ICO.crsOk  = _svg('<path d="M20.5 14.6a2.2 2.2 0 0 1-2.2 2.2H8.1l-4.6 3.7V5.7a2.2 2.2 0 0 1 2.2-2.2h12.6a2.2 2.2 0 0 1 2.2 2.2z"/><path d="M8.6 10.4l2.4 2.4 4.6-4.6"/>');
 
-/* ── the tiles, for both tabs ───────────────────────────────────────────── */
+/* ── the tiles: only what needs doing on the reviewing tab ──────────────── */
 function crsApps(){
   let s; try{ s=crsStats(); }catch(e){ return []; }
   return [
@@ -8750,10 +8476,6 @@ function crsApps(){
      t:'My CRS actions',     d:'Code 2 or 3 — reply not sent',   open:()=>openCrsList('owed')},
     {g:'crs', id:'crsRej',  ic:ICO.crsRej, n:s.rej.length,
      t:'Rejected by the client', d:'Code 3 — reply not sent',    open:()=>openCrsList('rej')},
-    {g:'crs', id:'crsOld',  ic:ICO.crsOld, n:s.old.length,
-     t:'Earlier revisions',  d:'Superseded, never answered',     open:()=>openCrsList('old')},
-    {g:'crs', id:'crsDone', ic:ICO.crsOk,  n:s.done.length,
-     t:'Replied',            d:'Reply sent to the client',       open:()=>openCrsList('done')},
     {g:'poB', id:'bCrs',    ic:ICO.crs,    n:s.owed.length,
      t:'Client CRS',         d:s.owed.length? s.owed.length+' awaiting our reply' : 'every reply sent',
      open:()=>openCrs()}
@@ -8761,28 +8483,22 @@ function crsApps(){
 }
 
 /* ═══ THE CRS LIST ═════════════════════════════════════════════════════════
-   One screen behind the four reviewing tiles, a manager's click on a chart,
-   and the Client CRS number against an engineer.  The columns are the ones a
-   reply is written from: what the client said, when it arrived, how long it
-   has waited, and whose it is. */
-const CL={ mode:'owed', who:null, age:null, code:null, q:'', rej:false, none:false,
+   Behind the two reviewing tiles, every figure on the managing page, and the
+   Client CRS number against an engineer.  One row per revision: that is the
+   unit a reply is owed on. */
+const CL={ mode:'owed', who:null, age:null, code:null, type:null, q:'', rej:false, none:false,
            sort:{k:null,dir:1}, rows:[], from:'home' };
 
 const CL_MODES={
-  owed:{ cls:'warn', t:()=>'Client CRS awaiting our reply',
-         pick:s=>s.owed },
-  rej :{ cls:'dang', t:()=>'Rejected by the client — reply not sent',
-         pick:s=>s.rej },
-  old :{ cls:'',     t:()=>'CRS on superseded revisions — never answered',
-         pick:s=>s.old },
-  done:{ cls:'ok',   t:()=>'CRS replied to the client',
-         pick:s=>s.done }
+  owed:{ cls:'warn', t:()=>'Client CRS awaiting our reply', pick:s=>s.owed },
+  rej :{ cls:'dang', t:()=>'Rejected by the client — reply not sent', pick:s=>s.rej },
+  done:{ cls:'ok',   t:()=>'Client CRS replied', pick:s=>s.done }
 };
 
 const CL_COLS=[
   {k:'doc',   t:'Document',          w:'auto',  v:x=>x.d.label},
   {k:'equip', t:'Equipment',         w:'140px', v:x=>x.d.xref||''},
-  {k:'rev',   t:'Rev',               w:'52px',  v:x=>x.r.trRev||''},
+  {k:'rev',   t:'Rev',               w:'64px',  v:x=>x.r.trRev||''},
   {k:'code',  t:'Client code',       w:'156px', v:x=>x.code},
   {k:'in',    t:'Comments received', w:'150px', v:x=>x.r.crsIn? x.r.crsIn.getTime() : 0, desc:true},
   {k:'days',  t:'Waiting',           w:'84px',  v:x=>x.days==null?-1:x.days, desc:true, right:true},
@@ -8792,11 +8508,11 @@ const CL_COLS=[
 ];
 
 const CL_AGE=[
-  {k:'a7',  t:'Up to 7 days',  lo:0,  hi:7},
-  {k:'a15', t:'8 – 15 days',   lo:8,  hi:15},
-  {k:'a30', t:'16 – 30 days',  lo:16, hi:30},
-  {k:'a60', t:'31 – 60 days',  lo:31, hi:60},
-  {k:'a61', t:'Over 60 days',  lo:61, hi:1e9}
+  {k:'a7',  t:'Up to 7 days',  lo:0,  hi:7,   col:'#2E9E6B'},
+  {k:'a15', t:'8 – 15 days',   lo:8,  hi:15,  col:'#8DBF5A'},
+  {k:'a30', t:'16 – 30 days',  lo:16, hi:30,  col:'#D9922E'},
+  {k:'a60', t:'31 – 60 days',  lo:31, hi:60,  col:'#E0703A'},
+  {k:'a61', t:'Over 60 days',  lo:61, hi:1e9, col:'#D4574E'}
 ];
 const clAgeOf = d => d==null ? null : (CL_AGE.find(b=>d>=b.lo && d<=b.hi)||{}).k;
 
@@ -8806,6 +8522,7 @@ function openCrsList(mode, who, extra){
   CL.who  = who===undefined ? null : who;
   CL.age  = extra && extra.age  || null;
   CL.code = extra && extra.code || null;
+  CL.type = extra && extra.type || null;
   CL.q=''; CL.rej=false; CL.none=false; CL.sort={k:null,dir:1};
   CL.from = CUR==='crs' ? 'crs' : (CUR==='eng' ? 'eng' : 'home');
   $('clQ').value='';
@@ -8822,11 +8539,11 @@ function clBack(){
 window.clBack=clBack;
 
 function clAll(){
-  const s=crsStats();
-  let l=CL_MODES[CL.mode].pick(s);
+  let l=CL_MODES[CL.mode].pick(crsStats());
   if(CL.who!=null) l=l.filter(x=>(x.who||'(unassigned)')===CL.who);
   if(CL.age)  l=l.filter(x=>clAgeOf(x.days)===CL.age);
   if(CL.code) l=l.filter(x=>x.code===CL.code);
+  if(CL.type) l=l.filter(x=>(x.d.code||'(no code)')===CL.type);
   return l;
 }
 
@@ -8846,9 +8563,9 @@ function renderCrsList(){
   if(CL.sort.k) rows=sortRows(rows, CL_COLS, CL.sort);
   else rows.sort((a,b)=>{
     /* untouched: rejections first, then whatever has waited longest */
-    if(CL.mode!=='done'){ const ra=a.code==='3'?0:1, rb=b.code==='3'?0:1; if(ra!==rb) return ra-rb; }
     if(CL.mode==='done'){ const ta=a.r.crsOn?a.r.crsOn.getTime():0, tb=b.r.crsOn?b.r.crsOn.getTime():0;
       if(ta!==tb) return tb-ta; }
+    else { const ra=a.code==='3'?0:1, rb=b.code==='3'?0:1; if(ra!==rb) return ra-rb; }
     const da=a.days==null?-1:a.days, db=b.days==null?-1:b.days;
     return db!==da ? db-da : String(a.d.label).localeCompare(String(b.d.label));
   });
@@ -8858,6 +8575,7 @@ function renderCrsList(){
   if(CL.who!=null) extra.push(CL.who==='(unassigned)'?'no engineer':CL.who);
   if(CL.age)  extra.push((CL_AGE.find(b=>b.k===CL.age)||{}).t);
   if(CL.code) extra.push('code '+CL.code);
+  if(CL.type) extra.push(CL.type);
   const title=M.t()+(extra.length?' — '+extra.join(' · '):'');
   crumbApp(title);
   $('clTitle').textContent=title;
@@ -8868,6 +8586,7 @@ function renderCrsList(){
 
   const rejN=all.filter(x=>x.code==='3').length;
   const noneN=all.filter(x=>!x.who).length;
+  const docsN=new Set(all.map(x=>x.d.tr)).size;
   const worst=all.reduce((m,x)=>Math.max(m,x.days||0),0);
   const took=all.map(x=>x.took).filter(v=>v!=null).sort((a,b)=>a-b);
   const med=took.length? took[Math.floor((took.length-1)/2)] : 0;
@@ -8876,17 +8595,16 @@ function renderCrsList(){
        ['', rejN, 'of them answering a rejection'],
        ['', med, 'days — the median time to reply'],
        ['', all.filter(x=>x.took!=null && x.took>15).length, 'took more than 15 days']]
-    : [[M.cls, all.length, CL.mode==='old'?'unanswered on a superseded revision':'awaiting our reply'],
-       ['dang', rejN, 'rejected — code 3'],
+    : [[M.cls, all.length, 'revisions awaiting our reply'],
+       ['', docsN, 'documents they belong to'],
        [noneN?'warn':'', noneN, 'with no engineer on them'],
        ['', worst, 'days — the longest one has waited']]
   ).map(([c,n,l])=>`<div class="m ${c}"><div class="n">${n.toLocaleString()}</div><div class="l">${l}</div></div>`).join('');
 
-  $('clRej').style.display  = CL.mode==='rej' ? 'none' : '';
+  $('clRej').style.display  = CL.mode==='owed' ? '' : 'none';
   $('clRej').classList.toggle('on', CL.rej);
   $('clNone').classList.toggle('on', CL.none);
   $('clCount').innerHTML=`<b>${rows.length.toLocaleString()}</b> of ${all.length.toLocaleString()} shown`;
-  $('clNote').style.display = CL.mode==='old' ? '' : 'none';
 
   $('clTable').querySelector('colgroup').innerHTML=CL_COLS.map(c=>`<col style="width:${c.w}">`).join('');
   sortHead('clHead', CL_COLS, CL.sort, renderCrsList);
@@ -8903,7 +8621,7 @@ function renderCrsList(){
       <td><div class="docno">${esc(d.label)}${isCriticalDoc(d)?'<span class="crit-tag">CRIT</span>':''}</div>
         <div class="doctitle" title="${esc(d.title||'')}">${esc(d.title||'—')}</div></td>
       <td><div class="s1">${esc(d.xref||'—')}</div><div class="s2" title="${esc(d.equip||'')}">${esc(d.equip||'')}</div></td>
-      <td><div class="revbig">${esc(r.trRev||'—')}</div>${x.cur?'':'<div class="s2">superseded</div>'}</td>
+      <td><div class="revbig">${esc(r.trRev||'—')}</div><div class="s2">${x.cur?'latest':'earlier'}</div></td>
       <td>${crsChip(x.code)}</td>
       <td><div class="s1 num">${r.crsIn?fmtS(r.crsIn):'—'}</div>
         <div class="s2 mono" title="${esc(r.crsInNo||'')}">${esc(r.crsInNo||'')}</div></td>
@@ -8929,37 +8647,45 @@ window.renderCrsList=renderCrsList;
   $('clNone').onclick=()=>{ CL.none=!CL.none; renderCrsList(); };
 })();
 
-/* ── the list as a spreadsheet, and as an Outlook draft ─────────────────── */
-function crsRowsOut(){
-  return CL.rows.map(x=>({
+/* ── lists as spreadsheets, and as an Outlook draft ─────────────────────── */
+function crsRowsOut(list){
+  return list.map(x=>({
     doc:x.d.label, title:x.d.title||'', tag:x.d.xref||'', equip:x.d.equip||'',
-    rev:x.r.trRev||'', cur:x.cur?'current':'superseded', code:x.code,
+    rev:x.r.trRev||'', cur:x.cur?'latest':'earlier', code:x.code,
     codeT:(CRS_CODE[x.code]||{}).t||'', inNo:x.r.crsInNo||'', inOn:x.r.crsIn,
     days:x.days, reply:x.r.crsNo||'', replyOn:x.r.crsOn, took:x.took,
     who:x.who||'' }));
 }
-function exportCrsXlsx(){
+function crsXlsx(list, sheet, file){
   if(typeof XLSX==='undefined') return alert('Spreadsheet engine not loaded.');
-  const rows=crsRowsOut();
+  const rows=crsRowsOut(list);
   const head=['DOCUMENT','TITLE','EQUIPMENT TAG','EQUIPMENT','REV','REVISION','CLIENT CODE','MEANING',
               'CLIENT TRANSMITTAL','COMMENTS RECEIVED','DAYS WAITING','OUR REPLY','REPLY DATE','DAYS TO REPLY','ENGINEER'];
   const aoa=[head].concat(rows.map(r=>[r.doc,r.title,r.tag,r.equip,r.rev,r.cur,r.code,r.codeT,r.inNo,
     r.inOn||'', r.days==null?'':r.days, r.reply, r.replyOn||'', r.took==null?'':r.took, r.who]));
   const ws=XLSX.utils.aoa_to_sheet(aoa,{cellDates:true});
-  ws['!cols']=[{wch:40},{wch:48},{wch:18},{wch:26},{wch:6},{wch:11},{wch:10},{wch:26},{wch:30},
+  ws['!cols']=[{wch:40},{wch:48},{wch:18},{wch:26},{wch:6},{wch:9},{wch:10},{wch:26},{wch:30},
                {wch:14},{wch:12},{wch:30},{wch:12},{wch:12},{wch:28}];
   head.forEach((_,c)=>{ const k=XLSX.utils.encode_cell({r:0,c});
     if(ws[k]) ws[k].s={fill:{patternType:'solid',fgColor:{rgb:'FF0B2545'}},font:{bold:true,color:{rgb:'FFFFFFFF'}}}; });
   for(let r=1;r<aoa.length;r++) [9,12].forEach(c=>{ const k=XLSX.utils.encode_cell({r,c});
     if(ws[k] && ws[k].t==='d') ws[k].z='dd-mmm-yyyy'; });
   const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Client CRS');
-  XLSX.writeFile(wb, `Client_CRS_${S.po}_${CL.mode}.xlsx`, {cellStyles:true});
+  XLSX.utils.book_append_sheet(wb, ws, sheet);
+  XLSX.writeFile(wb, file, {cellStyles:true});
 }
+function exportCrsXlsx(){ crsXlsx(CL.rows, 'Client CRS', `Client_CRS_${S.po}_${CL.mode}.xlsx`); }
 window.exportCrsXlsx=exportCrsXlsx;
+/* the managing page's Report: every code 2 and 3, answered or not */
+function exportCrsReport(){
+  const s=crsStats();
+  crsXlsx(s.items.filter(x=>x.acts).sort((a,b)=>(b.owed-a.owed)||((b.days||0)-(a.days||0))),
+          'Client CRS', `Client_CRS_${S.po}_all.xlsx`);
+}
+window.exportCrsReport=exportCrsReport;
 
 function emailCrs(){
-  const rows=crsRowsOut();
+  const rows=crsRowsOut(CL.rows);
   const pad=(t,w)=>{ t=String(t==null?'':t); return t.length>w? t.slice(0,w-1)+'…' : t.padEnd(w); };
   const cols=[['#',3,(r,i)=>i+1],['DOCUMENT',38,r=>r.doc],['REV',4,r=>r.rev],['CODE',5,r=>r.code],
               ['RECEIVED',11,r=>r.inOn?fmtS(r.inOn):''],['WAITING',8,r=>r.days==null?'':r.days+'d'],
@@ -8968,12 +8694,12 @@ function emailCrs(){
   let t=cols.map(c=>pad(c[0],c[1])).join(' | ')+'\n'+cols.map(c=>'-'.repeat(c[1])).join('-+-')+'\n';
   shown.forEach((r,i)=>{ t+=cols.map(c=>pad(c[2](r,i),c[1])).join(' | ')+'\n'; });
   const title=$('clTitle').textContent;
-  const subj=`[${S.po}] ${title} — ${rows.length} document${rows.length===1?'':'s'}`;
+  const subj=`[${S.po}] ${title} — ${rows.length} revision${rows.length===1?'':'s'}`;
   const body=`Purchase order : ${S.po}${S.poDesc?' — '+S.poDesc:''}\n`+
     `Reviewing as   : ${S.disc||''}\nAs of          : ${(S.meta&&S.meta.asOf)||''}\n\n${title}\n\n${t}`+
     (rows.length>shown.length? `\n… and ${rows.length-shown.length} more — the full list is in the attached spreadsheet.\n` : '')+
-    `\nCode 2 = with comments, code 3 = rejected (comments as noted). A reply is owed on both until a\n`+
-    `reply transmittal number is recorded against the revision.\n`;
+    `\nCode 2 = with comments, code 3 = rejected (comments as noted). A reply is owed on every\n`+
+    `revision with either code until a reply transmittal number is recorded against it.\n`;
   const to=[...new Set(rows.map(r=>r.who).filter(w=>w && !isNA(w)).map(w=>ROSTER.mail&&ROSTER.mail[w]).filter(Boolean))];
   const href='mailto:'+encodeURIComponent(to.join(';'))+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
   if(href.length>1900){
@@ -8985,126 +8711,182 @@ function emailCrs(){
 }
 window.emailCrs=emailCrs;
 
-/* ═══ THE CRS OVERVIEW ════════════════════════════════════════════════════
-   The managing tab's view of the same thing: what the client has said, how
-   much of it has been answered, how long the rest has waited, and on whose
-   desk it sits.  Every figure opens the list behind it. */
+/* ═══ THE CLIENT CRS PAGE ═════════════════════════════════════════════════
+   Built from the same parts as the For Review & Originator overview — the
+   same card, badge, donut, figures, progress bar and "where is it" rows — so
+   a lead reading one page already knows how to read the other.  Clicking a
+   donut unrolls the breakdown under it, exactly as it does there. */
 function openCrs(){
   if(!S.docs || !S.docs.length) return alert('Choose a purchase order first.');
-  crumbApp('Client CRS');
+  crumbApp('For review & originator — Client CRS');
   go('crs');
+  $('crsCard1').classList.remove('open'); $('crsCard2').classList.remove('open');
   renderCrs();
 }
 window.openCrs=openCrs;
 
+function crsToggle(n){ $('crsCard'+n).classList.toggle('open'); }
+window.crsToggle=crsToggle;
+
+const q_ = s => String(s).replace(/'/g,"\\'");
+
 function renderCrs(){
   const s=crsStats();
-  $('crsScope').innerHTML=`<span class="v">${esc(S.po)}</span>`+vendChip(34)+
+  const disc=esc(S.disc||'your discipline');
+  $('crsScope').innerHTML=`<span class="v">${esc(S.po)}</span>`+
+    (S.poDesc?`<span class="v">${esc(S.poDesc)}</span>`:'')+vendChip(34)+
     `<span class="v">${esc(S.dep)}</span>`+
-    `<span class="v">For review — ${esc(S.disc||'—')}</span>`+
-    `<span>as of ${esc((S.meta&&S.meta.asOf)||'—')}</span>`;
+    `<span>Reviewing as ${disc}</span>`;
+  $('crsTabnote').innerHTML=`Every revision marked <b>FOR REVIEW - ORIGINATOR</b> for <b>${disc}</b> under
+    purchase order <b>${esc(S.po)}</b> — every revision, not only the latest, because each client
+    comment needs its own reply.`;
 
-  const owedN=s.owed.length, doneN=s.done.length, actN=owedN+doneN;
+  const owedN=s.owed.length, doneN=s.done.length, actN=owedN+doneN, rejN=s.rej.length;
   const pct = actN ? Math.round(doneN/actN*100) : 0;
-  $('crsKpi').innerHTML=[
-    ['',     s.cur.length, 'returned by the client', null],
-    ['warn', owedN,        'awaiting our reply',     "openCrsList('owed')"],
-    ['dang', s.rej.length, 'rejected — code 3',      "openCrsList('rej')"],
-    ['ok',   doneN,        'replied',                "openCrsList('done')"],
-    ['',     s.old.length, 'superseded, never answered', "openCrsList('old')"],
-    ['',     s.oldest,     'days — the longest wait', owedN?"openCrsList('owed')":null]
-  ].map(([c,n,l,on])=>`<div class="m ${c}${on?' go':''}"${on?` role="button" tabindex="0" onclick="${on}"`:''}>
-      <div class="n">${n.toLocaleString()}</div><div class="l">${l}</div></div>`).join('');
 
-  /* ── chart 1: what the client said, on the current revision ─────────── */
-  const codes=['1','2','3','4'].filter(k=>s.byCode[k]);
-  const other=Object.keys(s.byCode).filter(k=>!CRS_CODE[k]);
-  const sl=codes.map(k=>({key:'Code '+k, label:'Code '+k+' — '+CRS_CODE[k].t, value:s.byCode[k], col:CRS_CODE[k].col}));
-  other.forEach(k=>sl.push({key:k, label:k, value:s.byCode[k], col:'#B8C4D0'}));
-  if(s.notBack) sl.push({key:'Not back', label:'Not returned by the client yet', value:s.notBack, col:CRS_NONE_COL});
+  /* ── card 1: what the client said, and how much we have answered ─────── */
+  $('crsEx1').textContent='The review code each revision came back from the client with. '+
+    'Codes 2 and 3 want a reply; 1 and 4 do not.';
+  $('crsMini1').innerHTML=[
+    ['',     s.items.length, 'revisions under review'],
+    ['',     s.back.length,  'returned by the client'],
+    ['warn', owedN,          'awaiting our reply'],
+    ['dang', rejN,           'rejected · code 3 · no reply'],
+    ['ok',   doneN,          'replied']
+  ].map(([c,n,l])=>`<div class="m ${c}"><span class="n">${n.toLocaleString()}</span><span class="l">${l}</span></div>`).join('');
+
+  const sl=['1','2','3','4'].filter(k=>s.byCode[k])
+    .map(k=>({key:'Code '+k, label:'Code '+k+' — '+CRS_CODE[k].t, value:s.byCode[k], col:CRS_CODE[k].col, unit:'revisions'}));
+  Object.keys(s.byCode).filter(k=>!CRS_CODE[k]).forEach(k=>
+    sl.push({key:k, label:k, value:s.byCode[k], col:'#B8C4D0', unit:'revisions'}));
+  if(s.notBack) sl.push({key:'Not back', label:'Not returned by the client yet', value:s.notBack, col:CRS_NONE_COL, unit:'revisions'});
   const tot=sl.reduce((n,x)=>n+x.value,0);
-  $('crsD1').innerHTML = tot
-    ? `<svg viewBox="0 0 220 220" width="220" height="220" role="img">${donutSVG(sl,220,.56)}</svg>
-       <div class="donut-ctr"><div class="v">${tot.toLocaleString()}</div><div class="l">documents</div></div>`
-    : '<div class="half-empty">No document in this scope.</div>';
-  if(tot) wireDonut('crsD1', tot.toLocaleString(), 'documents');
-  $('crsL1').innerHTML = sl.map(x=>{
-    const k=x.key.replace('Code ','');
-    const on = k==='2'||k==='3' ? ` onclick="openCrsList('owed',undefined,{code:'${k}'})" role="button" tabindex="0"` : '';
-    return `<div class="crs-li${on?' go':''}"${on}><span class="dot" style="background:${x.col}"></span>
-      <span class="t">${esc(x.label)}</span><b>${x.value.toLocaleString()}</b>
-      <span class="p">${tot?Math.round(x.value/tot*100):0}%</span></div>`;
-  }).join('');
+  if(tot){
+    $('crsDw1').innerHTML=`<svg viewBox="0 0 220 220" width="220" height="220" role="img">${donutSVG(sl,220,.56)}</svg>
+      <div class="donut-ctr"><div class="v">${tot.toLocaleString()}</div><div class="l">revisions</div></div>`;
+    wireDonut('crsDw1', tot.toLocaleString(), 'revisions');
+    $('crsBox1').style.pointerEvents='';
+  } else {
+    $('crsDw1').innerHTML='<div class="half-empty">No revision in this purchase order is marked<br>FOR REVIEW - ORIGINATOR for this discipline.</div>';
+    $('crsBox1').style.pointerEvents='none';
+  }
 
-  /* ── chart 2: of what needs a reply, how much has one ────────────────── */
-  const s2=[
-    {key:'Replied',        label:'Reply sent',                    value:doneN,                     col:'#2E9E6B'},
-    {key:'Code 2 owed',    label:'Awaiting reply — code 2',       value:owedN-s.rej.length,        col:'#D9922E'},
-    {key:'Code 3 owed',    label:'Awaiting reply — code 3',       value:s.rej.length,              col:'#D4574E'}
-  ].filter(x=>x.value);
-  $('crsD2').innerHTML = actN
-    ? `<svg viewBox="0 0 220 220" width="220" height="220" role="img">${donutSVG(s2,220,.56)}</svg>
-       <div class="donut-ctr"><div class="v">${pct}%</div><div class="l">replied</div></div>`
-    : '<div class="half-empty">The client has not asked for a reply<br>on any current revision.</div>';
-  if(actN) wireDonut('crsD2', pct+'%', 'replied');
-  $('crsL2').innerHTML = actN ? s2.map(x=>{
-    const go = x.key==='Replied' ? "openCrsList('done')" : "openCrsList('owed',undefined,{code:'"+(x.key==='Code 3 owed'?'3':'2')+"'})";
-    return `<div class="crs-li go" role="button" tabindex="0" onclick="${go}"><span class="dot" style="background:${x.col}"></span>
-      <span class="t">${esc(x.label)}</span><b>${x.value.toLocaleString()}</b>
-      <span class="p">${Math.round(x.value/actN*100)}%</span></div>`; }).join('') : '';
+  /* the progress bar: of what needs a reply, how much has one */
+  const seg=[
+    {k:'done', t:'Replied',                 v:doneN,        col:'#2E9E6B', go:"openCrsList('done')"},
+    {k:'c2',   t:'Awaiting reply · code 2', v:owedN-rejN,   col:'#D9922E', go:"openCrsList('owed',undefined,{code:'2'})"},
+    {k:'c3',   t:'Awaiting reply · code 3', v:rejN,         col:'#D4574E', go:"openCrsList('owed',undefined,{code:'3'})"}
+  ];
+  $('crsOv1').innerHTML = actN ? `
+    <div class="pblock-h"><span class="t">Replies sent</span>
+      <span class="v">${pct}%<small>${doneN.toLocaleString()} of ${actN.toLocaleString()} replied</small></span></div>
+    <div class="sbar live">${seg.filter(x=>x.v).map(x=>`<i style="width:${x.v/actN*100}%;background:${x.col}"
+      title="${x.t}: ${x.v} — click to list them" onclick="event.stopPropagation();${x.go}"></i>`).join('')}</div>
+    <div class="sbar-lab">${seg.filter(x=>x.v).map(x=>
+      `<span class="li"><span class="dot" style="background:${x.col}"></span>${x.t} <b>${x.v.toLocaleString()}</b></span>`).join('')}</div>`
+    : `<div class="pblock-h"><span class="t">Replies sent</span></div>
+       <div class="done-note">The client has not asked for a reply on any revision here.</div>`;
 
-  /* ── how long the unanswered ones have waited ─────────────────────────── */
-  const ages=CL_AGE.map(b=>({...b, n:s.owed.filter(x=>clAgeOf(x.days)===b.k).length}));
+  /* where is it — how long the unanswered ones have waited */
+  const ages=CL_AGE.map(b=>({...b, n:s.owed.filter(x=>clAgeOf(x.days)===b.k).length})).filter(b=>b.n);
   const nodate=s.owed.filter(x=>x.days==null).length;
-  const amax=Math.max(1,...ages.map(b=>b.n));
-  const acol=['#2E9E6B','#8DBF5A','#D9922E','#E0703A','#D4574E'];
-  $('crsAge').innerHTML = owedN ? ages.map((b,i)=>`
-    <div class="crs-bar${b.n?' go':''}"${b.n?` role="button" tabindex="0" onclick="openCrsList('owed',undefined,{age:'${b.k}'})"`:''}>
-      <span class="t">${b.t}</span>
-      <span class="tr"><i style="width:${(b.n/amax*100).toFixed(1)}%;background:${acol[i]}"></i></span>
-      <b>${b.n}</b></div>`).join('')+
-      (nodate? `<div class="s2" style="margin-top:8px">${nodate} with no date received in the register.</div>` : '')
-    : '<div class="half-empty" style="min-height:120px">Nothing is waiting on a reply.</div>';
+  $('crsSk1').innerHTML = owedN
+    ? `<div class="bt-h">Awaiting our reply — how long?</div>`+
+      ages.map(b=>`<div class="trow act sk-r" style="--c:${b.col}">
+        <div class="tc" title="${b.t} — ${b.n} of ${owedN} awaiting a reply">
+          <div class="c1 nm">${b.t}</div>
+          <div class="c2">${b.n} of ${owedN} awaiting a reply</div></div>
+        <div class="sk-bar"><i style="width:${b.n/owedN*100}%;background:${b.col}"></i></div>
+        <div class="pv">${b.n}</div>
+        <button class="actbtn" onclick="event.stopPropagation();openCrsList('owed',undefined,{age:'${b.k}'})">Take action</button>
+      </div>`).join('')+
+      (nodate? `<div class="done-note" style="color:var(--muted);background:var(--sf2);border-color:var(--line)">${nodate} with no received date in the register.</div>`:'')+
+      `<div class="sk-sum"><b>${owedN}</b> awaiting our reply =
+        <b style="color:#D9922E">${owedN-rejN}</b> with comments (code 2)
+        + <b style="color:#D4574E">${rejN}</b> rejected (code 3), across
+        <b>${s.docsOwed}</b> document${s.docsOwed===1?'':'s'}</div>`
+    : `<div class="bt-h">Awaiting our reply — how long?</div>
+       <div class="done-note">Nothing is owed to the client — every code 2 and 3 has its reply.</div>`;
 
-  /* ── on whose desk ───────────────────────────────────────────────────── */
-  const by=Object.values(crsByPerson()).sort((a,b)=>
-    (a.who==='(unassigned)')-(b.who==='(unassigned)') || b.owed-a.owed || b.old-a.old || a.who.localeCompare(b.who));
-  $('crsWho').innerHTML = by.length ? by.map(e=>{
-    const un=e.who==='(unassigned)', w=esc(e.who).replace(/'/g,"\\'");
-    return `<tr class="en-open" tabindex="0" role="button" onclick="openCrsList('owed','${w}')">
-      <td><div class="docno">${un?'<span class="en-un">no engineer</span>':esc(e.who)}</div></td>
-      <td style="text-align:right"><span class="s1 num${e.owed?' crs-n':''}">${e.owed}</span></td>
-      <td style="text-align:right"><span class="s1 num${e.rej?' crs-r':''}">${e.rej||'—'}</span></td>
-      <td style="text-align:right"><span class="s2 num">${e.done}</span></td>
-      <td style="text-align:right"><span class="s2 num">${e.old||'—'}</span></td>
-      <td style="text-align:right">${e.owed?`<span class="tag ${e.oldest>30?'dang':(e.oldest>15?'warn':'ok')} num">${e.oldest}d</span>`:'<span class="s2">—</span>'}</td>
-    </tr>`; }).join('')
-    : '<tr><td colspan="6" class="empty">No client code has come back on this scope yet.</td></tr>';
-
-  /* ── by document type ────────────────────────────────────────────────── */
+  /* unrolled on a click: replies by document type */
   const bc={};
-  s.cur.forEach(x=>{ if(!x.acts) return; const k=x.d.code||'(no code)';
+  s.items.forEach(x=>{ if(!x.acts) return; const k=x.d.code||'(no code)';
     const e=(bc[k]=bc[k]||{code:k, desc:x.d.codeDesc||'', owed:0, done:0});
     if(x.owed) e.owed++; else e.done++; });
   const bl=Object.values(bc).sort((a,b)=>b.owed-a.owed || (b.owed+b.done)-(a.owed+a.done) || a.code.localeCompare(b.code));
-  $('crsType').innerHTML = bl.length ? bl.map(e=>{
-    const t=e.owed+e.done;
-    return `<tr><td><div class="s1 mono">${esc(e.code)}</div><div class="s2">${esc(e.desc)}</div></td>
-      <td style="text-align:right"><span class="s1 num${e.owed?' crs-n':''}">${e.owed}</span></td>
-      <td style="text-align:right"><span class="s2 num">${e.done}</span></td>
-      <td><div class="en-bar"><i style="width:${(e.done/t*100).toFixed(1)}%;background:#2E9E6B"></i>
-        <i style="width:${(e.owed/t*100).toFixed(1)}%;background:#D9922E"></i></div></td></tr>`; }).join('')
-    : '<tr><td colspan="4" class="empty">No document type has a code 2 or 3 on its current revision.</td></tr>';
+  $('crsBt1').innerHTML=`<div class="bt-h">Replies by document type</div>`+(bl.length ? bl.map(e=>{
+    const t=e.owed+e.done, p=Math.round(e.done/t*100);
+    return `<div class="trow act">
+      <div class="tc"><div class="c1">${esc(e.code)}</div>
+        <div class="c2" title="${esc(e.desc)}">${esc(e.desc||'')} · ${t} revision${t===1?'':'s'}${
+          e.owed?' · <b style="color:#9A6414">'+e.owed+'</b> awaiting':''}</div></div>
+      <div class="sbar"><i style="width:${e.done/t*100}%;background:#2E9E6B"></i><i style="width:${e.owed/t*100}%;background:#D9922E"></i></div>
+      <div class="pv ${p?'':'zero'}">${p}%</div>
+      ${e.owed?`<button class="actbtn" onclick="event.stopPropagation();openCrsList('owed',undefined,{type:'${q_(esc(e.code))}'})">Take action</button>`:'<span></span>'}
+    </div>`; }).join('') : '<div class="done-note">No document type has a code 2 or 3.</div>');
+
+  /* ── card 2: on whose desk ──────────────────────────────────────────── */
+  const by=Object.values(crsByPerson());
+  const withOwed=by.filter(e=>e.owed).sort((a,b)=>
+    (a.who==='(unassigned)')-(b.who==='(unassigned)') || b.owed-a.owed || a.who.localeCompare(b.who));
+  const people=withOwed.filter(e=>e.who!=='(unassigned)').length;
+  const noneN=(by.find(e=>e.who==='(unassigned)')||{owed:0}).owed;
+  $('crsEx2').textContent='Each revision belongs to its document’s engineer — from the equipment tag, '+
+    'or named on the document in Assign engineers.';
+  $('crsMini2').innerHTML=[
+    ['',     people,   'engineers with a reply owed'],
+    ['warn', owedN,    'awaiting our reply'],
+    [noneN?'dang':'', noneN, 'with no engineer on them'],
+    ['',     s.oldest, 'days · the longest wait']
+  ].map(([c,n,l])=>`<div class="m ${c}"><span class="n">${n.toLocaleString()}</span><span class="l">${l}</span></div>`).join('');
+
+  const PAL=['#2563EB','#0EA5A4','#8B5CF6','#D9922E','#DB2777','#65A30D','#0891B2','#B45309'];
+  const top=withOwed.filter(e=>e.who!=='(unassigned)').slice(0,8);
+  const restN=withOwed.filter(e=>e.who!=='(unassigned)').slice(8).reduce((n,e)=>n+e.owed,0);
+  const wsl=top.map((e,i)=>({key:e.who, label:e.who, value:e.owed, col:PAL[i%PAL.length], unit:'replies owed'}));
+  if(restN) wsl.push({key:'others', label:'Everyone else', value:restN, col:'#B8C4D0', unit:'replies owed'});
+  if(noneN) wsl.push({key:'no engineer', label:'No engineer', value:noneN, col:'#E7B4AE', unit:'replies owed'});
+  if(owedN){
+    $('crsDw2').innerHTML=`<svg viewBox="0 0 220 220" width="220" height="220" role="img">${donutSVG(wsl,220,.56)}</svg>
+      <div class="donut-ctr"><div class="v">${owedN}</div><div class="l">awaiting</div></div>`;
+    wireDonut('crsDw2', String(owedN), 'awaiting');
+    $('crsBox2').style.pointerEvents='';
+  } else {
+    $('crsDw2').innerHTML='<div class="half-empty">Nothing is waiting on a reply.</div>';
+    $('crsBox2').style.pointerEvents='none';
+  }
+  const colOf=w=>{ const i=top.findIndex(e=>e.who===w); return i>=0? PAL[i%PAL.length] : (w==='(unassigned)'?'#D4574E':'#8FA3B8'); };
+
+  $('crsSk2').innerHTML = owedN
+    ? `<div class="bt-h">Awaiting our reply — by engineer</div>`+
+      withOwed.map(e=>{ const un=e.who==='(unassigned)', c=colOf(e.who);
+        return `<div class="trow act sk-r" style="--c:${c}">
+          <div class="tc" title="${esc(un?'No engineer':e.who)} — ${e.owed} of ${owedN} awaiting a reply">
+            <div class="c1 nm">${un?'No engineer':esc(e.who)}</div>
+            <div class="c2">${e.owed} of ${owedN}${e.rej?' · <b style="color:#D4574E">'+e.rej+' rejected</b>':''} · longest ${e.oldest}d</div></div>
+          <div class="sk-bar"><i style="width:${e.owed/owedN*100}%;background:${c}"></i></div>
+          <div class="pv">${e.owed}</div>
+          <button class="actbtn" onclick="event.stopPropagation();openCrsList('owed','${q_(esc(e.who))}')">Take action</button>
+        </div>`; }).join('')+
+      `<div class="sk-sum"><b>${owedN}</b> awaiting our reply = <b>${owedN-noneN}</b> on
+        <b>${people}</b> engineer${people===1?'':'s'}’ desks + <b>${noneN}</b> with no engineer yet</div>`
+    : `<div class="bt-h">Awaiting our reply — by engineer</div>
+       <div class="done-note">Nothing is owed to the client on anybody's desk.</div>`;
+
+  /* unrolled on a click: every engineer, replied and awaiting */
+  const allP=by.slice().sort((a,b)=>(a.who==='(unassigned)')-(b.who==='(unassigned)') ||
+    (b.owed+b.done)-(a.owed+a.done) || a.who.localeCompare(b.who));
+  $('crsBt2').innerHTML=`<div class="bt-h">Every engineer — replied and awaiting</div>`+(allP.length ? allP.map(e=>{
+    const t=e.owed+e.done, p=t?Math.round(e.done/t*100):0, un=e.who==='(unassigned)';
+    return `<div class="trow act wide">
+      <div class="tc"><div class="c1">${un?'No engineer':esc(e.who)}</div>
+        <div class="c2">${t} revision${t===1?'':'s'} with code 2 or 3${e.owed?' · <b style="color:#9A6414">'+e.owed+'</b> awaiting':''}</div></div>
+      <div class="sbar"><i style="width:${t?e.done/t*100:0}%;background:#2E9E6B"></i><i style="width:${t?e.owed/t*100:0}%;background:#D9922E"></i></div>
+      <div class="pv ${p?'':'zero'}">${p}%</div>
+      ${e.owed?`<button class="actbtn" onclick="event.stopPropagation();openCrsList('owed','${q_(esc(e.who))}')">Take action</button>`:'<span></span>'}
+    </div>`; }).join('') : '<div class="done-note">No client code has come back on this purchase order yet.</div>');
 }
 window.renderCrs=renderCrs;
-
-/* The figures that open a list are buttons to a keyboard as well. */
-document.addEventListener('keydown',e=>{
-  if(e.key!=='Enter' && e.key!==' ') return;
-  const el=e.target.closest && e.target.closest('#sc-crs .go[role=button]');
-  if(!el) return;
-  e.preventDefault(); el.click();
-});
 
 function go(s){
   ['upload','filter','home','work','load','dash','progress','eng','engload','action','doc','report','basket','vdr','crsl','crs']
