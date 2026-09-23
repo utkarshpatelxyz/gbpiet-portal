@@ -6844,10 +6844,11 @@ const EN_PEOPLE_COLS = [
 /* Every name this project knows, the chosen discipline's own list first. */
 function engNames(){
   const L=(S.eng&&S.eng.list)||ROSTER.list;
-  const mine=(S.disc && L[S.disc])||[];
+  /* N/A is the picker's own first row; a name that only means N/A is not a person */
+  const mine=((S.disc && L[S.disc])||[]).filter(n=>!isNA(n));
   if(mine.length) return mine;
-  const all=new Set(); Object.values(L).forEach(a=>a.forEach(n=>all.add(n)));
-  if(!all.size) Object.values(ROSTER.list).forEach(a=>a.forEach(n=>all.add(n)));
+  const all=new Set(); Object.values(L).forEach(a=>a.forEach(n=>{ if(!isNA(n)) all.add(n); }));
+  if(!all.size) Object.values(ROSTER.list).forEach(a=>a.forEach(n=>{ if(!isNA(n)) all.add(n); }));
   return [...all].sort((a,b)=>a.localeCompare(b));
 }
 
@@ -6865,9 +6866,13 @@ const splitTags = v => String(v||'').split(/[,;]+/).map(x=>x.trim()).filter(Bool
    anything: read from column W, or from column X where X has overruled it. */
 /* A tag can be marked not applicable: it stays on the list and can be given a
    real engineer later, but it counts towards nobody's workload and is not
-   chased as unassigned.  It is written to the register as plain "N/A". */
+   chased as unassigned.  It is written to the register as plain "N/A", and
+   the shorthands people type for it by hand — N, NA, N.A., NIL, a dash — are
+   read as the same thing: nobody is called N. */
 const ENG_NA = 'N/A';
-const isNA = v => String(v||'').trim().toUpperCase()==='N/A';
+const isNA = v => /^(N\s*\/\s*A|N\.?\s*A\.?|N|NIL|NONE|NOT\s+APPLICABLE|-+|\u2014)$/
+                    .test(String(v||'').trim().toUpperCase());
+const naNorm = v => isNA(v) ? ENG_NA : v;
 
 const ENG_SKIP = ['VOID','FOR INFORMATION','AS BUILT','NEVER RECEIVED'];
 const engCountable = d => ENG_SKIP.indexOf(String(d.status||'').toUpperCase())<0;
@@ -7447,9 +7452,14 @@ async function downloadRegister(after, opts){
 
     const iPO=hdr['PURCHASE ORDER'], iXR=hdr['CROSS REFERENCE'];
     const iTRc=hdr['TR NUMBER'];
-    /* Only the rows this discipline originates carry its engineer — the rows
-       the screens count.  A row another discipline originates is theirs and is
-       left alone; a row nobody originates carries no engineer at all. */
+    /* An engineer goes on a row only when the tool counts its document — the
+       latest revision FOR REVIEW - ORIGINATOR and still asking for a review —
+       and only on the revisions this discipline originates.  The rest of this
+       discipline's rows carry nobody.  A row another discipline originates is
+       theirs and is left alone; a row nobody originates carries no engineer. */
+    const scope=engScope();
+    const cv=(x,n)=>{ const c=hdr[n]===undefined? null : cell(x,hdr[n]);
+                      return c && c.v!=null ? String(c.v).trim() : ''; };
     const cDisc = S.disc ? (hdr[S.disc]!==undefined ? hdr[S.disc] : S.discIdx) : undefined;
     const cOrig = (S.depts||[]).map(x=>hdr[x.name]).filter(c=>c!==undefined);
     const roleAt=(x,c)=>{ const k=cell(x,c); return myRoleKey(k? String(k.v).trim() : ''); };
@@ -7471,9 +7481,15 @@ async function downloadRegister(after, opts){
         const xr=cell(x,iXR), tags=splitTags(xr? xr.v : '');
         const who = ovWho || colWho(tags, t=>S.eng.resp[tagKey(pp,t)]||'');
         if(cDisc===undefined || roleAt(x,cDisc)==='review-org'){
-          put(x,cRes,who);
-          if(who){ nt++; if(ovWho) nDoc++; }
-          else if(tags.length>1) nAmb++;
+          if(!scope || scope.has(engDocKey(n=>cv(x,n)))){
+            put(x,cRes,who);
+            if(who){ nt++; if(ovWho) nDoc++; }
+            else if(tags.length>1) nAmb++;
+          } else {
+            /* this discipline's, but a document the tool leaves out */
+            if(cell(x,cRes)) nOff++;
+            put(x,cRes,'');
+          }
         } else {
           /* take off what an earlier write put on a row this discipline does not
              originate, and anything on a row nobody originates */
@@ -7956,13 +7972,51 @@ function colWho(tags, whoOf){
    belongs to; tags that only ever appear together — identical equipment —
    share their documents' engineer; and a document whose name is not what its
    tags give it had that name set on it by hand. */
+/* One document of the register, the way buildDocs groups them: the purchase
+   order, the originator department, and the TR number — or, before one is
+   issued, the client number or the supplier's own. */
+function engDocKey(get){
+  const tr = get('TR NUMBER') || get('CLIENT NUMBER') ||
+    (get('SUPPLIER NUMBER')
+      ? '#UNRECEIVED#'+get('SUPPLIER NUMBER')+'~'+get('CODE')+'~'+get('CROSS REFERENCE') : '');
+  const po = get('PURCHASE ORDER');
+  return po && tr ? [po, get('ORIGINATOR DEPARTMENT')||'(blank)', tr].join(RM_SEP) : '';
+}
+/* The documents a discipline names engineers on: exactly the ones every
+   screen counts.  The latest revision — the one circulated last — reads FOR
+   REVIEW - ORIGINATOR in the discipline's column, and the document is not
+   void, for information, as built or never received.  Worked out from the
+   rows in memory for every purchase order, since the file is written whole. */
+function engScope(){
+  const disc=(S.depts||[]).find(d=>d.name===S.disc);
+  if(!disc || !S.rows || !S.hdr) return null;
+  const H=S.hdr;
+  const g=(a,n)=>{ const i=H[n]; const v=i===undefined? '' : a[i]; return v==null? '' : String(v).trim(); };
+  const best={};
+  S.rows.forEach(a=>{
+    const k=engDocKey(n=>g(a,n)); if(!k) return;
+    const c=xdate(a[H['CIRCULATE DATE']]) || xdate(a[H['RECEIVED DATE']]);
+    const t=c? c.getTime() : -1;
+    const e=best[k]; if(!e || t>e.t) best[k]={t, a};
+  });
+  const out=new Set();
+  Object.keys(best).forEach(k=>{
+    const a=best[k].a;
+    const st=String(effStatus(g(a,'DOCUMENT STATUS'), g(a,'RETURN STATUS FOR THE SUPPLIER'))
+                    ||'NEVER RECEIVED').toUpperCase();
+    if(ENG_SKIP.indexOf(st)>=0) return;
+    if(myRoleKey(a[disc.i]==null? '' : String(a[disc.i]).trim())!=='review-org') return;
+    out.add(k);
+  });
+  return out;
+}
 function engFromColumn(rows, iPO, iTR, iXR, iResp){
   const resp={}, doc={};
   if(iResp===undefined || iPO===undefined) return {resp, doc};
   const str=v=>String(v==null?'':v).trim();
   const byDoc={};
   rows.forEach((a,ri)=>{
-    const v=str(a[iResp]); if(!v) return;
+    const v=naNorm(str(a[iResp])); if(!v) return;
     const po=str(a[iPO]); if(!po) return;
     const tr=iTR!==undefined ? str(a[iTR]) : '';
     const e=(byDoc[tr? rmKey(po,tr) : '#'+ri]=byDoc[tr? rmKey(po,tr) : '#'+ri]||
@@ -8012,7 +8066,7 @@ function readDocEngSheet(wb){
   aoa.slice(1).forEach(r=>{
     const po=String(r[iPO]==null?'':r[iPO]).trim(), tr=String(r[iTR]==null?'':r[iTR]).trim(),
           w=String(r[iW]==null?'':r[iW]).trim();
-    if(po && tr && w) out[rmKey(po,tr)]=w;
+    if(po && tr && w) out[rmKey(po,tr)]=naNorm(w);
   });
   return out;
 }
