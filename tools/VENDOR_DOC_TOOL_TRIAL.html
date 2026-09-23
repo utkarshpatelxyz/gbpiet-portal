@@ -2486,8 +2486,8 @@ body[data-dark] #alBody tr.al-sub td{background:#101822}
   <div class="card fl-wrap" style="max-width:760px">
     <div class="fl-head">
       <h2>This register has no engineer assignments yet</h2>
-      <p>A report straight out of eGesDoc carries neither the <b>Engineer List</b> sheet nor the
-         requisition and responsible engineer columns — they are added by this tool. Load the last
+      <p>A report straight out of eGesDoc does not carry the requisition and responsible
+         engineer columns — they are added by this tool. Load the last
          register you saved and the assignments are carried across, matched on purchase order and
          equipment tag.</p>
     </div>
@@ -3294,20 +3294,21 @@ function bookModel(wb, aoa){
      tool has written before has both. */
   const engList = readEngineerSheet(wb);
   const iReq=H[ENG_REQ], iResp=H[ENG_RESP], iPO=H['PURCHASE ORDER'], iXR=H['CROSS REFERENCE'];
-  const req={}, resp={};
-  if(iReq!==undefined || iResp!==undefined){
+  const req={};
+  if(iReq!==undefined){
     rows.forEach(a=>{
       const po=String(a[iPO]||'').trim(); if(!po) return;
-      if(iReq!==undefined){ const v=String(a[iReq]||'').trim(); if(v && !req[po]) req[po]=v; }
-      if(iResp!==undefined){
-        const tag=String(a[iXR]||'').trim(); if(!tag) return;
-        const v=String(a[iResp]||'').trim(); const k=tagKey(po,tag);
-        if(v && !resp[k]) resp[k]=v;
-      }
+      const v=String(a[iReq]||'').trim(); if(v && !req[po]) req[po]=v;
     });
   }
+  /* the tags and the single documents, both out of the one column; a register
+     an earlier version wrote still has its Document Engineers sheet, and what
+     was recorded there is kept */
+  const fromCol=engFromColumn(rows, iPO, H['TR NUMBER'], iXR, iResp);
+  const resp=fromCol.resp;
+  const docEng=Object.assign(fromCol.doc, readDocEngSheet(wb));
   return { meta, hdr:H, headArr:head, depts, rows, engList, req, resp,
-           docEng: readDocEngSheet(wb),
+           docEng,
            hasEngCols: iReq!==undefined && iResp!==undefined };
 }
 function readBook(bytes){ const wb=bookOpen(bytes); return bookModel(wb, bookRows(wb)); }
@@ -3346,7 +3347,8 @@ async function parseBook(bytes){
   const list={}; Object.keys(ROSTER.list).forEach(k=>list[k]=ROSTER.list[k].slice());
   Object.entries(ctx.engList||{}).forEach(([k,v])=>{
     list[k]=[...new Set((list[k]||[]).concat(v))].sort((a,b)=>a.localeCompare(b)); });
-  const used=new Set(Object.values(ctx.req||{}).concat(Object.values(ctx.resp||{})));
+  const used=new Set(Object.values(ctx.req||{}).concat(Object.values(ctx.resp||{}),
+                                                         Object.values(ctx.docEng||{})));
   if(used.size){
     const k=Object.keys(list)[0]||'Vessels';
     used.forEach(n=>{ if(n && !isNA(n) && !Object.values(list).some(a=>a.indexOf(n)>=0))
@@ -7033,6 +7035,7 @@ function setDocResp(d, name){
   S.eng.doc=S.eng.doc||{};
   if(name) S.eng.doc[k]=name; else delete S.eng.doc[k];
   S.eng.dirty=true; engBump(); renderAction();
+  AC.tagEdit=true;
   return true;
 }
 window.setDocResp=setDocResp;
@@ -7199,7 +7202,7 @@ function renderEngTags(all, names){
 function engPicker(host, names, current, apply, placeholder){
   /* Clear is an action in the popup's own bar, the way Document types does
      it — not a row in the list pretending to be a name. */
-  const opts=[{v:ENG_NA, t:'N/A — no engineer needed', s:'counts towards nobody'}]
+  const opts=[{v:ENG_NA, t:'N/A', s:'no engineer needed — counts towards nobody'}]
     .concat(names.map(n=>({v:n, t:n})));
   dropdown(host, {
     placeholder: placeholder,
@@ -7443,10 +7446,14 @@ async function downloadRegister(after, opts){
     put(3,cReq,ENG_REQ); put(3,cRes,ENG_RESP);
 
     const iPO=hdr['PURCHASE ORDER'], iXR=hdr['CROSS REFERENCE'];
-    const iTRc=hdr['TR NUMBER'], iStc=hdr['DOCUMENT STATUS'],
-          iRetc=hdr['RETURN STATUS FOR THE SUPPLIER'];
-    const live={};                    // one document -> still circulating somewhere
-    let nr=0, nt=0, nAmb=0, nDoc=0;
+    const iTRc=hdr['TR NUMBER'];
+    /* Only the rows this discipline originates carry its engineer — the rows
+       the screens count.  A row another discipline originates is theirs and is
+       left alone; a row nobody originates carries no engineer at all. */
+    const cDisc = S.disc ? (hdr[S.disc]!==undefined ? hdr[S.disc] : S.discIdx) : undefined;
+    const cOrig = (S.depts||[]).map(x=>hdr[x.name]).filter(c=>c!==undefined);
+    const roleAt=(x,c)=>{ const k=cell(x,c); return myRoleKey(k? String(k.v).trim() : ''); };
+    let nr=0, nt=0, nAmb=0, nDoc=0, nOff=0;
     const rows=rg.e.r-3;
     wrStep('Writing the requisition and responsible engineer against every row.', 40);
     await yieldPaint();
@@ -7457,36 +7464,21 @@ async function downloadRegister(after, opts){
         const pp=String(po.v).trim();
         if(S.eng.req[pp]){ put(x,cReq,S.eng.req[pp]); nr++; }
         const trRow = iTRc!==undefined && cell(x,iTRc) ? String(cell(x,iTRc).v).trim() : '';
-        if(iTRc!==undefined && iStc!==undefined){
-          const stc=cell(x,iStc);
-          const tr=trRow;
-          if(tr){
-            const k=rmKey(pp,tr);
-            const eff=effStatus(stc? String(stc.v).trim() : '',
-                     iRetc!==undefined ? (cell(x,iRetc)? String(cell(x,iRetc).v).trim() : '') : '');
-            if(String(eff||'').toUpperCase()==='CIRCULATING') live[k]=true;
-            else if(live[k]===undefined) live[k]=false;
-          }
-        }
+        /* one owner per row, the same one the screens count it for: an engineer
+           named on the document itself, else the first tag it names that has a
+           real engineer */
         const ovWho = trRow ? (S.eng.doc||{})[rmKey(pp,trRow)] : '';
-        if(ovWho){
-          /* an engineer named on this document itself overrules its tags */
-          put(x,cRes,ovWho); nt++; nDoc++;
+        const xr=cell(x,iXR), tags=splitTags(xr? xr.v : '');
+        const who = ovWho || colWho(tags, t=>S.eng.resp[tagKey(pp,t)]||'');
+        if(cDisc===undefined || roleAt(x,cDisc)==='review-org'){
+          put(x,cRes,who);
+          if(who){ nt++; if(ovWho) nDoc++; }
+          else if(tags.length>1) nAmb++;
         } else {
-          const xr=cell(x,iXR);
-          const tags=splitTags(xr? xr.v : '');
-          if(tags.length){
-            /* one owner per row, the same one the screens count it for: the
-               first tag it names that has a real engineer */
-            let who='';
-            for(let ti=0;ti<tags.length;ti++){
-              const v=S.eng.resp[tagKey(pp,tags[ti])];
-              if(v && !isNA(v)){ who=v; break; }
-            }
-            if(!who && tags.length===1){ const v=S.eng.resp[tagKey(pp,tags[0])]; if(v) who=v; }
-            if(who){ put(x,cRes,who); nt++; }
-            else if(tags.length>1) nAmb++;
-          }
+          /* take off what an earlier write put on a row this discipline does not
+             originate, and anything on a row nobody originates */
+          const had=cell(x,cRes), hv=had? String(had.v).trim() : '';
+          if(hv && (hv===who || !cOrig.some(c=>roleAt(x,c)==='review-org'))){ put(x,cRes,''); nOff++; }
         }
       }
       wrStep(null, 40+((end-4)/rows)*45, nt.toLocaleString()+' rows given an engineer');
@@ -7494,37 +7486,12 @@ async function downloadRegister(after, opts){
     }
     rg.e.c=Math.max(rg.e.c,cRes); ws['!ref']=XLSX.utils.encode_range(rg);
 
-    /* No Engineer List sheet is written any more: the roster is in the tool,
-       and the names that matter are in the two columns themselves. */
-    wrStep('Writing the engineers named on single documents.', 84);
-    await yieldPaint();
-    /* and the overrides themselves, so a deliberate one is still deliberate
-       when this file is loaded again */
-    { const old=wb.SheetNames.indexOf(DOCENG_SHEET);
-      if(old>=0){ wb.SheetNames.splice(old,1); delete wb.Sheets[DOCENG_SHEET]; } }
-    const deKeep=[];
-    Object.keys(S.eng.doc||{}).forEach(k=>{
-      const v=S.eng.doc[k]; if(!v) return;
-      /* drop one whose document this file no longer has; keep everything else,
-         including documents this file says nothing about */
-      if(iTRc!==undefined && live[k]===undefined) return;
-      deKeep.push([k,v]);
-    });
-    if(deKeep.length){
-      const aoa=[DE_HEAD.slice()];
-      deKeep.forEach(pair=>{
-        const p2=pair[0].split(RM_SEP);
-        const d=(S.docs||[]).find(x=>x.tr===p2[1]);
-        aoa.push([p2[0], p2[1], d? d.label : p2[1], d? (d.xref||'') : '', d? (d.code||'') : '', pair[1]]);
-      });
-      const ds=XLSX.utils.aoa_to_sheet(aoa);
-      ds['!cols']=[{wch:16},{wch:34},{wch:34},{wch:26},{wch:12},{wch:30}];
-      DE_HEAD.forEach(function(_,c){ const k2=XLSX.utils.encode_cell({r:0,c});
-        if(ds[k2]) ds[k2].s={fill:{patternType:'solid',fgColor:{rgb:'FF0B2545'}},
-                             font:{bold:true,color:{rgb:'FFFFFFFF'}}}; });
-      XLSX.utils.book_append_sheet(wb, ds, DOCENG_SHEET);
-    }
-    S.eng.wroteDocEng=deKeep.length;
+    /* Nothing but the register's own sheet: the engineer on a single document
+       is in the RESPONSIBLE ENGINEER column like every other row, and the
+       sheets earlier versions added are taken out. */
+    [DOCENG_SHEET, ENG_SHEET].forEach(nm=>{
+      const old=wb.SheetNames.findIndex(x=>x.trim().toLowerCase()===nm.toLowerCase());
+      if(old>=0){ delete wb.Sheets[wb.SheetNames[old]]; wb.SheetNames.splice(old,1); } });
     wrStep('Saving the file.', 88);
     await yieldPaint();
     /* the register keeps the name it arrived with, so its date stays on it */
@@ -7538,7 +7505,7 @@ async function downloadRegister(after, opts){
     await yieldPaint();
     setTimeout(wrHide, 700);
     renderEng(); renderReqBtn();
-    S.eng.wrote={file:fname, req:nr, resp:nt, amb:nAmb};
+    S.eng.wrote={file:fname, req:nr, resp:nt, amb:nAmb, doc:nDoc, off:nOff};
     renderEng();
     if(typeof after==='function') setTimeout(after,0);
     if(!opts.silent)
@@ -7973,12 +7940,63 @@ function favLoading(pct){
 const RM_SEP='\u0001';
 const rmKey=(po,tr)=>String(po).trim()+RM_SEP+String(tr).trim();
 
-/* One engineer against one document, where the equipment tag's answer is not
-   the right one.  Kept in its own sheet for the same reason the delay reasons
-   are: the RESPONSIBLE ENGINEER column cannot say whether a name was inherited
-   from the tag or set by hand, and that difference has to survive the trip. */
+/* The sheet an earlier version kept the single-document engineers in.  Nothing
+   writes it now; it is read once from an old register, then taken out. */
 const DOCENG_SHEET='Document Engineers';
 const DE_HEAD=['PURCHASE ORDER','TR NUMBER','DOCUMENT','EQUIPMENT','CODE','RESPONSIBLE ENGINEER'];
+/* What the column says for a document from its tags alone — the writer and
+   the reader share it, so a round trip lands where it started: the first tag
+   with a real engineer; N/A when every tag is set aside; otherwise nobody. */
+function colWho(tags, whoOf){
+  for(let i=0;i<tags.length;i++){ const v=whoOf(tags[i]); if(v && !isNA(v)) return v; }
+  return tags.length && tags.every(t=>isNA(whoOf(t))) ? ENG_NA : '';
+}
+/* The RESPONSIBLE ENGINEER column read back.  Each document carries the one
+   engineer it counts for.  A document naming one tag says who that tag
+   belongs to; tags that only ever appear together — identical equipment —
+   share their documents' engineer; and a document whose name is not what its
+   tags give it had that name set on it by hand. */
+function engFromColumn(rows, iPO, iTR, iXR, iResp){
+  const resp={}, doc={};
+  if(iResp===undefined || iPO===undefined) return {resp, doc};
+  const str=v=>String(v==null?'':v).trim();
+  const byDoc={};
+  rows.forEach((a,ri)=>{
+    const v=str(a[iResp]); if(!v) return;
+    const po=str(a[iPO]); if(!po) return;
+    const tr=iTR!==undefined ? str(a[iTR]) : '';
+    const e=(byDoc[tr? rmKey(po,tr) : '#'+ri]=byDoc[tr? rmKey(po,tr) : '#'+ri]||
+             {po, tr, tags:iXR!==undefined ? splitTags(a[iXR]) : [], votes:{}});
+    e.votes[v]=(e.votes[v]||0)+1;
+  });
+  const top=t=>Object.keys(t).sort((x,y)=>t[y]-t[x]||x.localeCompare(y))[0];
+  const tally=(m,k,v)=>{ const t=(m[k]=m[k]||{}); t[v]=(t[v]||0)+1; };
+  const docs=Object.values(byDoc).map(e=>({po:e.po, tr:e.tr, tags:e.tags, v:top(e.votes)}));
+
+  const one={};
+  docs.forEach(d=>{ if(d.tags.length===1) tally(one, tagKey(d.po,d.tags[0]), d.v); });
+  Object.keys(one).forEach(k=>{ resp[k]=top(one[k]); });
+
+  const sets={}, seen={};
+  docs.forEach(d=>{
+    if(d.tags.length<2) return;
+    const sk=[d.po].concat(d.tags.slice().sort()).join(RM_SEP);
+    tally(sets, sk, d.v);
+    d.tags.forEach(t=>{ const tk=tagKey(d.po,t); (seen[tk]=seen[tk]||new Set()).add(sk); });
+  });
+  Object.keys(sets).forEach(sk=>{
+    const vs=Object.keys(sets[sk]); if(vs.length!==1) return;
+    const parts=sk.split(RM_SEP), po=parts[0], tags=parts.slice(1);
+    if(!tags.every(t=>{ const tk=tagKey(po,t); return !resp[tk] && seen[tk].size===1; })) return;
+    tags.forEach(t=>{ resp[tagKey(po,t)]=vs[0]; });
+  });
+
+  docs.forEach(d=>{
+    if(!d.tr) return;
+    if(d.v!==colWho(d.tags, t=>resp[tagKey(d.po,t)]||'')) doc[rmKey(d.po,d.tr)]=d.v;
+  });
+  return {resp, doc};
+}
 function readDocEngSheet(wb){
   const name=wb.SheetNames.find(n=>n.trim().toLowerCase()===DOCENG_SHEET.toLowerCase());
   if(!name) return {};
@@ -8889,6 +8907,15 @@ function renderCrs(){
 window.renderCrs=renderCrs;
 
 function go(s){
+  /* Walking off an equipment tag after changing who holds its documents
+     writes the register there and then — a manager who leaves expecting it
+     saved would otherwise lose it with the tab.  Opening one of its documents
+     is not leaving it. */
+  if((CUR==='action'||CUR==='doc') && s!=='action' && s!=='doc' && AC.tagEdit){
+    AC.tagEdit=false;
+    if(S.eng && S.eng.dirty && S.fileBytes)
+      setTimeout(()=>downloadRegister(null,{silent:true, title:'Saving your engineer changes'}),0);
+  }
   ['upload','filter','home','work','load','dash','progress','eng','engload','action','doc','report','basket','vdr','crsl','crs']
     .forEach(x=>$('sc-'+x).classList.toggle('on',x===s));
   CUR=s;
