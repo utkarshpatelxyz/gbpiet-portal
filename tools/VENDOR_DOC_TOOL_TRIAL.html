@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vendor Document Management — Powered by MERIDIAM</title>
+<title>Document Review Management — Powered by MERIDIAM</title>
 <link rel="icon" id="favi" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='13' fill='%230A6ED1'/%3E%3Cpath d='M20 44V21l12 13 12-13v23' fill='none' stroke='%23fff' stroke-width='5.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1783,8 +1783,8 @@ body[data-dark] #wkBody tr:hover td{background:#1C2839}
 .lb-pct{font-size:22px;font-weight:300;color:var(--ink);font-variant-numeric:tabular-nums;flex:none}
 .lb-bar{height:4px;background:var(--sf2);border:1px solid var(--line);border-radius:20px;
   overflow:hidden;margin-top:12px}
-.lb-bar>i{display:block;height:100%;width:2%;background:var(--blue);border-radius:20px;
-  transition:width .3s var(--ease)}
+.lb-bar>i{display:block;height:100%;width:100%;background:var(--blue);border-radius:20px;
+  transform-origin:0 50%;transform:scaleX(.02);transition:transform .9s cubic-bezier(.25,.8,.25,1)}
 .lb-steps{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:11px}
 .lb-steps .st{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:400;
   color:#9AA0A6;white-space:nowrap}
@@ -1827,102 +1827,212 @@ body[data-dark] .gone-tag{background:#2C2113;border-color:#4A3A1C;color:#E3B96E}
 body[data-dark] #alBody tr.al-r.open td{background:#16243B}
 body[data-dark] #alBody tr.al-sub td{background:#101822}
 
-/* ══ THE OPENING ═════════════════════════════════════════════════════════
-   What the tool is, told as the thing it does rather than as a logo.
+/* ══ THE OPENING, IN THREE DIMENSIONS ═════════════════════════════════════
+   What the tool does, played out in space.  Twelve documents spiral down out
+   of the dark and settle into a turning ring round a review core.  One by one
+   they are stamped REVIEWED while the core counts to 100%.  The ring spins up,
+   folds into the core, the core bursts, and the name of the tool assembles
+   letter by letter out of the flash — with the floor still running beneath it.
 
-   Documents arrive from the left and pile against a narrowing gate — codes and
-   numbers straight out of a real register, so the pile is recognisably the
-   reader's own backlog and not an abstraction.  The pressure shows: the queue
-   tightens, the gate glows hot, the count climbs.  Then MERIDIAM crosses the
-   frame, the gate opens, and everything that was stuck goes through and keeps
-   going.  Five seconds, one idea, no video file.
+   Everything that moves is a transform or an opacity on a CSS timeline, so the
+   browser's compositor plays it and nothing on the main thread can stall it.
+   The one script-driven part is the counter.  A reader who has asked for less
+   motion gets the title and nothing else.
    ═══════════════════════════════════════════════════════════════════════ */
-#mrd-module-splash .mms-stage{position:absolute;left:0;right:0;top:50%;height:380px;
-  transform:translateY(-50%);overflow:hidden;z-index:1;
-  transition:opacity .7s var(--ease),filter .7s var(--ease)}
-#mrd-module-splash.tell .mms-stage{opacity:0;filter:blur(7px)}
+#mrd-module-splash{--r:clamp(160px,24vw,350px)}
+/* it opens on the dark at once — the page behind never shows through */
+#mrd-module-splash.open{transition:none}
+#mrd-module-splash .mms-stage{position:absolute;inset:0;overflow:hidden;z-index:1;pointer-events:none}
 #mrd-module-splash.reduced .mms-stage{display:none}
+#mrd-module-splash .mms-inner{max-width:1240px}
+#mrd-module-splash .mms-name{font-size:clamp(28px,4.7vw,66px)}
 
-/* the channel the documents run down */
-.mms-rails{position:absolute;left:0;right:0;top:50%;height:252px;transform:translateY(-50%);
-  border-top:1px solid rgba(69,192,206,.13);border-bottom:1px solid rgba(69,192,206,.13);
-  background:linear-gradient(90deg,transparent,rgba(47,151,170,.05) 35%,rgba(47,151,170,.05) 65%,transparent)}
+/* two slow lights behind everything, so the dark has depth */
+.m3-neb{position:absolute;border-radius:50%;opacity:0}
+.m3-neb.a{left:-12%;top:-26%;width:70vw;height:70vw;
+  background:radial-gradient(circle,rgba(47,151,170,.30) 0%,rgba(47,151,170,.08) 40%,transparent 68%)}
+.m3-neb.b{right:-16%;bottom:-40%;width:78vw;height:78vw;
+  background:radial-gradient(circle,rgba(10,110,209,.30) 0%,rgba(10,110,209,.08) 42%,transparent 68%)}
+#mrd-module-splash.open .m3-neb.a{animation:m3show 1.4s ease forwards,m3drift 9s ease-in-out infinite alternate}
+#mrd-module-splash.open .m3-neb.b{animation:m3show 1.4s ease .2s forwards,m3drift 11s ease-in-out -4s infinite alternate-reverse}
+@keyframes m3drift{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(6vw,4vh,0) scale(1.12)}}
 
-/* the gate: two walls that meet in the middle and then stand aside */
-.mms-gate{position:absolute;left:50%;top:0;width:300px;height:100%;transform:translateX(-50%);
-  overflow:visible}
-.mms-gate .gw{transition:transform 1s cubic-bezier(.22,1,.36,1)}
-/* filled body, and only the funnel edge stroked — a stroke round the whole
-   path drew a box nobody asked for */
-.mms-gate .gw .fill{fill:rgba(47,151,170,.15);stroke:none;transition:fill .5s ease}
-.mms-gate .gw .edge{fill:none;stroke:rgba(69,192,206,.5);stroke-width:1.6;
-  stroke-linejoin:round;transition:stroke .5s ease}
-.mms-gate.jammed .gw .fill{fill:rgba(140,62,28,.26)}
-.mms-gate.jammed .gw .edge{stroke:rgba(224,122,60,.85)}
-.mms-gate.opened .gw.t{transform:translateY(-104px)}
-.mms-gate.opened .gw.b{transform:translateY(104px)}
-.mms-gate.opened .gw .fill{fill:rgba(47,151,170,.10)}
-.mms-gate.opened .gw .edge{stroke:rgba(105,220,232,.62)}
+/* the stars, streaming past the camera */
+.m3-stars{position:absolute;inset:0;perspective:560px;perspective-origin:50% 46%;transform-style:preserve-3d}
+.m3-star{position:absolute;width:3px;height:3px;border-radius:50%;background:#C9F6FF;
+  box-shadow:0 0 6px 1px rgba(105,220,232,.85);opacity:0;will-change:transform,opacity}
+#mrd-module-splash.open .m3-star{animation:m3fly var(--t) linear var(--dl) infinite}
+@keyframes m3fly{0%{transform:translateZ(-1100px);opacity:0}18%{opacity:1}80%{opacity:.95}
+  100%{transform:translateZ(360px);opacity:0}}
 
-/* the heat that builds behind a queue nobody is clearing */
-.mms-heat{position:absolute;left:50%;top:50%;width:520px;height:340px;transform:translate(-50%,-50%);
-  border-radius:50%;opacity:0;pointer-events:none;
-  background:radial-gradient(circle,rgba(224,122,60,.42) 0%,rgba(224,122,60,.12) 42%,transparent 70%);
-  transition:opacity .5s ease,background .6s ease}
-.mms-heat.cool{background:radial-gradient(circle,rgba(69,192,206,.40) 0%,rgba(69,192,206,.10) 42%,transparent 70%)}
+/* the floor, running towards us */
+.m3-floor{position:absolute;left:-50%;right:-50%;top:66%;bottom:-40%;perspective:340px;
+  perspective-origin:50% -10%;opacity:0;
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 26%,#000 70%,transparent 100%);
+          mask-image:linear-gradient(to bottom,transparent 0%,#000 26%,#000 70%,transparent 100%)}
+.m3-grid{position:absolute;left:0;right:0;top:-140%;height:340%;transform-origin:50% 100%;
+  background-image:linear-gradient(rgba(69,192,206,.42) 1.5px,transparent 1.5px),
+                   linear-gradient(90deg,rgba(69,192,206,.42) 1.5px,transparent 1.5px);
+  background-size:72px 72px;background-position:center 0;transform:rotateX(76deg)}
+#mrd-module-splash.open .m3-floor{animation:m3show 1s ease .05s forwards}
+#mrd-module-splash.open .m3-grid{animation:m3grid .9s linear infinite}
+@keyframes m3grid{from{transform:rotateX(76deg) translateY(0)}to{transform:rotateX(76deg) translateY(72px)}}
+.m3-horizon{position:absolute;left:0;right:0;top:66%;height:2px;opacity:0;transition:opacity .6s ease;
+  background:linear-gradient(90deg,transparent,rgba(125,230,242,.85) 30%,rgba(210,250,255,.95) 50%,rgba(125,230,242,.85) 70%,transparent);
+  box-shadow:0 0 36px 8px rgba(69,192,206,.30)}
+#mrd-module-splash.open .m3-horizon{animation:m3show 1.2s ease .2s forwards}
+#mrd-module-splash.tell .m3-horizon{animation:none;opacity:.35}
+@keyframes m3show{to{opacity:1}}
 
-/* what the queue costs, counted while it grows */
-.mms-count{position:absolute;left:50%;top:2px;transform:translateX(-50%);text-align:center;
-  opacity:0;transition:opacity .4s ease}
-.mms-count.on{opacity:1}
-.mms-count .n{font-family:var(--mono);font-size:30px;font-weight:700;color:#E8A06B;line-height:1;
-  font-variant-numeric:tabular-nums;text-shadow:0 0 22px rgba(224,122,60,.55)}
-.mms-count .l{font-size:8.5px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;
-  color:rgba(232,160,107,.68);margin-top:7px}
-.mms-count.cleared .n{color:#69DCE8;text-shadow:0 0 22px rgba(69,192,206,.6)}
-.mms-count.cleared .l{color:rgba(105,220,232,.7)}
+/* the scene: a world seen from a little above, a ring turning in it */
+.m3-scene{position:absolute;inset:0;perspective:1150px;perspective-origin:50% 38%}
+.m3-world{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d;
+  transform:rotateX(-14deg)}
+.m3-accel,.m3-ring{position:absolute;left:0;top:0;width:0;height:0;transform-style:preserve-3d}
+#mrd-module-splash.open .m3-ring{animation:m3spin 12s linear infinite}
+@keyframes m3spin{to{transform:rotateY(-360deg)}}
+/* the spin-up before the ring folds into the core */
+#mrd-module-splash.open .m3-accel{animation:m3accel 1.1s cubic-bezier(.5,0,.75,.25) 2.6s forwards}
+@keyframes m3accel{to{transform:rotateY(-400deg)}}
 
 /* one document */
-.mms-chip{position:absolute;left:0;top:0;display:flex;align-items:center;gap:6px;
-  padding:5px 9px 5px 7px;border-radius:4px;white-space:nowrap;
-  font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.02em;
-  color:#B9D4E4;background:rgba(17,39,60,.94);border:1px solid rgba(88,146,180,.45);
-  box-shadow:0 3px 12px rgba(0,0,0,.4);
-  will-change:transform;transform:translate3d(-300px,0,0);
-  transition:color .45s ease,border-color .45s ease,background .45s ease}
-.mms-chip i{width:8px;height:10px;border-radius:1.5px;background:#3E7FA8;flex:none;
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)}
-.mms-chip.hot{color:#F2CBA8;background:rgba(58,29,18,.94);border-color:rgba(214,120,72,.7)}
-.mms-chip.hot i{background:#D97A4E}
-.mms-chip.free{color:#A6EEDD;background:rgba(11,48,56,.92);border-color:rgba(69,192,206,.55)}
-.mms-chip.free i{background:#45C0CE}
+.m3-card{position:absolute;left:-54px;top:-76px;width:108px;height:152px;transform-style:preserve-3d;
+  transform:rotateY(var(--a)) translateZ(var(--r)) translateY(0) rotateX(0deg) rotateZ(0deg) scale(1)}
+#mrd-module-splash.open .m3-card{animation:
+  m3in 1.35s cubic-bezier(.15,.85,.3,1) calc(.1s + var(--i) * 78ms) both,
+  m3out .8s cubic-bezier(.55,0,.85,.35) calc(2.75s + var(--i) * 16ms) forwards}
+@keyframes m3in{
+  0%{transform:rotateY(calc(var(--a) + 160deg)) translateZ(calc(var(--r) * 2.1)) translateY(-460px)
+      rotateX(-80deg) rotateZ(35deg) scale(.55)}
+  100%{transform:rotateY(var(--a)) translateZ(var(--r)) translateY(0) rotateX(0deg) rotateZ(0deg) scale(1)}}
+@keyframes m3out{
+  0%{transform:rotateY(var(--a)) translateZ(var(--r)) translateY(0) rotateX(0deg) rotateZ(0deg) scale(1)}
+  100%{transform:rotateY(calc(var(--a) - 110deg)) translateZ(0px) translateY(0) rotateX(0deg) rotateZ(0deg) scale(.05)}}
 
-/* MERIDIAM, crossing the frame */
-.mms-sweep{position:absolute;top:0;bottom:0;left:0;width:34%;pointer-events:none;opacity:0;
-  background:linear-gradient(90deg,transparent,rgba(105,220,232,.20) 42%,rgba(190,245,250,.55) 62%,transparent);
-  filter:blur(6px);transform:translateX(-120%)}
-.mms-sweep.go{animation:mmsSweep .92s cubic-bezier(.4,0,.25,1) forwards}
-@keyframes mmsSweep{0%{opacity:0;transform:translateX(-120%)}
-  18%{opacity:1}82%{opacity:1}100%{opacity:0;transform:translateX(320%)}}
-.mms-word{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.82);
-  font-size:clamp(22px,4.2vw,46px);font-weight:800;letter-spacing:.3em;white-space:nowrap;
-  color:#fff;text-shadow:0 0 40px rgba(105,220,232,.85);opacity:0;pointer-events:none}
-.mms-word.go{animation:mmsWord 1.15s cubic-bezier(.22,1,.36,1) forwards}
-@keyframes mmsWord{0%{opacity:0;transform:translate(-50%,-50%) scale(.82);letter-spacing:.5em}
-  26%{opacity:1;transform:translate(-50%,-50%) scale(1);letter-spacing:.3em}
-  64%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1.1);letter-spacing:.26em}}
+.m3-face{position:absolute;inset:0;border-radius:7px;overflow:hidden;opacity:0;
+  -webkit-backface-visibility:hidden;backface-visibility:hidden}
+#mrd-module-splash.open .m3-face{animation:
+  m3show .3s ease calc(.1s + var(--i) * 78ms) forwards,
+  m3hide .3s ease calc(3.28s + var(--i) * 16ms) forwards}
+@keyframes m3hide{from{opacity:1}to{opacity:0}}
+.m3-front{padding:12px 10px 0;
+  background:linear-gradient(165deg,rgba(30,70,104,.96),rgba(12,32,54,.96));
+  border:1px solid rgba(105,220,232,.55);
+  box-shadow:0 0 24px rgba(69,192,206,.30),inset 0 1px 0 rgba(255,255,255,.16)}
+.m3-front::before{content:'';position:absolute;left:0;right:0;top:0;height:3px;
+  background:linear-gradient(90deg,#2F97AA,#69DCE8)}
+.m3-top{display:flex;justify-content:space-between;align-items:baseline;gap:4px;
+  font-family:var(--mono);font-size:9.5px;font-weight:700;color:#8FE9F5;letter-spacing:.02em}
+.m3-top em{font-style:normal;font-size:7px;font-weight:600;color:rgba(185,212,228,.62)}
+.m3-lines{margin-top:13px;display:flex;flex-direction:column;gap:7px}
+.m3-lines i{display:block;height:4px;border-radius:2px;background:rgba(160,196,220,.26)}
+.m3-lines i:first-child{height:6px;background:rgba(160,196,220,.44)}
+.m3-wait{position:absolute;left:9px;bottom:13px;font-size:6.5px;font-weight:800;letter-spacing:.16em;
+  color:#F0B27A;display:flex;align-items:center;gap:4px}
+.m3-wait::before{content:'';width:5px;height:5px;border-radius:50%;background:#E8954E;
+  box-shadow:0 0 6px #E8954E}
+.m3-ok{position:absolute;inset:0;border-radius:7px;border:1.5px solid #4FE0B0;opacity:0;
+  box-shadow:inset 0 0 20px rgba(79,224,176,.34),0 0 26px rgba(79,224,176,.5)}
+.m3-stamp{position:absolute;left:10px;right:10px;bottom:12px;padding:5px 0 4px;
+  border:1.5px solid #4FE0B0;border-radius:4px;background:rgba(8,62,52,.6);
+  font-size:8.5px;font-weight:800;letter-spacing:.14em;color:#7DF5CC;text-align:center;
+  text-shadow:0 0 8px rgba(79,224,176,.8);opacity:0;transform:scale(2.6) rotate(-16deg)}
+#mrd-module-splash.open .m3-stamp{animation:m3stamp .44s cubic-bezier(.2,1.55,.4,1) calc(1.3s + var(--i) * 105ms) forwards}
+@keyframes m3stamp{to{opacity:1;transform:scale(1) rotate(-6deg)}}
+#mrd-module-splash.open .m3-ok{animation:m3ok 1s ease calc(1.3s + var(--i) * 105ms) forwards}
+@keyframes m3ok{0%{opacity:0}22%{opacity:1}100%{opacity:.6}}
+#mrd-module-splash.open .m3-wait{animation:m3hide .18s ease calc(1.3s + var(--i) * 105ms) forwards}
+.m3-back{transform:rotateY(180deg);display:grid;place-items:center;
+  background:linear-gradient(165deg,rgba(20,48,74,.9),rgba(8,22,40,.9));
+  border:1px solid rgba(105,220,232,.32)}
+.m3-back svg{width:40px;height:40px;opacity:.5}
 
-/* the title waits for the flow to be running, then takes the frame */
-#mrd-module-splash .mms-inner{opacity:0;transition:opacity .5s ease}
+/* a column of light over the core while the documents are reviewed */
+.m3-beam{position:absolute;left:-80px;top:-640px;width:160px;height:640px;opacity:0;
+  transform:translateZ(-60px);transform-origin:50% 100%;
+  background:linear-gradient(to top,transparent 0%,rgba(150,236,250,.34) 16%,rgba(105,220,232,.10) 52%,transparent);
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 30%,#000 70%,transparent);
+          mask-image:linear-gradient(90deg,transparent,#000 30%,#000 70%,transparent)}
+#mrd-module-splash.open .m3-beam{animation:m3beam 2.2s ease 1.15s forwards}
+@keyframes m3beam{0%{opacity:0;transform:translateZ(-60px) scaleX(.3)}25%{opacity:1;transform:translateZ(-60px) scaleX(1)}
+  80%{opacity:.8}100%{opacity:0;transform:translateZ(-60px) scaleX(.2)}}
+
+/* the core the documents turn round: a counter inside three gyroscope rings */
+.m3-core{position:absolute;left:0;top:0;width:0;height:0;perspective:520px;
+  transform:rotateX(14deg) scale(0)}
+#mrd-module-splash.open .m3-core{animation:
+  m3coreIn .95s cubic-bezier(.2,1.45,.35,1) .4s forwards,
+  m3coreOut .45s cubic-bezier(.5,0,.8,.4) 3.3s forwards}
+@keyframes m3coreIn{to{transform:rotateX(14deg) scale(1)}}
+@keyframes m3coreOut{0%{transform:rotateX(14deg) scale(1)}100%{transform:rotateX(14deg) scale(2.3)}}
+/* the core bursts: its pieces fade on their own, the core itself never does —
+   a fading layer with a perspective of its own is clipped by some browsers */
+#mrd-module-splash.open .m3-prog,#mrd-module-splash.open .m3-count{animation:m3hide .45s ease 3.3s forwards}
+.m3-halo{position:absolute;left:-150px;top:-150px;width:300px;height:300px;border-radius:50%;
+  background:radial-gradient(circle,rgba(150,236,250,.42) 0%,rgba(69,192,206,.16) 34%,transparent 68%)}
+#mrd-module-splash.open .m3-halo{animation:m3pulse 1.6s ease-in-out infinite,m3hide .45s ease 3.3s forwards}
+@keyframes m3pulse{0%,100%{transform:scale(.92);opacity:.8}50%{transform:scale(1.08);opacity:1}}
+.m3-gyro{position:absolute;border-radius:50%;border:2px solid rgba(105,220,232,.22)}
+.m3-gyro::after{content:'';position:absolute;left:50%;top:-5px;width:8px;height:8px;margin-left:-4px;
+  border-radius:50%;background:#DFFBFF;box-shadow:0 0 10px 3px rgba(105,220,232,.95)}
+.m3-gyro.g1{left:-112px;top:-112px;width:224px;height:224px;
+  border-top-color:rgba(160,240,255,.95);border-right-color:rgba(105,220,232,.55)}
+.m3-gyro.g2{left:-96px;top:-96px;width:192px;height:192px;border-style:dashed;
+  border-color:rgba(105,220,232,.55)}
+.m3-gyro.g3{left:-124px;top:-124px;width:248px;height:248px;
+  border-bottom-color:rgba(160,240,255,.9);border-left-color:rgba(105,220,232,.5)}
+#mrd-module-splash.open .m3-gyro.g1{animation:m3g1 2.8s linear infinite,m3hide .45s ease 3.3s forwards}
+#mrd-module-splash.open .m3-gyro.g2{animation:m3g2 3.6s linear infinite,m3hide .45s ease 3.3s forwards}
+#mrd-module-splash.open .m3-gyro.g3{animation:m3g3 4.4s linear infinite,m3hide .45s ease 3.3s forwards}
+@keyframes m3g1{from{transform:rotateX(74deg) rotateZ(0deg)}to{transform:rotateX(74deg) rotateZ(360deg)}}
+@keyframes m3g2{from{transform:rotateY(66deg) rotateX(14deg) rotateZ(0deg)}to{transform:rotateY(66deg) rotateX(14deg) rotateZ(-360deg)}}
+@keyframes m3g3{from{transform:rotateX(-52deg) rotateY(-38deg) rotateZ(0deg)}to{transform:rotateX(-52deg) rotateY(-38deg) rotateZ(360deg)}}
+.m3-prog{position:absolute;left:-76px;top:-76px;width:152px;height:152px;transform:rotate(-90deg);overflow:visible}
+.m3-prog circle{fill:none;stroke-width:5}
+.m3-prog .bg{stroke:rgba(105,220,232,.14)}
+.m3-prog .fg{stroke:url(#m3Grad);stroke-linecap:round;stroke-dasharray:452.4;stroke-dashoffset:452.4;
+  filter:drop-shadow(0 0 6px rgba(105,220,232,.9))}
+.m3-count{position:absolute;left:-80px;top:-34px;width:160px;text-align:center}
+.m3-count .n{font-family:var(--mono);font-size:36px;font-weight:800;line-height:1;color:#fff;
+  font-variant-numeric:tabular-nums;text-shadow:0 0 22px rgba(105,220,232,.95)}
+.m3-count .n small{font-size:18px;font-weight:700;margin-left:1px;color:#9FEFFF}
+.m3-count .l{margin-top:8px;font-size:8.5px;font-weight:800;letter-spacing:.3em;text-transform:uppercase;
+  color:rgba(159,239,255,.78)}
+.m3-core.done .m3-count .n{color:#7DF5CC;text-shadow:0 0 24px rgba(79,224,176,.95)}
+.m3-core.done .m3-count .l{color:rgba(125,245,204,.85)}
+
+/* the burst as the ring folds in */
+/* drawn at full size and grown from a dot, so it is sharp when it is large */
+.m3-shock{position:absolute;left:-650px;top:-650px;width:1300px;height:1300px;border-radius:50%;
+  border:3px solid rgba(190,248,255,.95);opacity:0;
+  box-shadow:0 0 40px rgba(105,220,232,.8),inset 0 0 36px rgba(105,220,232,.55);
+  transform:translateY(96px) rotateX(90deg) scale(.02)}
+#mrd-module-splash.open .m3-shock{animation:m3shock 1.2s cubic-bezier(.15,.7,.3,1) 3.36s forwards}
+@keyframes m3shock{0%{opacity:0;transform:translateY(96px) rotateX(90deg) scale(.02)}
+  10%{opacity:1}100%{opacity:0;transform:translateY(96px) rotateX(90deg) scale(1)}}
+.m3-flash{position:absolute;inset:0;opacity:0;pointer-events:none;
+  background:radial-gradient(circle at 50% 48%,rgba(225,252,255,.95) 0%,rgba(105,220,232,.35) 26%,transparent 62%)}
+#mrd-module-splash.open .m3-flash{animation:m3flash 1s ease-out 3.32s forwards}
+@keyframes m3flash{0%{opacity:0}14%{opacity:1}100%{opacity:0}}
+
+/* the name, assembling out of the flash */
+#mrd-module-splash .mms-inner{opacity:0;transition:opacity .35s ease}
 #mrd-module-splash.tell .mms-inner,#mrd-module-splash.reduced .mms-inner{opacity:1}
 #mrd-module-splash.open .mms-eyebrow,#mrd-module-splash.open .mms-name,
 #mrd-module-splash.open .mms-rule,#mrd-module-splash.open .mms-powered{animation:none}
-#mrd-module-splash.tell .mms-eyebrow{animation:mmsFadeUp .5s ease forwards .05s}
-#mrd-module-splash.tell .mms-name{animation:mmsFadeUp .62s cubic-bezier(.22,1,.36,1) forwards .14s}
-#mrd-module-splash.tell .mms-rule{animation:mmsRule .5s cubic-bezier(.22,1,.36,1) forwards .38s}
-#mrd-module-splash.tell .mms-powered{animation:mmsFadeUp .5s ease forwards .5s}
-#mrd-module-splash.reduced .mms-eyebrow,#mrd-module-splash.reduced .mms-name,
-#mrd-module-splash.reduced .mms-powered{opacity:1;transform:none;animation:none}
+#mrd-module-splash.open .mms-name{opacity:1;transform:none;perspective:720px;text-shadow:none}
+.mms-name .w{display:inline-block;white-space:nowrap}
+.mms-name .ch{display:inline-block;opacity:0;transform-origin:50% 85%;
+  transform:translate3d(0,.42em,-160px) rotateX(-100deg);
+  text-shadow:0 0 44px rgba(69,192,206,.45)}
+.mms-name .w.hl .ch{color:#5ED8EC;text-shadow:0 0 44px rgba(69,192,206,.75)}
+#mrd-module-splash.tell .mms-name .ch{animation:m3ch .72s cubic-bezier(.2,.9,.3,1.18) calc(.06s + var(--k) * 30ms) forwards}
+@keyframes m3ch{to{opacity:1;transform:none}}
+#mrd-module-splash.tell .mms-eyebrow{animation:mmsFadeUp .5s ease forwards .02s}
+#mrd-module-splash.tell .mms-rule{animation:mmsRule .6s cubic-bezier(.22,1,.36,1) forwards .62s}
+#mrd-module-splash.tell .mms-powered{animation:mmsFadeUp .5s ease forwards .78s}
+#mrd-module-splash.reduced .mms-eyebrow,#mrd-module-splash.reduced .mms-powered,
+#mrd-module-splash.reduced .mms-name .ch{opacity:1;transform:none;animation:none}
 #mrd-module-splash.reduced .mms-rule{width:min(360px,60%);animation:none}
 
 /* a way past it for anyone who has seen it */
@@ -1930,7 +2040,11 @@ body[data-dark] #alBody tr.al-sub td{background:#101822}
   letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.3);
   background:none;border:0;cursor:pointer;padding:6px 8px;font-family:var(--font)}
 .mms-skip:hover{color:rgba(255,255,255,.75)}
-
+/* a phone: the same scene, smaller */
+@media (max-width:640px){
+  #mrd-module-splash{--r:230px}
+  .m3-world{transform:rotateX(-14deg) scale(.5)}
+}
 
 /* ── Client CRS ─────────────────────────────────────────────────────────── */
 .crs-code{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;
@@ -1956,24 +2070,35 @@ body[data-dark] #alBody tr.al-sub td{background:#101822}
 <div id="mrd-module-splash" aria-hidden="true">
   <div class="mms-topline"></div>
   <div class="mms-stage" id="mmsStage">
-    <div class="mms-rails"></div>
-    <div class="mms-heat" id="mmsHeat"></div>
-    <div class="mms-flow" id="mmsFlow"></div>
-    <svg class="mms-gate" id="mmsGate" viewBox="0 0 300 380" preserveAspectRatio="none" aria-hidden="true">
-      <g class="gw t"><path class="fill" d="M0,64 L300,64 L182,158 L118,158 Z"/>
-        <polyline class="edge" points="0,64 118,158 182,158 300,64"/></g>
-      <g class="gw b"><path class="fill" d="M0,316 L300,316 L182,222 L118,222 Z"/>
-        <polyline class="edge" points="0,316 118,222 182,222 300,316"/></g>
-    </svg>
-    <div class="mms-sweep" id="mmsSweep"></div>
-    <div class="mms-word" id="mmsWord">MERIDIAM</div>
-    <div class="mms-count" id="mmsCount"><div class="n" id="mmsN">0</div>
-      <div class="l" id="mmsL">documents held</div></div>
+    <i class="m3-neb a"></i><i class="m3-neb b"></i>
+    <div class="m3-stars" id="m3Stars"></div>
+    <div class="m3-floor"><div class="m3-grid"></div></div>
+    <div class="m3-horizon"></div>
+    <div class="m3-scene" id="m3Scene">
+      <div class="m3-world">
+        <div class="m3-shock"></div>
+        <div class="m3-beam"></div>
+        <div class="m3-core" id="m3Core">
+          <div class="m3-halo"></div>
+          <i class="m3-gyro g3"></i><i class="m3-gyro g1"></i><i class="m3-gyro g2"></i>
+          <svg class="m3-prog" viewBox="0 0 152 152" aria-hidden="true">
+            <defs><linearGradient id="m3Grad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#69DCE8"/><stop offset="1" stop-color="#4FE0B0"/></linearGradient></defs>
+            <circle class="bg" cx="76" cy="76" r="72"/>
+            <circle class="fg" id="m3Arc" cx="76" cy="76" r="72"/>
+          </svg>
+          <div class="m3-count"><div class="n" id="m3N">0<small>%</small></div>
+            <div class="l" id="m3L">reviewed</div></div>
+        </div>
+        <div class="m3-accel"><div class="m3-ring" id="m3Ring"></div></div>
+      </div>
+    </div>
+    <div class="m3-flash"></div>
   </div>
   <button class="mms-skip" id="mmsSkip" type="button">Skip</button>
   <div class="mms-inner">
     <div class="mms-eyebrow">Module</div>
-    <div class="mms-name" id="mms-name">Vendor Document Management</div>
+    <div class="mms-name" id="mms-name">Document Review Management</div>
     <div class="mms-rule"></div>
     <div class="mms-powered">
       <span class="mms-powered-by">Powered by</span>
@@ -1990,7 +2115,7 @@ body[data-dark] #alBody tr.al-sub td{background:#101822}
 </div>
 
 <div class="nav"><div class="nav-in">
-  <div class="brand">VENDOR <b>DOCUMENT MANAGEMENT</b><small>Powered by MERIDIAM</small></div>
+  <div class="brand">DOCUMENT <b>REVIEW MANAGEMENT</b><small>Powered by MERIDIAM</small></div>
   <div class="nav-sep"></div>
   <button class="navhome" id="btn-home" onclick="goHome()" title="Back to the home page">
     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
@@ -2810,199 +2935,131 @@ const daysBetween=(a,b)=> (!a||!b)?null:Math.round((b-a)/86400000);
 
 /* ── Module splash ─────────────────────────────────────────────────────── */
 /* ══ THE OPENING ═════════════════════════════════════════════════
-   Five seconds of what this tool is for, drawn rather than filmed - which is
-   the only way it can live inside a file somebody emails to somebody else.
+   Five and a half seconds of what the tool is for, in three dimensions and
+   drawn rather than filmed, so it lives inside a file somebody emails on.
 
-   Documents come in from the left carrying real codes off a real register.
-   They reach a gate that is too narrow, and they stop.  The queue builds, the
-   count climbs, the gate runs hot.  MERIDIAM crosses the frame, the gate
-   stands aside, and everything that was stuck goes through - and the ones
-   still arriving never slow down.
-
-   One requestAnimationFrame loop moving transforms, so it is cheap; one seeded
-   random so it looks the same every time; a Skip for anyone who has seen it,
-   and nothing at all for a reader who has asked for less motion.
+   The motion is all on CSS timelines (see THE OPENING, IN THREE DIMENSIONS in
+   the styles): the cards, the stamps, the spin-up, the burst.  This builds the
+   pieces, runs the one number that has to be counted — the core's percentage,
+   kept in step with the stamps — and splits the name into letters so each can
+   turn into place.  Skip, a click or a key ends it; a reader who has asked for
+   less motion sees the name and nothing else.
    ════════════════════════════════════════════════════════════════════ */
 (function(){
   const splash=document.getElementById('mrd-module-splash');
   if(!splash) return;
-  const stage=document.getElementById('mmsStage'),
-        flow =document.getElementById('mmsFlow'),
-        gate =document.getElementById('mmsGate'),
-        heat =document.getElementById('mmsHeat'),
-        sweep=document.getElementById('mmsSweep'),
-        word =document.getElementById('mmsWord'),
-        cnt  =document.getElementById('mmsCount'),
-        cN   =document.getElementById('mmsN'),
-        cL   =document.getElementById('mmsL'),
+  const ring =document.getElementById('m3Ring'),
+        stars=document.getElementById('m3Stars'),
+        core =document.getElementById('m3Core'),
+        arc  =document.getElementById('m3Arc'),
+        nEl  =document.getElementById('m3N'),
+        lEl  =document.getElementById('m3L'),
+        nmEl =document.getElementById('mms-name'),
         skip =document.getElementById('mmsSkip');
 
-  /* codes and document numbers as they actually read in the register */
-  const LABELS=['PLG-0003','CAL-0005','PLD-0008','GEA-01-D-101','DOS-0002','PLD-0001',
-    'EXP-25-D-004','PRC-0010','DET-02-D-606','MDR-01-D-504','CAL-02-D-607','QAC-0004',
-    'HYT-01-D-101','GEA-02-D-102','PLD-0019','EXP-01-D-310','VDB-0007','CER-0002',
-    'DET-01-D-101','GEA-02-D-304','PLD-0011','CAL-01-D-506','PRC-0004','DOS-0009'];
+  /* document types as the register writes them — no numbers, no names */
+  const CODES=['CAL-0005','PLG-0003','PLD-0008','DOS-0002','PRC-0010','VDB-0001',
+               'LIS-0016','PLD-0019','CER-0002','PRC-0038','PLD-0001','MDR-0003'];
+  const REVS =['01','B','00','A','02','01','00','A','B','01','03','00'];
+  const N=CODES.length;
+  /* in step with the CSS: the first stamp lands at 1.3s, one every 105ms */
+  const T_STAMP=1300, GAP=105, T_TELL=3450, T_END=5650, ARC=452.4;
+  const MARK='<svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="13" fill="none" '+
+    'stroke="#69DCE8" stroke-width="3"/><path d="M20 44V21l12 13 12-13v23" fill="none" stroke="#69DCE8" '+
+    'stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-  const T_OPEN=2500, T_TELL=3760, T_END=5000, IN_MS=880, OUT_MS=860;
-  const N_JAM=20, N_FREE=14, LANES=5, LANE_H=48;
-
-  /* seeded, so the same five seconds play every time */
-  let _s=20260919;
+  /* seeded, so the same opening plays every time */
+  let _s=20260923;
   const rnd=()=>{ _s=(_s*1664525+1013904223)&0x7fffffff; return _s/0x7fffffff; };
-
-  const easeOut=t=>1-Math.pow(1-t,3);
-  /* A released queue does not creep away — it goes.  A cubic ease-in left
-     everything looking frozen for most of the flush. */
-  const easeIn =t=>Math.pow(t,1.5);
   const clamp=(v,a,c)=>v<a?a:(v>c?c:v);
   const REDUCED_M=()=>matchMedia('(prefers-reduced-motion:reduce)').matches;
 
-  /* Where a document can get to at a given height: the funnel wall, read off
-     the same path the SVG draws, so the pile and the picture cannot disagree. */
-  function gateEdge(y,H,gateX){
-    const ly=y/H*380, gl=gateX-150;
-    let lx;
-    if(ly<=158)      lx=Math.max(0,(ly-64)/94*118);
-    else if(ly>=222) lx=Math.max(0,(316-ly)/94*118);
-    else             lx=118;
-    return gl+lx;
-  }
-
-  let raf=0, t1=null, t2=null, chips=[], done=false;
-
+  let built=false;
   function build(){
-    flow.innerHTML='';
-    chips=[];
-    const W=stage.clientWidth||1200, H=stage.clientHeight||330;
-    const gateX=W/2, midY=H/2;
-    const laneY=i=>midY-(LANES-1)/2*LANE_H+i*LANE_H;
-    for(let i=0;i<N_JAM+N_FREE;i++){
-      const el=document.createElement('div');
-      el.className='mms-chip';
-      el.innerHTML='<i></i>'+LABELS[i%LABELS.length];
-      el.style.transform='translate3d(-400px,0,0)';
-      flow.appendChild(el);
-      const jam=i<N_JAM, lane=i%LANES, col=Math.floor(i/LANES);
-      const w=el.offsetWidth||104, yc=laneY(lane)-11;
-      chips.push({el, lane, col, jam,
-        born: jam ? 120+i*80 : T_OPEN+300+(i-N_JAM)*96,
-        x0: -170-rnd()*130,
-        /* The front of the queue follows the slope of the wall, so the pile
-           wedges into the mouth of the funnel the way a real one would --
-           the outer lanes stop short, the middle lane reaches the neck. */
-        qx: gateEdge(laneY(lane),H,gateX)-w-11-col*118-rnd()*6,
-        y : yc, midY: midY-11, gateX,
-        wob: rnd()*6.28, out: jam ? T_OPEN+col*55 : 0,
-        hot:false, free:false});
+    if(built) return; built=true;
+    const widths=[[88,64],[92,78,56],[70,90,60],[84,52,74],[90,66]];
+    ring.innerHTML=CODES.map((c,i)=>{
+      const w=widths[i%widths.length];
+      return `<div class="m3-card" style="--i:${i};--a:${(i*360/N).toFixed(2)}deg">
+        <div class="m3-face m3-front">
+          <div class="m3-top"><b>${c}</b><em>REV ${REVS[i]}</em></div>
+          <div class="m3-lines"><i style="width:${w[0]}%"></i><i style="width:${w[1]}%"></i>
+            <i style="width:${w[2]||80}%"></i><i style="width:62%"></i></div>
+          <div class="m3-wait">IN REVIEW</div>
+          <div class="m3-ok"></div>
+          <div class="m3-stamp">&#10003; REVIEWED</div>
+        </div>
+        <div class="m3-face m3-back">${MARK}</div>
+      </div>`;
+    }).join('');
+    let h='';
+    for(let i=0;i<46;i++){
+      /* kept off the dead centre, where they would only ever be a dot */
+      let x=rnd()*100, y=rnd()*100;
+      if(Math.abs(x-50)<7 && Math.abs(y-46)<7) x+= x<50 ? -9 : 9;
+      const t=(2.1+rnd()*2.4).toFixed(2);
+      h+=`<i class="m3-star" style="left:${x.toFixed(1)}%;top:${y.toFixed(1)}%;--t:${t}s;--dl:-${(rnd()*t).toFixed(2)}s"></i>`;
     }
-    return {W,H,gateX,midY};
+    stars.innerHTML=h;
   }
 
-  /* Squeezed towards the centre line while passing the gate, fanning back to
-     its own lane once through - which is what makes it read as a channel. */
-  function yAt(c,x){
-    const k=clamp(1-Math.abs(x-c.gateX)/86,0,1);
-    return c.y+(c.midY-c.y)*k*0.72;
+  /* the name, one letter at a time; every word after the first in the accent,
+     the way the header writes it */
+  function nameHTML(name){
+    let k=0;
+    return String(name).trim().split(/\s+/).map((w,wi)=>
+      `<span class="w${wi?' hl':''}">`+[...w].map(ch=>
+        `<span class="ch" style="--k:${k++}">${ch.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</span>`).join('')+
+      '</span>').join(' ');
   }
 
-  function frame(t0){
+  let raf=0, t1=null, t2=null, done=false;
+  function count(t0){
     const step=now=>{
       const t=now-t0;
-      let queued=0;
-      for(const c of chips){
-        if(t<c.born){ c.el.style.opacity='0'; continue; }
-        c.el.style.opacity='1';
-        let x;
-        if(c.jam){
-          const inP=clamp((t-c.born)/IN_MS,0,1);
-          x=c.x0+(c.qx-c.x0)*easeOut(inP);
-          if(inP>=1){
-            queued++;
-            /* the pressure of a queue nobody is clearing */
-            x=c.qx+Math.sin(t/150+c.wob)*1.3+clamp((t-1500)/150,0,7);
-            if(!c.hot && t>1450){ c.hot=true; c.el.classList.add('hot'); }
-          }
-          if(t>c.out){
-            const p=clamp((t-c.out)/OUT_MS,0,1);
-            x=x+(stageW+180-x)*easeIn(p)*1.0;
-            if(!c.free && p>0.04){ c.free=true; c.el.classList.remove('hot'); c.el.classList.add('free'); }
-          }
-        } else {
-          const p=clamp((t-c.born)/1600,0,1);
-          x=c.x0+(stageW+180-c.x0)*p;
-          if(!c.free){ c.free=true; c.el.classList.add('free'); }
-        }
-        c.el.style.transform='translate3d('+x.toFixed(1)+'px,'+yAt(c,x).toFixed(1)+'px,0)';
-      }
-
-      if(t<T_OPEN){
-        cnt.classList.toggle('on', queued>0);
-        cN.textContent=queued;
-        heat.style.opacity=String(clamp(queued/12,0,1));
-        if(queued>=6) gate.classList.add('jammed');
-      }
-      if(t>=T_OPEN && !gate.classList.contains('opened')){
-        gate.classList.remove('jammed'); gate.classList.add('opened');
-        heat.classList.add('cool');
-      }
-      if(t>=T_OPEN){
-        /* The backlog counts DOWN as it drains — a number falling to nothing
-           is the whole point, and counting the cleared ones up buried it. */
-        const held=chips.filter(c=>c.jam && t<=c.out+OUT_MS*0.5).length;
-        cN.textContent=held;
-        if(held===0 && !cnt.classList.contains('cleared')){
-          cnt.classList.add('cleared'); cL.textContent='flowing again';
-        }
-        heat.style.opacity=String(clamp(1-(t-T_OPEN)/900,0,1)*0.75);
-        if(t>T_OPEN+1500) cnt.classList.remove('on');
-      }
-      if(t>=T_OPEN-320 && !sweep.classList.contains('go')){
-        sweep.classList.add('go'); word.classList.add('go');
-      }
-      if(t<T_END) raf=requestAnimationFrame(step);
+      /* the arc and the number move with the stamps, not ahead of them */
+      const p=clamp((t-T_STAMP-120)/(GAP*(N-1)+180),0,1);
+      const pct=Math.round(p*100);
+      nEl.innerHTML=pct+'<small>%</small>';
+      arc.style.strokeDashoffset=(ARC*(1-p)).toFixed(1);
+      if(p>=1 && !core.classList.contains('done')){ core.classList.add('done'); lEl.textContent='all reviewed'; }
+      if(t<T_TELL) raf=requestAnimationFrame(step);
     };
     raf=requestAnimationFrame(step);
   }
 
-  let stageW=1200;
   function close(){
     if(done) return; done=true;
-    cancelAnimationFrame(raf);
+    cancelAnimationFrame(raf); clearTimeout(t1);
     splash.classList.add('closing');
-    t2=setTimeout(()=>{
-      splash.classList.remove('open','closing','tell','reduced');
-      flow.innerHTML='';
-    },480);
+    t2=setTimeout(()=>splash.classList.remove('open','closing','tell','reduced'),480);
   }
 
   window.showModuleSplash=function(name){
-    if(name) document.getElementById('mms-name').textContent=name;
+    if(name) nmEl.innerHTML=nameHTML(name);
     clearTimeout(t1); clearTimeout(t2); cancelAnimationFrame(raf);
     done=false;
     splash.classList.remove('open','closing','tell','reduced');
-    gate.classList.remove('jammed','opened');
-    sweep.classList.remove('go'); word.classList.remove('go');
-    cnt.classList.remove('on','cleared'); cL.textContent='documents held';
-    heat.classList.remove('cool'); heat.style.opacity='0';
-    void splash.offsetWidth;
+    core.classList.remove('done'); lEl.textContent='reviewed';
+    nEl.innerHTML='0<small>%</small>'; arc.style.strokeDashoffset=String(ARC);
+    void splash.offsetWidth;                 // every animation starts again from nought
     splash.classList.add('open');
-
     if(REDUCED_M()){
       splash.classList.add('reduced','tell');
       t1=setTimeout(close,1400);
       return;
     }
-    const g=build(); stageW=g.W;
-    frame(performance.now());
+    build();
+    count(performance.now());
     t1=setTimeout(()=>{
       splash.classList.add('tell');
-      t1=setTimeout(close, T_END-T_TELL+260);
+      t1=setTimeout(close, T_END-T_TELL);
     }, T_TELL);
   };
   if(skip) skip.onclick=close;
   splash.addEventListener('click',e=>{ if(e.target!==skip) close(); });
-  addEventListener('keydown',e=>{ if(splash.classList.contains('open')) close(); });
-  showModuleSplash('Vendor Document Management');
+  addEventListener('keydown',()=>{ if(splash.classList.contains('open')) close(); });
+  showModuleSplash('Document Review Management');
 })();
 
 /* ── Load ──────────────────────────────────────────────────────────────── */
@@ -3024,22 +3081,20 @@ function lbShow(f){
   LB_TO=0; LB_AT=0;
   lbStep(0,1);
 }
-/* The reading is eased towards its target rather than jumped to it: opening a
-   large workbook blocks the main thread for seconds at a stretch, and a bar
-   that only moves on the far side of each stall reads as a bar that is stuck.
-   Between the stalls this keeps it moving. */
+/* The figure on the page is the figure on the tab, set the moment a step is
+   reached.  It used to be eased towards it frame by frame — and opening a large
+   workbook stops the frames for seconds at a time, so the page sat well behind
+   the tab.  Only the bar still glides, and it glides on the compositor, which
+   keeps drawing while the main thread is busy. */
 let LB_TO=0, LB_AT=0, LB_RAF=0;
-function lbTween(){
-  LB_RAF=0;
-  LB_AT += (LB_TO-LB_AT)*0.18;
-  if(Math.abs(LB_TO-LB_AT)<0.4) LB_AT=LB_TO;
-  $('lb-i').style.width=Math.max(2,Math.min(100,LB_AT))+'%';
-  $('lb-pct').textContent=Math.round(LB_AT)+'%';
-  if(LB_AT!==LB_TO) LB_RAF=requestAnimationFrame(lbTween);
+function lbPaint(){
+  LB_AT=LB_TO;
+  $('lb-pct').textContent=Math.round(LB_TO)+'%';
+  $('lb-i').style.transform='scaleX('+(Math.max(2,Math.min(100,LB_TO))/100).toFixed(4)+')';
 }
 function lbStep(i,pct,note){
   LB_TO=Math.max(LB_TO,Math.max(0,Math.min(100,pct)));
-  if(!LB_RAF) LB_RAF=requestAnimationFrame(lbTween);
+  lbPaint();
   document.querySelectorAll('#lb-steps .st').forEach(e=>{
     const k=+e.dataset.i;
     e.classList.toggle('on', k===i);
@@ -3050,7 +3105,8 @@ function lbStep(i,pct,note){
 }
 function lbHide(){
   if(LB_RAF) cancelAnimationFrame(LB_RAF);
-  LB_RAF=0; LB_TO=0; LB_AT=0; $('loadbox').classList.remove('on'); favIdle(); }
+  LB_RAF=0; LB_TO=0; LB_AT=0; $('lb-i').style.transform='scaleX(.02)';
+  $('loadbox').classList.remove('on'); favIdle(); }
 
 function readFile(f){
   lbShow(f);
@@ -4961,7 +5017,7 @@ function emailPerf(kind, key){
     body+=`Open past the ${DEADLINE_DAYS}-day target${openLate.length>shown.length?' (first '+shown.length+')':''}:\n\n`+table;
     if(openLate.length>shown.length) body+=`\n… and ${openLate.length-shown.length} more.\n`;
   } else body+='Nothing is currently open past the target.\n';
-  body+=`\nSent from Vendor Document Management — Powered by MERIDIAM.\n`;
+  body+=`\nSent from Document Review Management — Powered by MERIDIAM.\n`;
 
   const e2=t=>String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const html=`<table style="border-collapse:collapse;font-family:Segoe UI,Arial,sans-serif;font-size:11px">
@@ -7937,7 +7993,7 @@ window.docBack=docBack;
    ═══════════════════════════════════════════════════════════════════════════ */
 const FAV_IDLE="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='13' fill='%230A6ED1'/%3E%3Cpath d='M20 44V21l12 13 12-13v23' fill='none' stroke='%23fff' stroke-width='5.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E";
 function favSet(href){ const l=$('favi'); if(l) l.setAttribute('href',href); }
-function favIdle(){ favSet(FAV_IDLE); document.title='Vendor Document Management — Powered by MERIDIAM'; }
+function favIdle(){ favSet(FAV_IDLE); document.title='Document Review Management — Powered by MERIDIAM'; }
 function favLoading(pct){
   pct=Math.max(0,Math.min(100,Math.round(pct)));
   /* a ring that fills as the file opens — the same figure the page is showing */
@@ -8516,10 +8572,11 @@ function crsStats(){
   const items=crsItems();
   const back   = items.filter(x=>x.code);
   const owed   = items.filter(x=>x.owed);
+  const c2     = owed.filter(x=>x.code==='2');
   const rej    = owed.filter(x=>x.code==='3');
   const done   = items.filter(x=>x.acts && !x.owed);
   const byCode = {}; back.forEach(x=>{ byCode[x.code]=(byCode[x.code]||0)+1; });
-  return { items, back, owed, rej, done, byCode,
+  return { items, back, owed, c2, rej, done, byCode,
            notBack: items.length - back.length,
            docsOwed: new Set(owed.map(x=>x.d.tr)).size,
            oldest : owed.reduce((m,x)=>Math.max(m, x.days||0), 0) };
@@ -8538,6 +8595,7 @@ function crsByPerson(){
 
 /* ── the icons ─────────────────────────────────────────────────────────── */
 ICO.crs    = _svg('<path d="M20.5 14.6a2.2 2.2 0 0 1-2.2 2.2H8.1l-4.6 3.7V5.7a2.2 2.2 0 0 1 2.2-2.2h12.6a2.2 2.2 0 0 1 2.2 2.2z"/><path d="M8 8.6h8.2M8 12h5.4"/>');
+ICO.crsC2  = _svg('<path d="M20.5 14.6a2.2 2.2 0 0 1-2.2 2.2H8.1l-4.6 3.7V5.7a2.2 2.2 0 0 1 2.2-2.2h12.6a2.2 2.2 0 0 1 2.2 2.2z"/><path d="M12 7v4.4M12 13.9v.1"/>');
 ICO.crsRej = _svg('<path d="M20.5 14.6a2.2 2.2 0 0 1-2.2 2.2H8.1l-4.6 3.7V5.7a2.2 2.2 0 0 1 2.2-2.2h12.6a2.2 2.2 0 0 1 2.2 2.2z"/><path d="M9.6 7.6l5.2 5.2M14.8 7.6l-5.2 5.2"/>');
 
 /* ── the tiles: only what needs doing on the reviewing tab ──────────────── */
@@ -8546,6 +8604,8 @@ function crsApps(){
   return [
     {g:'crs', id:'crsMine', ic:ICO.crs,    n:s.owed.length,
      t:'My CRS actions',     d:'Code 2 or 3 — reply not sent',   open:()=>openCrsList('owed')},
+    {g:'crs', id:'crsC2',   ic:ICO.crsC2,  n:s.c2.length,
+     t:'Returned with comments', d:'Code 2 — reply not sent',    open:()=>openCrsList('c2')},
     {g:'crs', id:'crsRej',  ic:ICO.crsRej, n:s.rej.length,
      t:'Rejected by the client', d:'Code 3 — reply not sent',    open:()=>openCrsList('rej')},
     {g:'poB', id:'bCrs',    ic:ICO.crs,    n:s.owed.length,
@@ -8555,7 +8615,7 @@ function crsApps(){
 }
 
 /* ═══ THE CRS LIST ═════════════════════════════════════════════════════════
-   Behind the two reviewing tiles, every figure on the managing page, and the
+   Behind the three reviewing tiles, every figure on the managing page, and the
    Client CRS number against an engineer.  One row per revision: that is the
    unit a reply is owed on. */
 const CL={ mode:'owed', who:null, age:null, code:null, type:null, q:'', rej:false, none:false,
@@ -8563,6 +8623,7 @@ const CL={ mode:'owed', who:null, age:null, code:null, type:null, q:'', rej:fals
 
 const CL_MODES={
   owed:{ cls:'warn', t:()=>'Client CRS awaiting our reply', pick:s=>s.owed },
+  c2  :{ cls:'warn', t:()=>'Returned with comments — reply not sent', pick:s=>s.c2 },
   rej :{ cls:'dang', t:()=>'Rejected by the client — reply not sent', pick:s=>s.rej },
   done:{ cls:'ok',   t:()=>'Client CRS replied', pick:s=>s.done }
 };
