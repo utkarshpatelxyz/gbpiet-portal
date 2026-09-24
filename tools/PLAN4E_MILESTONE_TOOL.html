@@ -2073,29 +2073,29 @@ body[data-dark] #alBody tr.al-sub td{background:#101822}
    no word for, and it needs a shape of its own.
    ════════════════════════════════════════════════════════════════════════ */
 
-/* the project and department, which this export fixes and nobody picks */
-.p6-fixed{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:9px 12px;
-  border:1px solid var(--line);border-radius:6px;background:var(--sf2);
-  font-size:13px;font-weight:600;color:var(--ink)}
-.p6-fixed b{font-family:var(--mono);font-weight:700}
-.p6-fixed span{font-weight:400;color:var(--muted)}
+/* The project and department, which this export fixes and nobody picks.  It
+   is not a field, but it sits in the row of fields, so it is built out of the
+   same parts as the closed pickers beside it and differs only in being still. */
+.p6-fixed{display:flex;flex-wrap:wrap;align-items:center;gap:7px 9px;padding:9px 11px;
+  border:1px solid var(--line2);border-radius:9px;background:var(--sf2);
+  font-size:11.5px;font-weight:700;color:var(--navy)}
+.p6-fixed b{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--navy)}
+.p6-fixed span{font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.06em}
+.p6-fixed i{font-style:normal;color:var(--line2)}
 
-/* a small segmented control — the look-ahead, the curve's mode */
-.p6-ahead{display:inline-flex;align-items:center;gap:0;border:1px solid var(--line);
-  border-radius:6px;overflow:hidden;background:var(--sf)}
-.p6-ahead b{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-  color:var(--muted);padding:0 10px 0 11px;white-space:nowrap}
-.p6-ahead button{border:0;background:none;font-family:var(--font);font-size:12px;font-weight:600;
-  color:var(--muted);padding:6px 11px;cursor:pointer;border-left:1px solid var(--line);
-  transition:background .15s var(--ease),color .15s var(--ease)}
-.p6-ahead button:hover{background:var(--sf2);color:var(--ink)}
-.p6-ahead button.on{background:var(--blue);color:#fff}
+/* The look-ahead, and the curve's measure.  Both are the review tool's own
+   segmented control, untouched — only the label in front of it is new, or the
+   two tools would have two slightly different versions of the same switch. */
+.p6-ahead{display:inline-flex;align-items:center;flex:none}
+.p6-ahead b{font-size:10px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--muted);margin-right:9px;white-space:nowrap}
 
 /* ── the milestone chain ─────────────────────────────────────────────────
    Every document is the same short run of steps, so the run itself is the
    picture: one pill per milestone, read left to right, the state in the
    colour.  It is the row's status column and the document page's spine. */
-.mstrip{display:flex;align-items:center;gap:3px;flex-wrap:nowrap}
+.mstrip{display:flex;align-items:center;gap:3px;flex-wrap:wrap;row-gap:4px}
 .ms-pill{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 7px;border-radius:3px;
   font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.02em;white-space:nowrap;
   border:1px solid transparent;background:var(--sf2);color:var(--muted)}
@@ -2216,6 +2216,36 @@ body[data-dark] .ms-pill.due{color:#EABE76}
 .cp-new{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.06em;color:#fff;
   background:var(--blue);border-radius:3px;padding:1px 5px}
 
+
+/* ── the heading of a group carries the control that governs it ───────── */
+.lp-grp-h{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.lp-grp-h .fill{flex:1}
+
+/* ── reading the curve ───────────────────────────────────────────────────
+   A chart that cannot be questioned is a picture.  The pointer puts a line
+   through the month under it, marks the three values on it, and the panel
+   below says what they are — so the gap between plan and actual can be read
+   at any month, not only guessed at from the shape. */
+.cv-host .hair{stroke:var(--ink2);stroke-width:1;stroke-dasharray:3 3;opacity:.55}
+.cv-host .hit{fill:transparent;cursor:crosshair}
+.cv-read{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin-top:10px;
+  padding:10px 14px;border:1px solid var(--line);border-radius:9px;background:var(--sf2);
+  min-height:42px;font-size:12px;color:var(--ink)}
+.cv-read .mo{font-weight:800;color:var(--navy);min-width:74px}
+.cv-read .it{display:inline-flex;align-items:center;gap:7px;font-weight:600;color:var(--ink2)}
+.cv-read .it i{width:10px;height:10px;border-radius:2px;flex:none}
+.cv-read .it b{font-family:var(--mono);font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.cv-read .gap{margin-left:auto;font-weight:700}
+.cv-read .gap.behind{color:var(--dang)}
+.cv-read .gap.ahead{color:var(--ok)}
+.cv-read .idle{color:var(--muted);font-weight:600}
+
+/* the hero's figure says what kind of number it is */
+.ac-hero-v.dang{color:var(--dang)}
+.ac-hero-v.warn{color:var(--warn)}
+.ac-hero-v.ok{color:var(--ok)}
+.ac-hero-v.blue{color:var(--blue)}
+
 </style>
 </head>
 <body>
@@ -2327,6 +2357,7 @@ body[data-dark] .ms-pill.due{color:#EABE76}
       <div class="fld">
         <label>Project and department</label>
         <div class="p6-fixed" id="fxScope">—</div>
+        <div class="hint" id="fx-hint2"></div>
         <div class="hint" id="fx-hint"></div>
       </div>
       <div class="fld">
@@ -2365,7 +2396,6 @@ body[data-dark] .ms-pill.due{color:#EABE76}
         <button data-r="mgr" type="button">I am managing</button>
       </div>
       <div class="fill"></div>
-      <div class="p6-ahead" id="lpAhead" role="group" aria-label="How far ahead to look"></div>
       <button class="btn btn-g btn-s" onclick="go('filter')">Change scope</button>
       <button class="btn btn-g btn-s" onclick="resetAll()">Load another file</button>
     </div>
@@ -2384,9 +2414,11 @@ body[data-dark] .ms-pill.due{color:#EABE76}
     <div class="pb-sp"></div>
     <div class="pb-scope" id="mlScope"></div>
   </div>
-  <div class="wk-head" id="mlSum"></div>
-  <div class="dt-wrap" style="border-radius:4px;border:1px solid var(--line2);margin-top:14px">
+  <div class="ac-hero" id="mlHero"></div>
+  <div class="ac-sum" id="mlSum"></div>
+  <div class="dt-wrap" style="border-radius:14px;border:1px solid var(--line)">
     <div class="ac-tools">
+      <span class="lbl">Filter</span>
       <input class="wk-q" id="mlQ" placeholder="Search this list"
              autocomplete="off" spellcheck="false" aria-label="Search this list">
       <button class="chip" id="mlLate">Overdue only</button>
@@ -2483,6 +2515,7 @@ body[data-dark] .ms-pill.due{color:#EABE76}
       <div class="p6-ahead" id="cvMode" role="group" aria-label="What the curve counts"></div>
     </div>
     <div class="cv-host" id="cvHost"></div>
+    <div class="cv-read" id="cvRead"></div>
     <div class="cb-note" id="cvNote" style="margin-top:12px"></div>
   </div>
   <div class="card" style="margin-top:14px;padding:0">
@@ -3455,8 +3488,9 @@ async function parseBook(bytes){
   lbStep(4,100,'Ready.');
   buildScope();
   $('navinfo').style.display='';
-  $('navinfo').innerHTML=`<span class="pl">Project</span><b>${esc(P.meta.project||'—')}</b>`+
-    `<span class="pl">Cut-off</span><b>${esc(fmt(P.asOf)||P.meta.asOf||'—')}</b>`;
+  $('navinfo').innerHTML=`<div><div class="k">Project</div><div class="pn">${esc(P.meta.project||'—')}</div></div>
+    <span class="bar"></span>
+    <div><div class="k">Plan as of</div><div class="pd">${esc(P.meta.asOf||fmt(P.asOf)||'—')}</div></div>`;
   setTimeout(()=>{ lbHide(); go('filter'); }, 120);
   return true;
 }
@@ -3526,22 +3560,23 @@ const whoOf = d => (P.eng.doc||{})[d.key] || '';
 /* ═══ THE SCOPE ═════════════════════════════════════════════════════════ */
 const SCOPES=[
   {id:'sel-unit',    key:'unit',    hint:'unit-hint',    ph:'All units',    get:d=>d.unit,
-   sub:d=>d.clientUnit, label:'unit'},
+   sub:d=>d.clientUnit, one:'unit',    many:'units'},
   {id:'sel-area',    key:'area',    hint:'area-hint',    ph:'All areas',    get:d=>d.area||'(none)',
-   sub:()=>'',       label:'area'},
+   sub:()=>'',       one:'area',      many:'areas'},
   {id:'sel-fam',     key:'fam',     hint:'fam-hint',     ph:'All families', get:d=>d.family,
-   sub:d=>d.eom,     label:'family'},
+   sub:d=>d.eom,     one:'family',    many:'families'},
   {id:'sel-partner', key:'partner', hint:'partner-hint', ph:'All partners', get:d=>d.partner||'(none)',
-   sub:()=>'',       label:'partner'}
+   sub:()=>'',       one:'partner',   many:'partners'}
 ];
 function buildScope(){
   $('fxScope').innerHTML=
-    `<b>${esc(P.meta.project||'—')}</b><span>project</span>`+
-    `<b>${esc(P.meta.dept||'—')}</b><span>department</span>`+
-    `<b>${esc(fmt(P.asOf)||'—')}</b><span>cut-off</span>`+
-    (P.meta.revision?`<b>${esc(P.meta.revision)}</b><span>revision</span>`:'');
+    `<span>Project</span><b>${esc(P.meta.project||'—')}</b><i>|</i>`+
+    `<span>Department</span><b>${esc(P.meta.dept||'—')}</b><i>|</i>`+
+    `<span>Cut-off</span><b>${esc(fmt(P.asOf)||'—')}</b>`+
+    (P.meta.revision?`<i>|</i><span>Revision</span><b>${esc(P.meta.revision)}</b>`:'');
   $('fx-hint').textContent=P.all.length.toLocaleString()+' documents · '+
     P.all.reduce((n,d)=>n+d.ms.length,0).toLocaleString()+' milestones in the export.';
+  $('fx-hint2').textContent='Read from the first five lines of the export — this tool does not change them.';
 
   SCOPES.forEach(s=>{
     const cnt={}, sub={};
@@ -3552,7 +3587,7 @@ function buildScope(){
     dropdown($(s.id),{ placeholder:s.ph, multi:true, selected:P.inc[s.key],
       options:list.map(v=>({v, t:v, s:sub[v]||'', n:cnt[v]})),
       onChange:set=>{ P.inc[s.key]=set; scopeHints(); } });
-    $(s.hint).textContent=list.length+' '+s.label+(list.length===1?'':'s')+' in the export.';
+    $(s.hint).textContent=list.length+' '+(list.length===1?s.one:s.many)+' in the export.';
   });
   scopeHints();
 }
@@ -3566,9 +3601,9 @@ function scopeHints(){
   $('btn-build').disabled = !n;
   SCOPES.forEach(s=>{
     const all=new Set(P.all.map(d=>s.get(d)||'(none)')).size, on=P.inc[s.key].size;
-    $(s.hint).textContent = on>=all
-      ? all+' '+s.label+(all===1?'':'s')+' — all of them.'
-      : on+' of '+all+' '+s.label+(all===1?'':'s')+' chosen.';
+    const word = all===1 ? s.one : s.many;
+    $(s.hint).textContent = on>=all ? all+' '+word+' — all of them.'
+                                    : on+' of '+all+' '+word+' chosen.';
   });
   $('btn-build').textContent = n ? 'Open the plan — '+n.toLocaleString()+' documents →'
                                  : 'Nothing in this scope';
@@ -3731,7 +3766,7 @@ function homeApps(){
     {g:'act', id:'mOpen', ic:ICO.open, n:open.length,
      t:'Everything still open', d:'Every milestone not yet met', open:()=>openList('open')},
     {g:'act', id:'mSeed', ic:ICO.seed, n:ns.length,
-     t:'Not started', d:'No milestone met on the document', open:()=>openList('nostart')},
+     t:'Not started', d:'Nothing met on the document', open:()=>openList('nostart')},
 
     {g:'cli', id:'mAwc',  ic:ICO.awc,  n:awc.length,
      t:'Returned with comments', d:'Client code AWC', open:()=>openList('awc')},
@@ -3754,6 +3789,12 @@ function homeApps(){
      t:'What has moved', d:'Against an earlier export', open:()=>openCompare()}
   ];
 }
+/* the same control wherever the window is asked about */
+function aheadHTML(){
+  return '<div class="p6-ahead"><b>Look ahead</b><div class="seg2">'+AHEADS.map(n=>
+    `<button type="button" class="${n===P.ahead?'on':''}" onclick="event.stopPropagation();setAhead(${n})">${n} days</button>`
+  ).join('')+'</div></div>';
+}
 function setRole(r){ ROLE = r==='mgr' ? 'mgr' : 'del'; renderHome(); }
 function setAhead(n){
   P.ahead=n; try{ localStorage.setItem(AHEAD_KEY, String(n)); }catch(e){}
@@ -3768,9 +3809,6 @@ function renderHome(){
     b.classList.toggle('on', b.dataset.r===ROLE);
     b.onclick=()=>setRole(b.dataset.r);
   });
-  $('lpAhead').innerHTML='<b>Look ahead</b>'+AHEADS.map(n=>
-    `<button type="button" class="${n===P.ahead?'on':''}" onclick="setAhead(${n})">${n}d</button>`).join('');
-
   const pp=planPct();
   $('lpScope').innerHTML=[
     `<b>${esc(P.meta.project||'')}</b>`, esc(P.meta.dept||''),
@@ -3783,8 +3821,11 @@ function renderHome(){
   const apps=homeApps();
   $('lpGroups').innerHTML=LP_ORDER[ROLE].map(gk=>{
     const list=apps.filter(a=>a.g===gk); if(!list.length) return '';
+    /* the look-ahead governs three of the tiles under this one heading, so
+       it sits on that heading rather than up in the page's own bar */
+    const ctl = gk==='act' ? `<div class="fill"></div>${aheadHTML()}` : '';
     return `<section class="lp-grp">
-      <div class="lp-grp-h"><h2>${esc(LP_GROUPS[gk])}</h2></div>
+      <div class="lp-grp-h"><h2>${esc(LP_GROUPS[gk])}</h2>${ctl}</div>
       <div class="lp-tiles in">${list.map(tileHTML).join('')}</div>
     </section>`;
   }).join('');
@@ -3818,8 +3859,8 @@ const ML_COLS=[
   {k:'doc',  t:'Document',   w:'auto',   v:m=>m.d.drawing},
   {k:'fam',  t:'Family',     w:'96px',   v:m=>m.d.family},
   {k:'unit', t:'Unit',       w:'112px',  v:m=>m.d.unit},
-  {k:'ms',   t:'Milestone',  w:'110px',  v:m=>MS_ORDER.indexOf(m.code)},
-  {k:'chain',t:'The chain',  w:'188px',  v:m=>m.d.pct, desc:true},
+  {k:'ms',   t:'Milestone',  w:'104px',  v:m=>MS_ORDER.indexOf(m.code)},
+  {k:'chain',t:'The chain',  w:'216px',  v:m=>m.d.pct, desc:true},
   {k:'plan', t:'Planned',    w:'108px',  v:m=>m.planned?m.planned.getTime():0, desc:true},
   {k:'fcst', t:'Forecast',   w:'108px',  v:m=>m.forecast?m.forecast.getTime():0, desc:true},
   {k:'days', t:'Days',       w:'84px',   v:m=>m.done?-1e9:(m.over!=null?m.over:-(m.left||0)), desc:true, right:true},
@@ -3827,8 +3868,35 @@ const ML_COLS=[
   {k:'who',  t:'Engineer',   w:'168px',  v:m=>whoOf(m.d)},
   {k:'open', t:'',           w:'62px',   v:null}
 ];
-function openList(mode, extra){
+/* Opening a list from a bar takes that bar with it: the segment the reader
+   pressed grows into the list's own hero bar, so the new page is visibly the
+   inside of the thing they just pointed at rather than a page that replaced
+   it.  The same move the review tool makes out of its overview. */
+function flyBar(src, run){
+  if(!src || REDUCED()){ run(); return; }
+  const r=src.getBoundingClientRect();
+  run();
+  const t=document.querySelector('#mlHero .sbar');
+  if(!t) return;
+  const tr=t.getBoundingClientRect();
+  if(!tr.width || !r.width) return;
+  const dx=r.left-tr.left, dy=r.top-tr.top;
+  const sx=r.width/(tr.width||1), sy=r.height/(tr.height||1);
+  t.style.transformOrigin='top left';
+  t.style.transition='none';
+  t.style.transform=`translate(${dx}px,${dy}px) scale(${sx},${sy})`;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    t.style.transition='transform .5s cubic-bezier(.32,.72,.35,1)';
+    t.style.transform='none';
+    setTimeout(()=>{ t.style.transition=''; t.style.transformOrigin=''; }, 540);
+  }));
+}
+window.flyBar=flyBar;
+
+function openList(mode, extra, ev){
   if(!P.docs || !P.docs.length) return alert('Open a plan first.');
+  const src = ev && ev.currentTarget && ev.currentTarget.tagName==='I' ? ev.currentTarget : null;
+  if(src) return flyBar(src, ()=>openList(mode, extra));
   ML.mode = ML_MODES[mode] ? mode : 'late';
   extra=extra||{};
   ML.who=extra.who==null?null:extra.who; ML.code=extra.code||null;
@@ -3908,6 +3976,29 @@ function renderList(){
   const lateN=all.filter(m=>m.state==='late').length;
   const worst=all.reduce((n,m)=>Math.max(n, m.over||0), 0);
   const hrs=sumHours(all, ML.mode==='done'?'earned':'budget');
+
+  /* the hero: this list as a share of the whole plan, in the bar the reader
+     pressed to get here */
+  const sp=stateSplit(P.ms), tot=P.ms.length||1;
+  const share=Math.round(all.length/tot*100);
+  /* green means good; a list of what is late is not good, so the figure takes
+     the colour of the thing it counts rather than the colour of progress */
+  const heroCls = M.cls==='dang' ? 'dang' : M.cls==='warn' ? 'warn' : M.cls==='ok' ? 'ok' : 'blue';
+  const hero={
+    title:M.t(), sub:extra.length? extra.join(' · ')
+      : all.length.toLocaleString()+' of the '+tot.toLocaleString()+' milestones in this scope',
+    pct:share, v:all.length, tot:tot
+  };
+  $('mlHero').innerHTML=`
+    <div class="ac-hero-h">
+      <div class="ac-hero-t">${esc(hero.title)}<small>${esc(hero.sub)}</small></div>
+      <div class="ac-hero-v ${heroCls}">${hero.pct}%<small>${hero.v.toLocaleString()} of ${hero.tot.toLocaleString()} milestones</small></div>
+    </div>
+    <div class="sbar">${[
+      ['done',sp.done],['late',sp.late],['due',sp.due],['open',sp.open],['none',sp.none]
+    ].map(([k,v])=>v?`<i style="width:${v/tot*100}%;background:${ST[k].col}${
+      k===(ML.mode==='late'?'late':(ML.mode==='due'?'due':(ML.mode==='done'?'done':'')))?'' : ';opacity:.32'}"
+      title="${esc(ST[k].t)}: ${v.toLocaleString()}"></i>`:'').join('')}</div>`;
   $('mlSum').innerHTML=[
     [M.cls, all.length, ML.mode==='done'?'milestones met':'milestones on this list'],
     ['', docsN, 'documents they belong to'],
@@ -4077,6 +4168,7 @@ function renderOver(){
   $('ovDw1').innerHTML=`<svg viewBox="0 0 220 220" width="220" height="220" role="img">${donutSVG(live,220,.56)}</svg>
     <div class="donut-ctr"><div class="v">${tot1.toLocaleString()}</div><div class="l">milestones</div></div>`;
   wireDonut('ovDw1', tot1.toLocaleString(), 'milestones');
+  countUp($('ovDw1').querySelector('.donut-ctr .v'), tot1);
   $('ovDw1').querySelectorAll('.sl').forEach((el,i)=>{ const p=live[i];
     if(p) { el.style.cursor='pointer'; el.addEventListener('click',()=>openState(p.key)); } });
   $('ovEx1').innerHTML=`<b>${sp.done.toLocaleString()}</b> of <b>${ms.toLocaleString()}</b> milestones met`+
@@ -4085,7 +4177,7 @@ function renderOver(){
     <div class="m ${p.key==='late'?'dang':(p.key==='done'?'ok':(p.key==='due'?'warn':''))}"
          ${p.value?`role="button" tabindex="0" style="cursor:pointer" onclick="openState('${p.key}')"`:''}>
       <div class="n">${p.value.toLocaleString()}</div><div class="l">${esc(p.label)}</div></div>`).join('');
-  $('ovPb1').innerHTML=sbarHTML('Milestones', sp.done+' met', parts, ms);
+  $('ovPb1').innerHTML=sbarHTML('Milestones', sp.done+' met', parts, ms, true);
   $('ovCard1').classList.toggle('open', OV.open[1]);
   $('ovBt1').innerHTML = OV.open[1] ? groupRows('family', d=>d.family) : '';
 
@@ -4097,6 +4189,7 @@ function renderOver(){
       donutSVG(hp.map(p=>({...p,unit:'hours'})),220,.56)}</svg>
     <div class="donut-ctr"><div class="v">${pp.pct}%</div><div class="l">earned</div></div>`;
   wireDonut('ovDw2', pp.pct+'%', 'earned');
+  countUp($('ovDw2').querySelector('.donut-ctr .v'), pp.pct, '%');
   $('ovEx2').innerHTML=`<b>${Math.round(pp.earned).toLocaleString()}</b> of
     <b>${Math.round(pp.budget).toLocaleString()}</b> hours earned — <b>${pp.pct}%</b> of the plan by weight.`;
   const docsDone=P.docs.filter(d=>d.state==='done').length;
@@ -4107,6 +4200,7 @@ function renderOver(){
     ['warn', slipMs().length.toLocaleString(), 'forecasts past the plan']
   ].map(([c,n,l])=>`<div class="m ${c}"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('');
   $('ovPb2').innerHTML=sbarHTML('Hours', pp.pct+'%', hp, pp.budget||1);
+  countUp($('ovPb2').querySelector('.pblock-h .v'), pp.pct, '%');
   $('ovCard2').classList.toggle('open', OV.open[2]);
   $('ovBt2').innerHTML = OV.open[2] ? groupRows('unit', d=>d.unit) : '';
 
@@ -4118,21 +4212,21 @@ function renderOver(){
     'Each milestone carries a weight and a budget of hours. What has been met is what has been '+
     'earned, so this figure is the same one the schedule reports.');
 }
-function sbarHTML(title, right, parts, total){
+function sbarHTML(title, right, parts, total, live){
   const t=total||1;
   return `<div class="pblock-h"><span class="t">${esc(title)}</span><span class="v">${esc(right)}</span></div>
-    <div class="sbar">${parts.map(p=>p.value?`<i style="width:${p.value/t*100}%;background:${p.col}"
-      title="${esc(p.label)}: ${p.value.toLocaleString()}"></i>`:'').join('')}</div>
+    <div class="sbar${live?' live':''}">${parts.map(p=>p.value?`<i style="width:${p.value/t*100}%;background:${p.col}"
+      title="${esc(p.label)}: ${p.value.toLocaleString()}${live?' — click to list them':''}"${
+      live?` onclick="event.stopPropagation();openState('${p.key}',event)"`:''}></i>`:'').join('')}</div>
     <div class="sbar-lab">${parts.filter(p=>p.value).map(p=>
       `<span class="li"><i class="dot" style="background:${p.col}"></i>${esc(p.label)} <b>${p.value.toLocaleString()}</b></span>`).join('')}</div>`;
 }
-/* a slice of the donut opens the milestones behind it */
-function openState(k){
-  if(k==='done') return openList('done');
-  if(k==='late') return openList('late');
-  if(k==='due')  return openList('due');
-  if(k==='none') return openList('nodate');
-  openList('open', {state:'open'});
+/* a slice of the donut, or a segment of the bar, opens what is behind it */
+function openState(k, ev){
+  const mode = k==='done' ? 'done' : k==='late' ? 'late' : k==='due' ? 'due'
+             : k==='none' ? 'nodate' : 'open';
+  const extra = mode==='open' ? {state:'open'} : undefined;
+  openList(mode, extra, ev);
 }
 window.openState=openState;
 
@@ -4145,15 +4239,23 @@ function groupRows(what, keyFn){
     e.bud+=m.budget; e.earn+=m.earned; });
   const list=Object.values(by).sort((a,b)=>b.n-a.n);
   return `<div class="bt-h">By ${esc(what)}</div>`+list.map(e=>{
-    const p=e.bud? Math.round(e.earn/e.bud*100) : Math.round(e.done/e.n*100);
+    /* the figure is the bar's own figure.  Reading it off the hours instead
+       put 100% beside a bar with red in it, because the milestones still open
+       on that unit happen to carry no budget. */
+    const p=Math.round(e.done/e.n*100);
+    const key=esc(e.k).replace(/'/g,"\\'"), fld=what==='family'?'fam':'unit';
     return `<div class="trow wide" role="button" tabindex="0" style="cursor:pointer"
-       onclick="openList('open',{${what==='family'?'fam':'unit'}:'${esc(e.k).replace(/'/g,"\\'")}'})">
+       onclick="openList('open',{${fld}:'${key}'})">
       <div class="tc"><div class="c1 nm">${esc(e.k)}</div>
-        <div class="c2">${e.n.toLocaleString()} milestones · ${e.late} overdue</div></div>
-      <div class="sbar" style="height:14px">
-        <i style="width:${e.done/e.n*100}%;background:${ST.done.col}"></i>
-        <i style="width:${e.late/e.n*100}%;background:${ST.late.col}"></i>
-        <i style="width:${e.due/e.n*100}%;background:${ST.due.col}"></i></div>
+        <div class="c2">${e.n.toLocaleString()} milestone${e.n===1?'':'s'} · ${e.late} overdue · ${
+          Math.round(e.earn).toLocaleString()} of ${Math.round(e.bud).toLocaleString()} h</div></div>
+      <div class="sbar live" style="height:14px">
+        <i style="width:${e.done/e.n*100}%;background:${ST.done.col}"
+           title="Met: ${e.done}" onclick="event.stopPropagation();openList('done',{${fld}:'${key}'},event)"></i>
+        <i style="width:${e.late/e.n*100}%;background:${ST.late.col}"
+           title="Overdue: ${e.late}" onclick="event.stopPropagation();openList('late',{${fld}:'${key}'},event)"></i>
+        <i style="width:${e.due/e.n*100}%;background:${ST.due.col}"
+           title="Due soon: ${e.due}" onclick="event.stopPropagation();openList('due',{${fld}:'${key}'},event)"></i></div>
       <div class="pv ${p?'':'zero'}">${p}%</div>
     </div>`;
   }).join('');
@@ -4240,7 +4342,47 @@ function drawCurve(host, cv){
     <path class="ln" d="${path('real')}" stroke="#2E9E6B"/>
     ${cutI>=0?`<line class="now" x1="${x(cutI).toFixed(1)}" y1="${T}" x2="${x(cutI).toFixed(1)}" y2="${T+ih}"/>
       <text class="nowl" x="${(x(cutI)+6).toFixed(1)}" y="${T+11}">cut-off</text>`:''}
+    <line class="hair" id="cvHair" x1="0" y1="${T}" x2="0" y2="${T+ih}" style="display:none"/>
+    <circle class="cv-dot" id="cvD0" fill="#8895A5" style="display:none"/>
+    <circle class="cv-dot" id="cvD1" fill="#D9922E" style="display:none"/>
+    <circle class="cv-dot" id="cvD2" fill="#2E9E6B" style="display:none"/>
+    <rect class="hit" id="cvHit" x="${L}" y="${T}" width="${iw}" height="${ih}"/>
   </svg>`;
+
+  /* reading it: the month under the pointer, its three values, and the gap
+     between what was planned and what was earned */
+  const svg=host.querySelector('svg'), hit=host.querySelector('#cvHit');
+  const hair=host.querySelector('#cvHair');
+  const dots=[host.querySelector('#cvD0'),host.querySelector('#cvD1'),host.querySelector('#cvD2')];
+  const read=$('cvRead');
+  const idle=()=>{ hair.style.display='none'; dots.forEach(d=>d.style.display='none');
+    read.innerHTML='<span class="idle">Move the pointer across the chart to read any month.</span>'; };
+  idle();
+  const at=e=>{
+    const r=svg.getBoundingClientRect();
+    const px=(e.clientX-r.left)/r.width*W;
+    let i=Math.round((px-L)/(iw/Math.max(1,n-1)));
+    i=Math.max(0, Math.min(n-1, i));
+    const p=cv.pts[i], X=x(i);
+    hair.setAttribute('x1',X); hair.setAttribute('x2',X); hair.style.display='';
+    [['plan',0],['fcst',1],['real',2]].forEach(([k,j])=>{
+      const v=p[k];
+      if(v==null){ dots[j].style.display='none'; return; }
+      dots[j].setAttribute('cx',X); dots[j].setAttribute('cy',y(v)); dots[j].style.display='';
+    });
+    const u=CV.mode==='hours'?' h':'';
+    const gap=(p.real==null)? null : Math.round(p.plan-p.real);
+    read.innerHTML=`<span class="mo">${p.label}</span>`+
+      `<span class="it"><i style="background:#8895A5"></i>Planned <b>${Math.round(p.plan).toLocaleString()}${u}</b></span>`+
+      `<span class="it"><i style="background:#D9922E"></i>Forecast <b>${Math.round(p.fcst).toLocaleString()}${u}</b></span>`+
+      `<span class="it"><i style="background:#2E9E6B"></i>Actual <b>${p.real==null?'—':Math.round(p.real).toLocaleString()+u}</b></span>`+
+      `<span class="it">this month <b>${Math.round(p.mReal).toLocaleString()}${u}</b> met of <b>${Math.round(p.mPlan).toLocaleString()}${u}</b> planned</span>`+
+      (gap==null? '' : `<span class="gap ${gap>0?'behind':'ahead'}">${gap>0? Math.round(gap).toLocaleString()+u+' behind the plan'
+        : (gap<0? Math.round(-gap).toLocaleString()+u+' ahead of the plan' : 'exactly on the plan')}</span>`);
+  };
+  hit.addEventListener('mousemove', at);
+  hit.addEventListener('mouseleave', idle);
+  hit.addEventListener('click', at);
 }
 function renderCurve(){
   $('cvScope').innerHTML=scopeLine();
