@@ -32,7 +32,20 @@ def rd(p):
     return open(p, encoding='utf-8').read()
 
 html = rd(MAIN)
-src = {n: rd(os.path.join(SRC, n)) for n in os.listdir(SRC)}
+src = {n: rd(os.path.join(SRC, n)) for n in os.listdir(SRC) if not n.endswith('.jpg')}
+
+# ── the author's profile, and the signature the suite checks it against ──
+AUTHOR = ['Utkarsh Patel', 'linkedin.com/in/utkarshpatelin', 'https://www.linkedin.com/in/utkarshpatelin',
+          'utkarshpatel.in@gmail.com', 'mailto:utkarshpatel.in@gmail.com']
+def fnv(sv):
+    h = 0x811c9dc5
+    for ch in sv:
+        h ^= ord(ch); h = (h * 0x01000193) & 0xffffffff
+    return h
+PHOTO = 'data:image/jpeg;base64,' + base64.b64encode(open(os.path.join(SRC, 'profile.jpg'), 'rb').read()).decode('ascii')
+src['launchpad.html'] = src['launchpad.html'].replace('__PROFILE_IMG__', PHOTO)
+src['suite.js'] = src['suite.js'].replace('__AUTHOR_SIG__', str(fnv('|'.join(AUTHOR))))
+assert '__PROFILE_IMG__' not in src['launchpad.html'] and '__AUTHOR_SIG__' not in src['suite.js']
 
 def once(old, new, label):
     global html

@@ -1,4 +1,35 @@
   <script>
+  /* ── Authorship ───────────────────────────────────────────────────────
+     The suite is signed with its author's profile (the card behind the
+     profile button).  The launchpad and the app host read the name, the
+     LinkedIn address and the email from that card, and run only while they
+     match the signature written into this file at build time. */
+  (function () {
+    var SIG = __AUTHOR_SIG__;
+    function fnv(str) {
+      var h = 0x811c9dc5;
+      for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+      return h >>> 0;
+    }
+    function read() {
+      var card = document.getElementById('mrd-pf-card');
+      var btn = document.getElementById('mrd-pf-btn');
+      if (!card || !btn) return null;
+      var q = function (s) { return card.querySelector(s); };
+      var name = q('.mrd-pf-name'), li = q('.mrd-pf-li'), mail = q('.mrd-pf-mail'), img = q('.mrd-pf-img');
+      if (!name || !li || !mail || !img) return null;
+      if (!/^data:image\/jpeg;base64,/.test(img.getAttribute('src') || '') || img.getAttribute('src').length < 4000) return null;
+      return [name.textContent.trim(), li.textContent.trim(), li.getAttribute('href'),
+              mail.textContent.trim(), mail.getAttribute('href')].join('|');
+    }
+    window.mrdAuthorOk = function () {
+      var r = read();
+      return r !== null && fnv(r) === SIG;
+    };
+  })();
+  </script>
+
+  <script>
   /* ── The browser tab: the MERIDIAM mark, and a spinner while loading ──
      The icon is a navy tile with a white M.  While the suite opens, or an
      app loads, a ring turns around the M and the tab title carries a small
@@ -95,6 +126,7 @@
       empty.querySelector('b').textContent = q.value.trim();
     }
     function replay() {
+      if (!window.mrdAuthorOk()) { lp.classList.add('mlp-off'); return; }
       lp.querySelectorAll('.mlp-tiles').forEach(function (el, gi) {
         el.classList.remove('in'); void el.offsetWidth;
         [].forEach.call(el.children, function (t, i) { t.style.animationDelay = (gi * 90 + i * 45) + 'ms'; });
@@ -134,7 +166,8 @@
       },
       project: function () { openModule('project'); }
     };
-    window.mlpOpen = function (key) { if (OPEN[key]) OPEN[key](); };
+    window.mlpOpen = function (key) { if (window.mrdAuthorOk() && OPEN[key]) OPEN[key](); };
+    lp.classList.toggle('mlp-off', !window.mrdAuthorOk());
     tiles.forEach(function (t) {
       t.addEventListener('click', function () {
         hideTip();

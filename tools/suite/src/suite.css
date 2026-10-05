@@ -53,6 +53,28 @@
 
   .mlp-page{padding:0 48px 110px;max-width:1520px}
 
+  /* the profile, beside the search: in place, locked until it is switched on */
+  .mrd-pf{position:relative;flex:none}
+  .mrd-pf-btn{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;padding:0;
+    border:1px solid var(--mlp-line);background:#F7F8FA;color:var(--mlp-muted);cursor:pointer;
+    transition:background .14s,color .14s,border-color .14s}
+  .mrd-pf-btn:not(:disabled):hover{background:#EBF2FA;color:var(--mlp-blue);border-color:#B9D2EC}
+  .mrd-pf-btn:disabled{cursor:default}
+  .mrd-pf-card{position:absolute;right:0;top:44px;z-index:20;width:290px;padding:18px;border-radius:12px;
+    background:#fff;border:1px solid rgba(11,37,69,.10);box-shadow:0 18px 50px rgba(11,37,69,.24);
+    display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px}
+  .mrd-pf-card[hidden]{display:none}
+  .mrd-pf-img{width:72px;height:72px;border-radius:50%;object-fit:cover;margin-bottom:8px;
+    box-shadow:0 0 0 3px #fff,0 0 0 4px var(--mlp-line)}
+  .mrd-pf-k{font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#8A95A3}
+  .mrd-pf-name{font-size:16px;font-weight:700;color:var(--mlp-ink);margin-bottom:10px}
+  .mrd-pf-li,.mrd-pf-mail{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+    padding:8px 10px;margin-top:6px;border-radius:8px;border:1px solid var(--mlp-line);background:#fff;
+    font-size:12.5px;font-weight:600;color:#0B2545;text-decoration:none;transition:background .14s,border-color .14s}
+  .mrd-pf-li:hover,.mrd-pf-mail:hover{background:#EBF2FA;border-color:#B9D2EC}
+  .mrd-pf-mail svg{color:#0A6ED1;flex:none}
+  .mlp.mlp-off .mlp-grp,.mlp.mlp-off .mlp-scope,.mlp.mlp-off .mlp-bar{display:none}
+
   /* the page tabs, the way the tools carry them */
   .mlp-bar{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-top:12px;
     border-bottom:1px solid var(--mlp-line2)}
@@ -184,6 +206,8 @@
     font-family:'Montserrat','Segoe UI',Arial,sans-serif !important;font-weight:800;font-size:21px;
     letter-spacing:.07em;line-height:1;color:#0B2545;white-space:nowrap}
   .mlp-shell .mrd-wordmark, #mrd-app-topbar .mrd-wordmark{font-size:19px}
+
+  #mrd-app-host #mrd-app-frame{background:#EDF2F7}
 
   /* ── the way out of the Engineering Review Tool ───────────────────────── */
   #mrd-ert-allapps{position:fixed;top:10px;right:20px;z-index:1001;display:inline-flex;align-items:center;

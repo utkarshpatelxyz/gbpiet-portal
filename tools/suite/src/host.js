@@ -67,9 +67,19 @@
        bar.  A mirrored control clicks the app's own one, so every function
        stays the app's; the bar re-reads the app's bar whenever it changes.
        The tank checklist keeps its header: it is a form, not a bar. */
+    /* The tools paint their blue page with background-attachment:fixed on
+       <body>.  Inside a frame Edge scrolls that background away with the page
+       and leaves white underneath, so here the same blue is a fixed layer of
+       its own — a positioned element, which every browser keeps in place. */
+    var STUDIO_BG =
+      'html:has(body[data-skin="studio"]:not([data-dark])){background:#EDF2F7}' +
+      'body[data-skin="studio"]:not([data-dark]){background:transparent!important}' +
+      'html:has(body[data-skin="studio"]:not([data-dark]))::before{content:"";position:fixed;inset:0;' +
+      'z-index:-10;pointer-events:none;' +
+      'background:linear-gradient(180deg,#C7D9EC 0%,#DAE5F0 34%,#E7EEF5 72%,#EDF2F7 100%)}';
     var HIDE = {
-      drm:    '.nav{display:none!important}',
-      p6:     '.nav{display:none!important}',
+      drm:    '.nav{display:none!important}' + STUDIO_BG,
+      p6:     '.nav{display:none!important}' + STUDIO_BG,
       ceyhan: '.nav{display:none!important}',
       asme:   ':root{--header-h:0px!important}.hdr,.mnav{display:none!important}'
     };
@@ -234,6 +244,7 @@
     };
 
     window.openModule = function (key) {
+      if (!window.mrdAuthorOk || !window.mrdAuthorOk()) return;
       var L = LANDINGS[key];
       if (L) {
         if (!state.open) setReturn();
@@ -265,6 +276,7 @@
     };
 
     window.openEmbeddedApp = function (appKey, title) {
+      if (!window.mrdAuthorOk || !window.mrdAuthorOk()) return;
       var apps = window.__MRD_APPS__ || {};
       var b64 = apps[appKey];
       if (!state.open) setReturn();
