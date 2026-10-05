@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MERIDIAM — Static Equipment Intelligence</title>
+  <link rel="icon" id="mrd-favicon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2312395C'/%3E%3Cstop offset='1' stop-color='%230B2545'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url%28%23g%29'/%3E%3Ctext x='32' y='45' text-anchor='middle' font-family='Montserrat,Segoe UI,Arial,sans-serif' font-weight='800' font-size='38' fill='%23fff'%3EM%3C/text%3E%3C/svg%3E">
   <title>Meridiam — Engineer Review Tool</title>
   <title>Meridiam</title>
   <style>
@@ -5502,7 +5503,9 @@ window.addEventListener('hashchange', function() {
         </button>
         <span class="mrd-app-sep"></span>
         <span class="mrd-app-name" id="mrd-app-name"></span>
+        <div class="mrd-bar-l" id="mrd-bar-l"></div>
       </div>
+      <div class="mrd-bar-r" id="mrd-bar-r"></div>
       <button type="button" id="mrd-app-back" onclick="closeEmbeddedApp()" title="Back to all apps">
         <svg class="i-grid" viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><rect x="3.5" y="3.5" width="4.4" height="4.4" rx="1"/><rect x="9.8" y="3.5" width="4.4" height="4.4" rx="1"/><rect x="16.1" y="3.5" width="4.4" height="4.4" rx="1"/><rect x="3.5" y="9.8" width="4.4" height="4.4" rx="1"/><rect x="9.8" y="9.8" width="4.4" height="4.4" rx="1"/><rect x="16.1" y="9.8" width="4.4" height="4.4" rx="1"/><rect x="3.5" y="16.1" width="4.4" height="4.4" rx="1"/><rect x="9.8" y="16.1" width="4.4" height="4.4" rx="1"/><rect x="16.1" y="16.1" width="4.4" height="4.4" rx="1"/></svg>
         <svg class="i-back" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
@@ -5705,10 +5708,12 @@ window.addEventListener('hashchange', function() {
       splash.classList.remove('open', 'closing');
       void splash.offsetWidth;              // force reflow
       splash.classList.add('open');
+      if (window.mrdTabBusy) window.mrdTabBusy(true, name, 'splash');
       splashT1 = setTimeout(function () {
         splash.classList.add('closing');
         splashT2 = setTimeout(function () {
           splash.classList.remove('open', 'closing');
+          if (window.mrdTabBusy) window.mrdTabBusy(false, '', 'splash');
         }, 480);
       }, 1650);
     };
@@ -5729,7 +5734,124 @@ window.addEventListener('hashchange', function() {
        <head>, so a link such as "#/library" stays inside the app instead of
        resolving against this file.  The app's own bytes are untouched. */
     var BASE = '<base href="about:srcdoc">';
-    function appHTML(b64) {
+
+    /* ── One bar, not two ─────────────────────────────────────────────────
+       Each app's own top bar is hidden inside its frame, and what it carried
+       — the crumbs, the way home, the project chip, the settings gear, the
+       ASME lab's sections, search and theme — is mirrored into the MERIDIAM
+       bar.  A mirrored control clicks the app's own one, so every function
+       stays the app's; the bar re-reads the app's bar whenever it changes.
+       The tank checklist keeps its header: it is a form, not a bar. */
+    var HIDE = {
+      drm:    '.nav{display:none!important}',
+      p6:     '.nav{display:none!important}',
+      ceyhan: '.nav{display:none!important}',
+      asme:   ':root{--header-h:0px!important}.hdr,.mnav{display:none!important}'
+    };
+    var SHORT = { asme: 'ASME VIII-1 Visualiser' };
+    var HOME_SVG = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.4 10.6 12 3.6l8.6 7"/><path d="M5.6 9.4V20h12.8V9.4"/></svg>';
+    function txt(e) { return ((e && e.textContent) || '').replace(/\s+/g, ' ').trim(); }
+    function shown(e) { return !!e && e.style.display !== 'none' && !!e.innerHTML.trim(); }
+    function toolBar(d) {                       // Document Review and P6 PLAN4E
+      var L = [], R = [];
+      var home = d.getElementById('btn-home');
+      var cr = d.getElementById('crumbs');
+      /* the crumbs often start with Home already; then the button would say it twice */
+      var homeCrumb = cr && cr.firstElementChild && txt(cr.firstElementChild) === 'Home';
+      if (home && home.classList.contains('on') && !homeCrumb) L.push({ t: 'btn', html: HOME_SVG + '<span>Home</span>', el: home, title: home.title });
+      if (cr) [].forEach.call(cr.children, function (c) {
+        if (c.classList.contains('s')) L.push({ t: 'sep', text: txt(c) || '/' });
+        else L.push({ t: 'crumb', text: txt(c), on: c.classList.contains('on'), el: c.classList.contains('on') ? null : c });
+      });
+      var chip = d.getElementById('navinfo');
+      if (shown(chip)) R.push({ t: 'chip', html: chip.innerHTML });
+      var g = d.getElementById('btn-roster');
+      if (g) R.push({ t: 'icon', html: g.innerHTML, el: g, title: g.title || 'Settings' });
+      return { L: L, R: R };
+    }
+    var BAR = {
+      drm: { root: '.nav', read: toolBar },
+      p6:  { root: '.nav', read: toolBar },
+      ceyhan: { root: '.nav', read: function (d) {
+        return { L: [].map.call(d.querySelectorAll('.nav nav a'), function (a) {
+          return { t: 'link', text: txt(a), el: a };
+        }), R: [] };
+      } },
+      asme: { root: '.hdr', read: function (d) {
+        var L = [].map.call(d.querySelectorAll('.hdr-nav a'), function (a) {
+          return { t: 'link', text: txt(a), on: a.classList.contains('active'), el: a };
+        });
+        var R = [], s = d.getElementById('openPalette'), th = d.getElementById('themeBtn');
+        if (s) R.push({ t: 'search', text: txt(s.querySelector('.grow')) || 'Search', kbd: txt(s.querySelector('kbd')), el: s });
+        if (th) R.push({ t: 'icon', html: th.innerHTML, el: th, title: th.getAttribute('aria-label') || 'Theme' });
+        return { L: L, R: R };
+      } }
+    };
+    var barL = document.getElementById('mrd-bar-l'), barR = document.getElementById('mrd-bar-r');
+    var barObs = null, barPoll = null, barRAF = 0, barApp = null;
+    function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+    function control(it) {
+      var e;
+      if (it.t === 'sep') { e = document.createElement('span'); e.className = 'mrd-bar-sep'; e.textContent = it.text; return e; }
+      if (it.t === 'chip') { e = document.createElement('div'); e.className = 'mrd-bar-chip'; e.innerHTML = it.html; return e; }
+      e = document.createElement('button'); e.type = 'button';
+      e.className = 'mrd-bar-' + it.t + (it.on ? ' on' : '');
+      if (it.t === 'search') {
+        e.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" ' +
+          'stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>' +
+          '<span class="q">' + esc(it.text) + '</span>' + (it.kbd ? '<kbd>' + esc(it.kbd) + '</kbd>' : '');
+      } else if (it.html) e.innerHTML = it.html;
+      else e.textContent = it.text;
+      if (it.title) { e.title = it.title; e.setAttribute('aria-label', it.title); }
+      if (it.on) e.setAttribute('aria-current', 'page');
+      if (it.el) e.addEventListener('click', function (ev) {
+        ev.preventDefault();
+        it.el.click();
+        try { frame.contentWindow.focus(); } catch (err) {}
+      });
+      return e;
+    }
+    function paintBar() {
+      barRAF = 0;
+      var spec = BAR[barApp], d = null;
+      try { d = frame.contentDocument; } catch (e) {}
+      if (!spec || !d) return;
+      var m = spec.read(d);
+      barL.textContent = ''; barR.textContent = '';
+      m.L.forEach(function (it) { barL.appendChild(control(it)); });
+      m.R.forEach(function (it) { barR.appendChild(control(it)); });
+    }
+    function clearBar() {
+      if (barObs) { barObs.disconnect(); barObs = null; }
+      clearInterval(barPoll); barPoll = null; barApp = null;
+      barL.textContent = ''; barR.textContent = '';
+    }
+    function watchBar(key, f) {
+      clearBar();
+      var spec = BAR[key];
+      if (!spec) return;
+      barApp = key;
+      var t0 = Date.now();
+      barPoll = setInterval(function () {
+        var d = null;
+        try { d = f.contentDocument; } catch (e) {}
+        var root = d && d.URL === 'about:srcdoc' && d.querySelector(spec.root);
+        if (!root) { if (Date.now() - t0 > 15000) clearInterval(barPoll); return; }
+        clearInterval(barPoll); barPoll = null;
+        paintBar();
+        barObs = new MutationObserver(function () { if (!barRAF) barRAF = requestAnimationFrame(paintBar); });
+        barObs.observe(root, { subtree: true, childList: true, attributes: true, characterData: true });
+      }, 60);
+    }
+    /* Ctrl/⌘ K reaches the ASME search even while focus is on the bar. */
+    document.addEventListener('keydown', function (e) {
+      if (!state.open || state.key !== 'asme' || !(e.ctrlKey || e.metaKey) || (e.key || '').toLowerCase() !== 'k') return;
+      var s = barR.querySelector('.mrd-bar-search');
+      if (s) { e.preventDefault(); s.click(); }
+    });
+
+    function appHTML(b64, key) {
       var bin = atob(b64);
       var len = bin.length;
       var bytes = new Uint8Array(len);
@@ -5739,7 +5861,8 @@ window.addEventListener('hashchange', function() {
       var m = /<head\b[^>]*>/i.exec(lead);
       if (m) at = m.index + m[0].length;
       else { var d = /<!doctype[^>]*>/i.exec(lead); if (d) at = d.index + d[0].length; }
-      return html.slice(0, at) + BASE + html.slice(at);
+      var hide = HIDE[key] ? '<style id="mrd-suite-embed">' + HIDE[key] + '</style>' : '';
+      return html.slice(0, at) + BASE + hide + html.slice(at);
     }
     /* A new frame for every app: its first load replaces the blank page
        rather than adding to the browser's history, so Back never lands on an
@@ -5802,6 +5925,7 @@ window.addEventListener('hashchange', function() {
         }).join('');
         var mm = document.getElementById('mrd-app-missing'); if (mm) mm.style.display = 'none';
         landing.style.display = 'flex';
+        clearBar();
         newFrame(null);
         host.style.display = 'flex';
         state.open = true; state.key = key; state.title = L.name;
@@ -5819,13 +5943,15 @@ window.addEventListener('hashchange', function() {
       var apps = window.__MRD_APPS__ || {};
       var b64 = apps[appKey];
       if (!state.open) setReturn();
-      nameEl.textContent = title || '';
+      nameEl.textContent = SHORT[appKey] || title || '';
+      nameEl.title = title || '';
       if (!OWN_OPENING[appKey]) showModuleSplash(title || '');
       landing.style.display = 'none';
       state.open = true; state.key = appKey; state.title = title || '';
       document.title = 'MERIDIAM — ' + (title || '');
       if (!b64) {
         // Payload not embedded — show a graceful message rather than a blank frame.
+        clearBar();
         newFrame(null);
         host.style.display = 'flex';
         if (!document.getElementById('mrd-app-missing')) {
@@ -5840,7 +5966,12 @@ window.addEventListener('hashchange', function() {
         return;
       }
       var mm = document.getElementById('mrd-app-missing'); if (mm) mm.style.display = 'none';
-      newFrame(appHTML(b64));
+      if (window.mrdTabBusy) window.mrdTabBusy(true, title);
+      var f = newFrame(appHTML(b64, appKey));
+      watchBar(appKey, f);
+      var done = function () { if (frame === f && window.mrdTabBusy) window.mrdTabBusy(false); };
+      f.addEventListener('load', done, { once: true });
+      setTimeout(done, 12000);
       host.style.display = 'flex';
       try { frame.focus(); } catch (e) {}
       emit();
@@ -5848,7 +5979,9 @@ window.addEventListener('hashchange', function() {
 
     window.closeEmbeddedApp = function () {
       host.style.display = 'none';
+      clearBar();
       newFrame(null);
+      if (window.mrdTabBusy) window.mrdTabBusy(false);
       landing.style.display = 'none';
       var back = state.from === 'main' ? 'main' : currentView();
       state.open = false; state.key = null; state.title = '';
@@ -5864,31 +5997,9 @@ window.addEventListener('hashchange', function() {
   <script>
   /* ── MERIDIAM brand logo, full-screen on open ── */
   (function () {
-    // 0) Paint the supplied MERIDIAM logo (white wordmark + blue wireframe
-    //    globe + blue equator line on a dark chip) into every nav brand slot.
-    var LOGO =
-      '<svg viewBox="0 0 344 96" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-        '<defs>' +
-          '<radialGradient id="mrdGlobeBg" cx="50%" cy="44%" r="62%">' +
-            '<stop offset="0%" stop-color="#1b2a5c"/><stop offset="62%" stop-color="#0c1230"/>' +
-            '<stop offset="100%" stop-color="#070A1C"/>' +
-          '</radialGradient>' +
-          '<filter id="mrdGlow" x="-20%" y="-40%" width="140%" height="180%">' +
-            '<feGaussianBlur stdDeviation="1.1" result="b"/>' +
-            '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>' +
-          '</filter>' +
-        '</defs>' +
-        '<rect x="0" y="0" width="344" height="96" rx="16" fill="url(#mrdGlobeBg)"/>' +
-        '<g fill="none" stroke="#5570F6" stroke-width="2" filter="url(#mrdGlow)">' +
-          '<circle cx="172" cy="48" r="35"/>' +
-          '<ellipse cx="172" cy="48" rx="25" ry="35"/>' +
-          '<ellipse cx="172" cy="48" rx="12" ry="35"/>' +
-        '</g>' +
-        '<text x="172" y="63" text-anchor="middle" filter="url(#mrdGlow)" ' +
-          'font-family="Montserrat,\'Segoe UI\',Arial,sans-serif" font-weight="700" ' +
-          'font-size="44" letter-spacing="8" fill="#FFFFFF">MERIDIAM</text>' +
-        '<rect x="14" y="46.6" width="316" height="2.6" rx="1.3" fill="#5570F6" filter="url(#mrdGlow)"/>' +
-      '</svg>';
+    // 0) Paint the MERIDIAM wordmark — bold navy letters, nothing else —
+    //    into every nav brand slot.
+    var LOGO = '<span class="mrd-wordmark">MERIDIAM</span>';
     var logoSeq = 0;
     function paintLogo() {
       document.querySelectorAll('.mrd-brand-logo').forEach(function (el) {
@@ -6071,6 +6182,55 @@ window.addEventListener('hashchange', function() {
   #mrd-app-back.is-back .i-back{display:block}
   #mrd-app-back.is-back .i-grid{display:none}
 
+  /* the app's own bar, folded into this one */
+  #mrd-app-topbar{gap:10px}
+  #mrd-app-topbar .mrd-app-brand{flex:1;min-width:0}
+  #mrd-app-topbar .mrd-app-name{flex:none;max-width:34vw}
+  .mrd-bar-l{display:flex;align-items:center;gap:2px;min-width:0;overflow:hidden;white-space:nowrap}
+  .mrd-bar-l:not(:empty)::before{content:'';flex:none;width:1px;height:22px;background:var(--mlp-line);margin:0 8px 0 2px}
+  .mrd-bar-r{display:flex;align-items:center;gap:8px;flex:none}
+  .mrd-bar-r:not(:empty)::after{content:'';width:1px;height:22px;background:var(--mlp-line);margin-left:4px}
+  .mrd-bar-l button,.mrd-bar-r button{font-family:var(--mlp-font) !important}
+  .mrd-bar-link{position:relative;height:32px;padding:0 11px;border:0;border-radius:6px;background:none;cursor:pointer;
+    font-size:13.5px;font-weight:400;color:var(--mlp-muted);white-space:nowrap;transition:background .14s,color .14s}
+  .mrd-bar-link:hover{background:#F2F4F6;color:var(--mlp-ink)}
+  .mrd-bar-link.on{color:var(--mlp-ink);font-weight:600}
+  .mrd-bar-link.on::after{content:'';position:absolute;left:11px;right:11px;bottom:-8px;height:3px;
+    border-radius:2px 2px 0 0;background:var(--mlp-blue)}
+  .mrd-bar-crumb{height:28px;padding:0 6px;border:0;border-radius:5px;background:none;cursor:pointer;
+    font-size:13px;font-weight:400;color:var(--mlp-muted);white-space:nowrap;max-width:260px;overflow:hidden;text-overflow:ellipsis}
+  .mrd-bar-crumb:hover{color:var(--mlp-blue);background:#EBF2FA}
+  .mrd-bar-crumb.on{color:var(--mlp-ink);font-weight:600;cursor:default;background:none}
+  .mrd-bar-sep{font-size:13px;color:#BFC3C7;padding:0 1px}
+  .mrd-bar-btn{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;margin-right:4px;border:0;
+    border-radius:5px;background:none;cursor:pointer;font-size:13px;font-weight:500;color:var(--mlp-muted);
+    transition:background .14s,color .14s}
+  .mrd-bar-btn:hover{background:#EBF2FA;color:var(--mlp-blue)}
+  .mrd-bar-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:8px;cursor:pointer;
+    border:1px solid var(--mlp-line);background:#fff;color:var(--mlp-muted);
+    transition:background .14s,color .14s,border-color .14s,transform .3s}
+  .mrd-bar-icon:hover{background:#EBF2FA;color:var(--mlp-blue);border-color:#B9D2EC}
+  .mrd-bar-icon svg{width:17px;height:17px}
+  .mrd-bar-search{display:flex;align-items:center;gap:8px;height:32px;width:min(250px,20vw);padding:0 6px 0 11px;
+    border-radius:16px;border:1px solid transparent;background:#EFF1F2;color:var(--mlp-muted);cursor:pointer;
+    transition:background .14s,border-color .14s}
+  .mrd-bar-search:hover{background:#E8EBED;border-color:#D5DAE0}
+  .mrd-bar-search .q{flex:1;min-width:0;text-align:left;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mrd-bar-search kbd{flex:none;font-size:10.5px;padding:1px 5px;border-radius:4px;border:1px solid var(--mlp-line);
+    background:#fff;color:var(--mlp-muted);font-family:ui-monospace,Consolas,monospace}
+  .mrd-bar-chip{display:flex;align-items:center;gap:10px;padding:3px 11px;border:1px solid var(--mlp-line);
+    border-radius:8px;background:#F7F8FA;white-space:nowrap}
+  .mrd-bar-chip .k{font-size:8.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#98A2B3;line-height:1.2}
+  .mrd-bar-chip .pn{font-size:14px;font-weight:700;color:var(--mlp-ink);line-height:1.1}
+  .mrd-bar-chip .pd{font-size:9.5px;font-weight:600;color:var(--mlp-muted);line-height:1.2}
+  .mrd-bar-chip .bar{width:1px;height:22px;background:var(--mlp-line)}
+
+  /* ── the MERIDIAM wordmark: bold letters on white, nothing else ───────── */
+  .mrd-wordmark, .mlp .mrd-wordmark, #mrd-app-topbar .mrd-wordmark{
+    font-family:'Montserrat','Segoe UI',Arial,sans-serif !important;font-weight:800;font-size:21px;
+    letter-spacing:.07em;line-height:1;color:#0B2545;white-space:nowrap}
+  .mlp-shell .mrd-wordmark, #mrd-app-topbar .mrd-wordmark{font-size:19px}
+
   /* ── the way out of the Engineering Review Tool ───────────────────────── */
   #mrd-ert-allapps{position:fixed;top:10px;right:20px;z-index:1001;display:inline-flex;align-items:center;
     gap:7px;height:32px;padding:0 15px;border-radius:22px;cursor:pointer;
@@ -6239,6 +6399,63 @@ window.addEventListener('hashchange', function() {
     <iframe class="mhb-mailframe" id="mhbMailFrame" title="mail" aria-hidden="true" tabindex="-1"></iframe>
   </div>
   <script>
+  /* ── The browser tab: the MERIDIAM mark, and a spinner while loading ──
+     The icon is a navy tile with a white M.  While the suite opens, or an
+     app loads, a ring turns around the M and the tab title carries a small
+     spinner; both settle back when the work is done. */
+  (function () {
+    var link = document.getElementById('mrd-favicon');
+    if (!link) return;
+    var STATIC = link.href;
+    var cv = document.createElement('canvas'); cv.width = cv.height = 64;
+    var cx = cv.getContext('2d');
+    var reasons = {}, timer = null, step = 0, base = null, lastSet = null;
+    var SPIN = ['\u25D0', '\u25D3', '\u25D1', '\u25D2'];
+    function tile() {
+      var g = cx.createLinearGradient(0, 0, 64, 64);
+      g.addColorStop(0, '#12395C'); g.addColorStop(1, '#0B2545');
+      cx.fillStyle = g;
+      cx.beginPath();
+      if (cx.roundRect) cx.roundRect(0, 0, 64, 64, 14); else cx.rect(0, 0, 64, 64);
+      cx.fill();
+    }
+    function frame() {
+      step++;
+      cx.clearRect(0, 0, 64, 64);
+      tile();
+      var a = step * 0.42;
+      cx.lineWidth = 6; cx.lineCap = 'round';
+      cx.strokeStyle = 'rgba(255,255,255,.18)';
+      cx.beginPath(); cx.arc(32, 32, 24, 0, Math.PI * 2); cx.stroke();
+      cx.strokeStyle = '#45C0CE';
+      cx.beginPath(); cx.arc(32, 32, 24, a, a + Math.PI * 1.2); cx.stroke();
+      cx.fillStyle = '#fff';
+      cx.font = '800 26px Montserrat, "Segoe UI", Arial, sans-serif';
+      cx.textAlign = 'center'; cx.textBaseline = 'middle';
+      cx.fillText('M', 32, 34);
+      link.href = cv.toDataURL('image/png');
+      if (document.title !== lastSet) base = document.title;
+      lastSet = SPIN[step % 4] + ' ' + base;
+      document.title = lastSet;
+    }
+    window.mrdTabBusy = function (on, label, why) {
+      why = why || 'app';
+      if (on) reasons[why] = 1; else delete reasons[why];
+      var busy = Object.keys(reasons).length > 0;
+      if (busy && !timer) {
+        base = document.title; lastSet = null;
+        timer = setInterval(frame, 110); frame();
+      } else if (!busy && timer) {
+        clearInterval(timer); timer = null;
+        link.href = STATIC;
+        if (document.title === lastSet) document.title = base;
+      }
+    };
+    window.mrdTabBusy(true, 'MERIDIAM', 'start');
+  })();
+  </script>
+
+  <script>
   /* ── MERIDIAM launchpad ─────────────────────────────────────────────── */
   (function () {
     var lp    = document.querySelector('[data-view="main"]');
@@ -6372,7 +6589,10 @@ window.addEventListener('hashchange', function() {
       })();
     }
     window.mrdAfterLoader = afterLoader;
-    afterLoader(function () { if (visible()) replay(); });
+    afterLoader(function () {
+      if (window.mrdTabBusy) window.mrdTabBusy(false, '', 'start');
+      if (visible()) replay();
+    });
   })();
   </script>
 

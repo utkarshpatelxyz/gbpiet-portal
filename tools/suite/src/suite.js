@@ -1,4 +1,61 @@
   <script>
+  /* ── The browser tab: the MERIDIAM mark, and a spinner while loading ──
+     The icon is a navy tile with a white M.  While the suite opens, or an
+     app loads, a ring turns around the M and the tab title carries a small
+     spinner; both settle back when the work is done. */
+  (function () {
+    var link = document.getElementById('mrd-favicon');
+    if (!link) return;
+    var STATIC = link.href;
+    var cv = document.createElement('canvas'); cv.width = cv.height = 64;
+    var cx = cv.getContext('2d');
+    var reasons = {}, timer = null, step = 0, base = null, lastSet = null;
+    var SPIN = ['\u25D0', '\u25D3', '\u25D1', '\u25D2'];
+    function tile() {
+      var g = cx.createLinearGradient(0, 0, 64, 64);
+      g.addColorStop(0, '#12395C'); g.addColorStop(1, '#0B2545');
+      cx.fillStyle = g;
+      cx.beginPath();
+      if (cx.roundRect) cx.roundRect(0, 0, 64, 64, 14); else cx.rect(0, 0, 64, 64);
+      cx.fill();
+    }
+    function frame() {
+      step++;
+      cx.clearRect(0, 0, 64, 64);
+      tile();
+      var a = step * 0.42;
+      cx.lineWidth = 6; cx.lineCap = 'round';
+      cx.strokeStyle = 'rgba(255,255,255,.18)';
+      cx.beginPath(); cx.arc(32, 32, 24, 0, Math.PI * 2); cx.stroke();
+      cx.strokeStyle = '#45C0CE';
+      cx.beginPath(); cx.arc(32, 32, 24, a, a + Math.PI * 1.2); cx.stroke();
+      cx.fillStyle = '#fff';
+      cx.font = '800 26px Montserrat, "Segoe UI", Arial, sans-serif';
+      cx.textAlign = 'center'; cx.textBaseline = 'middle';
+      cx.fillText('M', 32, 34);
+      link.href = cv.toDataURL('image/png');
+      if (document.title !== lastSet) base = document.title;
+      lastSet = SPIN[step % 4] + ' ' + base;
+      document.title = lastSet;
+    }
+    window.mrdTabBusy = function (on, label, why) {
+      why = why || 'app';
+      if (on) reasons[why] = 1; else delete reasons[why];
+      var busy = Object.keys(reasons).length > 0;
+      if (busy && !timer) {
+        base = document.title; lastSet = null;
+        timer = setInterval(frame, 110); frame();
+      } else if (!busy && timer) {
+        clearInterval(timer); timer = null;
+        link.href = STATIC;
+        if (document.title === lastSet) document.title = base;
+      }
+    };
+    window.mrdTabBusy(true, 'MERIDIAM', 'start');
+  })();
+  </script>
+
+  <script>
   /* ── MERIDIAM launchpad ─────────────────────────────────────────────── */
   (function () {
     var lp    = document.querySelector('[data-view="main"]');
@@ -132,7 +189,10 @@
       })();
     }
     window.mrdAfterLoader = afterLoader;
-    afterLoader(function () { if (visible()) replay(); });
+    afterLoader(function () {
+      if (window.mrdTabBusy) window.mrdTabBusy(false, '', 'start');
+      if (visible()) replay();
+    });
   })();
   </script>
 

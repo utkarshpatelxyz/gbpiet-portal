@@ -55,6 +55,29 @@ once("const SPA_VIEW_TITLES = {'main': 'Meridiam — Suites', 'home': 'Meridiam 
 once('<div class="loader-tagline" id="loaderTagline"></div>',
      '<div class="loader-tagline" id="loaderTagline">Static Equipment Intelligence</div>', 'loader tagline')
 
+# ── the tab carries the MERIDIAM mark ─────────────────────────────────────
+from urllib.parse import quote
+FAV = ("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>"
+       "<defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#12395C'/>"
+       "<stop offset='1' stop-color='#0B2545'/></linearGradient></defs>"
+       "<rect width='64' height='64' rx='14' fill='url(#g)'/>"
+       "<text x='32' y='45' text-anchor='middle' font-family='Montserrat,Segoe UI,Arial,sans-serif' "
+       "font-weight='800' font-size='38' fill='#fff'>M</text></svg>")
+once('<title>MERIDIAM — Static Equipment Intelligence</title>',
+     '<title>MERIDIAM — Static Equipment Intelligence</title>\n  <link rel="icon" id="mrd-favicon" type="image/svg+xml" href="data:image/svg+xml,'
+     + quote(FAV, safe=" =:/,;'") + '">', 'favicon')
+
+# ── the wordmark: bold MERIDIAM on white, no globe, no rule ──────────────
+a_ = html.find('    var LOGO =\n')
+b_ = html.find("      '</svg>';\n", a_)
+assert a_ > 0 and b_ > a_, 'logo svg'
+html = html[:a_] + (
+    "    var LOGO = '<span class=\"mrd-wordmark\">MERIDIAM</span>';\n") + html[b_ + len("      '</svg>';\n"):]
+once('    // 0) Paint the supplied MERIDIAM logo (white wordmark + blue wireframe\n',
+     '    // 0) Paint the MERIDIAM wordmark — bold navy letters, nothing else —\n', 'logo comment')
+once('    //    globe + blue equator line on a dark chip) into every nav brand slot.\n',
+     '    //    into every nav brand slot.\n', 'logo comment 2')
+
 # ── the launchpad replaces the carousel ──────────────────────────────────
 asme = rd(TOOLS['asme'])
 n_mod = len(re.findall(r"id: '[A-Z]+-\d+', slug: '", asme))

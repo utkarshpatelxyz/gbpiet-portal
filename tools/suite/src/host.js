@@ -33,10 +33,12 @@
       splash.classList.remove('open', 'closing');
       void splash.offsetWidth;              // force reflow
       splash.classList.add('open');
+      if (window.mrdTabBusy) window.mrdTabBusy(true, name, 'splash');
       splashT1 = setTimeout(function () {
         splash.classList.add('closing');
         splashT2 = setTimeout(function () {
           splash.classList.remove('open', 'closing');
+          if (window.mrdTabBusy) window.mrdTabBusy(false, '', 'splash');
         }, 480);
       }, 1650);
     };
@@ -57,7 +59,124 @@
        <head>, so a link such as "#/library" stays inside the app instead of
        resolving against this file.  The app's own bytes are untouched. */
     var BASE = '<base href="about:srcdoc">';
-    function appHTML(b64) {
+
+    /* ── One bar, not two ─────────────────────────────────────────────────
+       Each app's own top bar is hidden inside its frame, and what it carried
+       — the crumbs, the way home, the project chip, the settings gear, the
+       ASME lab's sections, search and theme — is mirrored into the MERIDIAM
+       bar.  A mirrored control clicks the app's own one, so every function
+       stays the app's; the bar re-reads the app's bar whenever it changes.
+       The tank checklist keeps its header: it is a form, not a bar. */
+    var HIDE = {
+      drm:    '.nav{display:none!important}',
+      p6:     '.nav{display:none!important}',
+      ceyhan: '.nav{display:none!important}',
+      asme:   ':root{--header-h:0px!important}.hdr,.mnav{display:none!important}'
+    };
+    var SHORT = { asme: 'ASME VIII-1 Visualiser' };
+    var HOME_SVG = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.4 10.6 12 3.6l8.6 7"/><path d="M5.6 9.4V20h12.8V9.4"/></svg>';
+    function txt(e) { return ((e && e.textContent) || '').replace(/\s+/g, ' ').trim(); }
+    function shown(e) { return !!e && e.style.display !== 'none' && !!e.innerHTML.trim(); }
+    function toolBar(d) {                       // Document Review and P6 PLAN4E
+      var L = [], R = [];
+      var home = d.getElementById('btn-home');
+      var cr = d.getElementById('crumbs');
+      /* the crumbs often start with Home already; then the button would say it twice */
+      var homeCrumb = cr && cr.firstElementChild && txt(cr.firstElementChild) === 'Home';
+      if (home && home.classList.contains('on') && !homeCrumb) L.push({ t: 'btn', html: HOME_SVG + '<span>Home</span>', el: home, title: home.title });
+      if (cr) [].forEach.call(cr.children, function (c) {
+        if (c.classList.contains('s')) L.push({ t: 'sep', text: txt(c) || '/' });
+        else L.push({ t: 'crumb', text: txt(c), on: c.classList.contains('on'), el: c.classList.contains('on') ? null : c });
+      });
+      var chip = d.getElementById('navinfo');
+      if (shown(chip)) R.push({ t: 'chip', html: chip.innerHTML });
+      var g = d.getElementById('btn-roster');
+      if (g) R.push({ t: 'icon', html: g.innerHTML, el: g, title: g.title || 'Settings' });
+      return { L: L, R: R };
+    }
+    var BAR = {
+      drm: { root: '.nav', read: toolBar },
+      p6:  { root: '.nav', read: toolBar },
+      ceyhan: { root: '.nav', read: function (d) {
+        return { L: [].map.call(d.querySelectorAll('.nav nav a'), function (a) {
+          return { t: 'link', text: txt(a), el: a };
+        }), R: [] };
+      } },
+      asme: { root: '.hdr', read: function (d) {
+        var L = [].map.call(d.querySelectorAll('.hdr-nav a'), function (a) {
+          return { t: 'link', text: txt(a), on: a.classList.contains('active'), el: a };
+        });
+        var R = [], s = d.getElementById('openPalette'), th = d.getElementById('themeBtn');
+        if (s) R.push({ t: 'search', text: txt(s.querySelector('.grow')) || 'Search', kbd: txt(s.querySelector('kbd')), el: s });
+        if (th) R.push({ t: 'icon', html: th.innerHTML, el: th, title: th.getAttribute('aria-label') || 'Theme' });
+        return { L: L, R: R };
+      } }
+    };
+    var barL = document.getElementById('mrd-bar-l'), barR = document.getElementById('mrd-bar-r');
+    var barObs = null, barPoll = null, barRAF = 0, barApp = null;
+    function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+    function control(it) {
+      var e;
+      if (it.t === 'sep') { e = document.createElement('span'); e.className = 'mrd-bar-sep'; e.textContent = it.text; return e; }
+      if (it.t === 'chip') { e = document.createElement('div'); e.className = 'mrd-bar-chip'; e.innerHTML = it.html; return e; }
+      e = document.createElement('button'); e.type = 'button';
+      e.className = 'mrd-bar-' + it.t + (it.on ? ' on' : '');
+      if (it.t === 'search') {
+        e.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" ' +
+          'stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>' +
+          '<span class="q">' + esc(it.text) + '</span>' + (it.kbd ? '<kbd>' + esc(it.kbd) + '</kbd>' : '');
+      } else if (it.html) e.innerHTML = it.html;
+      else e.textContent = it.text;
+      if (it.title) { e.title = it.title; e.setAttribute('aria-label', it.title); }
+      if (it.on) e.setAttribute('aria-current', 'page');
+      if (it.el) e.addEventListener('click', function (ev) {
+        ev.preventDefault();
+        it.el.click();
+        try { frame.contentWindow.focus(); } catch (err) {}
+      });
+      return e;
+    }
+    function paintBar() {
+      barRAF = 0;
+      var spec = BAR[barApp], d = null;
+      try { d = frame.contentDocument; } catch (e) {}
+      if (!spec || !d) return;
+      var m = spec.read(d);
+      barL.textContent = ''; barR.textContent = '';
+      m.L.forEach(function (it) { barL.appendChild(control(it)); });
+      m.R.forEach(function (it) { barR.appendChild(control(it)); });
+    }
+    function clearBar() {
+      if (barObs) { barObs.disconnect(); barObs = null; }
+      clearInterval(barPoll); barPoll = null; barApp = null;
+      barL.textContent = ''; barR.textContent = '';
+    }
+    function watchBar(key, f) {
+      clearBar();
+      var spec = BAR[key];
+      if (!spec) return;
+      barApp = key;
+      var t0 = Date.now();
+      barPoll = setInterval(function () {
+        var d = null;
+        try { d = f.contentDocument; } catch (e) {}
+        var root = d && d.URL === 'about:srcdoc' && d.querySelector(spec.root);
+        if (!root) { if (Date.now() - t0 > 15000) clearInterval(barPoll); return; }
+        clearInterval(barPoll); barPoll = null;
+        paintBar();
+        barObs = new MutationObserver(function () { if (!barRAF) barRAF = requestAnimationFrame(paintBar); });
+        barObs.observe(root, { subtree: true, childList: true, attributes: true, characterData: true });
+      }, 60);
+    }
+    /* Ctrl/⌘ K reaches the ASME search even while focus is on the bar. */
+    document.addEventListener('keydown', function (e) {
+      if (!state.open || state.key !== 'asme' || !(e.ctrlKey || e.metaKey) || (e.key || '').toLowerCase() !== 'k') return;
+      var s = barR.querySelector('.mrd-bar-search');
+      if (s) { e.preventDefault(); s.click(); }
+    });
+
+    function appHTML(b64, key) {
       var bin = atob(b64);
       var len = bin.length;
       var bytes = new Uint8Array(len);
@@ -67,7 +186,8 @@
       var m = /<head\b[^>]*>/i.exec(lead);
       if (m) at = m.index + m[0].length;
       else { var d = /<!doctype[^>]*>/i.exec(lead); if (d) at = d.index + d[0].length; }
-      return html.slice(0, at) + BASE + html.slice(at);
+      var hide = HIDE[key] ? '<style id="mrd-suite-embed">' + HIDE[key] + '</style>' : '';
+      return html.slice(0, at) + BASE + hide + html.slice(at);
     }
     /* A new frame for every app: its first load replaces the blank page
        rather than adding to the browser's history, so Back never lands on an
@@ -130,6 +250,7 @@
         }).join('');
         var mm = document.getElementById('mrd-app-missing'); if (mm) mm.style.display = 'none';
         landing.style.display = 'flex';
+        clearBar();
         newFrame(null);
         host.style.display = 'flex';
         state.open = true; state.key = key; state.title = L.name;
@@ -147,13 +268,15 @@
       var apps = window.__MRD_APPS__ || {};
       var b64 = apps[appKey];
       if (!state.open) setReturn();
-      nameEl.textContent = title || '';
+      nameEl.textContent = SHORT[appKey] || title || '';
+      nameEl.title = title || '';
       if (!OWN_OPENING[appKey]) showModuleSplash(title || '');
       landing.style.display = 'none';
       state.open = true; state.key = appKey; state.title = title || '';
       document.title = 'MERIDIAM — ' + (title || '');
       if (!b64) {
         // Payload not embedded — show a graceful message rather than a blank frame.
+        clearBar();
         newFrame(null);
         host.style.display = 'flex';
         if (!document.getElementById('mrd-app-missing')) {
@@ -168,7 +291,12 @@
         return;
       }
       var mm = document.getElementById('mrd-app-missing'); if (mm) mm.style.display = 'none';
-      newFrame(appHTML(b64));
+      if (window.mrdTabBusy) window.mrdTabBusy(true, title);
+      var f = newFrame(appHTML(b64, appKey));
+      watchBar(appKey, f);
+      var done = function () { if (frame === f && window.mrdTabBusy) window.mrdTabBusy(false); };
+      f.addEventListener('load', done, { once: true });
+      setTimeout(done, 12000);
       host.style.display = 'flex';
       try { frame.focus(); } catch (e) {}
       emit();
@@ -176,7 +304,9 @@
 
     window.closeEmbeddedApp = function () {
       host.style.display = 'none';
+      clearBar();
       newFrame(null);
+      if (window.mrdTabBusy) window.mrdTabBusy(false);
       landing.style.display = 'none';
       var back = state.from === 'main' ? 'main' : currentView();
       state.open = false; state.key = null; state.title = '';

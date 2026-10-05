@@ -136,6 +136,55 @@
   #mrd-app-back.is-back .i-back{display:block}
   #mrd-app-back.is-back .i-grid{display:none}
 
+  /* the app's own bar, folded into this one */
+  #mrd-app-topbar{gap:10px}
+  #mrd-app-topbar .mrd-app-brand{flex:1;min-width:0}
+  #mrd-app-topbar .mrd-app-name{flex:none;max-width:34vw}
+  .mrd-bar-l{display:flex;align-items:center;gap:2px;min-width:0;overflow:hidden;white-space:nowrap}
+  .mrd-bar-l:not(:empty)::before{content:'';flex:none;width:1px;height:22px;background:var(--mlp-line);margin:0 8px 0 2px}
+  .mrd-bar-r{display:flex;align-items:center;gap:8px;flex:none}
+  .mrd-bar-r:not(:empty)::after{content:'';width:1px;height:22px;background:var(--mlp-line);margin-left:4px}
+  .mrd-bar-l button,.mrd-bar-r button{font-family:var(--mlp-font) !important}
+  .mrd-bar-link{position:relative;height:32px;padding:0 11px;border:0;border-radius:6px;background:none;cursor:pointer;
+    font-size:13.5px;font-weight:400;color:var(--mlp-muted);white-space:nowrap;transition:background .14s,color .14s}
+  .mrd-bar-link:hover{background:#F2F4F6;color:var(--mlp-ink)}
+  .mrd-bar-link.on{color:var(--mlp-ink);font-weight:600}
+  .mrd-bar-link.on::after{content:'';position:absolute;left:11px;right:11px;bottom:-8px;height:3px;
+    border-radius:2px 2px 0 0;background:var(--mlp-blue)}
+  .mrd-bar-crumb{height:28px;padding:0 6px;border:0;border-radius:5px;background:none;cursor:pointer;
+    font-size:13px;font-weight:400;color:var(--mlp-muted);white-space:nowrap;max-width:260px;overflow:hidden;text-overflow:ellipsis}
+  .mrd-bar-crumb:hover{color:var(--mlp-blue);background:#EBF2FA}
+  .mrd-bar-crumb.on{color:var(--mlp-ink);font-weight:600;cursor:default;background:none}
+  .mrd-bar-sep{font-size:13px;color:#BFC3C7;padding:0 1px}
+  .mrd-bar-btn{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;margin-right:4px;border:0;
+    border-radius:5px;background:none;cursor:pointer;font-size:13px;font-weight:500;color:var(--mlp-muted);
+    transition:background .14s,color .14s}
+  .mrd-bar-btn:hover{background:#EBF2FA;color:var(--mlp-blue)}
+  .mrd-bar-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:8px;cursor:pointer;
+    border:1px solid var(--mlp-line);background:#fff;color:var(--mlp-muted);
+    transition:background .14s,color .14s,border-color .14s,transform .3s}
+  .mrd-bar-icon:hover{background:#EBF2FA;color:var(--mlp-blue);border-color:#B9D2EC}
+  .mrd-bar-icon svg{width:17px;height:17px}
+  .mrd-bar-search{display:flex;align-items:center;gap:8px;height:32px;width:min(250px,20vw);padding:0 6px 0 11px;
+    border-radius:16px;border:1px solid transparent;background:#EFF1F2;color:var(--mlp-muted);cursor:pointer;
+    transition:background .14s,border-color .14s}
+  .mrd-bar-search:hover{background:#E8EBED;border-color:#D5DAE0}
+  .mrd-bar-search .q{flex:1;min-width:0;text-align:left;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mrd-bar-search kbd{flex:none;font-size:10.5px;padding:1px 5px;border-radius:4px;border:1px solid var(--mlp-line);
+    background:#fff;color:var(--mlp-muted);font-family:ui-monospace,Consolas,monospace}
+  .mrd-bar-chip{display:flex;align-items:center;gap:10px;padding:3px 11px;border:1px solid var(--mlp-line);
+    border-radius:8px;background:#F7F8FA;white-space:nowrap}
+  .mrd-bar-chip .k{font-size:8.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#98A2B3;line-height:1.2}
+  .mrd-bar-chip .pn{font-size:14px;font-weight:700;color:var(--mlp-ink);line-height:1.1}
+  .mrd-bar-chip .pd{font-size:9.5px;font-weight:600;color:var(--mlp-muted);line-height:1.2}
+  .mrd-bar-chip .bar{width:1px;height:22px;background:var(--mlp-line)}
+
+  /* ── the MERIDIAM wordmark: bold letters on white, nothing else ───────── */
+  .mrd-wordmark, .mlp .mrd-wordmark, #mrd-app-topbar .mrd-wordmark{
+    font-family:'Montserrat','Segoe UI',Arial,sans-serif !important;font-weight:800;font-size:21px;
+    letter-spacing:.07em;line-height:1;color:#0B2545;white-space:nowrap}
+  .mlp-shell .mrd-wordmark, #mrd-app-topbar .mrd-wordmark{font-size:19px}
+
   /* ── the way out of the Engineering Review Tool ───────────────────────── */
   #mrd-ert-allapps{position:fixed;top:10px;right:20px;z-index:1001;display:inline-flex;align-items:center;
     gap:7px;height:32px;padding:0 15px;border-radius:22px;cursor:pointer;
