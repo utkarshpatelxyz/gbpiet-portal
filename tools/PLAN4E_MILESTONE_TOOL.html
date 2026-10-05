@@ -2181,64 +2181,25 @@ body[data-dark] .ms-pill.due{color:#EABE76}
   .tl-r>:nth-child(n+8){grid-column:1/-1}
 }
 
-/* ── the curve ───────────────────────────────────────────────────────────
-   Planned, forecast and actual on one pair of axes; the cut-off is a line
-   down the middle, because everything left of it is history. */
-.cv-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
-.cv-t{font-size:14px;font-weight:700;color:var(--ink)}
-.cv-key{display:flex;gap:14px;flex-wrap:wrap}
-.cv-key span{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--ink2)}
-.cv-key i{width:14px;height:0;border-top-width:2.5px;border-top-style:solid;display:inline-block}
-.cv-host{position:relative;width:100%}
-.cv-host svg{display:block;width:100%;height:auto;overflow:visible}
-.cv-host .gl{stroke:var(--line);stroke-width:1}
-.cv-host .ax{stroke:var(--line2);stroke-width:1.2}
-.cv-host .lb{font-family:var(--font);font-size:10px;fill:var(--muted);font-weight:600}
-.cv-host .now{stroke:#0A6ED1;stroke-width:1.4;stroke-dasharray:4 3}
-.cv-host .nowl{font-family:var(--font);font-size:10px;font-weight:700;fill:#0A6ED1}
-.cv-host path.ln{fill:none;stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round}
-.cv-host path.fill{stroke:none;opacity:.10}
-.cv-dot{r:3.4;stroke:#fff;stroke-width:1.4}
-
-/* ── the smaller drop zone, on the compare screen ────────────────────── */
-.drop.drop-s{padding:24px 18px;margin:0}
-.drop.drop-s .t{font-size:14px}
-
 /* ── the engineer cells, borrowed from the review tool's vocabulary ───── */
 #enDocBody .en-pick,#enFamBody .en-pick{width:210px}
 .en-fam{display:inline-grid;place-items:center;min-width:32px;height:22px;padding:0 8px;border-radius:4px;
   font-family:var(--mono);font-size:11px;font-weight:700;color:#fff;background:#5B7A99}
 .p6-open{color:var(--blue);font-size:11px;font-weight:700;white-space:nowrap}
 
-/* the delta column when two exports are compared */
-.cp-up{color:var(--ok);font-weight:700}
-.cp-dn{color:var(--dang);font-weight:700}
-.cp-new{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.06em;color:#fff;
-  background:var(--blue);border-radius:3px;padding:1px 5px}
+/* ── how much of a document is done, in its own column ─────────────────── */
+.dl-prog{display:flex;align-items:center;gap:8px}
+.dl-bar{flex:1;height:7px;min-width:52px;border-radius:20px;background:var(--sf2);
+  border:1px solid var(--line);overflow:hidden}
+.dl-bar>i{display:block;height:100%;background:var(--ok);transition:width .7s var(--ease)}
+.dl-pct{font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--ink2);
+  font-variant-numeric:tabular-nums;min-width:34px;text-align:right}
+.dl-pct.full{color:var(--ok)}
 
 
 /* ── the heading of a group carries the control that governs it ───────── */
 .lp-grp-h{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 .lp-grp-h .fill{flex:1}
-
-/* ── reading the curve ───────────────────────────────────────────────────
-   A chart that cannot be questioned is a picture.  The pointer puts a line
-   through the month under it, marks the three values on it, and the panel
-   below says what they are — so the gap between plan and actual can be read
-   at any month, not only guessed at from the shape. */
-.cv-host .hair{stroke:var(--ink2);stroke-width:1;stroke-dasharray:3 3;opacity:.55}
-.cv-host .hit{fill:transparent;cursor:crosshair}
-.cv-read{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin-top:10px;
-  padding:10px 14px;border:1px solid var(--line);border-radius:9px;background:var(--sf2);
-  min-height:42px;font-size:12px;color:var(--ink)}
-.cv-read .mo{font-weight:800;color:var(--navy);min-width:74px}
-.cv-read .it{display:inline-flex;align-items:center;gap:7px;font-weight:600;color:var(--ink2)}
-.cv-read .it i{width:10px;height:10px;border-radius:2px;flex:none}
-.cv-read .it b{font-family:var(--mono);font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
-.cv-read .gap{margin-left:auto;font-weight:700}
-.cv-read .gap.behind{color:var(--dang)}
-.cv-read .gap.ahead{color:var(--ok)}
-.cv-read .idle{color:var(--muted);font-weight:600}
 
 /* the hero's figure says what kind of number it is */
 .ac-hero-v.dang{color:var(--dang)}
@@ -2495,32 +2456,33 @@ body[data-dark] .ms-pill.due{color:#EABE76}
   <div class="foot"></div>
 </div></div>
 
-<!-- 3b ── THE CURVE ─────────────────────────────────────────────────────── -->
-<div class="screen" id="sc-curve"><div class="wrap">
+<!-- 3c ── EVERY DOCUMENT ───────────────────────────────────────────────
+     One row per document rather than per milestone: the chain, how much of
+     its weight is met, and the one milestone it is waiting on.  This is the
+     picture — what is done, what is not, and where the work is. -->
+<div class="screen" id="sc-docs"><div class="wrap">
   <div class="pagebar">
     <button class="pb-back" onclick="goHome()" title="Back to home" aria-label="Back to home">&#8592;</button>
-    <div class="pb-t"><span>Progress curve</span></div>
+    <div class="pb-t"><span id="dlTitle">Every document</span></div>
     <div class="pb-sp"></div>
-    <div class="pb-scope" id="cvScope"></div>
-    <div class="pb-acts">
-      <button class="btn btn-g btn-s" onclick="exportCurveXlsx()">&#10515; Download as Excel</button>
-    </div>
+    <div class="pb-scope" id="dlScope"></div>
   </div>
-  <div class="wk-head" id="cvSum"></div>
-  <div class="card" style="margin-top:14px;padding:18px 20px 12px">
-    <div class="cv-head">
-      <div class="cv-t">Cumulative earned hours</div>
+  <div class="ac-hero" id="dlHero"></div>
+  <div class="ac-sum" id="dlSum"></div>
+  <div class="dt-wrap" style="border-radius:14px;border:1px solid var(--line)">
+    <div class="ac-tools">
+      <div class="p6-ahead" id="dlMode" role="group" aria-label="Which documents to show"></div>
+      <input class="wk-q" id="dlQ" placeholder="Search the documents"
+             autocomplete="off" spellcheck="false" aria-label="Search the documents">
+      <button class="chip" id="dlLate">Overdue only</button>
+      <button class="chip" id="dlNone">No engineer</button>
       <div class="fill"></div>
-      <div class="cv-key" id="cvKey"></div>
-      <div class="p6-ahead" id="cvMode" role="group" aria-label="What the curve counts"></div>
+      <span class="res" id="dlCount"></span>
+      <button class="chip" onclick="exportDocsXlsx()">&#10515; Download as Excel</button>
     </div>
-    <div class="cv-host" id="cvHost"></div>
-    <div class="cv-read" id="cvRead"></div>
-    <div class="cb-note" id="cvNote" style="margin-top:12px"></div>
-  </div>
-  <div class="card" style="margin-top:14px;padding:0">
-    <div class="dt-scroll" style="max-height:46vh">
-      <table class="dt" id="cvTable"><thead id="cvHead"></thead><tbody id="cvBody"></tbody></table>
+    <div class="dt-scroll" style="max-height:62vh">
+      <table class="dt" id="dlTable"><colgroup></colgroup>
+        <thead id="dlHead"></thead><tbody id="dlBody"></tbody></table>
     </div>
   </div>
   <div class="foot"></div>
@@ -2554,6 +2516,17 @@ body[data-dark] .ms-pill.due{color:#EABE76}
 
   <div class="card" style="margin-top:14px;padding:0">
     <div class="ac-tools">
+      <b style="font-size:13px">Who is carrying what</b>
+      <span class="hint2">Open milestones on the documents each engineer holds.</span>
+      <div class="fill"></div>
+    </div>
+    <div class="dt-scroll" style="max-height:30vh">
+      <table class="dt" id="enWhoTable"><thead id="enWhoHead"></thead><tbody id="enWhoBody"></tbody></table>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px;padding:0">
+    <div class="ac-tools">
       <b style="font-size:13px">By family</b>
       <span class="hint2">One name for a whole family sets every document in it that has nobody yet.</span>
       <div class="fill"></div>
@@ -2574,73 +2547,6 @@ body[data-dark] .ms-pill.due{color:#EABE76}
     </div>
     <div class="dt-scroll" style="max-height:52vh">
       <table class="dt" id="enDocTable"><thead id="enDocHead"></thead><tbody id="enDocBody"></tbody></table>
-    </div>
-  </div>
-  <div class="foot"></div>
-</div></div>
-
-<!-- 5b ── WORKLOAD BY ENGINEER ──────────────────────────────────────────── -->
-<div class="screen" id="sc-load"><div class="wrap">
-  <div class="pagebar">
-    <button class="pb-back" onclick="goHome()" title="Back to home" aria-label="Back to home">&#8592;</button>
-    <div class="pb-t"><span>Workload by engineer</span></div>
-    <div class="pb-sp"></div>
-    <div class="pb-scope" id="wlScope"></div>
-    <div class="pb-acts">
-      <button class="btn btn-g btn-s" onclick="exportLoadXlsx()">&#10515; Download as Excel</button>
-    </div>
-  </div>
-  <div class="wk-head" id="wlSum"></div>
-  <div class="card" style="margin-top:14px;padding:0">
-    <div class="dt-scroll" style="max-height:66vh">
-      <table class="dt" id="wlTable"><thead id="wlHead"></thead><tbody id="wlBody"></tbody></table>
-    </div>
-  </div>
-  <div class="foot"></div>
-</div></div>
-
-<!-- 6 ── COMPARE TWO EXPORTS ────────────────────────────────────────────── -->
-<div class="screen" id="sc-cmp"><div class="wrap">
-  <div class="pagebar">
-    <button class="pb-back" onclick="goHome()" title="Back to home" aria-label="Back to home">&#8592;</button>
-    <div class="pb-t"><span>What has moved</span></div>
-    <div class="pb-sp"></div>
-    <div class="pb-scope" id="cpScope"></div>
-    <div class="pb-acts">
-      <button class="btn btn-g btn-s" id="cpReset" style="display:none" onclick="resetCompare()">Choose another file</button>
-      <button class="btn btn-g btn-s" id="cpXlsx" style="display:none" onclick="exportCompareXlsx()">&#10515; Download as Excel</button>
-    </div>
-  </div>
-
-  <div class="card" id="cpPick" style="margin-top:6px">
-    <div class="fl-head">
-      <h2>Compare with an earlier export</h2>
-      <p>Load a P6-PLAN4E export from an earlier cut-off. Nothing is uploaded: the two files are
-         matched in this browser, document by document, and what changed is listed.</p>
-    </div>
-    <div class="fl-body">
-      <div class="drop drop-s" id="cpDrop" onclick="document.getElementById('cpFile').click()">
-        <div class="t">Drop the earlier export here</div>
-        <div class="s">or click to browse</div>
-      </div>
-      <input type="file" id="cpFile" accept=".xlsx,.xlsm,.xls" style="display:none">
-      <div class="err" id="cpErr"></div>
-    </div>
-  </div>
-
-  <div id="cpOut" style="display:none">
-    <div class="wk-head" id="cpSum"></div>
-    <div class="dt-wrap" style="border-radius:4px;border:1px solid var(--line2);margin-top:14px">
-      <div class="ac-tools">
-        <input class="wk-q" id="cpQ" placeholder="Search this list"
-               autocomplete="off" spellcheck="false" aria-label="Search this list">
-        <div class="p6-ahead" id="cpMode" role="group" aria-label="What to show"></div>
-        <div class="fill"></div>
-        <span class="res" id="cpCount"></span>
-      </div>
-      <div class="dt-scroll" style="max-height:62vh">
-        <table class="dt" id="cpTable"><thead id="cpHead"></thead><tbody id="cpBody"></tbody></table>
-      </div>
     </div>
   </div>
   <div class="foot"></div>
@@ -3667,8 +3573,10 @@ const noDateMs = () => P.ms.filter(m=>!m.done && !m.planned);
    schedule that has fallen behind, every planned date is already in the past
    and "due soon" is empty — the forecast is the only forward-looking date
    left, and it is what somebody delivering next week actually needs. */
-const fcstSoonMs = () => { const soon=new Date(P.asOf.getTime()+P.ahead*86400000);
-  return P.ms.filter(m=>!m.done && m.forecast && m.forecast>=P.asOf && m.forecast<=soon); };
+const expDate = m => m.forecast || m.planned;
+const soonMs = () => { const soon=new Date(P.asOf.getTime()+P.ahead*86400000);
+  return P.ms.filter(m=>{ const e=expDate(m);
+    return !m.done && e && e>=P.asOf && e<=soon; }); };
 function sumHours(list, k){ return list.reduce((n,m)=>n+(m[k]||0), 0); }
 function planPct(){
   const b=sumHours(P.ms,'budget'), e=sumHours(P.ms,'earned');
@@ -3676,13 +3584,13 @@ function planPct(){
 }
 
 /* ═══ NAVIGATION ════════════════════════════════════════════════════════ */
-const SCREENS=['upload','filter','home','list','over','curve','doc','eng','load','cmp'];
+const SCREENS=['upload','filter','home','list','docs','over','doc','eng'];
 function go(s){
   SCREENS.forEach(x=>$('sc-'+x).classList.toggle('on', x===s));
   CUR=s;
   window.scrollTo(0,0);
   if(s==='filter'||s==='upload') $('crumbs').innerHTML='';
-  $('btn-home').classList.toggle('on', ['list','over','curve','doc','eng','load','cmp'].indexOf(s)>=0);
+  $('btn-home').classList.toggle('on', ['list','docs','over','doc','eng'].indexOf(s)>=0);
   showBackdrop(s);
 }
 function goHome(){ renderHome(); go('home'); }
@@ -3734,61 +3642,42 @@ const ICO={
   due   :_svg('<rect x="3.2" y="4.6" width="17.6" height="16.2" rx="2.4"/><path d="M3.2 9.4h17.6M8.2 2.8v3.4M15.8 2.8v3.4"/><path d="M9.4 14.6l1.9 1.9 3.6-3.8"/>'),
   open  :_svg('<path d="M3 20.5h18"/><path d="M4.5 16.2 9.6 11l3.5 3.5 6.4-7.1"/><path d="M19.5 7.4h-4M19.5 7.4v4"/>'),
   awc   :_svg('<path d="M20.5 14.6a2.2 2.2 0 0 1-2.2 2.2H8.1l-4.6 3.7V5.7a2.2 2.2 0 0 1 2.2-2.2h12.6a2.2 2.2 0 0 1 2.2 2.2z"/><path d="M12 7v4.4M12 13.9v.1"/>'),
-  seed  :_svg('<circle cx="12" cy="12" r="9"/><path d="M12 7.6v8.8M7.6 12h8.8"/>'),
   pie   :_svg('<path d="M11.2 3.3a8.8 8.8 0 1 0 9.5 9.5h-9.5V3.3z"/><path d="M14.6 2.7a8.8 8.8 0 0 1 6.7 6.7h-6.7V2.7z"/>'),
-  curve :_svg('<path d="M3 20.5h18"/><path d="M3.4 17.4c4.6 0 5.2-11 8.6-11s4 8.2 8.6 8.2"/>'),
-  slip  :_svg('<path d="M3 6.4h12M3 12h8M3 17.6h14"/><path d="M17.4 8.6 21 12l-3.6 3.4"/>'),
   assign:_svg('<path d="M14.5 20.5v-1.8a3.6 3.6 0 0 0-3.6-3.6H5.6A3.6 3.6 0 0 0 2 18.7v1.8"/><circle cx="8.2" cy="7.4" r="3.6"/><path d="M19 7.5v6M22 10.5h-6"/>'),
-  load  :_svg('<path d="M3 20.5h18"/><rect x="4.6" y="11" width="3.6" height="6.2" rx="1.1"/><rect x="10.2" y="6.4" width="3.6" height="10.8" rx="1.1"/><rect x="15.8" y="13.4" width="3.6" height="3.8" rx="1.1"/>'),
-  cmp   :_svg('<path d="M3 16.4l4.8-5.6 3.8 3.8L16.9 7l4.1 5"/><path d="M3 20.6h18"/><circle cx="7.8" cy="10.8" r="1.1"/><circle cx="16.9" cy="7" r="1.1"/>'),
   done  :_svg('<rect x="3" y="4" width="18" height="16" rx="2.6"/><path d="M8 12.2l2.6 2.6L16 9.4"/>')
 };
 const LP_GROUPS={
-  act :'Take action \u2014 Milestones owed',
-  cli :'Take action \u2014 Client comments',
-  see :'The plan',
-  plan:'Plan the work'
+  act :'Take action \u2014 what is still owed',
+  plan:'The whole plan'
 };
-const LP_ORDER={ del:['act','cli'], mgr:['see','plan'] };
+const LP_ORDER={ del:['act'], mgr:['plan'] };
 
 function homeApps(){
-  const late=lateMs(), due=dueMs(), open=openMs(), awc=awcMs(), slip=slipMs(), ns=noStartMs();
-  const pp=planPct();
+  const late=lateMs(), soon=soonMs(), open=openMs(), awc=awcMs();
+  const pp=planPct(), none=P.docs.filter(d=>!whoOf(d)).length;
+  const act=P.docs.filter(d=>d.state!=='done').length;
   return [
+    /* what is owed.  Four tiles, and every one of them is a list of work
+       somebody has to do — nothing here is only worth knowing. */
     {g:'act', id:'mLate', ic:ICO.late, n:late.length,
      t:'Overdue milestones', d:'Past the planned date', open:()=>openList('late')},
-    {g:'act', id:'mDue',  ic:ICO.due,  n:due.length,
-     t:'Due in the next '+P.ahead+' days', d:'Planned, not yet met', open:()=>openList('due')},
-    {g:'act', id:'mFcst', ic:ICO.curve, n:fcstSoonMs().length,
-     t:'Forecast in the next '+P.ahead+' days', d:'What is about to land', open:()=>openList('fsoon')},
-    {g:'act', id:'mSlip', ic:ICO.slip, n:slip.length,
-     t:'Forecast past the plan', d:'The date has already moved', open:()=>openList('slip')},
+    {g:'act', id:'mSoon', ic:ICO.due, n:soon.length,
+     t:'Coming up in '+P.ahead+' days', d:'Expected in the window', open:()=>openList('soon')},
     {g:'act', id:'mOpen', ic:ICO.open, n:open.length,
      t:'Everything still open', d:'Every milestone not yet met', open:()=>openList('open')},
-    {g:'act', id:'mSeed', ic:ICO.seed, n:ns.length,
-     t:'Not started', d:'Nothing met on the document', open:()=>openList('nostart')},
-
-    {g:'cli', id:'mAwc',  ic:ICO.awc,  n:awc.length,
+    {g:'act', id:'mAwc',  ic:ICO.awc, n:awc.length,
      t:'Returned with comments', d:'Client code AWC', open:()=>openList('awc')},
-    {g:'cli', id:'mAppr', ic:ICO.done, n:P.ms.filter(m=>String(m.cmtCode).toUpperCase()==='A').length,
-     t:'Approved by the client', d:'Client code A', open:()=>openList('appr')},
 
-    {g:'see', id:'pOver', ic:ICO.pie,   n:pp.pct, unit:'%',
-     t:'Milestone overview', d:'Where the plan stands', open:()=>openOver()},
-    {g:'see', id:'pCurve', ic:ICO.curve, n:null,
-     t:'Progress curve', d:'Planned, forecast and actual', open:()=>openCurve()},
-    {g:'see', id:'pDone',  ic:ICO.done,  n:doneMs().length,
-     t:'Milestones met', d:'Everything already achieved', open:()=>openList('done')},
-
-    {g:'plan', id:'pEng',  ic:ICO.assign, n:P.docs.filter(d=>!whoOf(d)).length,
-     t:'Responsible engineers', d:'Assign, then write the file', open:()=>openEng()},
-    {g:'plan', id:'pLoad', ic:ICO.load,
-     n:new Set(P.docs.map(d=>whoOf(d)).filter(w=>w && !isNA(w))).size,
-     t:'Workload by engineer', d:'Who is carrying what', open:()=>openLoad()},
-    {g:'plan', id:'pCmp',  ic:ICO.cmp, n:null,
-     t:'What has moved', d:'Against an earlier export', open:()=>openCompare()}
+    /* and the plan itself: the documents, the progress, and who holds what */
+    {g:'plan', id:'pDocs', ic:ICO.doc, n:act,
+     t:'Every document', d:act+' of '+P.docs.length+' need action', open:()=>openDocs('act')},
+    {g:'plan', id:'pOver', ic:ICO.pie, n:pp.pct, unit:'%',
+     t:'Progress by weight', d:'Where the plan stands', open:()=>openOver()},
+    {g:'plan', id:'pEng',  ic:ICO.assign, n:none,
+     t:'Responsible engineers', d:'Assign, then write the file', open:()=>openEng()}
   ];
 }
+
 /* the same control wherever the window is asked about */
 function aheadHTML(){
   return '<div class="p6-ahead"><b>Look ahead</b><div class="seg2">'+AHEADS.map(n=>
@@ -3843,17 +3732,14 @@ window.renderHome=renderHome;
 const ML={ mode:'late', who:null, code:null, fam:null, unit:null, state:null,
            q:'', late:false, none:false, sort:{k:null,dir:1}, rows:[], from:'home' };
 const ML_MODES={
-  late   :{ cls:'dang', t:()=>'Overdue milestones',                     pick:lateMs },
-  due    :{ cls:'warn', t:()=>'Due in the next '+P.ahead+' days',       pick:dueMs },
-  slip   :{ cls:'dang', t:()=>'Forecast past the planned date',         pick:slipMs },
-  open   :{ cls:'blue', t:()=>'Milestones still open',                  pick:openMs },
-  nostart:{ cls:'blue', t:()=>'Documents not started',                  pick:noStartMs },
-  awc    :{ cls:'warn', t:()=>'Returned by the client with comments',   pick:awcMs },
-  appr   :{ cls:'ok',   t:()=>'Approved by the client',
-            pick:()=>P.ms.filter(m=>String(m.cmtCode).toUpperCase()==='A') },
-  done   :{ cls:'ok',   t:()=>'Milestones met',                         pick:doneMs },
-  nodate :{ cls:'blue', t:()=>'Open milestones with no planned date',   pick:noDateMs },
-  fsoon  :{ cls:'warn', t:()=>'Forecast in the next '+P.ahead+' days',   pick:fcstSoonMs }
+  late   :{ cls:'dang', t:()=>'Overdue milestones',                   pick:lateMs },
+  soon   :{ cls:'warn', t:()=>'Coming up in the next '+P.ahead+' days', pick:soonMs },
+  open   :{ cls:'blue', t:()=>'Milestones still open',                pick:openMs },
+  awc    :{ cls:'warn', t:()=>'Returned by the client with comments', pick:awcMs },
+  /* not on a tile, but reachable: the donut's own slices open these */
+  due    :{ cls:'warn', t:()=>'Planned in the next '+P.ahead+' days',  pick:dueMs },
+  done   :{ cls:'ok',   t:()=>'Milestones met',                       pick:doneMs },
+  nodate :{ cls:'blue', t:()=>'Open milestones with no planned date',  pick:noDateMs }
 };
 const ML_COLS=[
   {k:'doc',  t:'Document',   w:'auto',   v:m=>m.d.drawing},
@@ -3902,14 +3788,13 @@ function openList(mode, extra, ev){
   ML.who=extra.who==null?null:extra.who; ML.code=extra.code||null;
   ML.fam=extra.fam||null; ML.unit=extra.unit||null; ML.state=extra.state||null;
   ML.q=''; ML.late=false; ML.none=false; ML.sort={k:null,dir:1};
-  ML.from = (CUR==='over'||CUR==='load'||CUR==='curve') ? CUR : 'home';
+  ML.from = (CUR==='over'||CUR==='docs') ? CUR : 'home';
   $('mlQ').value='';
   renderList(); go('list');
 }
 function mlBack(){
-  if(ML.from==='over')  return openOver();
-  if(ML.from==='load')  return openLoad();
-  if(ML.from==='curve') return openCurve();
+  if(ML.from==='over') return openOver();
+  if(ML.from==='docs') return openDocs();
   goHome();
 }
 window.openList=openList; window.mlBack=mlBack;
@@ -4048,6 +3933,132 @@ window.renderList=renderList;
   $('mlNone').onclick=()=>{ ML.none=!ML.none; renderList(); };
 })();
 
+/* ═══ EVERY DOCUMENT ════════════════════════════════════════════════════
+   The picture.  One row per document instead of per milestone: the chain it
+   runs, how much of its weight is met, and the single milestone it is waiting
+   on.  Somebody who wants to know where the work stands reads this; somebody
+   who wants to know what to do next opens one of the action lists.
+   ═══════════════════════════════════════════════════════════════════════ */
+const DL={ mode:'act', q:'', late:false, none:false, sort:{k:null,dir:1}, rows:[] };
+const DL_MODES={
+  act :{ cls:'warn', t:()=>'Documents still to finish', pick:()=>P.docs.filter(d=>d.state!=='done') },
+  done:{ cls:'ok',   t:()=>'Documents complete',        pick:()=>P.docs.filter(d=>d.state==='done') },
+  all :{ cls:'blue', t:()=>'Every document',            pick:()=>P.docs.slice() }
+};
+const DL_COLS=[
+  {k:'doc',  t:'Document',        w:'auto',   v:d=>d.drawing},
+  {k:'fam',  t:'Family',          w:'90px',   v:d=>d.family},
+  {k:'unit', t:'Unit',            w:'104px',  v:d=>d.unit},
+  {k:'chain',t:'The chain',       w:'216px',  v:d=>d.pct, desc:true},
+  {k:'wt',   t:'Weight met',      w:'112px',  v:d=>d.wDone, desc:true, right:true},
+  {k:'pct',  t:'Progress',        w:'146px',  v:d=>d.pct,  desc:true},
+  {k:'next', t:'Waiting on',      w:'152px',  v:d=>d.next? (d.next.planned? d.next.planned.getTime():8e15) : -1},
+  {k:'days', t:'Days',            w:'82px',   v:d=>d.over!=null? d.over : -1e9, desc:true, right:true},
+  {k:'who',  t:'Engineer',        w:'160px',  v:d=>whoOf(d)},
+  {k:'open', t:'',                w:'62px',   v:null}
+];
+function openDocs(mode){
+  if(!P.docs || !P.docs.length) return alert('Open a plan first.');
+  if(mode && DL_MODES[mode]) DL.mode=mode;
+  crumbApp('Every document');
+  renderDocs(); go('docs');
+}
+function dlSet(m){ DL.mode=m; renderDocs(); }
+window.openDocs=openDocs; window.dlSet=dlSet;
+
+function renderDocs(){
+  const M=DL_MODES[DL.mode], all=M.pick();
+  let rows=all.slice();
+  if(DL.q){ const q=DL.q.toUpperCase(); rows=rows.filter(d=>d.searchKey.indexOf(q)>=0); }
+  if(DL.late) rows=rows.filter(d=>d.state==='late');
+  if(DL.none) rows=rows.filter(d=>!whoOf(d));
+  if(DL.sort.k) rows=sortRows(rows, DL_COLS, DL.sort);
+  else rows.sort((a,b)=>{
+    /* untouched: the latest first, then the least finished, so the worst of
+       it is at the top without anybody asking for a sort */
+    const oa=a.over!=null?a.over:-1e9, ob=b.over!=null?b.over:-1e9;
+    if(oa!==ob) return ob-oa;
+    if(a.pct!==b.pct) return a.pct-b.pct;
+    return String(a.drawing).localeCompare(String(b.drawing));
+  });
+  DL.rows=rows;
+
+  $('dlTitle').textContent=M.t();
+  $('dlScope').innerHTML=scopeLine();
+  $('dlMode').innerHTML='<b>Show</b><div class="seg2">'+
+    [['act','To finish'],['done','Complete'],['all','All']].map(([k,t])=>
+      `<button type="button" class="${DL.mode===k?'on':''}" onclick="dlSet('${k}')">${t}</button>`).join('')+'</div>';
+
+  /* the hero: the weight of the whole scope, and how much of it is met */
+  const wTot=P.docs.reduce((n,d)=>n+d.wTot,0)||1, wDone=P.docs.reduce((n,d)=>n+d.wDone,0);
+  const pp=planPct(), doneN=P.docs.filter(d=>d.state==='done').length;
+  $('dlHero').innerHTML=`
+    <div class="ac-hero-h">
+      <div class="ac-hero-t">${esc(M.t())}<small>${all.length.toLocaleString()} of the ${
+        P.docs.length.toLocaleString()} documents in this scope</small></div>
+      <div class="ac-hero-v ok">${pp.pct}%<small>${Math.round(pp.earned).toLocaleString()} of ${
+        Math.round(pp.budget).toLocaleString()} hours earned</small></div>
+    </div>
+    <div class="sbar live">
+      <i style="width:${doneN/P.docs.length*100}%;background:${ST.done.col}" title="Complete: ${doneN}"
+         onclick="event.stopPropagation();dlSet('done')"></i>
+      <i style="width:${(P.docs.length-doneN)/P.docs.length*100}%;background:${ST.late.col};opacity:.55"
+         title="Still to finish: ${P.docs.length-doneN}" onclick="event.stopPropagation();dlSet('act')"></i>
+    </div>`;
+
+  const lateN=all.filter(d=>d.state==='late').length;
+  const noneN=all.filter(d=>!whoOf(d)).length;
+  const openW=all.reduce((n,d)=>n+(d.wTot-d.wDone),0);
+  $('dlSum').innerHTML=[
+    ['', all.length, 'documents on this list'],
+    [lateN?'dang':'', lateN, 'with a milestone already overdue'],
+    ['', Math.round(all.reduce((n,d)=>n+d.wDone,0)/(all.reduce((n,d)=>n+d.wTot,0)||1)*100)+'%',
+     'of their weight met'],
+    ['', Math.round(all.reduce((n,d)=>n+(d.budget-d.earned),0)).toLocaleString(), 'hours still to earn'],
+    [noneN?'warn':'', noneN, 'with no engineer named']
+  ].map(([c,n,l])=>`<div class="m ${c}"><div class="n">${
+    typeof n==='number'? n.toLocaleString():n}</div><div class="l">${l}</div></div>`).join('');
+
+  $('dlLate').classList.toggle('on', DL.late);
+  $('dlNone').classList.toggle('on', DL.none);
+  $('dlCount').innerHTML=`<b>${rows.length.toLocaleString()}</b> of ${all.length.toLocaleString()} shown`;
+
+  $('dlTable').querySelector('colgroup').innerHTML=DL_COLS.map(c=>`<col style="width:${c.w}">`).join('');
+  sortHead('dlHead', DL_COLS, DL.sort, renderDocs);
+  $('dlBody').innerHTML = rows.length ? rows.slice(0,900).map(d=>{
+    const who=whoOf(d), nx=d.next;
+    return `<tr data-k="${esc(d.key)}">
+      <td><div class="docno">${esc(d.drawing)}</div>
+        <div class="doctitle" title="${esc(d.desc||'')}">${esc(d.desc||'—')}</div></td>
+      <td><div class="s1">${esc(d.family)}</div><div class="s2">${esc(d.eom||'')}</div></td>
+      <td><div class="s1">${esc(d.unit)}</div><div class="s2">${esc(d.area||'')}</div></td>
+      <td>${chainHTML(d, nx)}</td>
+      <td style="text-align:right"><span class="s1 num">${d.wDone}</span>
+        <div class="s2 num">of ${d.wTot}</div></td>
+      <td><div class="dl-prog"><div class="dl-bar"><i style="width:${d.pct}%"></i></div>
+        <span class="dl-pct${d.pct===100?' full':''}">${d.pct}%</span></div>
+        <div class="s2">${d.doneN} of ${d.ms.length} milestones</div></td>
+      <td>${nx? `<div class="s1">${esc(nx.code)}</div>
+            <div class="s2 num">${nx.planned? fmtS(nx.planned) : 'no date'}</div>`
+          : '<span class="p6-st done">Complete</span>'}</td>
+      <td style="text-align:right">${d.over!=null? `<span class="p6-d late">${d.over}d late</span>`
+        : (nx && nx.left!=null ? `<span class="p6-d due">in ${nx.left}d</span>` : '<span class="s2">—</span>')}</td>
+      <td><div class="s2">${who? (isNA(who)?'N/A':esc(who)) : '<span class="en-un">no engineer</span>'}</div></td>
+      <td><span class="wk-open">open &#8594;</span></td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="${DL_COLS.length}" class="empty">${
+      all.length? 'Nothing here matches those filters.' : 'No document on this list.'}</td></tr>`;
+  $('dlBody').querySelectorAll('tr[data-k]').forEach(tr=>tr.onclick=()=>openDoc(tr.dataset.k));
+}
+window.renderDocs=renderDocs;
+(function(){
+  const q=$('dlQ'); if(!q) return;
+  let t=null;
+  q.addEventListener('input',()=>{ clearTimeout(t); t=setTimeout(()=>{ DL.q=q.value.trim(); renderDocs(); },160); });
+  $('dlLate').onclick=()=>{ DL.late=!DL.late; renderDocs(); };
+  $('dlNone').onclick=()=>{ DL.none=!DL.none; renderDocs(); };
+})();
+
 /* ═══ ONE DOCUMENT ══════════════════════════════════════════════════════ */
 let DOC_FROM='home';
 function openDoc(key){
@@ -4061,7 +4072,7 @@ function openDoc(key){
 function docBack(){
   if(DOC_FROM==='list'){ renderList(); return go('list'); }
   if(DOC_FROM==='eng'){ renderEng(); return go('eng'); }
-  if(DOC_FROM==='load'){ return openLoad(); }
+  if(DOC_FROM==='docs'){ return openDocs(); }
   goHome();
 }
 window.openDoc=openDoc; window.docBack=docBack;
@@ -4197,7 +4208,7 @@ function renderOver(){
     ['ok', pp.pct+'%', 'of the plan earned'],
     ['', Math.round(rem).toLocaleString(), 'hours still to earn'],
     ['', docsDone.toLocaleString()+' / '+P.docs.length.toLocaleString(), 'documents complete'],
-    ['warn', slipMs().length.toLocaleString(), 'forecasts past the plan']
+    ['warn', slipMs().length.toLocaleString(), 'forecasts already past the plan']
   ].map(([c,n,l])=>`<div class="m ${c}"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('');
   $('ovPb2').innerHTML=sbarHTML('Hours', pp.pct+'%', hp, pp.budget||1);
   countUp($('ovPb2').querySelector('.pblock-h .v'), pp.pct, '%');
@@ -4260,170 +4271,6 @@ function groupRows(what, keyFn){
     </div>`;
   }).join('');
 }
-
-/* ═══ THE CURVE ═════════════════════════════════════════════════════════
-   Three cumulative lines on one pair of axes: what the plan asked for, what
-   is now forecast, and what has actually been earned.  The gap between the
-   first and the last, read at the cut-off, is the position. */
-const CV={ mode:'hours' };
-function openCurve(){ crumbApp('Progress curve'); renderCurve(); go('curve'); }
-window.openCurve=openCurve;
-function cvSet(m){ CV.mode=m; renderCurve(); }
-window.cvSet=cvSet;
-
-function monthKey(d){ return d.getUTCFullYear()*12+d.getUTCMonth(); }
-function monthDate(k){ return new Date(Date.UTC(Math.floor(k/12), k%12, 1)); }
-const MON3=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-function monthLabel(k){ const d=monthDate(k); return MON3[d.getUTCMonth()]+" '"+String(d.getUTCFullYear()).slice(2); }
-
-function curveData(){
-  const v = CV.mode==='hours' ? (m=>m.budget) : (m=>1);
-  const rows={};
-  const add=(d, field, amount)=>{ if(!d) return; const k=monthKey(d);
-    (rows[k]=rows[k]||{k, plan:0, fcst:0, real:0})[field]+=amount; };
-  P.ms.forEach(m=>{
-    add(m.planned, 'plan', v(m));
-    add(m.forecast||m.planned, 'fcst', v(m));
-    if(m.done) add(m.real||m.planned||m.forecast, 'real', v(m));
-  });
-  const keys=Object.keys(rows).map(Number).sort((a,b)=>a-b);
-  if(!keys.length) return {pts:[], total:0};
-  const out=[]; let cp=0, cf=0, cr=0;
-  const cutK=monthKey(P.asOf);
-  for(let k=keys[0]; k<=keys[keys.length-1]; k++){
-    const r=rows[k]||{plan:0,fcst:0,real:0};
-    cp+=r.plan; cf+=r.fcst; cr+=r.real;
-    out.push({k, label:monthLabel(k), plan:cp, fcst:cf,
-              real: k<=cutK ? cr : null, mPlan:r.plan, mFcst:r.fcst, mReal:r.real});
-  }
-  const total=Math.max(cp, cf, cr);
-  return {pts:out, total, cutK};
-}
-function drawCurve(host, cv){
-  if(!cv.pts.length){ host.innerHTML='<div class="empty">Nothing with dates to draw.</div>'; return; }
-  const W=1000, H=340, L=62, R=16, T=14, B=34;
-  const iw=W-L-R, ih=H-T-B;
-  const n=cv.pts.length, max=cv.total||1;
-  const x=i=>L+(n===1?iw/2:iw*i/(n-1));
-  const path=(key)=>{
-    let d='', started=false;
-    cv.pts.forEach((p,i)=>{ const v=p[key]; if(v==null){ return; }
-      d += (started?' L ':'M ')+x(i).toFixed(1)+' '+y(v).toFixed(1); started=true; });
-    return d;
-  };
-  const area=(key)=>{
-    const pts=cv.pts.map((p,i)=>({v:p[key],i})).filter(p=>p.v!=null);
-    if(!pts.length) return '';
-    return 'M '+x(pts[0].i).toFixed(1)+' '+y(0)+' '+
-      pts.map(p=>'L '+x(p.i).toFixed(1)+' '+y(p.v).toFixed(1)).join(' ')+
-      ' L '+x(pts[pts.length-1].i).toFixed(1)+' '+y(0)+' Z';
-  };
-  /* round the axis to a step somebody can read — 10, 25, 50, 100, 250 … of
-     whatever size fits, rather than a fifth of an arbitrary maximum */
-  const rough=max/5, mag=Math.pow(10, Math.floor(Math.log10(rough)||0));
-  const stepY=[1,2,2.5,5,10].map(x=>x*mag).find(x=>x>=rough) || mag*10;
-  const topY=Math.ceil(max/stepY)*stepY;
-  const step=Math.max(1, Math.ceil(n/12));
-  const cutI=cv.pts.findIndex(p=>p.k===cv.cutK);
-  const unit = CV.mode==='hours' ? 'h' : '';
-  const y=v=>T+ih-(v/topY)*ih;
-  host.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Cumulative progress">
-    ${Array.from({length:Math.round(topY/stepY)+1},(_,t)=>{ const v=stepY*t;
-      return `<line class="gl" x1="${L}" y1="${y(v).toFixed(1)}" x2="${W-R}" y2="${y(v).toFixed(1)}"/>
-              <text class="lb" x="${L-8}" y="${(y(v)+3.5).toFixed(1)}" text-anchor="end">${
-                Math.round(v).toLocaleString()}${unit}</text>`; }).join('')}
-    <line class="ax" x1="${L}" y1="${T}" x2="${L}" y2="${T+ih}"/>
-    <line class="ax" x1="${L}" y1="${T+ih}" x2="${W-R}" y2="${T+ih}"/>
-    ${cv.pts.map((p,i)=> i%step? '' :
-      `<text class="lb" x="${x(i).toFixed(1)}" y="${T+ih+18}" text-anchor="middle">${p.label}</text>`).join('')}
-    <path class="fill" d="${area('real')}" fill="#2E9E6B"/>
-    <path class="ln" d="${path('plan')}" stroke="#8895A5" stroke-dasharray="6 4"/>
-    <path class="ln" d="${path('fcst')}" stroke="#D9922E"/>
-    <path class="ln" d="${path('real')}" stroke="#2E9E6B"/>
-    ${cutI>=0?`<line class="now" x1="${x(cutI).toFixed(1)}" y1="${T}" x2="${x(cutI).toFixed(1)}" y2="${T+ih}"/>
-      <text class="nowl" x="${(x(cutI)+6).toFixed(1)}" y="${T+11}">cut-off</text>`:''}
-    <line class="hair" id="cvHair" x1="0" y1="${T}" x2="0" y2="${T+ih}" style="display:none"/>
-    <circle class="cv-dot" id="cvD0" fill="#8895A5" style="display:none"/>
-    <circle class="cv-dot" id="cvD1" fill="#D9922E" style="display:none"/>
-    <circle class="cv-dot" id="cvD2" fill="#2E9E6B" style="display:none"/>
-    <rect class="hit" id="cvHit" x="${L}" y="${T}" width="${iw}" height="${ih}"/>
-  </svg>`;
-
-  /* reading it: the month under the pointer, its three values, and the gap
-     between what was planned and what was earned */
-  const svg=host.querySelector('svg'), hit=host.querySelector('#cvHit');
-  const hair=host.querySelector('#cvHair');
-  const dots=[host.querySelector('#cvD0'),host.querySelector('#cvD1'),host.querySelector('#cvD2')];
-  const read=$('cvRead');
-  const idle=()=>{ hair.style.display='none'; dots.forEach(d=>d.style.display='none');
-    read.innerHTML='<span class="idle">Move the pointer across the chart to read any month.</span>'; };
-  idle();
-  const at=e=>{
-    const r=svg.getBoundingClientRect();
-    const px=(e.clientX-r.left)/r.width*W;
-    let i=Math.round((px-L)/(iw/Math.max(1,n-1)));
-    i=Math.max(0, Math.min(n-1, i));
-    const p=cv.pts[i], X=x(i);
-    hair.setAttribute('x1',X); hair.setAttribute('x2',X); hair.style.display='';
-    [['plan',0],['fcst',1],['real',2]].forEach(([k,j])=>{
-      const v=p[k];
-      if(v==null){ dots[j].style.display='none'; return; }
-      dots[j].setAttribute('cx',X); dots[j].setAttribute('cy',y(v)); dots[j].style.display='';
-    });
-    const u=CV.mode==='hours'?' h':'';
-    const gap=(p.real==null)? null : Math.round(p.plan-p.real);
-    read.innerHTML=`<span class="mo">${p.label}</span>`+
-      `<span class="it"><i style="background:#8895A5"></i>Planned <b>${Math.round(p.plan).toLocaleString()}${u}</b></span>`+
-      `<span class="it"><i style="background:#D9922E"></i>Forecast <b>${Math.round(p.fcst).toLocaleString()}${u}</b></span>`+
-      `<span class="it"><i style="background:#2E9E6B"></i>Actual <b>${p.real==null?'—':Math.round(p.real).toLocaleString()+u}</b></span>`+
-      `<span class="it">this month <b>${Math.round(p.mReal).toLocaleString()}${u}</b> met of <b>${Math.round(p.mPlan).toLocaleString()}${u}</b> planned</span>`+
-      (gap==null? '' : `<span class="gap ${gap>0?'behind':'ahead'}">${gap>0? Math.round(gap).toLocaleString()+u+' behind the plan'
-        : (gap<0? Math.round(-gap).toLocaleString()+u+' ahead of the plan' : 'exactly on the plan')}</span>`);
-  };
-  hit.addEventListener('mousemove', at);
-  hit.addEventListener('mouseleave', idle);
-  hit.addEventListener('click', at);
-}
-function renderCurve(){
-  $('cvScope').innerHTML=scopeLine();
-  $('cvMode').innerHTML='<b>Measure</b>'+
-    [['hours','Hours'],['count','Milestones']].map(([k,t])=>
-      `<button type="button" class="${CV.mode===k?'on':''}" onclick="cvSet('${k}')">${t}</button>`).join('');
-  $('cvKey').innerHTML=
-    '<span><i style="border-color:#8895A5;border-top-style:dashed"></i>Planned</span>'+
-    '<span><i style="border-color:#D9922E"></i>Forecast</span>'+
-    '<span><i style="border-color:#2E9E6B"></i>Actual</span>';
-  const cv=curveData();
-  drawCurve($('cvHost'), cv);
-
-  const at=cv.pts.find(p=>p.k===cv.cutK) || cv.pts[cv.pts.length-1] || {plan:0,fcst:0,real:0};
-  const behind=Math.max(0, (at.plan||0)-(at.real||0));
-  const unit=CV.mode==='hours'?' h':'';
-  $('cvSum').innerHTML=[
-    ['', Math.round(at.plan||0).toLocaleString()+unit, 'planned by the cut-off'],
-    ['ok', Math.round(at.real||0).toLocaleString()+unit, 'actually earned'],
-    [behind?'dang':'', Math.round(behind).toLocaleString()+unit, 'behind the plan'],
-    ['', Math.round(cv.total).toLocaleString()+unit, 'the whole plan']
-  ].map(([c,n,l])=>`<div class="m ${c}"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('');
-  $('cvNote').innerHTML=`Cumulative, month by month, from the dates in the export: a milestone counts
-    towards <b>planned</b> on its planned date, towards <b>forecast</b> on its forecast date, and
-    towards <b>actual</b> on the date it was met. The actual line stops at the cut-off of this
-    export — <b>${esc(fmt(P.asOf)||'')}</b> — because nothing after it has happened yet.`;
-
-  const cols=[{k:'m',t:'Month'},{k:'p',t:'Planned'},{k:'f',t:'Forecast'},{k:'r',t:'Actual'},
-              {k:'cp',t:'Planned to date'},{k:'cf',t:'Forecast to date'},{k:'cr',t:'Earned to date'}];
-  $('cvHead').innerHTML='<tr>'+cols.map((c,i)=>`<th${i?' style="text-align:right"':''}>${c.t}</th>`).join('')+'</tr>';
-  $('cvBody').innerHTML=cv.pts.map(p=>`<tr${p.k===cv.cutK?' style="background:rgba(10,110,209,.06)"':''}>
-    <td><div class="s1">${p.label}</div></td>
-    <td style="text-align:right"><span class="num">${Math.round(p.mPlan).toLocaleString()}</span></td>
-    <td style="text-align:right"><span class="num">${Math.round(p.mFcst).toLocaleString()}</span></td>
-    <td style="text-align:right"><span class="num">${Math.round(p.mReal).toLocaleString()}</span></td>
-    <td style="text-align:right"><span class="num">${Math.round(p.plan).toLocaleString()}</span></td>
-    <td style="text-align:right"><span class="num">${Math.round(p.fcst).toLocaleString()}</span></td>
-    <td style="text-align:right"><span class="num">${p.real==null?'—':Math.round(p.real).toLocaleString()}</span></td>
-  </tr>`).join('');
-}
-
 /* ═══ THE ENGINEERS ═════════════════════════════════════════════════════
    One name per document, and a way to set a whole family at once.  It is kept
    in the workbook's own column, so the next person to load the file sees it. */
@@ -4500,6 +4347,29 @@ function renderEng(){
     <b>${ENG_COL}</b> column of the workbook — load that file next time and it is still there.`;
   $('enDirty').style.display = P.eng.dirty ? '' : 'none';
   $('enDirty').innerHTML='Changes are in this tab only. <b>Download the plan</b> to keep them.';
+
+  /* who is carrying what — the screen this used to need of its own */
+  const wl=sortRows(loadRows(), WL_COLS, WL.sort, r=>r.who==='(nobody)'?1:0);
+  sortHead('enWhoHead', WL_COLS, WL.sort, renderEng);
+  $('enWhoBody').innerHTML = wl.length ? wl.map(e=>{
+    const real=e.who!=='(nobody)';
+    return `<tr>
+      <td><div class="docno">${real?esc(e.who):'<span class="en-un">nobody named</span>'}</div>
+        ${real&&engMail(e.who)?`<div class="s2">${esc(engMail(e.who))}</div>`:''}</td>
+      <td style="text-align:right"><span class="s1 num">${e.docs}</span></td>
+      <td style="text-align:right"><span class="s1 num">${e.open}</span></td>
+      <td style="text-align:right">${e.late
+        ? `<span class="p6-d late" role="button" tabindex="0" style="cursor:pointer"
+             onclick="openList('late',{who:'${esc(e.who).replace(/'/g,"\\'")}'})">${e.late}</span>`
+        : '<span class="s2">—</span>'}</td>
+      <td style="text-align:right">${e.awc? `<span class="s1 num">${e.awc}</span>`:'<span class="s2">—</span>'}</td>
+      <td style="text-align:right"><span class="s1 num">${e.pct}%</span></td>
+      <td><div class="en-progcell">
+        <div class="en-bar"><i style="width:${e.pct}%;background:#2E9E6B"></i></div>
+        <span class="en-load" style="color:${e.pct?'var(--ok)':'var(--muted)'}">${
+          Math.round(e.earn).toLocaleString()} h</span></div></td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="7" class="empty">Nobody has been given a document yet.</td></tr>';
 
   /* by family */
   const fams={};
@@ -4640,15 +4510,15 @@ async function downloadPlan(after){
   }
 }
 window.downloadPlan=downloadPlan;
-
-/* ═══ WORKLOAD BY ENGINEER ══════════════════════════════════════════════ */
+/* ── who is carrying what ─────────────────────────────────────────────────
+   It had a screen of its own and did not need one: the only thing anybody
+   does with it is give somebody fewer documents, and that happens here. */
 const WL={ sort:{k:'late',dir:-1} };
 const WL_COLS=[
   {k:'who',  t:'Engineer',       v:r=>r.who},
   {k:'docs', t:'Documents',      v:r=>r.docs, desc:true, right:true},
   {k:'open', t:'Open milestones',v:r=>r.open, desc:true, right:true},
   {k:'late', t:'Overdue',        v:r=>r.late, desc:true, right:true},
-  {k:'due',  t:'Due soon',       v:r=>r.due,  desc:true, right:true},
   {k:'awc',  t:'With comments',  v:r=>r.awc,  desc:true, right:true},
   {k:'pct',  t:'Earned',         v:r=>r.pct,  desc:true, right:true},
   {k:'bar',  t:'',               v:null}
@@ -4665,164 +4535,7 @@ function loadRows(){
       if(String(m.cmtCode).toUpperCase()==='AWC') e.awc++; });
   });
   return Object.values(by).map(e=>({...e, pct: e.bud? Math.round(e.earn/e.bud*100) : 0}));
-}
-function openLoad(){ crumbApp('Workload by engineer'); renderLoad(); go('load'); }
-window.openLoad=openLoad;
-function renderLoad(){
-  $('wlScope').innerHTML=scopeLine();
-  const list=sortRows(loadRows(), WL_COLS, WL.sort, r=>r.who==='(nobody)'?1:0);
-  const nobody=list.find(r=>r.who==='(nobody)');
-  $('wlSum').innerHTML=[
-    ['', list.filter(r=>r.who!=='(nobody)').length,
-     'engineer'+(list.filter(r=>r.who!=='(nobody)').length===1?'':'s')+' carrying work'],
-    ['', P.docs.length, 'documents in scope'],
-    [nobody?'dang':'', nobody?nobody.docs:0, 'documents with nobody named'],
-    ['dang', lateMs().length, 'overdue milestones between them']
-  ].map(([c,n,l])=>`<div class="m ${c}"><div class="n">${n.toLocaleString()}</div><div class="l">${l}</div></div>`).join('');
-  sortHead('wlHead', WL_COLS, WL.sort, renderLoad);
-  $('wlBody').innerHTML = list.length ? list.map(e=>{
-    const real=e.who!=='(nobody)';
-    return `<tr${real?'':' class="en-newtag"'}>
-      <td><div class="docno">${real?esc(e.who):'<span class="en-un">nobody named</span>'}</div>
-        ${real&&engMail(e.who)?`<div class="s2">${esc(engMail(e.who))}</div>`:''}</td>
-      <td style="text-align:right"><span class="s1 num">${e.docs}</span></td>
-      <td style="text-align:right"><span class="s1 num">${e.open}</span></td>
-      <td style="text-align:right">${e.late
-        ? `<span class="p6-d late" role="button" tabindex="0" style="cursor:pointer"
-             onclick="openList('late',{who:'${esc(e.who).replace(/'/g,"\\'")}'})">${e.late}</span>`
-        : '<span class="s2">—</span>'}</td>
-      <td style="text-align:right">${e.due? `<span class="p6-d due">${e.due}</span>`:'<span class="s2">—</span>'}</td>
-      <td style="text-align:right">${e.awc? `<span class="s1 num">${e.awc}</span>`:'<span class="s2">—</span>'}</td>
-      <td style="text-align:right"><span class="s1 num">${e.pct}%</span></td>
-      <td><div class="en-progcell">
-        <div class="en-bar"><i style="width:${e.pct}%;background:#2E9E6B"></i></div>
-        <span class="en-load" style="color:${e.pct?'var(--ok)':'var(--muted)'}">${Math.round(e.earn).toLocaleString()} h</span>
-        <span class="en-go" onclick="openList('open',{who:'${esc(e.who).replace(/'/g,"\\'")}'})">open →</span></div></td>
-    </tr>`;
-  }).join('') : '<tr><td colspan="8" class="empty">Nobody has been given a document yet.</td></tr>';
-}
-
-/* ═══ WHAT HAS MOVED ════════════════════════════════════════════════════
-   The same export from an earlier cut-off, matched document by document and
-   milestone by milestone: what was met, what slipped, what is new. */
-const CP={ mode:'all', q:'', rows:[], meta:null };
-function openCompare(){ crumbApp('What has moved'); $('cpScope').innerHTML=scopeLine();
-  if(P.prev) renderCompare(); else { $('cpPick').style.display=''; $('cpOut').style.display='none';
-    $('cpReset').style.display='none'; $('cpXlsx').style.display='none'; }
-  go('cmp'); }
-function resetCompare(){ P.prev=null; openCompare(); }
-window.openCompare=openCompare; window.resetCompare=resetCompare;
-function cpSet(m){ CP.mode=m; renderCompare(); }
-window.cpSet=cpSet;
-
-(function(){
-  const inp=$('cpFile'), zone=$('cpDrop'); if(!inp) return;
-  inp.addEventListener('change',e=>{ const f=e.target.files[0]; if(f) readPrev(f); });
-  ['dragenter','dragover'].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.add('over');}));
-  ['dragleave','drop'].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.remove('over');}));
-  zone.addEventListener('drop',e=>{ const f=e.dataTransfer.files[0]; if(f) readPrev(f); });
-})();
-function cpFail(m){ const e=$('cpErr'); e.innerHTML='<div class="err-t">'+esc(m)+'</div>'; e.classList.add('on'); }
-function readPrev(f){
-  $('cpErr').classList.remove('on');
-  const fr=new FileReader();
-  fr.onerror=()=>cpFail('Could not read that file.');
-  fr.onload=ev=>{
-    try{
-      const wb=bookOpen(new Uint8Array(ev.target.result));
-      const ctx=bookModel(wb, bookRows(wb));
-      const docs=buildDocs(ctx.rows, ctx.hdr);
-      const when=p6Date(ctx.meta.asOf);
-      if(when && P.asOf && when>P.asOf)
-        return cpFail('That export is dated '+fmt(when)+', which is after the one on screen. Load the earlier of the two.');
-      P.prev={ docs, meta:ctx.meta, asOf:when, name:f.name,
-               by:Object.fromEntries(docs.map(d=>[d.key,d])) };
-      $('cpFile').value='';
-      renderCompare();
-    }catch(e){
-      cpFail(e && e.code===NOT_P6 ? 'That is not a P6-PLAN4E export ('+e.message+').'
-                                  : 'Could not read that workbook: '+(e.message||e));
-    }
-  };
-  fr.readAsArrayBuffer(f);
-}
-const CP_COLS=[
-  {k:'doc', t:'Document',  w:'auto',  v:r=>r.d.drawing},
-  {k:'fam', t:'Family',    w:'92px',  v:r=>r.d.family},
-  {k:'what',t:'What moved',w:'240px', v:r=>r.kind},
-  {k:'was', t:'Was',       w:'150px', v:r=>r.was},
-  {k:'now', t:'Now',       w:'150px', v:r=>r.now},
-  {k:'pct', t:'Met',       w:'110px', v:r=>r.pctNow, desc:true, right:true},
-  {k:'open',t:'',          w:'62px',  v:null}
-];
-function compareRows(){
-  const out=[];
-  P.docs.forEach(d=>{
-    const p=P.prev.by[d.key];
-    if(!p){ out.push({d, kind:'new document', was:'—', now:d.pct+'% met', pctNow:d.pct, cls:'new'}); return; }
-    /* a milestone met since the earlier export */
-    d.ms.forEach(m=>{
-      const q=p.ms.find(x=>x.code===m.code && x.order===m.order);
-      if(!q) { out.push({d, kind:'new milestone '+m.code, was:'—',
-                         now:(m.planned?fmt(m.planned):'no date'), pctNow:d.pct, cls:'new'}); return; }
-      if(m.done && !q.done)
-        out.push({d, kind:'met '+m.code, was:'open', now:(m.real?fmt(m.real):'met'), pctNow:d.pct, cls:'up'});
-      else if(!m.done && q.done)
-        out.push({d, kind:'re-opened '+m.code, was:'met', now:'open', pctNow:d.pct, cls:'dn'});
-      const a=q.planned? q.planned.getTime():null, b=m.planned? m.planned.getTime():null;
-      if(a&&b&&a!==b)
-        out.push({d, kind:'planned date moved on '+m.code, was:fmt(q.planned), now:fmt(m.planned),
-                  pctNow:d.pct, cls: b>a?'dn':'up', days:Math.round((b-a)/86400000)});
-      const c=q.forecast? q.forecast.getTime():null, e=m.forecast? m.forecast.getTime():null;
-      if(c&&e&&c!==e && !m.done)
-        out.push({d, kind:'forecast moved on '+m.code, was:fmt(q.forecast), now:fmt(m.forecast),
-                  pctNow:d.pct, cls: e>c?'dn':'up', days:Math.round((e-c)/86400000)});
-    });
-  });
-  return out;
-}
-function renderCompare(){
-  $('cpPick').style.display='none'; $('cpOut').style.display='';
-  $('cpReset').style.display=''; $('cpXlsx').style.display='';
-  const all=compareRows();
-  CP.all=all;
-  let rows=all.filter(r=>CP.mode==='all' || (CP.mode==='met'&&r.cls==='up') ||
-                          (CP.mode==='slip'&&r.cls==='dn') || (CP.mode==='new'&&r.cls==='new'));
-  if(CP.q){ const q=CP.q.toUpperCase(); rows=rows.filter(r=>r.d.searchKey.indexOf(q)>=0); }
-  CP.rows=rows;
-
-  const met=all.filter(r=>r.cls==='up').length, slip=all.filter(r=>r.cls==='dn').length;
-  $('cpSum').innerHTML=[
-    ['', all.length, 'changes since '+(P.prev.asOf? fmt(P.prev.asOf):'the earlier export')],
-    ['ok', met, 'milestones met or pulled forward'],
-    ['dang', slip, 'dates pushed out'],
-    ['', new Set(all.map(r=>r.d.key)).size, 'documents affected']
-  ].map(([c,n,l])=>`<div class="m ${c}"><div class="n">${n.toLocaleString()}</div><div class="l">${l}</div></div>`).join('');
-  $('cpMode').innerHTML='<b>Show</b>'+[['all','Everything'],['met','Met'],['slip','Slipped'],['new','New']]
-    .map(([k,t])=>`<button type="button" class="${CP.mode===k?'on':''}" onclick="cpSet('${k}')">${t}</button>`).join('');
-  $('cpCount').innerHTML=`<b>${rows.length.toLocaleString()}</b> of ${all.length.toLocaleString()} shown`;
-
-  $('cpHead').innerHTML='<tr>'+CP_COLS.map(c=>`<th${c.right?' style="text-align:right"':''}>${c.t}</th>`).join('')+'</tr>';
-  $('cpBody').innerHTML = rows.length ? rows.slice(0,900).map(r=>`<tr data-k="${esc(r.d.key)}">
-    <td><div class="docno">${esc(r.d.drawing)}</div>
-      <div class="doctitle">${esc(r.d.desc||'')}</div></td>
-    <td><span class="en-fam">${esc(r.d.family)}</span></td>
-    <td><div class="s1">${r.cls==='new'?'<span class="cp-new">NEW</span> ':''}${esc(r.kind)}</div>
-      ${r.days?`<div class="s2 ${r.days>0?'cp-dn':'cp-up'}">${r.days>0?'+':''}${r.days} days</div>`:''}</td>
-    <td><div class="s1 num">${esc(r.was)}</div></td>
-    <td><div class="s1 num ${r.cls==='up'?'cp-up':(r.cls==='dn'?'cp-dn':'')}">${esc(r.now)}</div></td>
-    <td style="text-align:right"><span class="s1 num">${r.pctNow}%</span></td>
-    <td><span class="wk-open">open →</span></td>
-  </tr>`).join('') : '<tr><td colspan="7" class="empty">Nothing changed between the two exports.</td></tr>';
-  $('cpBody').querySelectorAll('tr[data-k]').forEach(tr=>tr.onclick=()=>openDoc(tr.dataset.k));
-}
-(function(){
-  const q=$('cpQ'); if(!q) return;
-  let t=null;
-  q.addEventListener('input',()=>{ clearTimeout(t); t=setTimeout(()=>{ CP.q=q.value.trim(); renderCompare(); },160); });
-})();
-
-/* ═══ WHAT LEAVES THE TOOL ══════════════════════════════════════════════ */
+}/* ═══ WHAT LEAVES THE TOOL ══════════════════════════════════════════════ */
 function reportHead(title, extra){
   return [['P6 PLAN4E — '+title],
     [ (P.meta.project||'')+'  ·  '+(P.meta.dept||'')+'  ·  as of '+(fmt(P.asOf)||'') ],
@@ -4855,6 +4568,25 @@ function exportListXlsx(){
   return saveBook(aoa, head, [34,42,9,8,13,16,8,10,11,8,12,12,12,12,10,8,26,11,12,10,10,26],
     'Milestones', 'P6_'+ML.mode+'_'+(P.meta.project||'')+'.xlsx');
 }
+function docsAoa(){
+  const head=['DOCUMENT','DESCRIPTION','FAMILY','EOM','UNIT','AREA','PARTNER','MILESTONES','MET',
+    'WEIGHT MET','WEIGHT TOTAL','PROGRESS %','WAITING ON','PLANNED','FORECAST','DAYS LATE',
+    'BUDGET H','EARNED H','ENGINEER'];
+  const aoa=reportHead(DL_MODES[DL.mode].t(), DL.rows.length+' documents').concat([head]);
+  DL.rows.forEach(d=>{ const n=d.next;
+    aoa.push([d.drawing, d.desc||'', d.family, d.eom||'', d.unit, d.area||'', d.partner||'',
+      d.ms.length, d.doneN, d.wDone, d.wTot, d.pct,
+      n? n.code : 'complete', n? fmt(n.planned) : '', n? fmt(n.forecast) : '',
+      d.over==null?'':d.over, Math.round(d.budget), Math.round(d.earned), whoOf(d)||'']);
+  });
+  return {aoa, head};
+}
+function exportDocsXlsx(){
+  if(!DL.rows.length) return alert('There is nothing in this list to export.');
+  const {aoa,head}=docsAoa();
+  return saveBook(aoa, head, [34,42,9,8,13,8,10,11,7,11,12,11,13,12,12,10,10,10,26],
+    'Documents', 'P6_documents_'+(P.meta.project||'')+'.xlsx');
+}
 function exportOverviewXlsx(){
   const sp=stateSplit(P.ms), pp=planPct();
   const head=['GROUP','KEY','MILESTONES','MET','OVERDUE','DUE SOON','BUDGET H','EARNED H','EARNED %'];
@@ -4876,40 +4608,6 @@ function exportOverviewXlsx(){
   return saveBook(aoa, head, [14,26,12,9,10,11,11,11,10], 'Overview',
     'P6_overview_'+(P.meta.project||'')+'.xlsx');
 }
-function exportCurveXlsx(){
-  const cv=curveData();
-  const head=['MONTH','PLANNED','FORECAST','ACTUAL','PLANNED TO DATE','FORECAST TO DATE','EARNED TO DATE'];
-  const aoa=reportHead('Progress curve', CV.mode==='hours'?'hours':'milestones').concat([head]);
-  cv.pts.forEach(p=>aoa.push([p.label, Math.round(p.mPlan), Math.round(p.mFcst), Math.round(p.mReal),
-    Math.round(p.plan), Math.round(p.fcst), p.real==null?'':Math.round(p.real)]));
-  return saveBook(aoa, head, [12,12,12,12,17,17,16], 'Curve',
-    'P6_curve_'+(P.meta.project||'')+'.xlsx');
-}
-function exportLoadXlsx(){
-  const head=['ENGINEER','EMAIL','DOCUMENTS','OPEN MILESTONES','OVERDUE','DUE SOON','WITH COMMENTS',
-              'BUDGET H','EARNED H','EARNED %'];
-  const list=loadRows();
-  const aoa=reportHead('Workload by engineer', list.length+' engineers').concat([head]);
-  list.forEach(e=>aoa.push([e.who, engMail(e.who)||'', e.docs, e.open, e.late, e.due, e.awc,
-    Math.round(e.bud), Math.round(e.earn), e.pct]));
-  return saveBook(aoa, head, [30,28,12,17,10,11,15,11,11,10], 'Workload',
-    'P6_workload_'+(P.meta.project||'')+'.xlsx');
-}
-function exportCompareXlsx(){
-  if(!P.prev) return;
-  const head=['DOCUMENT','DESCRIPTION','FAMILY','UNIT','WHAT MOVED','WAS','NOW','DAYS','MET %'];
-  const aoa=reportHead('What has moved',
-    'against '+(P.prev.name||'the earlier export')+(P.prev.asOf?' of '+fmt(P.prev.asOf):'')).concat([head]);
-  CP.rows.forEach(r=>aoa.push([r.d.drawing, r.d.desc||'', r.d.family, r.d.unit,
-    r.kind, r.was, r.now, r.days||'', r.pctNow]));
-  return saveBook(aoa, head, [34,40,9,13,30,14,14,8,9], 'Moved',
-    'P6_moved_'+(P.meta.project||'')+'.xlsx');
-}
-window.exportListXlsx=exportListXlsx; window.exportOverviewXlsx=exportOverviewXlsx;
-window.exportCurveXlsx=exportCurveXlsx; window.exportLoadXlsx=exportLoadXlsx;
-window.exportCompareXlsx=exportCompareXlsx;
-
-/* ── the same list, as an Outlook draft ─────────────────────────────────── */
 function emailList(){
   if(!ML.rows.length) return alert('There is nothing in this list to send.');
   const file=exportListXlsx();
