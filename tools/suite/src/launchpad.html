@@ -1,0 +1,95 @@
+  <!-- ═══════════════════════════════════════════════════════════════
+       MERIDIAM LAUNCHPAD — every app, visible at once, as tiles.
+  ═══════════════════════════════════════════════════════════════════ -->
+  <div data-view="main" class="mlp" style="display:block;">
+    <header class="mlp-shell">
+      <button type="button" class="mlp-brand" onclick="mlpGoTab('all')" title="MERIDIAM — all apps" aria-label="MERIDIAM — all apps">
+        <span class="mrd-brand-logo" role="img" aria-label="MERIDIAM"></span>
+      </button>
+      <span class="mlp-sep"></span>
+      <span class="mlp-product">Static Equipment Intelligence</span>
+      <span class="mlp-fill"></span>
+      <label class="mlp-search" title="Search apps (press /)">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="mlpQ" type="search" placeholder="Search apps" autocomplete="off" spellcheck="false" aria-label="Search apps">
+        <kbd>/</kbd>
+      </label>
+    </header>
+
+    <main class="mlp-page">
+      <div class="mlp-bar">
+        <nav class="mlp-tabs" id="mlpTabs" aria-label="App groups">
+          <button type="button" class="on" data-g="all">All apps</button>
+          <button type="button" data-g="ctl">Document &amp; Schedule Control</button>
+          <button type="button" data-g="eng">Engineering &amp; Codes</button>
+        </nav>
+      </div>
+      <div class="mlp-scope" id="mlpScope"></div>
+
+      <section class="mlp-grp" data-g="ctl">
+        <h2>Document &amp; Schedule Control</h2>
+        <div class="mlp-tiles">
+          <button type="button" class="mlp-tile" data-app="drm" data-k="vendor documents review crs po purchase order transmittal engineer consolidated status"
+                  data-tip="Load the Consolidated Status workbook, pick your department, discipline and purchase order, then work the lists — your review actions, what is waiting on others, the client CRS, engineers and reports.">
+            <span class="t">Document Review Management</span>
+            <span class="d">Vendor documents &amp; CRS</span>
+            <span class="mid"></span>
+            <span class="ft">
+              <span class="ic"><svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="m8.6 14.4 2.3 2.3 4.4-4.7"/></svg></span>
+              <span class="inf">Consolidated Status workbook</span>
+            </span>
+          </button>
+          <button type="button" class="mlp-tile" data-app="p6" data-k="p6 plan4e primavera schedule milestone weight progress planning overdue look ahead"
+                  data-tip="Load the P6-PLAN4E export to see what is overdue or coming up, progress by milestone weight, every document's milestone chain, and who is responsible for each family.">
+            <span class="t">P6 PLAN4E Milestone Management</span>
+            <span class="d">Milestones &amp; progress</span>
+            <span class="mid"></span>
+            <span class="ft">
+              <span class="ic"><svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="9" height="3.2" rx="1"/><rect x="7" y="10.4" width="9" height="3.2" rx="1"/><rect x="4.5" y="16.3" width="6.5" height="3.2" rx="1"/><path d="m19.2 15.2 2.3 2.7-2.3 2.7-2.3-2.7z"/></svg></span>
+              <span class="inf">P6-PLAN4E export</span>
+            </span>
+          </button>
+        </div>
+      </section>
+
+      <section class="mlp-grp" data-g="eng">
+        <h2>Engineering &amp; Codes</h2>
+        <div class="mlp-tiles">
+          <button type="button" class="mlp-tile" data-app="asme" data-k="asme bpvc section viii division 1 code ug-27 ug-32 ug-28 ug-37 pressure vessel learning shell head nozzle mdmt"
+                  data-tip="Browse ASME BPVC Section VIII Division 1 (2025) by Part and appendix, search any paragraph, and work through interactive modules — shells, heads, vacuum, openings and more. A learning aid, not a design tool.">
+            <span class="t">ASME Section VIII Division 1 Visualiser</span>
+            <span class="d">Learn the code, interactively</span>
+            <span class="mid"></span>
+            <span class="ft">
+              <span class="ic"><svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7.5C7 5.6 9.2 4 12 4s5 1.6 5 3.5v9c0 1.9-2.2 3.5-5 3.5s-5-1.6-5-3.5z"/><path d="M7 12h10" stroke-dasharray="1.6 1.9"/><path d="M17 9.5h3M12 4V2.4"/></svg></span>
+              <span class="inf">__ASME_MODULES__ interactive modules · 2025 edition</span>
+            </span>
+          </button>
+          <button type="button" class="mlp-tile" data-app="ert" data-k="engineering review tool checklist drum column reactor tank sphere api 650 gad vessel"
+                  data-tip="Review equipment against structured checklists: build or import a drum review, run the API 650 tank GAD checklist, and save audit-ready Excel.">
+            <span class="t">Engineering Review Tool</span>
+            <span class="d">Equipment review checklists</span>
+            <span class="mid"></span>
+            <span class="ft">
+              <span class="ic"><svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2.8h6V4"/><path d="m8.4 10 1.6 1.6 2.9-3M8.4 15.6l1.6 1.6 2.9-3"/><path d="M15 10.3h1.5M15 15.9h1.5"/></svg></span>
+              <span class="inf">Drum · Column · Reactor · Tank · Sphere</span>
+            </span>
+          </button>
+          <button type="button" class="mlp-tile" data-app="project" data-k="project details ceyhan pdh pp 10410 equipment explorer plant units"
+                  data-tip="Explore a project's static equipment: every pressure vessel, column and reactor by unit, typology, support and service — starting with CEYHAN PDH-PP.">
+            <span class="t">Project Details</span>
+            <span class="d">Static equipment by project</span>
+            <span class="mid"></span>
+            <span class="ft">
+              <span class="ic"><svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20.5V11l5 3v-3l5 3V7.5l8 4.2v8.8z"/><path d="M2 20.5h20M7 17.5h1.5M11.5 17.5H13M16.5 17.5H18"/></svg></span>
+              <span class="inf">CEYHAN PDH-PP · 10410</span>
+            </span>
+          </button>
+        </div>
+      </section>
+
+      <div class="mlp-empty" id="mlpEmpty" hidden>No app matches “<b></b>”.</div>
+    </main>
+    <div class="mlp-tip" id="mlpTip" role="tooltip"><div class="t1"></div><div class="t2"></div></div>
+  </div>
+

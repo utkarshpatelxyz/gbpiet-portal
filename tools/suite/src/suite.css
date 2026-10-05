@@ -1,0 +1,266 @@
+  <style id="mrd-suite-css">
+  /* ══ MERIDIAM SUITE ══════════════════════════════════════════════════════
+     The launchpad every app opens from, the bar every app opens under, and
+     the help button that follows you everywhere.  Written in the same tile
+     language as Document Review Management and P6 PLAN4E: a white bar, a
+     blue page, and a wall of identical tiles.
+     ════════════════════════════════════════════════════════════════════ */
+  :root{
+    --mlp-blue:#0A6ED1; --mlp-ink:#32363A; --mlp-muted:#6A6D70;
+    --mlp-line:#D9D9D9; --mlp-line2:#C6CCD2; --mlp-navy:#0B2545;
+    --mlp-ease:cubic-bezier(.4,0,.2,1);
+    --mlp-font:'Inter','Segoe UI',system-ui,-apple-system,Arial,sans-serif;
+  }
+  /* The suite chrome speaks in the tools' typeface, not the brand sheet's.
+     Element-scoped so the MERIDIAM logo keeps its own lettering. */
+  .mlp :is(div,span,button,input,h1,h2,h3,p,a,label,nav,header,section,kbd,small,b,i,main),
+  #mrd-app-topbar :is(div,span,button),
+  #mrd-project-landing :is(div,span,button),
+  #mrd-ert-allapps, #mrd-ert-allapps span,
+  .mhb :is(div,span,button,input,textarea,label,p,a,b,small,header,section,i){
+    font-family:var(--mlp-font) !important;
+  }
+
+  /* ── the page ─────────────────────────────────────────────────────────── */
+  [data-view="main"].mlp{position:fixed;inset:0;overflow-y:auto;overflow-x:hidden;
+    background:linear-gradient(180deg,#C7D9EC 0%,#DAE5F0 34%,#E7EEF5 72%,#EDF2F7 100%);
+    color:var(--mlp-ink);-webkit-font-smoothing:antialiased}
+
+  /* the bar across the top */
+  .mlp-shell{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;
+    height:48px;padding:0 22px;background:#fff;border-bottom:1px solid var(--mlp-line);
+    box-shadow:0 1px 2px rgba(0,0,0,.05)}
+  .mlp-brand{display:flex;align-items:center;background:none;border:0;padding:2px;margin:0;
+    cursor:pointer;border-radius:6px;flex:none}
+  .mlp-brand:focus-visible{outline:2px solid var(--mlp-blue);outline-offset:2px}
+  .mlp-brand .mrd-brand-logo svg{height:30px}
+  .mlp-sep{width:1px;height:22px;background:var(--mlp-line);flex:none}
+  .mlp-product{font-size:14px;font-weight:600;color:var(--mlp-ink);white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis}
+  .mlp-fill{flex:1}
+  .mlp-search{display:flex;align-items:center;gap:8px;height:32px;width:min(300px,36vw);
+    padding:0 6px 0 11px;border-radius:16px;background:#EFF1F2;border:1px solid transparent;
+    color:var(--mlp-muted);transition:background .14s var(--mlp-ease),border-color .14s var(--mlp-ease),box-shadow .14s}
+  .mlp-search:hover{background:#E8EBED}
+  .mlp-search:focus-within{background:#fff;border-color:var(--mlp-blue);box-shadow:0 0 0 2px rgba(10,110,209,.16)}
+  .mlp-search svg{flex:none}
+  .mlp-search input{flex:1;min-width:0;border:0;background:none;outline:none;font-size:13px;
+    color:var(--mlp-ink)}
+  .mlp-search input::placeholder{color:var(--mlp-muted)}
+  .mlp-search kbd{flex:none;display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 5px;
+    border-radius:4px;border:1px solid var(--mlp-line);background:#fff;font-size:11px;color:var(--mlp-muted)}
+  .mlp-search:focus-within kbd{display:none}
+
+  .mlp-page{padding:0 48px 110px;max-width:1520px}
+
+  /* the page tabs, the way the tools carry them */
+  .mlp-bar{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-top:12px;
+    border-bottom:1px solid var(--mlp-line2)}
+  .mlp-tabs{display:flex;gap:28px;flex-wrap:wrap}
+  .mlp-tabs button{position:relative;background:none;border:0;padding:11px 1px 12px;
+    font-size:15px;font-weight:400;color:var(--mlp-muted);cursor:pointer;white-space:nowrap;
+    transition:color .14s var(--mlp-ease)}
+  .mlp-tabs button:hover{color:var(--mlp-ink)}
+  .mlp-tabs button.on{color:var(--mlp-ink);font-weight:600}
+  .mlp-tabs button.on::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:3px;
+    background:var(--mlp-blue)}
+  .mlp-tabs button:focus-visible{outline:1px dotted var(--mlp-ink);outline-offset:2px}
+
+  /* one quiet line that says where you are */
+  .mlp-scope{display:flex;flex-wrap:wrap;gap:3px 9px;margin:13px 0 0;font-size:12.5px;
+    font-weight:400;color:var(--mlp-muted)}
+  .mlp-scope b{color:var(--mlp-ink);font-weight:600}
+  .mlp-scope i{font-style:normal;color:#B9BFC5}
+
+  .mlp-grp{margin-top:20px}
+  .mlp-grp[hidden]{display:none}
+  .mlp-grp h2{font-size:17px;font-weight:400;color:var(--mlp-ink);margin:0 0 12px;letter-spacing:0}
+
+  /* Fixed tiles, left-aligned — the same object as a tile in the tools. */
+  .mlp-tiles{display:grid;grid-template-columns:repeat(auto-fill,244px);gap:12px;justify-content:start}
+  @media(max-width:560px){.mlp-tiles{grid-template-columns:1fr}.mlp-page{padding:0 16px 110px}}
+  .mlp-tile{position:relative;display:flex;flex-direction:column;height:238px;padding:18px 20px 20px;
+    background:#fff;border:1px solid var(--mlp-line);border-radius:4px;margin:0;
+    color:inherit;text-align:left;cursor:pointer;overflow:hidden;
+    transition:background .14s var(--mlp-ease),border-color .14s var(--mlp-ease),transform .12s var(--mlp-ease)}
+  .mlp-tile[hidden]{display:none}
+  .mlp-tile .t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+    font-size:16px;font-weight:400;color:var(--mlp-ink);line-height:1.3}
+  .mlp-tile .d{display:block;margin-top:5px;font-size:13.5px;font-weight:400;color:var(--mlp-muted);
+    line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mlp-tile .mid{flex:1}
+  .mlp-tile .ft{display:flex;align-items:flex-end;gap:13px;min-height:38px}
+  .mlp-tile .ic{display:flex;color:#6C90B4;flex:none;transition:color .14s var(--mlp-ease)}
+  .mlp-tile .inf{font-size:12px;font-weight:400;color:var(--mlp-muted);line-height:1.35;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .mlp-tile:focus-visible{outline:1px dotted var(--mlp-ink);outline-offset:-4px}
+  @media (hover:hover){
+    .mlp-tile:hover{background:#F5F6F7;border-color:#C2C6CA}
+    .mlp-tile:hover .ic{color:var(--mlp-blue)}
+  }
+  .mlp-tile:active,.mlp-tile.go{transform:scale(.975)}
+  @keyframes mlpTileIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .mlp-tiles.in .mlp-tile{animation:mlpTileIn .32s var(--mlp-ease) both}
+  @media (prefers-reduced-motion:reduce){.mlp-tiles.in .mlp-tile{animation:none}}
+
+  .mlp-empty{margin-top:34px;font-size:14px;color:var(--mlp-muted)}
+  .mlp-empty[hidden]{display:none}
+  .mlp-empty b{color:var(--mlp-ink);font-weight:600}
+
+  /* what a tile is for, on hover — the tools' own tooltip */
+  .mlp-tip{position:fixed;z-index:50;pointer-events:none;opacity:0;transform:translateY(4px);
+    transition:opacity .13s,transform .13s;background:#0B2545;color:#fff;border-radius:9px;
+    padding:10px 12px;box-shadow:0 8px 26px rgba(11,37,69,.32);max-width:300px}
+  .mlp-tip.on{opacity:1;transform:translateY(0)}
+  .mlp-tip .t1{font-size:12px;font-weight:700}
+  .mlp-tip .t2{font-size:11.5px;font-weight:500;color:rgba(255,255,255,.82);margin-top:4px;line-height:1.45}
+
+  /* ── the bar every app opens under ────────────────────────────────────── */
+  #mrd-app-host #mrd-app-topbar{height:48px;padding:0 22px;background:#fff;
+    border-bottom:1px solid var(--mlp-line);box-shadow:0 1px 2px rgba(0,0,0,.05)}
+  #mrd-app-topbar .mrd-app-brand{gap:12px;min-width:0}
+  #mrd-app-topbar .mrd-app-logo{display:flex;align-items:center;background:none;border:0;padding:2px;
+    margin:0;cursor:pointer;border-radius:6px;flex:none}
+  #mrd-app-topbar .mrd-app-logo:focus-visible{outline:2px solid var(--mlp-blue);outline-offset:2px}
+  #mrd-app-topbar .mrd-brand-logo svg{height:30px}
+  #mrd-app-topbar .mrd-app-sep{height:22px;background:var(--mlp-line)}
+  #mrd-app-topbar .mrd-app-name{font-size:14px;font-weight:600;color:var(--mlp-ink);letter-spacing:0;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #mrd-app-host #mrd-app-back{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 12px;
+    border-radius:5px;background:transparent;border:1px solid transparent;box-shadow:none;
+    color:var(--mlp-muted);font-size:13px;font-weight:500;cursor:pointer;flex:none;
+    transition:background .14s var(--mlp-ease),color .14s var(--mlp-ease)}
+  #mrd-app-host #mrd-app-back:hover{background:#EBF2FA;color:var(--mlp-blue);border-color:transparent}
+  #mrd-app-host #mrd-app-back:focus-visible{outline:1px dotted var(--mlp-ink);outline-offset:2px}
+  #mrd-app-back .i-back{display:none}
+  #mrd-app-back.is-back .i-back{display:block}
+  #mrd-app-back.is-back .i-grid{display:none}
+
+  /* ── the way out of the Engineering Review Tool ───────────────────────── */
+  #mrd-ert-allapps{position:fixed;top:10px;right:20px;z-index:1001;display:inline-flex;align-items:center;
+    gap:7px;height:32px;padding:0 15px;border-radius:22px;cursor:pointer;
+    background:rgba(255,255,255,.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border:1px solid rgba(34,65,95,.18);color:#22415F;font-size:12.5px;font-weight:600;
+    box-shadow:0 1px 3px rgba(34,65,95,.08);transition:all .18s;
+    opacity:0;animation:mrdPillIn .5s ease forwards .35s}
+  #mrd-ert-allapps:hover{background:#22415F;color:#fff;border-color:transparent}
+  @keyframes mrdPillIn{to{opacity:1}}
+  [data-view="home"] .home-logo{cursor:pointer}
+
+  /* ══ HELP ═══════════════════════════════════════════════════════════════
+     A round button in the corner of every screen.  It knows which app you are
+     in, answers the questions people ask about it, and when the question is
+     not there it writes the email for you.
+     ════════════════════════════════════════════════════════════════════ */
+  .mhb{--mhb-r:22px;--mhb-b:22px}
+  .mhb.lift{--mhb-b:56px}               /* above the ASME lab's footer strip */
+  .mhb-fab{position:fixed;right:var(--mhb-r);bottom:var(--mhb-b);z-index:12500;width:54px;height:54px;
+    border-radius:50%;border:0;padding:0;cursor:pointer;color:#fff;display:grid;place-items:center;
+    background:linear-gradient(145deg,#1C7FE0 0%,#0A6ED1 45%,#0B2545 100%);
+    box-shadow:0 8px 22px rgba(11,37,69,.34),inset 0 1px 0 rgba(255,255,255,.25);
+    transition:transform .2s var(--mlp-ease),box-shadow .2s var(--mlp-ease),bottom .25s var(--mlp-ease),opacity .3s;
+    opacity:0;pointer-events:none}
+  .mhb.ready .mhb-fab{opacity:1;pointer-events:auto}
+  .mhb-fab:hover{transform:translateY(-2px) scale(1.04);box-shadow:0 12px 28px rgba(11,37,69,.40),inset 0 1px 0 rgba(255,255,255,.25)}
+  .mhb-fab:focus-visible{outline:3px solid rgba(10,110,209,.45);outline-offset:3px}
+  .mhb-fab svg{position:absolute;transition:transform .25s var(--mlp-ease),opacity .2s}
+  .mhb-fab .i-x{opacity:0;transform:rotate(-90deg) scale(.6)}
+  .mhb.open .mhb-fab .i-q{opacity:0;transform:rotate(90deg) scale(.6)}
+  .mhb.open .mhb-fab .i-x{opacity:1;transform:none}
+  /* a slow ring the first time it appears, so it is noticed once */
+  .mhb.ready.hello .mhb-fab::after{content:'';position:absolute;inset:0;border-radius:50%;
+    box-shadow:0 0 0 0 rgba(10,110,209,.45);animation:mhbRing 1.6s ease-out 2}
+  @keyframes mhbRing{to{box-shadow:0 0 0 16px rgba(10,110,209,0)}}
+  .mhb-tipl{position:fixed;right:calc(var(--mhb-r) + 64px);bottom:calc(var(--mhb-b) + 14px);z-index:12500;
+    background:#0B2545;color:#fff;font-size:12px;font-weight:600;padding:6px 10px;border-radius:7px;
+    white-space:nowrap;pointer-events:none;opacity:0;transform:translateX(6px);
+    transition:opacity .15s,transform .15s,bottom .25s var(--mlp-ease)}
+  .mhb.ready .mhb-fab:hover + .mhb-tipl{opacity:1;transform:none}
+  .mhb.open .mhb-tipl{display:none}
+
+  .mhb-panel{position:fixed;right:var(--mhb-r);bottom:calc(var(--mhb-b) + 66px);z-index:12500;
+    width:min(384px,calc(100vw - 32px));height:min(600px,calc(100vh - var(--mhb-b) - 96px));
+    display:flex;flex-direction:column;background:#fff;border-radius:14px;overflow:hidden;
+    border:1px solid rgba(11,37,69,.10);box-shadow:0 22px 64px rgba(11,37,69,.30);
+    transform-origin:100% 100%;transition:bottom .25s var(--mlp-ease);color:#32363A}
+  .mhb-panel[hidden]{display:none}
+  .mhb.open .mhb-panel{animation:mhbIn .24s cubic-bezier(.2,.9,.3,1.2) both}
+  @keyframes mhbIn{from{opacity:0;transform:translateY(10px) scale(.94)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.mhb.open .mhb-panel{animation:none}.mhb-fab::after{display:none}}
+
+  .mhb-head{display:flex;align-items:center;gap:11px;padding:13px 12px 13px 15px;flex:none;color:#fff;
+    background:linear-gradient(135deg,#0B2545 0%,#12395C 60%,#0A6ED1 140%)}
+  .mhb-av{width:34px;height:34px;border-radius:50%;flex:none;display:grid;place-items:center;
+    background:rgba(255,255,255,.14);box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)}
+  .mhb-ht{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+  .mhb-ht b{font-size:14px;font-weight:700;letter-spacing:.01em}
+  .mhb-ht small{font-size:11.5px;font-weight:500;color:rgba(255,255,255,.78);white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis}
+  .mhb-x{width:30px;height:30px;border-radius:7px;border:0;background:transparent;color:#fff;cursor:pointer;
+    display:grid;place-items:center;flex:none;transition:background .14s}
+  .mhb-x:hover{background:rgba(255,255,255,.14)}
+
+  .mhb-thread{flex:1;min-height:0;overflow-y:auto;padding:14px 14px 6px;background:#F7F9FC;
+    display:flex;flex-direction:column;gap:8px;scroll-behavior:smooth}
+  .mhb-conv{display:flex;flex-direction:column;gap:8px}
+  .mhb-conv[hidden]{display:none}
+  .mhb-msg{max-width:86%;padding:9px 12px;font-size:13px;line-height:1.48;border-radius:13px;
+    animation:mhbMsg .22s var(--mlp-ease) both;word-wrap:break-word}
+  @keyframes mhbMsg{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+  .mhb-msg.bot{align-self:flex-start;background:#fff;border:1px solid #E3E8EF;border-bottom-left-radius:4px;color:#32363A}
+  .mhb-msg.me{align-self:flex-end;background:#0A6ED1;color:#fff;border-bottom-right-radius:4px}
+  .mhb-msg b{font-weight:600}
+  .mhb-msg.me b{color:#fff}
+  .mhb-msg .k{display:inline-block;font-size:12px;font-weight:600;padding:0 6px;border-radius:4px;
+    background:#EEF3F9;color:#0B2545;border:1px solid #D9E2EC}
+  .mhb-msg a{color:#0A6ED1;font-weight:600}
+  .mhb-msg .acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .mhb-msg .acts button{font-size:12px;font-weight:600;padding:5px 10px;border-radius:6px;cursor:pointer;
+    border:1px solid #C9D6E3;background:#fff;color:#0A6ED1;transition:background .14s}
+  .mhb-msg .acts button:hover{background:#EBF2FA}
+  .mhb-typing{align-self:flex-start;display:flex;gap:4px;padding:11px 13px;background:#fff;
+    border:1px solid #E3E8EF;border-radius:13px;border-bottom-left-radius:4px}
+  .mhb-typing i{width:6px;height:6px;border-radius:50%;background:#A3B1C2;animation:mhbDot 1s infinite ease-in-out}
+  .mhb-typing i:nth-child(2){animation-delay:.15s}.mhb-typing i:nth-child(3){animation-delay:.3s}
+  @keyframes mhbDot{0%,60%,100%{transform:none;opacity:.5}30%{transform:translateY(-4px);opacity:1}}
+
+  .mhb-dock{flex:none;max-height:48%;display:flex;flex-direction:column;border-top:1px solid #E6EAF0;background:#fff}
+  .mhb-dock[hidden]{display:none}
+  .mhb-dl{flex:none;padding:10px 15px 6px;font-size:10.5px;font-weight:700;letter-spacing:.09em;
+    text-transform:uppercase;color:#8A95A3}
+  .mhb-qs{flex:1;min-height:0;overflow-y:auto;padding:0 10px 8px;display:flex;flex-direction:column;gap:5px}
+  .mhb-q{display:flex;align-items:center;gap:9px;width:100%;text-align:left;padding:8px 10px;border-radius:8px;
+    border:1px solid #E1E7EE;background:#fff;color:#0B2545;font-size:12.8px;font-weight:500;line-height:1.35;
+    cursor:pointer;transition:background .14s,border-color .14s,color .14s}
+  .mhb-q:hover{background:#EBF2FA;border-color:#B9D2EC;color:#0A6ED1}
+  .mhb-q svg{flex:none;color:#7E9AB8}
+  .mhb-q.seen{color:#6A6D70}
+  .mhb-q.seen svg{color:#2E9E6B}
+  .mhb-miss{flex:none;display:flex;align-items:center;justify-content:center;gap:8px;margin:2px 10px 10px;
+    padding:9px 12px;border-radius:8px;border:1px dashed #9DB4CC;background:#F7FAFD;color:#0B2545;
+    font-size:13px;font-weight:600;cursor:pointer;transition:background .14s,border-color .14s}
+  .mhb-miss:hover{background:#EBF2FA;border-color:#0A6ED1;color:#0A6ED1}
+
+  .mhb-compose{flex:none;display:flex;flex-direction:column;gap:8px;padding:12px 14px 13px;
+    border-top:1px solid #E6EAF0;background:#fff;animation:mhbMsg .2s var(--mlp-ease) both}
+  .mhb-compose[hidden]{display:none}
+  .mhb-compose label{font-size:12.5px;font-weight:700;color:#0B2545}
+  .mhb-compose textarea{width:100%;min-height:104px;max-height:190px;resize:vertical;padding:9px 11px;
+    border:1px solid #C9D3DD;border-radius:8px;font-size:13px;line-height:1.45;color:#32363A;background:#fff;outline:none;
+    transition:border-color .14s,box-shadow .14s}
+  .mhb-compose textarea:focus{border-color:#0A6ED1;box-shadow:0 0 0 2px rgba(10,110,209,.16)}
+  .mhb-crow{display:flex;align-items:center;gap:10px}
+  .mhb-back{background:none;border:0;padding:4px 2px;color:#6A6D70;font-size:12px;font-weight:600;cursor:pointer}
+  .mhb-back:hover{color:#0A6ED1}
+  .mhb-count{flex:1;text-align:right;font-size:11px;color:#8A95A3;font-variant-numeric:tabular-nums}
+  .mhb-send{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 15px;border:0;border-radius:8px;
+    background:#0A6ED1;color:#fff;font-size:13px;font-weight:600;cursor:pointer;
+    box-shadow:0 3px 10px rgba(10,110,209,.3);transition:background .14s,transform .14s;
+    animation:mhbSend .26s cubic-bezier(.2,.9,.3,1.3) both}
+  .mhb-send[hidden]{display:none}
+  .mhb-send:hover{background:#0858A8}
+  @keyframes mhbSend{from{opacity:0;transform:translateX(8px) scale(.9)}to{opacity:1;transform:none}}
+  .mhb-to{font-size:11px;color:#8A95A3}
+  .mhb-to b{color:#32363A;font-weight:600}
+  .mhb-mailframe{display:none}
+  </style>
