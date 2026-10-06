@@ -7084,7 +7084,9 @@ function engPeople(){
   const get=k=>(by[k]=by[k]||{who:k, tags:[], docs:[]});
   engDocs().forEach(d=>{ const w=docWhoOf(d); if(isNA(w)) return;
     get(w||'(unassigned)').docs.push(d); });
-  engIndex().list.forEach(t=>{ if(isNA(t.who)) return; get(t.who||'(unassigned)').tags.push(t); });
+  /* identical tags carry the same documents, so a family is one piece of
+     work: it counts once, on its first tag, and the rest ride along */
+  engIndex().list.forEach(t=>{ if(isNA(t.who) || t.twinOf) return; get(t.who||'(unassigned)').tags.push(t); });
   /* somebody whose only open work is a reply to the client still belongs here */
   let crs={}; try{ crs=crsByPerson(); }catch(e){ crs={}; }
   Object.keys(crs).forEach(w=>{ if(crs[w].owed) get(w); });
@@ -7322,7 +7324,8 @@ function renderEngPeople(tags){
           ${open?'<span class="en-go">open →</span>':''}</div></td>
       <td><div class="s2">${e.tags.length
           ? e.tags.map(t=>esc(t.tag)+' <span style="color:var(--muted)">('+t.mineN+
-              (t.twinOf? ', shared with '+esc(t.twinOf) : '')+')</span>').join(' · ')
+              (t.twins&&t.twins.length>1? ', identical to '+esc(t.twins.filter(x=>x!==t.tag).join(', ')) : '')+
+              ')</span>').join(' · ')
           : '<span style="color:var(--muted)">no equipment tags — documents assigned one by one</span>'}</div></td>
     </tr>`;}).join('')
     : '<tr><td colspan="6" class="empty">No equipment tags in this scope.</td></tr>';
@@ -8316,10 +8319,23 @@ async function buildAllPo(step){
 
   Object.values(out.pos).forEach(P=>{
     const whoOf=t=>S.eng.resp[tagKey(P.po,t)]||'';
-    /* who holds which tags */
+    /* Tags carrying exactly the same documents are one piece of equipment
+       repeated — the purchase order screen folds them into a family, and so
+       does this: one tag counted, its engineer whichever of them has one. */
+    const trs={};
+    P.docs.forEach(d=>d.tags.forEach(t=>{ (trs[t]=trs[t]||[]).push(d.tr); }));
+    const fam={};
     Object.values(P.tags).forEach(T=>{
+      const k=(trs[T.tag]||[]).slice().sort().join('\u0001')||('#'+T.tag);
+      (fam[k]=fam[k]||[]).push(T);
+    });
+    /* who holds which tags */
+    Object.values(fam).forEach(g=>{
+      g.sort((a,b)=>a.tag.localeCompare(b.tag));
+      const T=g[0];
+      if(g.length>1) T.twins=g.map(x=>x.tag);
       out.tags++;
-      const raw=whoOf(T.tag);
+      const raw=(g.map(x=>whoOf(x.tag)).find(v=>v)||'');
       if(isNA(raw)) return;                               // set aside on purpose
       const who=raw||'(unassigned)';
       const E=(out.eng[who]=out.eng[who]||{who, pos:{}, tags:0, n:0, circ:0, late:0,
@@ -8463,7 +8479,7 @@ function renderLoadAll(){
         rows.push(`<tr class="al-sub">
           <td><div class="al-po">${esc(P.po)}</div>
             <div class="s2" title="${esc(P.desc)}">${esc(P.desc||'')}</div>
-            <div class="s2">${P.tags.map(t=>esc(tagLabel(t.tag))).slice(0,8).join(', ')}${P.tags.length>8?' …':''}</div></td>
+            <div class="s2">${P.tags.map(t=>esc(tagLabel(t.tag))+(t.twins? ' (×'+t.twins.length+' identical)':'')).slice(0,8).join(', ')}${P.tags.length>8?' …':''}</div></td>
           <td></td>
           <td style="text-align:right"><span class="s2 num">${P.tags.length}</span></td>
           <td style="text-align:right"><span class="s2 num">${P.n.toLocaleString()}</span></td>
