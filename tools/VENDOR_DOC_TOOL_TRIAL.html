@@ -1654,6 +1654,19 @@ body[data-dark] .navhome:hover{background:#1C2839;color:var(--blue)}
 .wk-head .m .l{font-size:12px;font-weight:400;color:var(--muted);margin-top:6px}
 /* the one figure that stays coloured: work that is already late */
 .wk-head .m.dang .n{color:#BB0000}
+.who-bar{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;margin:14px 0 0}
+.who-bar .who-l{font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--muted);margin-right:4px}
+.who-bar button{display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 12px;border-radius:16px;
+  border:1px solid var(--line2);background:var(--sf);color:var(--ink);font-size:12.5px;font-weight:600;
+  cursor:pointer;transition:background .14s var(--ease),border-color .14s var(--ease),color .14s var(--ease)}
+.who-bar button:hover{border-color:var(--blue);color:var(--blue)}
+.who-bar button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.who-bar button i{font-style:normal;font-family:var(--mono);font-size:11px;font-weight:700;
+  padding:1px 7px;border-radius:10px;background:var(--sf2);color:var(--muted)}
+.who-bar button.on i{background:rgba(255,255,255,.22);color:#fff}
+.who-bar button.none{color:var(--warn)}
+.who-bar button.none.on{background:var(--warn);border-color:var(--warn);color:#fff}
 .wk-q{flex:0 1 240px;min-width:150px;padding:7px 11px;font-size:13px;font-weight:400;color:var(--ink);
   background:var(--sf);border:1px solid var(--line2);border-radius:4px}
 .wk-q:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px rgba(10,110,209,.18)}
@@ -2223,6 +2236,7 @@ body[data-dark] #alBody tr.al-sub td{background:#101822}
     <div class="pb-sp"></div>
     <div class="pb-scope" id="wkScope"></div>
   </div>
+  <div class="who-bar" id="wkWho" style="display:none"></div>
   <div class="wk-head" id="wkSum"></div>
   <div class="dt-wrap" style="border-radius:4px;border:1px solid var(--line2);margin-top:14px">
     <div class="ac-tools">
@@ -2293,6 +2307,7 @@ body[data-dark] #alBody tr.al-sub td{background:#101822}
     <div class="pb-sp"></div>
     <div class="pb-scope" id="clScope"></div>
   </div>
+  <div class="who-bar" id="clWho" style="display:none"></div>
   <div class="wk-head" id="clSum"></div>
   <div class="dt-wrap" style="border-radius:4px;border:1px solid var(--line2);margin-top:14px">
     <div class="ac-tools">
@@ -7813,7 +7828,39 @@ window.renderHome=renderHome;
    document that is not circulating is not something anybody can act on, and
    only the columns needed to decide which one to pick up next.
    ═══════════════════════════════════════════════════════════════════════ */
-const WK={ mode:'mine', q:'', over:false, crit:false, sort:{k:null,dir:1}, rows:[] };
+const WK={ mode:'mine', who:null, q:'', over:false, crit:false, sort:{k:null,dir:1}, rows:[] };
+
+/* ── Whose documents ────────────────────────────────────────────────────
+   Once the register carries engineers for this purchase order, the two
+   "my actions" lists can be narrowed to one person — the same split the
+   managers' Workload by engineer uses, so an engineer finds their own
+   documents without leaving the reviewing tab.  With nobody assigned the
+   lists are exactly what they were. */
+const WHO_NONE='(unassigned)';
+let WHO_PICK=null;                       // kept while the file is open
+function engNamesHere(){
+  let p=[]; try{ p=engPeople(); }catch(e){ p=[]; }
+  return [...new Set(p.map(e=>e.who).filter(w=>w && w!==WHO_NONE && !isNA(w)))]
+           .sort((a,b)=>a.localeCompare(b));
+}
+const whoKeyDoc = d => { const w=docWhoOf(d); return w && !isNA(w) ? w : WHO_NONE; };
+/* The picker: View all, every engineer on this PO with what they hold on
+   this list, and the documents nobody holds yet. */
+function whoBar(id, base, keyOf, cur, pick){
+  const el=$(id); if(!el) return;
+  const names=engNamesHere();
+  if(!names.length){ el.style.display='none'; el.innerHTML=''; return; }
+  const cnt={}; base.forEach(x=>{ const k=keyOf(x); cnt[k]=(cnt[k]||0)+1; });
+  const opts=[{w:'', t:'View all', n:base.length}]
+    .concat(names.map(w=>({w, t:w, n:cnt[w]||0})))
+    .concat(cnt[WHO_NONE]? [{w:WHO_NONE, t:'No engineer', n:cnt[WHO_NONE], cls:'none'}] : []);
+  el.style.display='';
+  el.innerHTML='<span class="who-l">Show documents for</span>'+opts.map(o=>
+    `<button type="button" class="${o.cls||''}${(cur||'')===o.w?' on':''}" data-w="${esc(o.w)}"
+       title="${esc(o.w? o.t+' — '+o.n+' on this list' : 'Every document on this list')}">${esc(o.t)}<i>${o.n}</i></button>`).join('');
+  el.querySelectorAll('button').forEach(b=>b.onclick=()=>{ WHO_PICK=b.dataset.w||null; pick(WHO_PICK); });
+}
+const whoValid = w => w && (w===WHO_NONE || engNamesHere().indexOf(w)>=0) ? w : null;
 
 const WK_MODES={
   mine   :{ key:'you',     cls:'warn', t:()=>'Waiting on '+(S.disc||'your discipline')},
@@ -7841,6 +7888,7 @@ function wkCols(){
 function openWork(mode){
   if(!S.docs || !S.docs.length) return alert('Choose a purchase order first.');
   WK.mode = WK_MODES[mode] ? mode : 'mine';
+  WK.who = WK.mode==='mine' ? whoValid(WHO_PICK) : null;
   WK.q=''; WK.over=false; WK.crit=false; WK.sort={k:null,dir:1};
   $('wkQ').value='';
   renderWork();
@@ -7868,7 +7916,10 @@ window.emailWork=emailWork;
 
 function renderWork(){
   const M=WK_MODES[WK.mode];
-  const all=wkAll();
+  const base=wkAll();
+  if(WK.mode==='mine') whoBar('wkWho', base, whoKeyDoc, WK.who, w=>{ WK.who=w; renderWork(); });
+  else { $('wkWho').style.display='none'; $('wkWho').innerHTML=''; }
+  const all=WK.who==null ? base : base.filter(d=>whoKeyDoc(d)===WK.who);
   let rows=all.map(d=>({d, disc:null}));
   if(WK.q){ const q=WK.q.toUpperCase(); rows=rows.filter(r=>r.d.searchKey.indexOf(q)>=0); }
   if(WK.over) rows=rows.filter(r=>r.d.over>0);
@@ -7887,8 +7938,9 @@ function renderWork(){
   WK.rows=rows;
   wkSyncAc();
 
-  crumbApp(M.t());
-  $('wkTitle').textContent=M.t();
+  const wkT=M.t()+(WK.who==null? '' : ' — '+(WK.who===WHO_NONE? 'no engineer' : WK.who));
+  crumbApp(wkT);
+  $('wkTitle').textContent=wkT;
   $('wkScope').innerHTML=`<span class="v">${esc(S.po)}</span>`+
     vendChip(34)+
     `<span class="v">${esc(S.dep)}</span>`+
@@ -8698,6 +8750,8 @@ function openCrsList(mode, who, extra){
   CL.type = extra && extra.type || null;
   CL.q=''; CL.rej=false; CL.none=false; CL.sort={k:null,dir:1};
   CL.from = CUR==='crs' ? 'crs' : (CUR==='eng' ? 'eng' : 'home');
+  /* the reviewing tiles open on the engineer last picked, if any */
+  if(CL.from==='home' && who===undefined && CL.mode!=='done') CL.who=whoValid(WHO_PICK);
   $('clQ').value='';
   renderCrsList();
   go('crsl');
@@ -8711,9 +8765,17 @@ function clBack(){
 }
 window.clBack=clBack;
 
+const whoKeyCrs = x => x.who && !isNA(x.who) ? x.who : WHO_NONE;
+function clBase(){
+  let l=CL_MODES[CL.mode].pick(crsStats());
+  if(CL.age)  l=l.filter(x=>clAgeOf(x.days)===CL.age);
+  if(CL.code) l=l.filter(x=>x.code===CL.code);
+  if(CL.type) l=l.filter(x=>(x.d.code||'(no code)')===CL.type);
+  return l;
+}
 function clAll(){
   let l=CL_MODES[CL.mode].pick(crsStats());
-  if(CL.who!=null) l=l.filter(x=>(x.who||'(unassigned)')===CL.who);
+  if(CL.who!=null) l=l.filter(x=>whoKeyCrs(x)===CL.who);
   if(CL.age)  l=l.filter(x=>clAgeOf(x.days)===CL.age);
   if(CL.code) l=l.filter(x=>x.code===CL.code);
   if(CL.type) l=l.filter(x=>(x.d.code||'(no code)')===CL.type);
@@ -8728,6 +8790,9 @@ function crsChip(code){
 
 function renderCrsList(){
   const M=CL_MODES[CL.mode];
+  if(CL.from==='home' && CL.mode!=='done')
+    whoBar('clWho', clBase(), whoKeyCrs, CL.who, w=>{ CL.who=w; renderCrsList(); });
+  else { $('clWho').style.display='none'; $('clWho').innerHTML=''; }
   const all=clAll();
   let rows=all.slice();
   if(CL.q){ const q=CL.q.toUpperCase(); rows=rows.filter(x=>x.d.searchKey.indexOf(q)>=0); }
