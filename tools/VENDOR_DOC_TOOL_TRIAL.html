@@ -1654,19 +1654,39 @@ body[data-dark] .navhome:hover{background:#1C2839;color:var(--blue)}
 .wk-head .m .l{font-size:12px;font-weight:400;color:var(--muted);margin-top:6px}
 /* the one figure that stays coloured: work that is already late */
 .wk-head .m.dang .n{color:#BB0000}
-.who-bar{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;margin:14px 0 0}
-.who-bar .who-l{font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;
-  color:var(--muted);margin-right:4px}
-.who-bar button{display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 12px;border-radius:16px;
-  border:1px solid var(--line2);background:var(--sf);color:var(--ink);font-size:12.5px;font-weight:600;
-  cursor:pointer;transition:background .14s var(--ease),border-color .14s var(--ease),color .14s var(--ease)}
-.who-bar button:hover{border-color:var(--blue);color:var(--blue)}
-.who-bar button.on{background:var(--blue);border-color:var(--blue);color:#fff}
-.who-bar button i{font-style:normal;font-family:var(--mono);font-size:11px;font-weight:700;
-  padding:1px 7px;border-radius:10px;background:var(--sf2);color:var(--muted)}
-.who-bar button.on i{background:rgba(255,255,255,.22);color:#fff}
-.who-bar button.none{color:var(--warn)}
-.who-bar button.none.on{background:var(--warn);border-color:var(--warn);color:#fff}
+.who-card{width:min(460px,100%)}
+.who-find{padding:12px 20px 4px}
+.who-find input{width:100%;padding:9px 12px;font-size:13px;color:var(--ink);background:var(--sf);
+  border:1px solid var(--line2);border-radius:8px;outline:none;transition:border-color .14s,box-shadow .14s}
+.who-find input:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(10,110,209,.16)}
+.who-list{padding:8px 12px 14px;display:flex;flex-direction:column;gap:4px;max-height:min(56vh,480px)}
+.who-opt{display:flex;align-items:center;gap:12px;width:100%;padding:9px 10px;border-radius:9px;
+  border:1px solid transparent;background:none;cursor:pointer;text-align:left;color:var(--ink);
+  transition:background .14s var(--ease),border-color .14s var(--ease)}
+.who-opt:hover,.who-opt:focus-visible{background:var(--sf2);border-color:var(--line2);outline:none}
+.who-opt.on{border-color:var(--blue);background:rgba(10,110,209,.06)}
+.who-av{flex:none;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;
+  font-size:11.5px;font-weight:800;color:#fff;background:#5B7A99;letter-spacing:.02em}
+.who-opt.all .who-av{background:var(--blue)}
+.who-opt.none .who-av{background:var(--warn)}
+.who-nm{flex:1;min-width:0;font-size:13px;font-weight:700;color:var(--navy);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who-nm small{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-top:1px}
+.who-n{flex:none;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--ink);
+  padding:2px 9px;border-radius:12px;background:var(--sf2);border:1px solid var(--line)}
+.who-opt.zero .who-nm,.who-opt.zero .who-n{color:var(--muted)}
+.who-opt.zero .who-av{opacity:.55}
+.who-sep{height:1px;background:var(--line);margin:4px 6px}
+.who-empty{padding:18px 10px;font-size:12.5px;color:var(--muted);text-align:center}
+.who-bar{display:flex;align-items:center;gap:10px;margin:14px 0 0}
+.who-bar .who-l{font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.who-bar .who-cur{display:inline-flex;align-items:center;gap:9px;height:32px;padding:0 8px 0 13px;border-radius:16px;
+  border:1px solid var(--line2);background:var(--sf);color:var(--navy);font-size:12.5px;font-weight:700;cursor:pointer;
+  transition:border-color .14s var(--ease),color .14s var(--ease)}
+.who-bar .who-cur:hover{border-color:var(--blue);color:var(--blue)}
+.who-bar .who-cur i{font-style:normal;font-family:var(--mono);font-size:11px;padding:1px 7px;border-radius:10px;
+  background:var(--sf2);color:var(--muted)}
+.who-bar .who-cur span.chg{font-size:11.5px;font-weight:600;color:var(--blue)}
 .wk-q{flex:0 1 240px;min-width:150px;padding:7px 11px;font-size:13px;font-weight:400;color:var(--ink);
   background:var(--sf);border:1px solid var(--line2);border-radius:4px}
 .wk-q:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px rgba(10,110,209,.18)}
@@ -2843,6 +2863,23 @@ body[data-dark] #alBody tr.al-sub td{background:#101822}
 <!-- ── engineer list ───────────────────────────────────────────────────────
      The roster used to be a constant in the source, so changing it meant
      editing the file.  It is edited here instead and kept in this browser. -->
+<div class="modal" id="whoModal" hidden>
+  <div class="modal-bd" onclick="closeWho()"></div>
+  <div class="modal-card who-card" role="dialog" aria-modal="true" aria-labelledby="whoTitle">
+    <div class="modal-h">
+      <div style="flex:1;min-width:0">
+        <div class="modal-t" id="whoTitle">My review actions</div>
+        <div class="modal-s" id="whoSub">Whose documents do you want to see?</div>
+      </div>
+      <button class="modal-x" onclick="closeWho()" aria-label="Close">&#10005;</button>
+    </div>
+    <div class="who-find">
+      <input id="whoQ" type="search" placeholder="Find an engineer" autocomplete="off" spellcheck="false"
+             aria-label="Find an engineer">
+    </div>
+    <div class="modal-b who-list" id="whoList" role="listbox" aria-labelledby="whoTitle"></div>
+  </div>
+</div>
 <div class="modal" id="rosterModal" hidden>
   <div class="modal-bd" onclick="closeRoster()"></div>
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="rosterTitle">
@@ -7730,7 +7767,7 @@ function homeApps(){
   return [
     /* ── take action ───────────────────────────────────────────────────── */
     {g:'act', id:'mine',    ic:ICO.mine,    n:mine.length,
-     t:'My review actions',   d:'Not yet closed by you',   open:()=>openWork('mine')},
+     t:'My review actions',   d:'Not yet closed by you',   open:()=>askWho('work','mine')},
     {g:'act', id:'others',   ic:ICO.others,  n:oth.length,
      t:'Waiting on others',   d:'Held by another discipline',  open:()=>openWork('others')},
     {g:'act', id:'release',  ic:ICO.release, n:rel.length,
@@ -7847,21 +7884,78 @@ function engNamesHere(){
            .sort((a,b)=>a.localeCompare(b));
 }
 const whoKeyDoc = d => { const w=docWhoOf(d); return w && !isNA(w) ? w : WHO_NONE; };
-/* The picker: View all, every engineer on this PO with what they hold on
-   this list, and the documents nobody holds yet. */
-function whoBar(id, base, keyOf, cur, pick){
-  const el=$(id); if(!el) return;
+/* Whose documents: a dialog when a "my actions" tile is clicked — View all,
+   every engineer assigned on this purchase order with what they hold on that
+   list, and the documents nobody holds — with a search, so thirty names are
+   as easy as three.  On the list itself one line says whose it is. */
+const WHO_LIST = {
+  work:{ title:()=>'My review actions', base:()=>(S.docs||[]).filter(d=>d.circulating && d.stuck==='you'),
+         key:d=>whoKeyDoc(d), open:w=>openWork('mine', w) },
+  crs :{ title:m=>({owed:'My CRS actions', c2:'Returned with comments', rej:'Rejected by the client'})[m]||'Client CRS',
+         base:m=>CL_MODES[m].pick(crsStats()), key:x=>whoKeyCrs(x), open:(w,m)=>openCrsList(m, w) }
+};
+let WHO_ASK=null;
+function whoOptions(kind, mode){
+  const L=WHO_LIST[kind], base=L.base(mode), cnt={};
+  base.forEach(x=>{ const k=L.key(x); cnt[k]=(cnt[k]||0)+1; });
   const names=engNamesHere();
-  if(!names.length){ el.style.display='none'; el.innerHTML=''; return; }
-  const cnt={}; base.forEach(x=>{ const k=keyOf(x); cnt[k]=(cnt[k]||0)+1; });
-  const opts=[{w:'', t:'View all', n:base.length}]
+  return [{w:null, t:'View all', s:'Every document on this list', n:base.length, cls:'all'}]
     .concat(names.map(w=>({w, t:w, n:cnt[w]||0})))
-    .concat(cnt[WHO_NONE]? [{w:WHO_NONE, t:'No engineer', n:cnt[WHO_NONE], cls:'none'}] : []);
+    .concat(cnt[WHO_NONE]? [{w:WHO_NONE, t:'No engineer', s:'Documents nobody is assigned to yet', n:cnt[WHO_NONE], cls:'none'}] : []);
+}
+const initials = n => String(n).split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase();
+function askWho(kind, mode){
+  if(!S.docs || !S.docs.length) return alert('Choose a purchase order first.');
+  /* with nobody assigned on this purchase order there is nothing to choose */
+  if(!engNamesHere().length) return WHO_LIST[kind].open(null, mode);
+  WHO_ASK={kind, mode, opts:whoOptions(kind, mode)};
+  $('whoTitle').textContent=WHO_LIST[kind].title(mode);
+  $('whoSub').textContent='Whose documents do you want to see? Pick your own name to see only what is on you.';
+  $('whoQ').value='';
+  renderWho();
+  $('whoModal').hidden=false;
+  setTimeout(()=>$('whoQ').focus(), 30);
+}
+function renderWho(){
+  const q=$('whoQ').value.trim().toUpperCase(), cur=WHO_PICK;
+  const opts=WHO_ASK.opts.filter(o=>!q || o.w===null || String(o.t).toUpperCase().indexOf(q)>=0);
+  const people=opts.filter(o=>o.w && o.w!==WHO_NONE);
+  const row=o=>`<button type="button" class="who-opt ${o.cls||''}${o.n?'':' zero'}${(o.w||null)===(cur||null)?' on':''}"
+      role="option" data-w="${esc(o.w==null?'':o.w)}">
+      <span class="who-av">${o.cls==='all'?'&#9776;':(o.cls==='none'?'?':esc(initials(o.t)))}</span>
+      <span class="who-nm">${esc(o.t)}${o.s?`<small>${esc(o.s)}</small>`:''}</span>
+      <span class="who-n">${o.n}</span></button>`;
+  const all=opts.find(o=>o.w===null), none=opts.find(o=>o.w===WHO_NONE);
+  $('whoList').innerHTML = row(all) + '<div class="who-sep"></div>' +
+    (people.length ? people.map(row).join('') : `<div class="who-empty">No engineer matches “${esc($('whoQ').value.trim())}”.</div>`) +
+    (none ? '<div class="who-sep"></div>'+row(none) : '');
+  $('whoList').querySelectorAll('.who-opt').forEach(b=>b.onclick=()=>pickWho(b.dataset.w||null));
+}
+function pickWho(w){
+  const a=WHO_ASK; closeWho(); if(!a) return;
+  WHO_PICK=w;
+  WHO_LIST[a.kind].open(w, a.mode);
+}
+function closeWho(){ $('whoModal').hidden=true; }
+window.askWho=askWho; window.closeWho=closeWho;
+(function(){
+  const q=$('whoQ'); if(!q) return;
+  q.addEventListener('input', renderWho);
+  q.addEventListener('keydown', e=>{
+    if(e.key==='Enter'){ const f=$('whoList').querySelector('.who-opt:not(.all):not(.none)') ||
+                                 $('whoList').querySelector('.who-opt'); if(f) f.click(); }
+  });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !$('whoModal').hidden) closeWho(); });
+})();
+/* One line on the list: whose it is, and the way back to the dialog. */
+function whoLine(id, kind, mode, cur, n){
+  const el=$(id); if(!el) return;
+  if(!engNamesHere().length){ el.style.display='none'; el.innerHTML=''; return; }
+  const t = cur==null ? 'Everyone' : (cur===WHO_NONE ? 'No engineer' : cur);
   el.style.display='';
-  el.innerHTML='<span class="who-l">Show documents for</span>'+opts.map(o=>
-    `<button type="button" class="${o.cls||''}${(cur||'')===o.w?' on':''}" data-w="${esc(o.w)}"
-       title="${esc(o.w? o.t+' — '+o.n+' on this list' : 'Every document on this list')}">${esc(o.t)}<i>${o.n}</i></button>`).join('');
-  el.querySelectorAll('button').forEach(b=>b.onclick=()=>{ WHO_PICK=b.dataset.w||null; pick(WHO_PICK); });
+  el.innerHTML=`<span class="who-l">Showing</span>
+    <button type="button" class="who-cur" title="Choose whose documents to see">${esc(t)}<i>${n}</i><span class="chg">Change</span></button>`;
+  el.querySelector('.who-cur').onclick=()=>askWho(kind, mode);
 }
 const whoValid = w => w && (w===WHO_NONE || engNamesHere().indexOf(w)>=0) ? w : null;
 
@@ -7888,10 +7982,10 @@ function wkCols(){
   return WK_BASE.concat([WK_OPEN]);
 }
 
-function openWork(mode){
+function openWork(mode, who){
   if(!S.docs || !S.docs.length) return alert('Choose a purchase order first.');
   WK.mode = WK_MODES[mode] ? mode : 'mine';
-  WK.who = WK.mode==='mine' ? whoValid(WHO_PICK) : null;
+  WK.who = WK.mode==='mine' ? (who===undefined ? whoValid(WHO_PICK) : whoValid(who)) : null;
   WK.q=''; WK.over=false; WK.crit=false; WK.sort={k:null,dir:1};
   $('wkQ').value='';
   renderWork();
@@ -7920,9 +8014,9 @@ window.emailWork=emailWork;
 function renderWork(){
   const M=WK_MODES[WK.mode];
   const base=wkAll();
-  if(WK.mode==='mine') whoBar('wkWho', base, whoKeyDoc, WK.who, w=>{ WK.who=w; renderWork(); });
-  else { $('wkWho').style.display='none'; $('wkWho').innerHTML=''; }
   const all=WK.who==null ? base : base.filter(d=>whoKeyDoc(d)===WK.who);
+  if(WK.mode==='mine') whoLine('wkWho', 'work', 'mine', WK.who, all.length);
+  else { $('wkWho').style.display='none'; $('wkWho').innerHTML=''; }
   let rows=all.map(d=>({d, disc:null}));
   if(WK.q){ const q=WK.q.toUpperCase(); rows=rows.filter(r=>r.d.searchKey.indexOf(q)>=0); }
   if(WK.over) rows=rows.filter(r=>r.d.over>0);
@@ -8711,11 +8805,11 @@ function crsApps(){
   let s; try{ s=crsStats(); }catch(e){ return []; }
   return [
     {g:'crs', id:'crsMine', ic:ICO.crs,    n:s.owed.length,
-     t:'My CRS actions',     d:'Code 2 or 3 — reply not sent',   open:()=>openCrsList('owed')},
+     t:'My CRS actions',     d:'Code 2 or 3 — reply not sent',   open:()=>askWho('crs','owed')},
     {g:'crs', id:'crsC2',   ic:ICO.crsC2,  n:s.c2.length,
-     t:'Returned with comments', d:'Code 2 — reply not sent',    open:()=>openCrsList('c2')},
+     t:'Returned with comments', d:'Code 2 — reply not sent',    open:()=>askWho('crs','c2')},
     {g:'crs', id:'crsRej',  ic:ICO.crsRej, n:s.rej.length,
-     t:'Rejected by the client', d:'Code 3 — reply not sent',    open:()=>openCrsList('rej')},
+     t:'Rejected by the client', d:'Code 3 — reply not sent',    open:()=>askWho('crs','rej')},
     {g:'poB', id:'bCrs',    ic:ICO.crs,    n:s.owed.length,
      t:'Client CRS',         d:s.owed.length? s.owed.length+' awaiting our reply' : 'every reply sent',
      open:()=>openCrs()}
@@ -8768,6 +8862,7 @@ function openCrsList(mode, who, extra){
   CL.from = CUR==='crs' ? 'crs' : (CUR==='eng' ? 'eng' : 'home');
   /* the reviewing tiles open on the engineer last picked, if any */
   if(CL.from==='home' && who===undefined && CL.mode!=='done') CL.who=whoValid(WHO_PICK);
+  else if(who!==undefined && who!==null) CL.who=whoValid(who);
   $('clQ').value='';
   renderCrsList();
   go('crsl');
@@ -8806,10 +8901,9 @@ function crsChip(code){
 
 function renderCrsList(){
   const M=CL_MODES[CL.mode];
-  if(CL.from==='home' && CL.mode!=='done')
-    whoBar('clWho', clBase(), whoKeyCrs, CL.who, w=>{ CL.who=w; renderCrsList(); });
-  else { $('clWho').style.display='none'; $('clWho').innerHTML=''; }
   const all=clAll();
+  if(CL.from==='home' && CL.mode!=='done') whoLine('clWho', 'crs', CL.mode, CL.who, all.length);
+  else { $('clWho').style.display='none'; $('clWho').innerHTML=''; }
   let rows=all.slice();
   if(CL.q){ const q=CL.q.toUpperCase(); rows=rows.filter(x=>x.d.searchKey.indexOf(q)>=0); }
   if(CL.rej)  rows=rows.filter(x=>x.code==='3');
