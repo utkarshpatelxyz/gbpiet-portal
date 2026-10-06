@@ -3134,6 +3134,10 @@ function fail(t,s){
    against it. */
 const ENG_REQ = 'REQUISITION ENGINEER';     // one per purchase order
 const ENG_RESP = 'RESPONSIBLE ENGINEER';    // one per equipment tag
+/* On a row naming several equipment tags, the engineer of each of them —
+   "210-D-016A: NAME; 210-D-016B: NAME" — because the one cell before it can
+   only say who the document counts for, not who holds every tag it names. */
+const ENG_TAGS = 'ENGINEER BY TAG';
 const ENG_SHEET = 'Engineer List';
 /* The roster used to come from a second sheet the register does not normally
    carry.  It lives here instead, so a plain eGesDoc export is enough; any name
@@ -3360,7 +3364,7 @@ function bookModel(wb, aoa){
   /* the tags and the single documents, both out of the one column; a register
      an earlier version wrote still has its Document Engineers sheet, and what
      was recorded there is kept */
-  const fromCol=engFromColumn(rows, iPO, H['TR NUMBER'], iXR, iResp);
+  const fromCol=engFromColumn(rows, iPO, H['TR NUMBER'], iXR, iResp, H[ENG_TAGS]);
   const resp=fromCol.resp;
   const docEng=Object.assign(fromCol.doc, readDocEngSheet(wb));
   return { meta, hdr:H, headArr:head, depts, rows, engList, req, resp,
@@ -7504,7 +7508,8 @@ async function downloadRegister(after, opts){
     const hdr={}; for(let c=rg.s.c;c<=rg.e.c;c++){ const k=cell(3,c); if(k&&k.v) hdr[String(k.v).trim()]=c; }
     const cReq = hdr[ENG_REQ]  !== undefined ? hdr[ENG_REQ]  : rg.e.c+1;
     const cRes = hdr[ENG_RESP] !== undefined ? hdr[ENG_RESP] : Math.max(rg.e.c+2, cReq+1);
-    put(3,cReq,ENG_REQ); put(3,cRes,ENG_RESP);
+    const cTag = hdr[ENG_TAGS] !== undefined ? hdr[ENG_TAGS] : Math.max(rg.e.c+3, cRes+1);
+    put(3,cReq,ENG_REQ); put(3,cRes,ENG_RESP); put(3,cTag,ENG_TAGS);
 
     const iPO=hdr['PURCHASE ORDER'], iXR=hdr['CROSS REFERENCE'];
     const iTRc=hdr['TR NUMBER'];
@@ -7536,27 +7541,33 @@ async function downloadRegister(after, opts){
         const ovWho = trRow ? (S.eng.doc||{})[rmKey(pp,trRow)] : '';
         const xr=cell(x,iXR), tags=splitTags(xr? xr.v : '');
         const who = ovWho || colWho(tags, t=>S.eng.resp[tagKey(pp,t)]||'');
+        /* every tag on a shared row with its own engineer, so the register
+           reads back exactly as it was assigned */
+        const byTag = tags.length>1
+          ? tags.map(t=>{ const w=S.eng.resp[tagKey(pp,t)]||''; return w? t+': '+w : ''; })
+                .filter(Boolean).join('; ')
+          : '';
         if(cDisc===undefined || roleAt(x,cDisc)==='review-org'){
           if(!scope || scope.has(engDocKey(n=>cv(x,n)))){
-            put(x,cRes,who);
+            put(x,cRes,who); put(x,cTag,byTag);
             if(who){ nt++; if(ovWho) nDoc++; }
             else if(tags.length>1) nAmb++;
           } else {
             /* this discipline's, but a document the tool leaves out */
             if(cell(x,cRes)) nOff++;
-            put(x,cRes,'');
+            put(x,cRes,''); put(x,cTag,'');
           }
         } else {
           /* take off what an earlier write put on a row this discipline does not
              originate, and anything on a row nobody originates */
           const had=cell(x,cRes), hv=had? String(had.v).trim() : '';
-          if(hv && (hv===who || !cOrig.some(c=>roleAt(x,c)==='review-org'))){ put(x,cRes,''); nOff++; }
+          if(hv && (hv===who || !cOrig.some(c=>roleAt(x,c)==='review-org'))){ put(x,cRes,''); put(x,cTag,''); nOff++; }
         }
       }
       wrStep(null, 40+((end-4)/rows)*45, nt.toLocaleString()+' rows given an engineer');
       await yieldPaint();
     }
-    rg.e.c=Math.max(rg.e.c,cRes); ws['!ref']=XLSX.utils.encode_range(rg);
+    rg.e.c=Math.max(rg.e.c,cRes,cTag); ws['!ref']=XLSX.utils.encode_range(rg);
 
     /* Nothing but the register's own sheet: the engineer on a single document
        is in the RESPONSIBLE ENGINEER column like every other row, and the
@@ -8066,10 +8077,36 @@ function engScope(){
   });
   return out;
 }
-function engFromColumn(rows, iPO, iTR, iXR, iResp){
+/* "210-D-016A: NAME; 210-D-016B: NAME" back into its pairs. */
+function parseTagEngs(v){
+  const out=[];
+  String(v==null?'':v).split(';').forEach(part=>{
+    const i=part.indexOf(':'); if(i<0) return;
+    const tag=part.slice(0,i).trim(), who=part.slice(i+1).trim();
+    if(tag && who) out.push([tag, naNorm(who)]);
+  });
+  return out;
+}
+/* Identical equipment is usually a pair or a handful of drums; a document
+   naming more tags than this is a list (spare parts, a common procedure) and
+   says nothing about who holds any one of them. */
+const ENG_FAMILY_MAX = 12;
+function engFromColumn(rows, iPO, iTR, iXR, iResp, iTags){
   const resp={}, doc={};
-  if(iResp===undefined || iPO===undefined) return {resp, doc};
+  if(iPO===undefined || (iResp===undefined && iTags===undefined)) return {resp, doc};
   const str=v=>String(v==null?'':v).trim();
+  const top=t=>Object.keys(t).sort((x,y)=>t[y]-t[x]||x.localeCompare(y))[0];
+  const tally=(m,k,v)=>{ const t=(m[k]=m[k]||{}); t[v]=(t[v]||0)+1; };
+
+  /* 1 · every tag a row names outright, from the ENGINEER BY TAG column */
+  const named={};
+  if(iTags!==undefined) rows.forEach(a=>{
+    const po=str(a[iPO]); if(!po) return;
+    parseTagEngs(a[iTags]).forEach(([t,v])=>tally(named, tagKey(po,t), v));
+  });
+  Object.keys(named).forEach(k=>{ resp[k]=top(named[k]); });
+
+  if(iResp===undefined) return {resp, doc};
   const byDoc={};
   rows.forEach((a,ri)=>{
     const v=naNorm(str(a[iResp])); if(!v) return;
@@ -8079,28 +8116,31 @@ function engFromColumn(rows, iPO, iTR, iXR, iResp){
              {po, tr, tags:iXR!==undefined ? splitTags(a[iXR]) : [], votes:{}});
     e.votes[v]=(e.votes[v]||0)+1;
   });
-  const top=t=>Object.keys(t).sort((x,y)=>t[y]-t[x]||x.localeCompare(y))[0];
-  const tally=(m,k,v)=>{ const t=(m[k]=m[k]||{}); t[v]=(t[v]||0)+1; };
   const docs=Object.values(byDoc).map(e=>({po:e.po, tr:e.tr, tags:e.tags, v:top(e.votes)}));
 
+  /* 2 · a document naming one tag says who that tag belongs to */
   const one={};
   docs.forEach(d=>{ if(d.tags.length===1) tally(one, tagKey(d.po,d.tags[0]), d.v); });
-  Object.keys(one).forEach(k=>{ resp[k]=top(one[k]); });
+  Object.keys(one).forEach(k=>{ if(!resp[k]) resp[k]=top(one[k]); });
 
-  const sets={}, seen={};
+  /* 3 · a register written before ENGINEER BY TAG existed: identical equipment
+     shares its documents, so a small set of tags whose documents carry a name
+     that none of its tags explains yet is that name's — smallest sets first,
+     so a pair is read before any larger list that happens to include it */
+  const sets={};
   docs.forEach(d=>{
-    if(d.tags.length<2) return;
+    if(d.tags.length<2 || d.tags.length>ENG_FAMILY_MAX) return;
     const sk=[d.po].concat(d.tags.slice().sort()).join(RM_SEP);
-    tally(sets, sk, d.v);
-    d.tags.forEach(t=>{ const tk=tagKey(d.po,t); (seen[tk]=seen[tk]||new Set()).add(sk); });
+    const e=(sets[sk]=sets[sk]||{po:d.po, tags:d.tags.slice().sort(), votes:{}});
+    e.votes[d.v]=(e.votes[d.v]||0)+1;
   });
-  Object.keys(sets).forEach(sk=>{
-    const vs=Object.keys(sets[sk]); if(vs.length!==1) return;
-    const parts=sk.split(RM_SEP), po=parts[0], tags=parts.slice(1);
-    if(!tags.every(t=>{ const tk=tagKey(po,t); return !resp[tk] && seen[tk].size===1; })) return;
-    tags.forEach(t=>{ resp[tagKey(po,t)]=vs[0]; });
+  Object.values(sets).sort((x,y)=>x.tags.length-y.tags.length).forEach(e=>{
+    if(colWho(e.tags, t=>resp[tagKey(e.po,t)]||'')) return;
+    const v=top(e.votes);
+    e.tags.forEach(t=>{ const k=tagKey(e.po,t); if(!resp[k]) resp[k]=v; });
   });
 
+  /* 4 · whatever a document says that its tags do not was set on it by hand */
   docs.forEach(d=>{
     if(!d.tr) return;
     if(d.v!==colWho(d.tags, t=>resp[tagKey(d.po,t)]||'')) doc[rmKey(d.po,d.tr)]=d.v;
