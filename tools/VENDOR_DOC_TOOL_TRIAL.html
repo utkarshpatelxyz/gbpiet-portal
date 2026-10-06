@@ -7903,11 +7903,18 @@ function whoOptions(kind, mode){
     .concat(names.map(w=>({w, t:w, n:cnt[w]||0})))
     .concat(cnt[WHO_NONE]? [{w:WHO_NONE, t:'No engineer', s:'Documents nobody is assigned to yet', n:cnt[WHO_NONE], cls:'none'}] : []);
 }
+function whoHasAny(kind, mode){
+  if(!engNamesHere().length) return false;
+  const L=WHO_LIST[kind];
+  return L.base(mode).some(x=>L.key(x)!==WHO_NONE);
+}
 const initials = n => String(n).split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase();
 function askWho(kind, mode){
   if(!S.docs || !S.docs.length) return alert('Choose a purchase order first.');
-  /* with nobody assigned on this purchase order there is nothing to choose */
-  if(!engNamesHere().length) return WHO_LIST[kind].open(null, mode);
+  /* Only when documents on this very list carry an engineer.  A report with
+     no assignments — or names that hold nothing here — would offer a row of
+     zeros, which reads as "nothing pending", so it goes straight to View all. */
+  if(!whoHasAny(kind, mode)) return WHO_LIST[kind].open(null, mode);
   WHO_ASK={kind, mode, opts:whoOptions(kind, mode)};
   $('whoTitle').textContent=WHO_LIST[kind].title(mode);
   $('whoSub').textContent='Whose documents do you want to see? Pick your own name to see only what is on you.';
@@ -7950,7 +7957,7 @@ window.askWho=askWho; window.closeWho=closeWho;
 /* One line on the list: whose it is, and the way back to the dialog. */
 function whoLine(id, kind, mode, cur, n){
   const el=$(id); if(!el) return;
-  if(!engNamesHere().length){ el.style.display='none'; el.innerHTML=''; return; }
+  if(cur==null && !whoHasAny(kind, mode)){ el.style.display='none'; el.innerHTML=''; return; }
   const t = cur==null ? 'Everyone' : (cur===WHO_NONE ? 'No engineer' : cur);
   el.style.display='';
   el.innerHTML=`<span class="who-l">Showing</span>
