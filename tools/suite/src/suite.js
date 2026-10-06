@@ -439,10 +439,28 @@
       conv().hidden = false;
     }
     function scrollDown() { thread.scrollTop = thread.scrollHeight; }
+    /* Utkarsh answers: his photo sits beside every reply, and beside the
+       dots while he is typing. */
+    var FACE = (document.querySelector('#mrd-pf-card .mrd-pf-img') || {}).src || '';
+    var headFace = document.getElementById('mhbHeadFace');
+    if (headFace && FACE) headFace.src = FACE;
+    function face() {
+      var i = document.createElement('img');
+      i.className = 'mhb-face'; i.alt = ''; i.src = FACE;
+      return i;
+    }
+    function row(inner) {
+      var r = document.createElement('div');
+      r.className = 'mhb-row';
+      r.appendChild(face()); r.appendChild(inner);
+      conv().appendChild(r); scrollDown();
+      return r;
+    }
     function bubble(cls, html) {
       var d = document.createElement('div');
       d.className = 'mhb-msg ' + cls; d.innerHTML = html;
-      conv().appendChild(d); scrollDown(); return d;
+      if (cls === 'bot') row(d); else { conv().appendChild(d); scrollDown(); }
+      return d;
     }
     function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 
@@ -486,13 +504,14 @@
       bubble('me', esc(f.q));
       var t = document.createElement('div');
       t.className = 'mhb-typing'; t.innerHTML = '<i></i><i></i><i></i>';
-      conv().appendChild(t); scrollDown();
+      var tr = null;
+      setTimeout(function () { tr = row(t); }, 350);
       setTimeout(function () {
-        t.remove();
+        if (tr) tr.remove();
         bubble('bot', f.a);
         if (btn) btn.classList.add('seen');
         busy = false;
-      }, 520);
+      }, 3350);
     }
 
     /* opening and closing */

@@ -291,6 +291,12 @@
   .mhb-msg .acts button{font-size:12px;font-weight:600;padding:5px 10px;border-radius:6px;cursor:pointer;
     border:1px solid #C9D6E3;background:#fff;color:#0A6ED1;transition:background .14s}
   .mhb-msg .acts button:hover{background:#EBF2FA}
+  .mhb-row{align-self:flex-start;display:flex;align-items:flex-end;gap:8px;max-width:92%;
+    animation:mhbMsg .22s var(--mlp-ease) both}
+  .mhb-row .mhb-msg{max-width:none;align-self:auto}
+  .mhb-face{width:30px;height:30px;border-radius:50%;object-fit:cover;flex:none;display:block;
+    box-shadow:0 0 0 2px #fff,0 1px 4px rgba(11,37,69,.25)}
+  .mhb-av .mhb-face{width:34px;height:34px;box-shadow:0 0 0 2px rgba(255,255,255,.35)}
   .mhb-typing{align-self:flex-start;display:flex;gap:4px;padding:11px 13px;background:#fff;
     border:1px solid #E3E8EF;border-radius:13px;border-bottom-left-radius:4px}
   .mhb-typing i{width:6px;height:6px;border-radius:50%;background:#A3B1C2;animation:mhbDot 1s infinite ease-in-out}

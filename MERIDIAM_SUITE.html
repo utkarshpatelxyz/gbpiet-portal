@@ -6363,6 +6363,12 @@ window.addEventListener('hashchange', function() {
   .mhb-msg .acts button{font-size:12px;font-weight:600;padding:5px 10px;border-radius:6px;cursor:pointer;
     border:1px solid #C9D6E3;background:#fff;color:#0A6ED1;transition:background .14s}
   .mhb-msg .acts button:hover{background:#EBF2FA}
+  .mhb-row{align-self:flex-start;display:flex;align-items:flex-end;gap:8px;max-width:92%;
+    animation:mhbMsg .22s var(--mlp-ease) both}
+  .mhb-row .mhb-msg{max-width:none;align-self:auto}
+  .mhb-face{width:30px;height:30px;border-radius:50%;object-fit:cover;flex:none;display:block;
+    box-shadow:0 0 0 2px #fff,0 1px 4px rgba(11,37,69,.25)}
+  .mhb-av .mhb-face{width:34px;height:34px;box-shadow:0 0 0 2px rgba(255,255,255,.35)}
   .mhb-typing{align-self:flex-start;display:flex;gap:4px;padding:11px 13px;background:#fff;
     border:1px solid #E3E8EF;border-radius:13px;border-bottom-left-radius:4px}
   .mhb-typing i{width:6px;height:6px;border-radius:50%;background:#A3B1C2;animation:mhbDot 1s infinite ease-in-out}
@@ -6417,11 +6423,11 @@ window.addEventListener('hashchange', function() {
       <svg class="i-q" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.6a8.4 8.4 0 0 1-12.2 7.5L3.5 20.5l1.4-4.6A8.4 8.4 0 1 1 21 11.6z"/><path d="M9.9 9.3a2.3 2.3 0 0 1 4.4.9c0 1.5-2.2 2-2.2 3.3"/><path d="M12.1 16.2h.01" stroke-width="2.4"/></svg>
       <svg class="i-x" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
     </button>
-    <span class="mhb-tipl" aria-hidden="true">Need help?</span>
-    <section class="mhb-panel" id="mhbPanel" role="dialog" aria-label="MERIDIAM Help" hidden>
+    <span class="mhb-tipl" aria-hidden="true">Ask Utkarsh</span>
+    <section class="mhb-panel" id="mhbPanel" role="dialog" aria-label="Ask Utkarsh" hidden>
       <header class="mhb-head">
-        <span class="mhb-av" aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.6a8.4 8.4 0 0 1-12.2 7.5L3.5 20.5l1.4-4.6A8.4 8.4 0 1 1 21 11.6z"/><path d="M9.9 9.3a2.3 2.3 0 0 1 4.4.9c0 1.5-2.2 2-2.2 3.3"/><path d="M12.1 16.2h.01" stroke-width="2.4"/></svg></span>
-        <div class="mhb-ht"><b>MERIDIAM Help</b><small id="mhbCtx"></small></div>
+        <span class="mhb-av" aria-hidden="true"><img class="mhb-face" id="mhbHeadFace" alt=""></span>
+        <div class="mhb-ht"><b>Ask Utkarsh</b><small id="mhbCtx"></small></div>
         <button type="button" class="mhb-x" id="mhbClose" aria-label="Close help"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
       </header>
       <div class="mhb-thread" id="mhbThread" aria-live="polite"></div>
@@ -6889,10 +6895,28 @@ window.addEventListener('hashchange', function() {
       conv().hidden = false;
     }
     function scrollDown() { thread.scrollTop = thread.scrollHeight; }
+    /* Utkarsh answers: his photo sits beside every reply, and beside the
+       dots while he is typing. */
+    var FACE = (document.querySelector('#mrd-pf-card .mrd-pf-img') || {}).src || '';
+    var headFace = document.getElementById('mhbHeadFace');
+    if (headFace && FACE) headFace.src = FACE;
+    function face() {
+      var i = document.createElement('img');
+      i.className = 'mhb-face'; i.alt = ''; i.src = FACE;
+      return i;
+    }
+    function row(inner) {
+      var r = document.createElement('div');
+      r.className = 'mhb-row';
+      r.appendChild(face()); r.appendChild(inner);
+      conv().appendChild(r); scrollDown();
+      return r;
+    }
     function bubble(cls, html) {
       var d = document.createElement('div');
       d.className = 'mhb-msg ' + cls; d.innerHTML = html;
-      conv().appendChild(d); scrollDown(); return d;
+      if (cls === 'bot') row(d); else { conv().appendChild(d); scrollDown(); }
+      return d;
     }
     function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 
@@ -6936,13 +6960,14 @@ window.addEventListener('hashchange', function() {
       bubble('me', esc(f.q));
       var t = document.createElement('div');
       t.className = 'mhb-typing'; t.innerHTML = '<i></i><i></i><i></i>';
-      conv().appendChild(t); scrollDown();
+      var tr = null;
+      setTimeout(function () { tr = row(t); }, 350);
       setTimeout(function () {
-        t.remove();
+        if (tr) tr.remove();
         bubble('bot', f.a);
         if (btn) btn.classList.add('seen');
         busy = false;
-      }, 520);
+      }, 3350);
     }
 
     /* opening and closing */
