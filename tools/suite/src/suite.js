@@ -297,6 +297,12 @@
         { q: 'How do I assign an engineer?',
           a: 'Switch to ' + k('I am managing') + ' and open ' + k('Assign engineers') + '. Pick a name against each tag, ' +
              'or against a single document. Engineers and their email addresses are kept under Settings — the gear at the top right.' },
+        { q: 'How do I record hold points on a GA drawing?',
+          a: 'Under ' + k('I am reviewing') + ', open ' + k('Hold points') + '. Every GA drawing (PLG-0003) is listed with ' +
+             'its hold points on show — click one to add, change, close or delete them: write the hold point, choose the ' +
+             'department and set ' + k('Open') + ' or ' + k('Closed') + '. Then press ' + k('Download register') +
+             ': the report gets a sheet per purchase order, ' + k('PO 1234 HOLD List') + '. Load that file next time — or carry ' +
+             'it into the next eGesDoc report — and the hold lists come back, on every new revision.' },
         { q: 'How do I send a list to an engineer?',
           a: 'Open the list and press ' + k('Email this list') + '. Your email app opens a draft — addressed to the engineer ' +
              'when the engineer list has their address — and the table is copied, so press ' + k('Ctrl+V') +
