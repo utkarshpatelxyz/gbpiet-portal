@@ -2229,6 +2229,122 @@ body[data-dark] .hp-n.rev{background:#16243B;color:#9DBBF5}
 body[data-dark] .hp-save{border-color:rgba(226,165,77,.4)}
 body[data-dark] .hp-done{border-color:rgba(67,193,138,.35)}
 
+/* ── critical document timeline ──────────────────────────────────────────
+   A Gantt drawn in plain boxes: a sticky label column, a lane per row, and
+   every date placed by its distance from the start of the chart. */
+.tl-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px;padding:12px 14px;
+  background:var(--sf);border:1px solid var(--line2);border-radius:4px}
+.tl-tools .fill{flex:1}
+.tl-tools .lbl{font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-left:6px}
+.tl-seg{display:inline-flex;border:1px solid var(--line2);border-radius:4px;overflow:hidden}
+.tl-seg button{border:none;background:var(--sf);color:var(--muted);font-size:11.5px;font-weight:700;padding:6px 11px;cursor:pointer;
+  transition:background .14s var(--ease),color .14s var(--ease)}
+.tl-seg button+button{border-left:1px solid var(--line2)}
+.tl-seg button:hover{color:var(--ink)}
+.tl-seg button.on{background:var(--navy);color:#fff}
+body[data-dark] .tl-seg button.on{background:var(--blue)}
+.tl-legend{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;margin:12px 2px 9px;font-size:11.5px;color:var(--muted)}
+.tl-legend span{display:inline-flex;align-items:center;gap:7px}
+.tl-legend .lg{position:relative;display:inline-block}
+.tl-legend .lg.dia{width:9px;height:9px;transform:rotate(45deg);border:2px solid var(--navy);background:var(--sf)}
+.tl-legend .lg.dia.est{border-style:dashed;border-color:var(--muted)}
+.tl-legend .lg.dot{width:10px;height:10px;border-radius:50%;background:#2E9E6B}
+.tl-legend .lg.dot.late{background:#D4574E}
+.tl-legend .lg.bar{width:22px;height:4px;border-radius:2px}
+.tl-legend .lg.win{width:22px;height:9px;border-radius:3px}
+.tl-legend .lg.now{width:2px;height:14px;background:#D4574E}
+.tl-card{background:var(--sf);border:1px solid var(--line2);border-radius:4px;overflow:hidden}
+.tl-scroll{overflow:auto;max-height:72vh;position:relative;overscroll-behavior:contain}
+.tl-grid{position:relative}
+.tl-lines{position:absolute;top:0;bottom:0;pointer-events:none;z-index:0}
+.tl-lines i{position:absolute;top:0;bottom:0;width:1px}
+.tl-lines i.m{background:var(--line2)}
+.tl-lines i.w{background:var(--line);opacity:.7}
+.tl-lines i.now{width:2px;margin-left:-1px;background:#D4574E;opacity:.7}
+.tl-head{position:sticky;top:0;z-index:5;display:flex;background:var(--sf2);border-bottom:1px solid var(--line2)}
+.tl-head .tl-l{background:var(--sf2);font-size:9.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.tl-axis{position:relative;flex:none;height:48px;overflow:hidden}
+.tl-axis .mo{position:absolute;top:7px;font-size:11px;font-weight:800;color:var(--navy);white-space:nowrap;padding-left:6px;
+  border-left:1px solid var(--line2);height:40px}
+.tl-axis .dy{position:absolute;bottom:6px;font-size:9.5px;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
+.tl-axis .nw{position:absolute;bottom:4px;z-index:2;font-size:9px;font-weight:800;color:#B42318;white-space:nowrap;
+  transform:translateX(-50%);background:var(--sf2);padding:0 4px;border-radius:3px}
+.tl-row{display:flex;position:relative;z-index:1;border-bottom:1px solid var(--line)}
+.tl-row:hover>.tl-r{background:rgba(37,99,235,.035)}
+.tl-l{position:sticky;left:0;z-index:4;flex:none;display:flex;align-items:center;gap:9px;min-width:0;padding:6px 12px;
+  background:var(--sf);border-right:1px solid var(--line2);box-shadow:4px 0 8px -6px rgba(11,37,69,.18)}
+.tl-l .tx{flex:1;min-width:0}
+.tl-l .tx small{display:block;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.tl-r{position:relative;flex:none}
+.tl-ch{flex:none;display:grid;place-items:center;width:22px;height:22px;border:1px solid var(--line2);border-radius:4px;
+  background:var(--sf);color:var(--muted);font-size:10px;cursor:pointer;transition:transform .16s var(--ease),color .14s,border-color .14s}
+.tl-ch:hover{color:var(--blue);border-color:var(--blue)}
+.tl-ch.on{transform:rotate(90deg);color:var(--blue);border-color:var(--blue)}
+.tl-ch.none{visibility:hidden}
+.tl-row.code{min-height:52px;cursor:pointer}
+.tl-row.code>.tl-l{background:var(--sf2)}
+.tl-row.code .tx b{font-size:13.5px;font-weight:800;color:var(--navy)}
+.tl-row.code .tx .nm{font-size:13px;font-weight:600;color:var(--ink);margin-left:6px}
+.tl-row.code .tx small{white-space:normal;line-height:1.35}
+.tl-row.batch{min-height:30px}
+.tl-row.batch>.tl-l{padding-left:46px;font-size:11.5px;font-weight:700;color:var(--navy)}
+.tl-row.batch>.tl-l{display:block;padding-top:7px;padding-bottom:7px;line-height:1.35}
+.tl-row.batch .bt{white-space:nowrap;margin-right:8px}
+.tl-row.batch>.tl-l small{display:inline;font-weight:500;color:var(--muted)}
+.tl-row.batch>.tl-r{background:rgba(11,37,69,.025)}
+.tl-row.doc{min-height:42px}
+.tl-row.doc>.tl-l{padding-left:46px}
+.tl-row.doc .no{font-size:12.5px;font-weight:700;color:var(--navy);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.tl-row.doc .no:hover{color:var(--blue);text-decoration:underline}
+.tl-row.rev{min-height:32px}
+.tl-row.rev>.tl-l{padding-left:76px;font-size:11px;background:var(--sf);gap:8px}
+.tl-row.rev .rn{flex:none;font-weight:800;color:var(--navy);min-width:40px}
+.tl-row.rev .tx{color:var(--muted);line-height:1.3}
+.tl-row.rev .tx.past{color:#B42318;font-weight:700}
+.tl-row.rev.est .rn{color:var(--muted);font-style:italic}
+.tl-mat{display:flex;gap:3px;flex:none}
+.tl-mat i{width:9px;height:9px;border-radius:2px;background:var(--line2)}
+.tl-mat i.c{outline:2px solid var(--warn);outline-offset:-2px;background:transparent}
+.tl-hp{flex:none;display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px;border-radius:11px;font-size:10.5px;
+  font-weight:800;cursor:pointer;border:1px solid transparent;transition:filter .14s,border-color .14s}
+.tl-hp svg{width:11px;height:11px}
+.tl-hp.open{background:var(--warn-bg);color:#9A6414;border-color:rgba(217,146,46,.45)}
+.tl-hp.closed{background:var(--ok-bg);color:#1B7A4E;border-color:rgba(46,158,107,.4)}
+.tl-hp:hover{filter:brightness(.96);border-color:var(--blue)}
+body[data-dark] .tl-hp.open{color:var(--warn)} body[data-dark] .tl-hp.closed{color:var(--ok)}
+.tl-st{flex:none;font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;white-space:nowrap;min-width:54px;text-align:center}
+.tl-dia{position:absolute;top:50%;width:11px;height:11px;margin:-6.5px 0 0 -6.5px;transform:rotate(45deg);background:var(--sf);
+  border:2px solid var(--navy);z-index:3}
+.tl-dia.est{border-style:dashed;border-color:var(--muted)}
+.tl-dia.big{width:13px;height:13px;margin:-7.5px 0 0 -7.5px}
+.tl-dot{position:absolute;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:#2E9E6B;z-index:3;
+  border:2px solid var(--sf)}
+.tl-dot.late{background:#D4574E}
+.tl-bar{position:absolute;top:50%;height:4px;margin-top:-2px;border-radius:2px;z-index:2}
+.tl-bar.ok,.tl-legend .lg.bar.ok{background:rgba(46,158,107,.6)}
+.tl-bar.late{background:rgba(212,87,78,.75)}
+.tl-bar.over,.tl-legend .lg.bar.over{background:repeating-linear-gradient(90deg,#D4574E 0 6px,transparent 6px 10px)}
+.tl-bar.wait{background:repeating-linear-gradient(90deg,var(--muted) 0 4px,transparent 4px 9px);opacity:.6}
+.tl-span{position:absolute;top:50%;height:14px;margin-top:-7px;border-radius:7px;z-index:1;opacity:.9}
+.tl-span.ok{background:rgba(46,158,107,.22);border:1px solid rgba(46,158,107,.45)}
+.tl-span.late{background:rgba(217,146,46,.22);border:1px solid rgba(217,146,46,.55)}
+.tl-span.over{background:rgba(212,87,78,.18);border:1px dashed rgba(212,87,78,.7)}
+.tl-span.wait{background:rgba(92,107,122,.10);border:1px dashed var(--line2)}
+.tl-win{position:absolute;top:50%;height:10px;margin-top:-5px;border-radius:3px;z-index:1}
+.tl-win.rv,.tl-legend .lg.win.rv{background:rgba(37,99,235,.30)}
+.tl-win.run{background:rgba(217,146,46,.38)}
+.tl-win.rp,.tl-legend .lg.win.rp{background:rgba(47,151,170,.28)}
+.tl-win .ovr,.tl-legend .lg.win.ovr{position:absolute;top:0;bottom:0;right:0;background:rgba(212,87,78,.6);border-radius:0 3px 3px 0}
+.tl-legend .lg.win.ovr{position:static;display:inline-block;border-radius:3px}
+.tl-ret{position:absolute;top:50%;width:3px;height:16px;margin:-8px 0 0 -1.5px;background:var(--navy);border-radius:1px;z-index:3}
+.tl-tgt{position:absolute;top:50%;width:0;height:18px;margin-top:-9px;border-left:2px dotted var(--navy);opacity:.55;z-index:2}
+.tl-cnt{position:absolute;top:50%;transform:translate(11px,-50%);font-size:10.5px;font-weight:800;color:var(--navy);
+  background:var(--sf);border:1px solid var(--line2);border-radius:9px;padding:0 6px;line-height:16px;z-index:4;white-space:nowrap}
+.tl-lab{position:absolute;top:50%;transform:translate(10px,-50%);font-size:10px;font-weight:700;color:var(--muted);white-space:nowrap;z-index:4}
+.tl-lab.late{color:#B42318}
+.tl-empty{padding:40px 24px;text-align:center;color:var(--muted);font-size:12.5px}
+.tl-note{margin:10px 2px 0;font-size:11.5px;color:var(--muted);line-height:1.5}
+
 </style>
 </head>
 <body>
@@ -2958,6 +3074,48 @@ body[data-dark] .hp-done{border-color:rgba(67,193,138,.35)}
         The list stays with this drawing and is carried into every new revision.</span>
     </div>
   </div>
+  <div class="foot"></div>
+</div></div>
+
+<!-- 4c ── CRITICAL DOCUMENT TIMELINE ──────────────────────────────────────
+     GA drawings and mechanical calculations: when each batch was due, when
+     it came in, and how each document has matured revision by revision. -->
+<div class="screen" id="sc-tl"><div class="wrap">
+  <div class="pagebar">
+    <button class="pb-back" onclick="goHome()" title="Back to home" aria-label="Back to home">&#8592;</button>
+    <div class="pb-t"><span>Critical document timeline</span></div>
+    <div class="pb-sp"></div>
+    <div class="pb-scope" id="tlScope"></div>
+  </div>
+  <div class="wk-head" id="tlSum"></div>
+  <div class="tl-tools">
+    <input class="wk-q" id="tlQ" placeholder="Search documents, tags or equipment"
+           autocomplete="off" spellcheck="false" aria-label="Search the timeline">
+    <span class="lbl">Show</span>
+    <div class="tl-seg" id="tlShow" role="group" aria-label="Which documents">
+      <button type="button" data-v="all">All</button><button type="button" data-v="late">Late</button><button type="button" data-v="notrec">Not received</button><button type="button" data-v="hp">With hold points</button>
+    </div>
+    <div class="fill"></div>
+    <span class="lbl">Scale</span>
+    <div class="tl-seg" id="tlZoom" role="group" aria-label="Time scale">
+      <button type="button" data-v="month">Months</button><button type="button" data-v="week">Weeks</button><button type="button" data-v="day">Days</button>
+    </div>
+    <button class="chip" onclick="exportTimelineXlsx()">&#10515; Download as Excel</button>
+  </div>
+  <div class="tl-legend">
+    <span><i class="lg dia"></i>Official / expected date</span>
+    <span><i class="lg dot"></i>Received on time</span>
+    <span><i class="lg dot late"></i>Received late</span>
+    <span><i class="lg bar over"></i>Not received — overdue</span>
+    <span><i class="lg win rp"></i>Supplier reply</span>
+    <span><i class="lg win rv"></i>Our review</span>
+    <span><i class="lg win ovr"></i>Beyond 15 days</span>
+    <span><i class="lg dia est"></i>Estimated next revision</span>
+    <span><i class="lg now"></i>Report date</span>
+  </div>
+  <div class="tl-card"><div class="tl-scroll" id="tlScroll"></div></div>
+  <div class="tl-note">The official date is the date agreed for the first revision. For every revision after it the expected date is
+    worked out from the cycle: <b>15 days</b> for our review, then <b>15 days</b> for the supplier to reply.</div>
   <div class="foot"></div>
 </div></div>
 
@@ -8186,7 +8344,7 @@ function crumbHold(label){
 }
 function openHoldDoc(tr, from){
   const d=(S.docs||[]).find(x=>x.tr===tr); if(!d || !isGA(d)) return;
-  HP.tr=tr; HP.from=from==='doc'? 'doc' : 'hold';
+  HP.tr=tr; HP.from= from==='doc' || from==='tl' ? from : 'hold';
   if(HP.from==='doc') HP.docFrom=S.docFrom;
   renderHoldDoc();
   go('holded');
@@ -8201,6 +8359,7 @@ function holdEdBack(){
   const d=heDoc(), e=d && holdOf(d);
   if(e) e.pts=e.pts.filter(p=>String(p.text||'').trim() || !p.fresh);
   if(HP.from==='doc'){ const keep=HP.docFrom; openDoc(HP.tr); S.docFrom=keep; return; }
+  if(HP.from==='tl'){ crumbApp('Critical document timeline'); renderTimeline(); go('tl'); return; }
   crumbApp('Hold points'); renderHold(); go('hold');
 }
 const heDoc = () => (S.docs||[]).find(x=>x.tr===HP.tr);
@@ -8441,6 +8600,432 @@ window.openHold=openHold; window.openHoldDoc=openHoldDoc; window.holdEdBack=hold
 window.addHoldPoint=addHoldPoint; window.saveHold=saveHold; window.leaveHold=leaveHold;
 window.exportHoldXlsx=exportHoldXlsx;
 
+/* ═══ CRITICAL DOCUMENT TIMELINE ════════════════════════════════════════════
+   Only the two critical document types: GA drawings and mechanical
+   calculations.  The OFFICIAL DATE on a document's first revision is the date
+   agreed for it; documents agreed for the same date arrive as a batch.
+
+   Three levels, each one click deeper:
+     · a row per document type, its batches along the time line;
+     · the documents of that type, batch by batch — when the first revision
+       was due against when it actually came in;
+     · one document's revisions — how it matured.  Every revision after the
+       first has no agreed date of its own, so one is worked out from the
+       cycle: 15 days for our review, then 15 days for the supplier's reply.
+   A GA drawing carries its hold points, one click from the hold list.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const TL_CODES = [
+  { code:'PLG-0003', name:'General arrangement drawings' },
+  { code:'CAL-0005', name:'Mechanical calculations' }
+];
+const TL_REVIEW = DEADLINE_DAYS;        // days we take to return a revision
+const TL_REPLY  = 15;                   // days the supplier takes to send the next one
+const TL_DONE   = ['REVIEWED WITHOUT COMMENTS','FOR INFORMATION','AS BUILT','VOID'];
+const TL_ZOOM   = { month:'fit', week:4.5, day:12 };
+const TL_LW     = 440;                  // the label column
+const DAY_MS    = 86400000;
+const TL={ open:new Set(), docs:new Set(), q:'', show:'all', zoom:'week', keep:null, pos:null };
+
+/* every date on the chart is a UTC midnight, the way the workbook dates are read */
+const tlDay = d => d ? Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) : null;
+const tlAdd = (t, n) => t==null ? null : t + n*DAY_MS;
+const tlDiff = (a, b) => (a==null || b==null) ? null : Math.round((b-a)/DAY_MS);
+const tlF = t => t==null ? '—' : fmt(new Date(t));
+const tlFS = t => t==null ? '—' : fmtS(new Date(t));
+const tlDM = t => t==null ? '—' : fmt(new Date(t)).slice(0,6);
+function tlWord(status, running){
+  if(running) return ['With us','warn'];
+  const s=String(status||'').toUpperCase();
+  return s.indexOf('WITHOUT')>=0 ? ['No comments','ok'] : s.indexOf('MINOR')>=0 ? ['Minor','lime']
+       : s.indexOf('MAJOR')>=0 ? ['Major','dang'] : s.indexOf('REJECT')>=0 ? ['Rejected','dang']
+       : [stShort(status)||'—', stMeta(status).cls];
+}
+function tlAsOf(){
+  const d=S.asOfDate||new Date();
+  return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+}
+const tlCodeOf = d => String(d.code||'').trim().toUpperCase();
+const tlCritical = d => TL_CODES.some(c=>c.code===tlCodeOf(d));
+const tlRevNum = r => { const n=parseInt(String(r.trRev==null?'':r.trRev).replace(/[^\d]/g,''),10); return isNaN(n)? -1 : n; };
+function tlNextRev(label){
+  const s=String(label==null?'':label).trim();
+  if(/^\d+$/.test(s)) return String(+s+1).padStart(s.length,'0');
+  if(/^[A-Y]$/i.test(s)) return String.fromCharCode(s.charCodeAt(0)+1);
+  return 'next';
+}
+
+/* One document, revision by revision: what was expected when, what happened,
+   and the revision still to come while it has not matured. */
+function tlDocModel(d, asOf){
+  const revs=d.revs.slice().sort((a,b)=>tlRevNum(a)-tlRevNum(b) ||
+    (tlDay(a.received)||0)-(tlDay(b.received)||0));
+  const cyc=[];
+  revs.forEach((r,i)=>{
+    const prev=cyc[i-1]||null;
+    const rec=tlDay(r.received), circ=tlDay(r.circ), ret=tlDay(r.returned);
+    /* the first revision has the date agreed for it; each one after is due
+       the supplier's 15 days after the last one came back to them */
+    let exp=null, basis='';
+    if(i===0){ exp=tlDay(r.official||d.official); basis='official date'; }
+    else if(prev){ const back=prev.ret!=null? prev.ret : prev.due;
+      exp=tlAdd(back, TL_REPLY); basis=(prev.ret!=null? 'returned ' : 'due back ')+tlFS(back)+' + '+TL_REPLY+' days'; }
+    const start = circ!=null ? circ : rec;
+    const due = start!=null ? tlAdd(start, TL_REVIEW) : null;
+    const st=String(r.status||'').toUpperCase();
+    cyc.push({ rev:String(r.trRev==null?'':r.trRev).trim(), first:i===0, exp, basis, rec, circ, ret, due, start,
+      status:r.status||'', retTxt:r.ret||'', code:r.reviewCode||'',
+      late: (rec!=null && exp!=null) ? tlDiff(exp, rec) : null,
+      overdue: (rec==null && exp!=null && exp<asOf) ? tlDiff(exp, asOf) : null,
+      review: (ret!=null && start!=null) ? tlDiff(start, ret) : (start!=null && ret==null ? tlDiff(start, asOf) : null),
+      running: start!=null && ret==null && st==='CIRCULATING',
+      reply: (prev && prev.ret!=null && rec!=null) ? tlDiff(prev.ret, rec) : null,
+      replyFrom: prev? prev.ret : null });
+  });
+  /* the revision still to come: only while the latest is back with comments,
+     rejected, or still with us */
+  const last=cyc[cyc.length-1];
+  let next=null;
+  if(last && last.rec!=null && TL_DONE.indexOf(String(last.status).toUpperCase())<0){
+    const back = last.ret!=null ? last.ret : last.due;
+    if(back!=null) next={ rev:tlNextRev(last.rev), est:true, exp:tlAdd(back, TL_REPLY), from:back,
+      basis:(last.ret!=null? 'returned ' : 'due back ')+tlFS(back)+' + '+TL_REPLY+' days',
+      ifComments: last.ret==null };
+  }
+  const first=cyc[0]||null;
+  const mature = !!last && last.rec!=null && TL_DONE.indexOf(String(last.status).toUpperCase())>=0;
+  /* the hold points of a GA drawing */
+  let hp=null;
+  if(isGA(d)){ const l=livePts(holdOf(d)); if(l.length) hp={ n:l.length, open:l.filter(ptOpen).length }; }
+  const firstState = !first || first.exp==null ? 'none'
+                   : first.rec!=null ? (first.late>0 ? 'late' : 'ok')
+                   : first.overdue!=null ? 'over' : 'wait';
+  return { d, cyc, next, first, last, mature, hp, firstState };
+}
+
+function tlModel(){
+  const asOf=tlAsOf();
+  const all=(S.docs||[]).filter(tlCritical).map(d=>tlDocModel(d, asOf));
+  /* the time line spans every date in play, not only the ones on show, so
+     filtering never moves the chart under the reader */
+  let lo=asOf, hi=asOf;
+  const see=t=>{ if(t==null) return; if(t<lo) lo=t; if(t>hi) hi=t; };
+  all.forEach(m=>{ m.cyc.forEach(c=>{ see(c.exp); see(c.rec); see(c.ret); if(c.running) see(c.due); });
+                   if(m.next) see(m.next.exp); });
+  const s=new Date(tlAdd(lo,-12)), e=new Date(tlAdd(hi,24));
+  const min=Date.UTC(s.getUTCFullYear(), s.getUTCMonth(), 1);
+  const max=Date.UTC(e.getUTCFullYear(), e.getUTCMonth()+1, 1);
+  return { asOf, all, min, max };
+}
+
+function tlFilter(list){
+  const q=TL.q.trim().toUpperCase();
+  return list.filter(m=>{
+    if(TL.show==='late' && !(m.firstState==='late' || m.firstState==='over')) return false;
+    if(TL.show==='notrec' && !(m.first && m.first.rec==null)) return false;
+    if(TL.show==='hp' && !m.hp) return false;
+    if(q && [m.d.label, m.d.xref, m.d.equip, m.d.title].join(' ').toUpperCase().indexOf(q)<0) return false;
+    return true;
+  });
+}
+/* documents agreed for the same official date are one batch */
+function tlBatches(list){
+  const by={};
+  list.forEach(m=>{ const k=m.first && m.first.exp!=null ? m.first.exp : 'none'; (by[k]=by[k]||[]).push(m); });
+  return Object.keys(by).sort((a,b)=>(a==='none')-(b==='none') || a-b).map(k=>{
+    const docs=by[k].sort((x,y)=>(x.d.xref||'').localeCompare(y.d.xref||'') || x.d.label.localeCompare(y.d.label));
+    const n=s=>docs.filter(m=>m.firstState===s).length;
+    return { t:k==='none'? null : +k, docs, ok:n('ok'), late:n('late'), over:n('over'), wait:n('wait'),
+             recs:docs.map(m=>m.first&&m.first.rec).filter(v=>v!=null) };
+  });
+}
+function tlCounts(list){
+  const n=s=>list.filter(m=>m.firstState===s).length;
+  return { n:list.length, ok:n('ok'), late:n('late'), over:n('over'), wait:n('wait'),
+           mature:list.filter(m=>m.mature).length };
+}
+const tlSay = c => [c.ok? c.ok+' on time' : '', c.late? c.late+' late' : '',
+                    c.over? c.over+' not received — overdue' : '', c.wait? c.wait+' not yet due' : '']
+                   .filter(Boolean).join(' · ');
+
+function openTimeline(){
+  if(!S.docs || !S.docs.length) return;
+  TL.pos=null;                          // a fresh visit starts at the first due date
+  crumbApp('Critical document timeline');
+  renderTimeline();
+  go('tl');
+}
+
+/* Months fits the whole span into the width there is; the others are fixed */
+function tlPpd(M, z){
+  const v=TL_ZOOM[z||TL.zoom]||TL_ZOOM.week;
+  if(v!=='fit') return v;
+  const box=$('tlScroll'), w=(box && box.clientWidth) || (innerWidth-140);
+  return Math.max(1, (w-TL_LW-4)/((M.max-M.min)/DAY_MS));
+}
+function renderTimeline(){
+  const M=tlModel(), ppd=tlPpd(M);
+  const W=Math.round((M.max-M.min)/DAY_MS*ppd);
+  const X=t=>Math.round((t-M.min)/DAY_MS*ppd);
+  const sc=$('tlScroll');
+
+  $('tlScope').innerHTML=`<span class="v">${esc(S.po)}</span>`+vendChip(34)+
+    `<span class="v">${esc(S.dep)}</span><span>report of ${esc((S.meta&&S.meta.asOf)||'—')}</span>`;
+  const all=tlCounts(M.all);
+  $('tlSum').innerHTML=[
+    [all.n,'critical documents',''],
+    [all.ok,'first revision on time','ok'],
+    [all.late,'first revision late', all.late?'warn':''],
+    [all.over,'not received — overdue', all.over?'dang':''],
+    [all.wait,'not yet due',''],
+    [all.mature,'matured — no more comments','']
+  ].map(([n,l,k])=>`<div class="m ${k}"><div class="n">${n.toLocaleString()}</div><div class="l">${esc(l)}</div></div>`).join('');
+  $('tlQ').value=TL.q;
+  $('tlQ').oninput=e=>{ TL.q=e.target.value; renderTimeline(); };
+  document.querySelectorAll('#tlShow button').forEach(b=>{ b.classList.toggle('on', b.dataset.v===TL.show);
+    b.onclick=()=>{ TL.show=b.dataset.v; renderTimeline(); }; });
+  document.querySelectorAll('#tlZoom button').forEach(b=>{ b.classList.toggle('on', b.dataset.v===TL.zoom);
+    b.onclick=()=>{ tlRezoom(b.dataset.v); }; });
+
+  if(!M.all.length){
+    sc.innerHTML=`<div class="tl-empty">This purchase order has no GA drawings (PLG-0003) or mechanical
+      calculations (CAL-0005).</div>`;
+    return;
+  }
+
+  /* the axis: a label at every month, a tick at every Monday when there is room */
+  let axis='', lines='';
+  for(let t=M.min; t<M.max; ){
+    const d=new Date(t), nx=Date.UTC(d.getUTCFullYear(), d.getUTCMonth()+1, 1);
+    const mw=X(nx)-X(t), mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getUTCMonth()];
+    axis+=`<div class="mo" style="left:${X(t)}px;width:${mw}px">${mw>=78? mn+' '+d.getUTCFullYear()
+      : mn+(t===M.min||d.getUTCMonth()===0? " '"+String(d.getUTCFullYear()).slice(2) : '')}</div>`;
+    lines+=`<i class="m" style="left:${X(t)}px"></i>`;
+    t=nx;
+  }
+  if(ppd>=3){
+    for(let t=M.min; t<M.max; t+=DAY_MS){
+      const d=new Date(t); if(d.getUTCDay()!==1) continue;
+      lines+=`<i class="w" style="left:${X(t)}px"></i>`;
+      axis+=`<div class="dy" style="left:${X(t)}px">${d.getUTCDate()}</div>`;
+    }
+  }
+  axis+=`<div class="nw" style="left:${X(M.asOf)}px">Report ${tlFS(M.asOf)}</div>`;
+  lines+=`<i class="now" style="left:${X(M.asOf)}px" title="Report date ${tlF(M.asOf)}"></i>`;
+
+  /* ── the pieces each row is drawn from ── */
+  const at=(t,cls,title,extra)=>t==null? '' :
+    `<i class="${cls}" style="left:${X(t)}px" title="${esc(title)}"></i>${extra||''}`;
+  const span=(a,b,cls,title)=>{ if(a==null||b==null) return ''; const l=Math.min(a,b), r=Math.max(a,b);
+    return `<i class="${cls}" style="left:${X(l)}px;width:${Math.max(2,X(r)-X(l))}px" title="${esc(title||'')}"></i>`; };
+  const lab=(t,text,cls)=>t==null? '' : `<span class="tl-lab ${cls||''}" style="left:${X(t)}px">${esc(text)}</span>`;
+  const flag='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" '+
+             'stroke-linejoin="round" aria-hidden="true"><path d="M5.5 21V3.6"/><path d="M5.5 4.2h12.2l-2.7 4.6 2.7 4.6H5.5"/></svg>';
+
+  /* the first revision of one document: due against received */
+  function firstLane(m){
+    const f=m.first; if(!f) return '';
+    let h=at(f.exp,'tl-dia','Official date '+tlF(f.exp));
+    if(f.rec!=null){
+      const late=f.late>0;
+      h+=span(f.exp,f.rec,'tl-bar '+(late?'late':'ok'));
+      h+=at(f.rec,'tl-dot'+(late?' late':''),'Received '+tlF(f.rec)+(f.late==null?'':
+        late? ' — '+f.late+' days late' : f.late<0? ' — '+(-f.late)+' days early' : ' — on the day'));
+      h+=lab(Math.max(f.rec, f.exp==null?f.rec:f.exp), late? '+'+f.late+'d' : '', late?'late':'');
+    } else if(f.exp!=null){
+      h+= f.exp<M.asOf ? span(f.exp,M.asOf,'tl-bar over','Not received — '+f.overdue+' days overdue')+lab(M.asOf, f.overdue+'d overdue','late')
+                       : lab(f.exp, 'due '+tlFS(f.exp));
+    }
+    return h;
+  }
+  /* one revision: the supplier's reply, its arrival, our review, its return */
+  function revLane(c){
+    let h='';
+    if(c.replyFrom!=null && c.rec!=null){
+      const tgt=tlAdd(c.replyFrom, TL_REPLY);
+      h+=`<i class="tl-win rp" style="left:${X(c.replyFrom)}px;width:${Math.max(2,X(c.rec)-X(c.replyFrom))}px"
+          title="Supplier reply: ${c.reply} days (expected ${TL_REPLY})"></i>`;
+    }
+    h+=at(c.exp,'tl-dia'+(c.first?' big':''),(c.first?'Official date ':'Expected ')+tlF(c.exp)+(c.basis&&!c.first?' ('+c.basis+')':''));
+    if(c.rec!=null){
+      const late=c.late>0;
+      if(c.exp!=null && c.rec!==c.exp) h+=span(c.exp,c.rec,'tl-bar '+(late?'late':'ok'));
+      h+=at(c.rec,'tl-dot'+(late?' late':''),'Received '+tlF(c.rec)+(c.late==null?'':late?' — '+c.late+' days late':''));
+    } else if(c.exp!=null && c.exp<M.asOf){
+      h+=span(c.exp,M.asOf,'tl-bar over','Not received — '+c.overdue+' days overdue');
+    }
+    if(c.start!=null){
+      const end=c.ret!=null? c.ret : M.asOf;
+      const over=tlDiff(c.due,end);
+      const w=Math.max(2,X(end)-X(c.start));
+      const ow=over>0? Math.min(w, Math.round(over*ppd)) : 0;
+      h+=`<i class="tl-win ${c.ret!=null?'rv':'run'}" style="left:${X(c.start)}px;width:${w}px"
+          title="${c.ret!=null? 'Reviewed in '+c.review+' days' : 'With us for '+c.review+' days so far'} (target ${TL_REVIEW})">${
+          ow? `<i class="ovr" style="width:${ow}px"></i>` : ''}</i>`;
+      h+=`<i class="tl-tgt" style="left:${X(c.due)}px" title="Due back ${tlF(c.due)}"></i>`;
+      if(c.ret!=null) h+=at(c.ret,'tl-ret','Returned '+tlF(c.ret)+(c.retTxt?' — '+c.retTxt:''));
+    }
+    return h;
+  }
+
+  let rows='';
+  TL_CODES.forEach(C=>{
+    const mine=M.all.filter(m=>tlCodeOf(m.d)===C.code);
+    if(!mine.length) return;
+    const shown=tlFilter(mine);
+    const open=TL.open.has(C.code) || (!!TL.q.trim() && shown.length>0);
+    const batches=tlBatches(shown), cnt=tlCounts(shown);
+    const desc=(mine[0].d.codeDesc||C.name);
+    /* the type: each batch as its due date and the spread of what came in */
+    let lane='';
+    batches.forEach(b=>{
+      if(b.t==null) return;
+      const lo=Math.min(b.t, ...b.recs), hi=Math.max(b.t, ...b.recs, b.over? M.asOf : b.t);
+      const cls= b.over? 'over' : b.late? 'late' : b.wait===b.docs.length? 'wait' : 'ok';
+      lane+=span(lo,hi,'tl-span '+cls, b.docs.length+' due '+tlF(b.t)+' — '+tlSay(b));
+      lane+=at(b.t,'tl-dia big', b.docs.length+' document'+(b.docs.length===1?'':'s')+' due '+tlF(b.t),
+               `<span class="tl-cnt" style="left:${X(b.t)}px">${b.docs.length}</span>`);
+    });
+    rows+=`<div class="tl-row code" data-code="${esc(C.code)}">
+      <div class="tl-l" style="width:${TL_LW}px"><span class="tl-ch${open?' on':''}">&#9654;</span>
+        <div class="tx"><b>${esc(C.code)}</b><span class="nm">${esc(C.name)}</span>
+          <small>${shown.length===mine.length? mine.length+' documents' : shown.length+' of '+mine.length+' documents'}
+            · ${batches.filter(b=>b.t!=null).length} batch${batches.length===1?'':'es'}${tlSay(cnt)? ' · '+tlSay(cnt) : ''}</small></div></div>
+      <div class="tl-r" style="width:${W}px">${lane}</div></div>`;
+    if(!open) return;
+    if(!shown.length){
+      rows+=`<div class="tl-row batch"><div class="tl-l" style="width:${TL_LW}px">Nothing matches the filter.</div>
+        <div class="tl-r" style="width:${W}px"></div></div>`;
+      return;
+    }
+    batches.forEach(b=>{
+      rows+=`<div class="tl-row batch"><div class="tl-l" style="width:${TL_LW}px"><span class="bt">${
+          b.t==null? 'No official date' : 'Due '+tlF(b.t)}</span><small>${b.docs.length} document${b.docs.length===1?'':'s'}${
+          tlSay(b)? ' · '+tlSay(b) : ''}</small></div>
+        <div class="tl-r" style="width:${W}px">${b.t==null?'':at(b.t,'tl-dia big','Batch due '+tlF(b.t),
+          `<span class="tl-cnt" style="left:${X(b.t)}px">${b.docs.length}</span>`)}</div></div>`;
+      b.docs.forEach(m=>{
+        const d=m.d, dOpen=TL.docs.has(d.tr);
+        const dots=m.cyc.filter(c=>c.rec!=null).map(c=>`<i${c.running?' class="c"':''} style="${c.running?'':'background:'+stMeta(c.status).col}"
+            title="Rev ${esc(c.rev)}: ${esc(c.running? 'with us' : c.status)}"></i>`).join('');
+        const hp=m.hp? `<button type="button" class="tl-hp ${m.hp.open?'open':'closed'}" data-hp="${esc(d.tr)}"
+            title="${m.hp.n} hold point${m.hp.n===1?'':'s'} — ${m.hp.open} open. Click to manage them.">${flag}${m.hp.n}</button>` : '';
+        rows+=`<div class="tl-row doc">
+          <div class="tl-l" style="width:${TL_LW}px">
+            <button type="button" class="tl-ch${dOpen?' on':''}${m.cyc.length?'':' none'}" data-doc="${esc(d.tr)}"
+              title="${dOpen?'Hide':'Show'} every revision" aria-expanded="${dOpen}">&#9654;</button>
+            <div class="tx"><span class="no" data-open="${esc(d.tr)}" title="Open the document">${esc(d.label)}</span>
+              <small>${esc(d.xref||'—')}${d.equip?' · '+esc(d.equip):''}</small></div>
+            <span class="tl-mat" title="How it has matured, revision by revision">${dots}</span>${hp}</div>
+          <div class="tl-r" style="width:${W}px">${firstLane(m)}</div></div>`;
+        if(!dOpen) return;
+        m.cyc.forEach(c=>{
+          const said = c.rec==null ? (c.exp==null? 'not received' : c.exp<M.asOf? 'not received — '+c.overdue+' days overdue' : 'due '+tlFS(c.exp))
+            : 'exp '+tlDM(c.exp)+' · rec '+tlDM(c.rec)+(c.late>0? ' (+'+c.late+'d)' : '')+
+              (c.ret!=null? ' · back '+tlDM(c.ret)+', '+c.review+'d' : c.running? ' · with us '+c.review+'d' : '');
+          const wd=tlWord(c.status, c.running);
+          rows+=`<div class="tl-row rev"><div class="tl-l" style="width:${TL_LW}px">
+              <span class="rn">Rev ${esc(c.rev||'—')}</span>
+              ${c.rec!=null? `<span class="tl-st tag ${wd[1]}" title="${esc(c.retTxt||c.status)}">${esc(wd[0])}</span>` : ''}
+              <span class="tx" title="${esc((c.first?'First revision — official date ':'Expected: '+c.basis+' — ')+tlF(c.exp))}">${esc(said)}</span></div>
+            <div class="tl-r" style="width:${W}px">${revLane(c)}</div></div>`;
+        });
+        if(m.next){
+          const n=m.next;
+          rows+=`<div class="tl-row rev est"><div class="tl-l" style="width:${TL_LW}px">
+              <span class="rn">Rev ${esc(n.rev)}</span>
+              <span class="tx${n.exp<M.asOf?' past':''}" title="${esc(n.basis)}">estimated — about ${tlDM(n.exp)}${
+                n.exp<M.asOf? ', '+tlDiff(n.exp,M.asOf)+'d past and not in yet' : n.ifComments?' if it comes back with comments':''}</span></div>
+            <div class="tl-r" style="width:${W}px">${span(n.from,n.exp,'tl-bar wait','Supplier reply, '+TL_REPLY+' days')}${
+              at(n.exp,'tl-dia est','Estimated '+tlF(n.exp)+' ('+n.basis+')')}${lab(n.exp,'≈ '+tlDM(n.exp), n.exp<M.asOf?'late':'')}</div></div>`;
+        }
+      });
+    });
+  });
+
+  sc.innerHTML=`<div class="tl-grid" style="width:${TL_LW+W}px">
+      <div class="tl-lines" style="left:${TL_LW}px;width:${W}px">${lines}</div>
+      <div class="tl-head"><div class="tl-l" style="width:${TL_LW}px">Document</div>
+        <div class="tl-axis" style="width:${W}px">${axis}</div></div>
+      ${rows}</div>`;
+  /* keep the reader where they were; on a fresh visit, start just before the
+     earliest due date rather than at the empty start of the month.  The
+     screen may still be hidden here, so it is applied again once it shows. */
+  let L0, T0=TL.pos? TL.pos.t : 0;
+  if(TL.keep){ L0=TL.keep(X); TL.keep=null; }
+  else if(TL.pos) L0=TL.pos.l;
+  else { const f=M.all.map(m=>m.first&&m.first.exp).filter(v=>v!=null);
+         L0=0; if(f.length){ const d0=new Date(Math.min(...f)); L0=Math.max(0, X(Date.UTC(d0.getUTCFullYear(), d0.getUTCMonth(), 1))); } }
+  TL.pos={l:L0, t:T0};
+  const put=()=>{ sc.scrollLeft=L0; sc.scrollTop=T0; };
+  put(); requestAnimationFrame(put);
+}
+/* a new scale keeps the same day at the left edge */
+function tlRezoom(z){
+  if(z===TL.zoom) return;
+  const sc=$('tlScroll'), M=tlModel(), old=tlPpd(M);
+  TL.pos={l:sc.scrollLeft, t:sc.scrollTop};
+  const day=M.min + (sc.scrollLeft/old)*DAY_MS;
+  TL.zoom=z;
+  TL.keep=X=>Math.max(0, X(day));
+  renderTimeline();
+}
+/* one listener for the whole chart */
+(function(){
+  const sc=$('tlScroll'); if(!sc) return;
+  sc.addEventListener('scroll',()=>{ if(CUR==='tl') TL.pos={l:sc.scrollLeft, t:sc.scrollTop}; },{passive:true});
+  sc.addEventListener('click',e=>{
+    const hp=e.target.closest('[data-hp]');
+    if(hp){ e.stopPropagation(); openHoldDoc(hp.dataset.hp, 'tl'); return; }
+    const op=e.target.closest('[data-open]');
+    if(op){ openDoc(op.dataset.open); return; }
+    const dc=e.target.closest('[data-doc]');
+    if(dc){ const k=dc.dataset.doc; TL.docs.has(k)? TL.docs.delete(k) : TL.docs.add(k); renderTimeline(); return; }
+    const cd=e.target.closest('[data-code]');
+    if(cd){ const k=cd.dataset.code; TL.open.has(k)? TL.open.delete(k) : TL.open.add(k); renderTimeline(); }
+  });
+})();
+
+/* the same, as a table */
+function exportTimelineXlsx(){
+  if(typeof XLSX==='undefined') return alert('Spreadsheet engine not loaded.');
+  const M=tlModel();
+  if(!M.all.length) return alert('There are no critical documents on this purchase order.');
+  const D=t=>t==null? '' : tlF(t);
+  const head=['DOCUMENT TYPE','BATCH (OFFICIAL DATE)','DOCUMENT','EQ. TAG NO','EQUIPMENT NAME','REV','EXPECTED','BASIS',
+              'RECEIVED','DAYS LATE','CIRCULATED','DUE BACK','RETURNED','REVIEW DAYS','RETURN STATUS','HOLD POINTS (OPEN / ALL)'];
+  const aoa=[['CRITICAL DOCUMENT TIMELINE — '+S.po+(S.poDesc?' — '+S.poDesc:'')],
+             ['Report as of '+((S.meta&&S.meta.asOf)||'—')+'  ·  revisions after the first: expected '+TL_REVIEW+
+              ' days review + '+TL_REPLY+' days supplier reply'],[],head];
+  TL_CODES.forEach(C=>{
+    tlBatches(tlFilter(M.all.filter(m=>tlCodeOf(m.d)===C.code))).forEach(b=>b.docs.forEach(m=>{
+      const base=[C.code+' — '+C.name, D(b.t), m.d.label, m.d.xref||'', m.d.equip||''];
+      const hp=m.hp? m.hp.open+' / '+m.hp.n : (isGA(m.d)? '0' : '');
+      m.cyc.forEach(c=>aoa.push(base.concat([c.rev, D(c.exp), c.first?'official date':c.basis, D(c.rec),
+        c.late==null? (c.overdue!=null? 'not received, '+c.overdue+' overdue' : '') : c.late,
+        D(c.circ), D(c.due), D(c.ret), c.review==null?'':c.review,
+        c.rec==null? '' : (c.running? 'CIRCULATING' : (c.retTxt||c.status)), c.first? hp : ''])));
+      if(m.next) aoa.push(base.concat([m.next.rev+' (estimated)', D(m.next.exp), m.next.basis, '', '', '', '', '', '', '', '']));
+    }));
+  });
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols']=[30,16,34,14,30,12,14,30,14,12,14,14,14,10,34,14].map(w=>({wch:w}));
+  ws['!autofilter']={ref:XLSX.utils.encode_range({s:{r:3,c:0},e:{r:aoa.length-1,c:head.length-1}})};
+  const B={style:'thin',color:{rgb:'BFCCDA'}};
+  const put=(r,c,st)=>{ const k=XLSX.utils.encode_cell({r,c}); if(!ws[k]) ws[k]={t:'s',v:''}; ws[k].s=st; };
+  put(0,0,{font:{bold:true,sz:14,color:{rgb:'0B2545'}}});
+  put(1,0,{font:{italic:true,sz:9,color:{rgb:'5C6B7A'}}});
+  head.forEach((_,c)=>put(3,c,{font:{bold:true,sz:9,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'0B2545'}},
+    alignment:{wrapText:true,vertical:'center',horizontal:'center'},border:{top:B,bottom:B,left:B,right:B}}));
+  for(let r=4;r<aoa.length;r++){
+    const est=/estimated/.test(String(aoa[r][5]));
+    for(let c=0;c<head.length;c++) put(r,c,{font:{sz:9,italic:est,color:{rgb:est?'5C6B7A':'1A2432'}},
+      alignment:{vertical:'top',wrapText:c===7||c===14},border:{top:B,bottom:B,left:B,right:B}});
+  }
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Timeline');
+  XLSX.writeFile(wb,'Critical_Document_Timeline_'+String(S.po).replace(/[^\w.-]+/g,'_')+'.xlsx',{cellStyles:true});
+}
+window.openTimeline=openTimeline; window.renderTimeline=renderTimeline; window.exportTimelineXlsx=exportTimelineXlsx;
+
 
 /* ═══════════════════════════════════════════════════════════════════════════
    TRIAL — APPS INSTEAD OF ONE BIG PAGE
@@ -8492,7 +9077,8 @@ const ICO={
   focus  :_svg('<circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="3.9"/><circle cx="12" cy="12" r=".9" fill="currentColor" stroke="none"/>'),
   globe  :_svg('<circle cx="12" cy="12" r="9.2"/><path d="M2.8 12h18.4"/><path d="M12 2.8a14 14 0 0 1 0 18.4 14 14 0 0 1 0-18.4z"/>'),
   list   :_svg('<path d="M9 6.2h12M9 12h12M9 17.8h12"/><path d="M4.2 6.2h.01M4.2 12h.01M4.2 17.8h.01"/>'),
-  hold   :_svg('<path d="M5.5 21V3.6"/><path d="M5.5 4.2h12.2l-2.7 4.6 2.7 4.6H5.5"/>')
+  hold   :_svg('<path d="M5.5 21V3.6"/><path d="M5.5 4.2h12.2l-2.7 4.6 2.7 4.6H5.5"/>'),
+  gantt  :_svg('<path d="M3 3.5v17h18"/><rect x="6" y="6" width="7.5" height="3.2" rx="1"/><rect x="10" y="11" width="9" height="3.2" rx="1"/><rect x="8" y="16" width="5.5" height="3.2" rx="1"/>')
 };
 
 /* ── the groups on the home page, and the order each role reads them in ──── */
@@ -8582,6 +9168,9 @@ function homeApps(){
     {g:'plan', id:'all',     ic:ICO.globe,   n:null,
      t:'Workload across POs',  d:'One engineer, every order',
      open:()=>openLoadAll()},
+    /* when the critical documents were due, when they came, how they matured */
+    {g:'plan', id:'tl',      ic:ICO.gantt,   n:(S.docs||[]).filter(tlCritical).length,
+     t:'Critical document timeline', d:'GA drawings and calculations', open:()=>openTimeline()},
     {g:'plan', id:'progress',ic:ICO.compare, n:null,
      t:'Check progress',      d:'Against an earlier export',
      open:()=>{ crumbApp('Check progress'); openProgress(); }},
@@ -8932,6 +9521,7 @@ function docBack(){
   if(to==='work'){ renderWork(); return go('work'); }
   if(to==='hold'){ crumbApp('Hold points'); renderHold(); return go('hold'); }
   if(to==='holded'){ renderHoldDoc(); go('holded'); return holdGrowAll(); }
+  if(to==='tl'){ crumbApp('Critical document timeline'); renderTimeline(); return go('tl'); }
   go(to);
 }
 window.docBack=docBack;
@@ -10037,13 +10627,13 @@ function go(s){
     if(S.eng && S.eng.dirty && S.fileBytes)
       setTimeout(()=>downloadRegister(null,{silent:true, title:'Saving your engineer changes'}),0);
   }
-  ['upload','filter','home','work','load','dash','progress','eng','engload','action','doc','hold','holded','report','basket','vdr','crsl','crs']
+  ['upload','filter','home','work','load','dash','progress','eng','engload','action','doc','hold','holded','tl','report','basket','vdr','crsl','crs']
     .forEach(x=>$('sc-'+x).classList.toggle('on',x===s));
   CUR=s;
   window.scrollTo(0,0);
   if(s==='filter'||s==='upload') $('crumbs').innerHTML='';
   /* the way home is in the header on every page that has one to go back to */
-  $('btn-home').classList.toggle('on', ['work','load','dash','progress','eng','engload','action','doc','hold','holded','report','basket','vdr','crsl','crs'].indexOf(s)>=0);
+  $('btn-home').classList.toggle('on', ['work','load','dash','progress','eng','engload','action','doc','hold','holded','tl','report','basket','vdr','crsl','crs'].indexOf(s)>=0);
   /* the sheet strip belongs to the status page only */
   $('sheettabs').classList.toggle('on', s==='dash');
   /* the backdrop belongs to the screens before any data is on screen */
