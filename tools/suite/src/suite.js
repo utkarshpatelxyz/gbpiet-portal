@@ -307,7 +307,7 @@
           a: 'Under ' + k('I am managing') + ', open ' + k('Critical document timeline') + '. GA drawings (PLG-0003) and ' +
              'mechanical calculations (CAL-0005) are shown as a Gantt: click a type to see its documents batch by batch — the ' +
              'official date of the first revision against the date it was received. The arrow on a document opens every ' +
-             'revision: after the first, the expected date is the return + 15 days for the supplier, and our review is ' +
+             'revision: after the first, the expected date is 15 days after the date we returned the previous revision, and our review is ' +
              'measured against 15 days. A GA drawing with hold points shows their number — click it to manage them.' },
         { q: 'How do I send a list to an engineer?',
           a: 'Open the list and press ' + k('Email this list') + '. Your email app opens a draft — addressed to the engineer ' +

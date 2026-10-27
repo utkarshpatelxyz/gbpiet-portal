@@ -3115,7 +3115,8 @@ body[data-dark] .tl-hp.open{color:var(--warn)} body[data-dark] .tl-hp.closed{col
   </div>
   <div class="tl-card"><div class="tl-scroll" id="tlScroll"></div></div>
   <div class="tl-note">The official date is the date agreed for the first revision. For every revision after it the expected date is
-    worked out from the cycle: <b>15 days</b> for our review, then <b>15 days</b> for the supplier to reply.</div>
+    <b>15 days after the date we returned the previous one</b> — nothing is expected until it has been returned. Our own review is
+    measured against <b>15 days</b> from circulation.</div>
   <div class="foot"></div>
 </div></div>
 
@@ -7045,25 +7046,51 @@ const DOSSIER_PREFIX = ['DOS','VDB','CER','QAC','MDR','PLN','PRC'];
    strict: in the sheet this mirrors, the block total is the sum of the six
    status rows — void, rejected and for-information documents are left out
    altogether.  Turn it off to count every document in the block. */
-const V = { cls:{}, strict:true };
+/* The report belongs to the scope it was opened on.  The header fields were
+   filled once and then kept, so a second purchase order was counted correctly
+   under the first one's PO number, vendor and description.  They are now
+   filled again whenever the scope changes, and kept only while it does not.
+     · what the reader types into a field is theirs until the scope moves on;
+     · the vendor, PO and description lines and the choice of critical / other
+       / excluded types belong to one purchase order, so they start afresh on
+       the next;
+     · project name, month and week belong to the file, so what the reader
+       typed there survives a change of purchase order but not a new file. */
+const V = { cls:{}, strict:true, file:null, scope:null, typed:{} };
+const V_PER_PO = ['v-vendor','v-po','v-podesc'];
 
-function openVdr(){
-  const rows=S.docs;
-  if(!rows.length) return alert('The filtered list is empty — there is nothing to report on.');
+function vdrSeed(rows){
+  const m=S.meta||{};
+  const file=[S.fileName||'', m.asOf||'', m.project||''].join('|');
+  const scope=file+'|'+S.po+'|'+S.dep;
+  if(V.file!==file){ V.file=file; V.typed={}; }
+  if(V.scope!==scope){ V.scope=scope; V.cls={}; V_PER_PO.forEach(id=>{ delete V.typed[id]; }); }
+
   const codes=[...new Set(rows.map(d=>d.code||'(no code)'))].sort();
   codes.forEach(c=>{ if(!V.cls[c]) V.cls[c]=defaultClass(c,rows); });
   Object.keys(V.cls).forEach(c=>{ if(!codes.includes(c)) delete V.cls[c]; });
 
-  const d0=rows[0];
   /* the project's trade name is not in the consolidated export, so seed the
      field with its number and let the reader type the name they use */
-  if(!$('v-proj').value)   $('v-proj').value   = String(S.meta.project||'');
-  if(!$('v-month').value)  $('v-month').value  = new Date().toLocaleString('en',{month:'long',year:'numeric'});
-  if(!$('v-week').value)   $('v-week').value   = 'Week '+isoWeek(new Date());
-  if(!$('v-vendor').value) $('v-vendor').value = vendorName(rows);
-  if(!$('v-po').value)     $('v-po').value     = S.po;
-  if(!$('v-podesc').value) $('v-podesc').value = S.poDesc || S.dep;
-  ['v-proj','v-month','v-week','v-vendor','v-po','v-podesc'].forEach(id=>$(id).oninput=renderVdr);
+  const seed={
+    'v-proj'  : String(m.project||''),
+    'v-month' : new Date().toLocaleString('en',{month:'long',year:'numeric'}),
+    'v-week'  : 'Week '+isoWeek(new Date()),
+    'v-vendor': vendorName(rows),
+    'v-po'    : String(S.po||''),
+    'v-podesc': S.poDesc || S.dep || ''
+  };
+  Object.keys(seed).forEach(id=>{
+    const el=$(id);
+    if(!V.typed[id] || !el.value) el.value=seed[id];
+    el.oninput=()=>{ V.typed[id]=true; renderVdr(); };
+  });
+}
+
+function openVdr(){
+  const rows=S.docs;
+  if(!rows.length) return alert('The filtered list is empty — there is nothing to report on.');
+  vdrSeed(rows);
   renderVdr();
   go('vdr');
 }
@@ -8664,11 +8691,13 @@ function tlDocModel(d, asOf){
     const prev=cyc[i-1]||null;
     const rec=tlDay(r.received), circ=tlDay(r.circ), ret=tlDay(r.returned);
     /* the first revision has the date agreed for it; each one after is due
-       the supplier's 15 days after the last one came back to them */
+       the supplier's 15 days after the day WE RETURNED the one before — the
+       date it was actually returned, never the latest date it could have been */
     let exp=null, basis='';
     if(i===0){ exp=tlDay(r.official||d.official); basis='official date'; }
-    else if(prev){ const back=prev.ret!=null? prev.ret : prev.due;
-      exp=tlAdd(back, TL_REPLY); basis=(prev.ret!=null? 'returned ' : 'due back ')+tlFS(back)+' + '+TL_REPLY+' days'; }
+    else if(prev && prev.ret!=null){
+      exp=tlAdd(prev.ret, TL_REPLY); basis='returned '+tlFS(prev.ret)+' + '+TL_REPLY+' days'; }
+    else if(prev){ basis='previous revision not returned'; }
     const start = circ!=null ? circ : rec;
     const due = start!=null ? tlAdd(start, TL_REVIEW) : null;
     const st=String(r.status||'').toUpperCase();
@@ -8681,15 +8710,16 @@ function tlDocModel(d, asOf){
       reply: (prev && prev.ret!=null && rec!=null) ? tlDiff(prev.ret, rec) : null,
       replyFrom: prev? prev.ret : null });
   });
-  /* the revision still to come: only while the latest is back with comments,
-     rejected, or still with us */
+  /* the revision still to come, while the latest is not matured.  It is dated
+     only once the latest has been returned; until then it waits on us. */
   const last=cyc[cyc.length-1];
   let next=null;
   if(last && last.rec!=null && TL_DONE.indexOf(String(last.status).toUpperCase())<0){
-    const back = last.ret!=null ? last.ret : last.due;
-    if(back!=null) next={ rev:tlNextRev(last.rev), est:true, exp:tlAdd(back, TL_REPLY), from:back,
-      basis:(last.ret!=null? 'returned ' : 'due back ')+tlFS(back)+' + '+TL_REPLY+' days',
-      ifComments: last.ret==null };
+    next = last.ret!=null
+      ? { rev:tlNextRev(last.rev), est:true, exp:tlAdd(last.ret, TL_REPLY), from:last.ret,
+          basis:'returned '+tlFS(last.ret)+' + '+TL_REPLY+' days' }
+      : { rev:tlNextRev(last.rev), est:true, exp:null, from:null, waiting:last.rev,
+          basis:'starts when Rev '+last.rev+' is returned' };
   }
   const first=cyc[0]||null;
   const mature = !!last && last.rec!=null && TL_DONE.indexOf(String(last.status).toUpperCase())>=0;
@@ -8929,12 +8959,18 @@ function renderTimeline(){
               <span class="tx" title="${esc((c.first?'First revision — official date ':'Expected: '+c.basis+' — ')+tlF(c.exp))}">${esc(said)}</span></div>
             <div class="tl-r" style="width:${W}px">${revLane(c)}</div></div>`;
         });
-        if(m.next){
+        if(m.next && m.next.waiting!=null){
+          const n=m.next;
+          rows+=`<div class="tl-row rev est"><div class="tl-l" style="width:${TL_LW}px">
+              <span class="rn">Rev ${esc(n.rev)}</span>
+              <span class="tx" title="${esc(n.basis)}">not dated yet — ${TL_REPLY} days after we return Rev ${esc(n.waiting)}</span></div>
+            <div class="tl-r" style="width:${W}px"></div></div>`;
+        } else if(m.next){
           const n=m.next;
           rows+=`<div class="tl-row rev est"><div class="tl-l" style="width:${TL_LW}px">
               <span class="rn">Rev ${esc(n.rev)}</span>
               <span class="tx${n.exp<M.asOf?' past':''}" title="${esc(n.basis)}">estimated — about ${tlDM(n.exp)}${
-                n.exp<M.asOf? ', '+tlDiff(n.exp,M.asOf)+'d past and not in yet' : n.ifComments?' if it comes back with comments':''}</span></div>
+                n.exp<M.asOf? ', '+tlDiff(n.exp,M.asOf)+'d past and not in yet' : ''}</span></div>
             <div class="tl-r" style="width:${W}px">${span(n.from,n.exp,'tl-bar wait','Supplier reply, '+TL_REPLY+' days')}${
               at(n.exp,'tl-dia est','Estimated '+tlF(n.exp)+' ('+n.basis+')')}${lab(n.exp,'≈ '+tlDM(n.exp), n.exp<M.asOf?'late':'')}</div></div>`;
         }
@@ -8995,7 +9031,7 @@ function exportTimelineXlsx(){
               'RECEIVED','DAYS LATE','CIRCULATED','DUE BACK','RETURNED','REVIEW DAYS','RETURN STATUS','HOLD POINTS (OPEN / ALL)'];
   const aoa=[['CRITICAL DOCUMENT TIMELINE — '+S.po+(S.poDesc?' — '+S.poDesc:'')],
              ['Report as of '+((S.meta&&S.meta.asOf)||'—')+'  ·  revisions after the first: expected '+TL_REVIEW+
-              ' days review + '+TL_REPLY+' days supplier reply'],[],head];
+              ' days for our review; the next revision is expected '+TL_REPLY+' days after the date we returned the previous one'],[],head];
   TL_CODES.forEach(C=>{
     tlBatches(tlFilter(M.all.filter(m=>tlCodeOf(m.d)===C.code))).forEach(b=>b.docs.forEach(m=>{
       const base=[C.code+' — '+C.name, D(b.t), m.d.label, m.d.xref||'', m.d.equip||''];
@@ -9004,7 +9040,7 @@ function exportTimelineXlsx(){
         c.late==null? (c.overdue!=null? 'not received, '+c.overdue+' overdue' : '') : c.late,
         D(c.circ), D(c.due), D(c.ret), c.review==null?'':c.review,
         c.rec==null? '' : (c.running? 'CIRCULATING' : (c.retTxt||c.status)), c.first? hp : ''])));
-      if(m.next) aoa.push(base.concat([m.next.rev+' (estimated)', D(m.next.exp), m.next.basis, '', '', '', '', '', '', '', '']));
+      if(m.next) aoa.push(base.concat([m.next.rev+(m.next.exp==null?' (not dated yet)':' (estimated)'), D(m.next.exp), m.next.basis, '', '', '', '', '', '', '', '']));
     }));
   });
   const ws=XLSX.utils.aoa_to_sheet(aoa);
