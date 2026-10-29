@@ -283,6 +283,10 @@
       ]},
 
       drm: { name: 'Document Review Management', faq: [
+        { q: 'Is there a tutorial?',
+          a: 'Yes — press ' + k('Tutorials') + ' at the top right. Each task has a short animated walkthrough: where the ' +
+             'file comes from, what to click and what you get. A cap on a home-page tile, or the ' + k('How it works') +
+             ' pill on a page, opens the tutorial for that feature. When it ends, ' + k('Try it now →') + ' opens the real thing.' },
         { q: 'Which file do I load?',
           a: 'The master <b>Consolidated Status</b> workbook (.xlsx). Drop it on the first page or click to browse. ' +
              'Large files take a few seconds — the percentage shows how far it has read.' },

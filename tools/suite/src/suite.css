@@ -182,6 +182,11 @@
     border-radius:5px;background:none;cursor:pointer;font-size:13px;font-weight:500;color:var(--mlp-muted);
     transition:background .14s,color .14s}
   .mrd-bar-btn:hover{background:#EBF2FA;color:var(--mlp-blue)}
+  .mrd-bar-tut{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 13px 0 10px;margin-right:8px;
+    border-radius:16px;border:1px solid #B9D2EC;background:#EAF2FB;color:#1A4FBF;cursor:pointer;
+    font-size:13px;font-weight:600;white-space:nowrap;transition:background .14s,border-color .14s}
+  .mrd-bar-tut:hover{background:#DCEAFB;border-color:var(--mlp-blue)}
+  .mrd-bar-tut svg{width:16px;height:16px;flex:none}
   .mrd-bar-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:8px;cursor:pointer;
     border:1px solid var(--mlp-line);background:#fff;color:var(--mlp-muted);
     transition:background .14s,color .14s,border-color .14s,transform .3s}

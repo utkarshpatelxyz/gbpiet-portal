@@ -101,6 +101,8 @@
       });
       var chip = d.getElementById('navinfo');
       if (shown(chip)) R.push({ t: 'chip', html: chip.innerHTML });
+      var tu = d.getElementById('btn-tut');
+      if (tu) R.push({ t: 'tut', html: tu.innerHTML, el: tu, title: tu.title });
       var g = d.getElementById('btn-roster');
       if (g) R.push({ t: 'icon', html: g.innerHTML, el: g, title: g.title || 'Settings' });
       return { L: L, R: R };
